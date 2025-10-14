@@ -1,0 +1,43 @@
+@use "./variables" as *;
+@use "./hex" as *;
+@use "./cardlibrary" as *;
+
+body {
+  margin: 0;
+  font-family: "Inter", sans-serif;
+  background-color: #faf9f6;
+  color: #333;
+}
+
+.app {
+  display: flex;
+  flex-direction: row;
+  height: 100vh;
+
+  @media (max-width: 768px) {
+    flex-direction: column;
+  }
+}
+
+.toolbar {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  display: flex;
+  gap: 10px;
+  z-index: 100;
+
+  button {
+    background-color: #ffd84d;
+    border: none;
+    padding: 8px 12px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: 0.2s;
+
+    &:hover {
+      background-color: #ffca3a;
+    }
+  }
+}

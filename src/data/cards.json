@@ -1,0 +1,297 @@
+[
+  {
+    "id": "I",
+    "title": "Immersion",
+    "definition": "Les élèves sont immergés et captivés par la rencontre, la pratique et/ou la connaissance culturelle et artistique abordée. Ils sont attentifs et font preuve de curiosité.",
+    "category": "visees"
+  },
+  {
+    "id": "II",
+    "title": "Vocabulaire",
+    "definition": "Les élèves apprennent de nouveaux termes liés aux domaines culturels et artistiques abordés.",
+    "category": "visees"
+  },
+  {
+    "id": "III",
+    "title": "Découvertes",
+    "definition": "Les élèves découvrent des personnages, œuvres, lieux, évènements et/ou courants artistiques ou culturels à travers des rencontres.",
+    "category": "visees"
+  },
+  {
+    "id": "IV",
+    "title": "Multi sensorialité",
+    "definition": "Les élèves utilisent une panoplie de sens pour apprécier et interroger les œuvres artistiques, objets ou lieux culturels",
+    "category": "visees"
+  },
+  {
+    "id": "V",
+    "title": "Expressions",
+    "definition": "Les élèves utilisent voire combinent les outils et supports artistiques et/ou culturels pour exprimer leurs sensations, émotions, idées, etc.",
+    "category": "visees"
+  },
+  {
+    "id": "VI",
+    "title": "Expérimentation",
+    "definition": "Les élèves explorent les techniques, outils et matériaux. Ils prennent  des initiatives et/ou des risques raisonnables dans une logique d’apprentissage par expérimentation.",
+    "category": "visees"
+  },
+  {
+    "id": "VII",
+    "title": "Interrogations",
+    "definition": "Les élèves s'interrogent sur les origines de l'œuvre et/ou de la pratique artistique, son inscription dans l'histoire (ancienne et contemporaine), son rapport aux traditions (locales, culturelles, etc.).",
+    "category": "visees"
+  },
+  {
+    "id": "VIII",
+    "title": "Distinction",
+    "definition": " Les élèves utilisent un ou plusieurs critères  (sensoriels/émotifs, techniques, historiques, culturels, etc.) pour différencier les pratiques et/ou les créations culturelles et artistiques.",
+    "category": "visees"
+  },
+  {
+    "id": "IX",
+    "title": "Ecoute mutuelle",
+    "definition": "Les élèves sont attentifs et réceptifs aux expériences vécues par les uns et les autres.",
+    "category": "visees"
+  },
+  {
+    "id": "X",
+    "title": "Créer collectivement",
+    "definition": "Les élèves s’organisent en se répartissant et en coordonnant les rôles et tâches au sein d’un groupe pour créer une œuvre commune.",
+    "category": "visees"
+  },
+  {
+    "id": "XI",
+    "title": "Souvenirs (traces)",
+    "definition": "Les élèves conservent précieusement des souvenirs de leur expérience culturelle et artistique.",
+    "category": "visees"
+  },
+  {
+    "id": "XII",
+    "title": "Recherche de sens",
+    "definition": "Les élèves cherchent à tisser des liens et construire du sens (par exemple à travers une histoire, une explication) en partant de leurs expériences culturelles et artistiques passées et présentes.",
+    "category": "visees"
+  },
+  {
+    "id": "XIII",
+    "title": "Partage",
+    "definition": "Les élèves partagent les processus et/ou les créations artistiques auxquels ils ont pris part avec d’autres acteurs de la communauté éducative.",
+    "category": "visees"
+  },
+  {
+    "id": "XIV",
+    "title": "Transfert",
+    "definition": "Les élèves identifient et transfèrent les apprentissages issus de l’expérience à d’autres disciplines scolaires et/ou transversales.",
+    "category": "visees"
+  },
+  {
+    "id": "1",
+    "title": "Parcours",
+    "definition": "Je construis mon intervention en lien avec le PECA des élèves en respectant les principes de diversité et de progressivité des apprentissages.",
+    "category": "conditions-enseignant"
+  },
+  {
+    "id": "2",
+    "title": "Rencontrer Connaître Pratiquer",
+    "definition": " Je combine au moins deux des trois composantes du PECA dans une optique de complémentarité.",
+    "category": "conditions-enseignant"
+  },
+  {
+    "id": "3",
+    "title": "Objectifs",
+    "definition": "Je définis préalablement les objectifs de l'intervention et les présente aux élèves. En cas de partenariat, ces objectifs sont définis conjointement.",
+    "category": "conditions-enseignant"
+  },
+  {
+    "id": "4",
+    "title": "Espace",
+    "definition": "Je recherche un espace adéquat à l'intervention (dans l’école et/ou le lieu culturel et artistique).",
+    "category": "conditions-enseignant"
+  },
+  {
+    "id": "5",
+    "title": "Matériel",
+    "definition": "Je prévois du matériel fonctionnel et de qualité pour les élèves.",
+    "category": "conditions-enseignant"
+  },
+  {
+    "id": "6",
+    "title": "Budget",
+    "definition": "J’établis, avec la direction, un budget pour l’intervention permettant la participation de tous les élèves et sollicite d'éventuels subsides de la FW-B, etc.",
+    "category": "conditions-enseignant"
+  },
+  {
+    "id": "7",
+    "title": "Durée",
+    "definition": "Je prévois une durée adaptée à l'engagement des élèves, tant au niveau de l'intervention dans son ensemble que lors des différentes séances.",
+    "category": "conditions-enseignant"
+  },
+  {
+    "id": "8",
+    "title": "Processus",
+    "definition": "Je valorise autant le processus que la création finale (spectacle, exposition…).",
+    "category": "conditions-enseignant"
+  },
+  {
+    "id": "9",
+    "title": "Respect & confiance",
+    "definition": "Je manifeste mon respect et ma confiance envers les élèves et partenaires et je valorise la contribution de chacun.",
+    "category": "conditions-enseignant"
+  },
+  {
+    "id": "10",
+    "title": "Auto-évaluation",
+    "definition": "Je prévois des moments et des outils pour que les élèves prennent du recul, notamment à travers des traces qui suscitent la discussion et l'esprit critique.",
+    "category": "conditions-enseignant"
+  },
+  {
+    "id": "11",
+    "title": "Réflexivité",
+    "definition": "Je dresse le bilan de l'intervention accomplie par rapport aux objectifs fixés.",
+    "category": "conditions-enseignant"
+  },
+  {
+    "id": "12",
+    "title": "Niveaux de difficulté",
+    "definition": "Je prévois des tâches avec un niveau de difficulté adapté qui permet à chaque élève de s'épanouir.",
+    "category": "recommandations-enseignant"
+  },
+  {
+    "id": "13",
+    "title": "Interdisciplinarité",
+    "definition": "Je fais intervenir ou j’établis un lien avec d'autres disciplines scolaires.",
+    "category": "recommandations-enseignant"
+  },
+  {
+    "id": "14",
+    "title": "Contexte des élèves",
+    "definition": "J’effectue des liens avec les (potentiels) intérêts des élèves, l'actualité et/ou la réalité du contexte (notamment l'histoire socio-culturelle des familles des élèves).",
+    "category": "recommandations-enseignant"
+  },
+  {
+    "id": "15",
+    "title": "Ressources locales",
+    "definition": "Je sollicite les personnes et/ou ressources locales (opérateurs culturels, asbl, etc.) pour mettre en place des activités dans et/ou hors de l'école (visites des lieux culturels et artistiques régionaux, du patrimoine, etc.).",
+    "category": "recommandations-enseignant"
+  },
+  {
+    "id": "16",
+    "title": "Implication des familles",
+    "definition": "Je prévois des moments et des outils pour impliquer les familles au cours du processus et/ou en fin d’intervention.",
+    "category": "recommandations-enseignant"
+  },
+  {
+    "id": "17",
+    "title": "Collaboration",
+    "definition": "En cas de partenariat, les partenaires prennent en compte les particularités des différents contextes (de classe, artistiques et culturels). Ils s’accordent sur les alvéoles « conditions » et définissent les rôles et responsabilités de chacun.",
+    "category": "recommandations-enseignant"
+  },
+  {
+    "id": "18",
+    "title": "Projet",
+    "definition": "J’inscris l'intervention dans la pédagogie du projet (ou autre).",
+    "category": "recommandations-enseignant"
+  },
+  {
+    "id": "19",
+    "title": "Communication",
+    "definition": "J’explique l'intervention, ses étapes et/ou les résultats attendus à la direction, à ses collègues, aux familles, et/ou à d'autres collègues issu·es d'autres établissements.",
+    "category": "recommandations-enseignant"
+  },
+  {
+    "id": "20",
+    "title": "Représentations",
+    "definition": "Je questionne les élèves sur les représentations qu'ils ont de la pratique culturelle et/ou artistique, l'artiste, l'oeuvre et/ou du patrimoine.",
+    "category": "recommandations-enseignant"
+  },
+  {
+    "id": "21",
+    "title": "Participation",
+    "definition": "Je participe aux tâches effectuées par les élèves, dans une position d'apprenant, de modèle et/ou de co-créateur.",
+    "category": "recommandations-enseignant"
+  },
+  {
+    "id": "22",
+    "title": "Esprit d'équipe",
+    "definition": "Je favorise le travail en groupe / la collaboration, la coopération et l'esprit d'équipe parmi les élèves.",
+    "category": "recommandations-enseignant"
+  },
+  {
+    "id": "23",
+    "title": "Flexibilité",
+    "definition": "Je fais preuve de flexibilité pour répondre aux besoins des élèves et exploite leurs réactions.",
+    "category": "recommandations-enseignant"
+  },
+  {
+    "id": "24",
+    "title": "Droit à l’erreur",
+    "definition": "Je favorise la prise de risque, le lâcher-prise et le droit à l'erreur dans le processus créatif.",
+    "category": "recommandations-enseignant"
+  },
+  {
+    "id": "P",
+    "title": "Planification",
+    "definition": "L’équipe éducative planifie, en collaboration avec les partenaires, l'intégration des différentes interventions dans le PECA des élèves, la mise en place et la coordination des différentes interventions dans une optique complémentaire. Nous valorisons le PECA dans le plan de pilotage de l'établissement.",
+    "category": "conditions-equipe"
+  },
+  {
+    "id": "R",
+    "title": "Personnes-ressources PECA",
+    "definition": "L’équipe éducative sollicite les personnes ressources pour le PECA (les enseignants relais, les référents culturels, les inspecteurs, les référents scolaires, les opérateurs culturels, etc.).",
+    "category": "conditions-equipe"
+  },
+  {
+    "id": "E",
+    "title": "Évaluation",
+    "definition": "L’équipe éducative évalue (en collaboration avec les partenaires, le cas échéant) l'intégration des différentes interventions dans le Parcours des élèves, la mise en place, la diversité et la coordination des différentes interventions dans une optique d'amélioration, par exemple en contrastant les Ruches.",
+    "category": "conditions-equipe"
+  },
+  {
+    "id": "VA",
+    "title": "Valorisation",
+    "definition": "L’équipe éducative utilise et anime régulièrement un ou des espace(s) « arts et culture » au sein de l'établissement (œuvres d'élèves et d'artistes affichées, informations sur les académies, affiches des expositions ou spectacles locaux, citations d'artistes affichées...).",
+    "category": "recommandations-equipe"
+  },
+  {
+    "id": "a",
+    "title": "Audiovisuel",
+    "definition": "",
+    "category": "domaine"
+  },
+  {
+    "id": "b",
+    "title": "Musique",
+    "definition": "",
+    "category": "domaine"
+  },
+  {
+    "id": "c",
+    "title": "Langue française et lettres",
+    "definition": "",
+    "category": "domaine"
+  },
+  {
+    "id": "d",
+    "title": "Arts plastiques et visuels",
+    "definition": "",
+    "category": "domaine"
+  },
+  {
+    "id": "e",
+    "title": "Théâtre",
+    "definition": "",
+    "category": "domaine"
+  },
+  {
+    "id": "f",
+    "title": "Arts forains, du cirque et de la rue",
+    "definition": "",
+    "category": "domaine"
+  },
+  {
+    "id": "g",
+    "title": "Patrimoine culturel",
+    "definition": "",
+    "category": "domaine"
+  },
+  { "id": "h", "title": "Danse", "definition": "", "category": "domaine" }
+]
