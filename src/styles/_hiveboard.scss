@@ -1,0 +1,29 @@
+.hive-board {
+    border: 2px dashed #aaa;
+    background: #fafafa;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.toolbar {
+  position: fixed;
+  top: 7.5vh;
+  right: 20px;
+  display: flex;
+  gap: 10px;
+  z-index: 100;
+
+  button {
+    background-color: #ffd84d;
+    border: none;
+    padding: 8px 12px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: 0.2s;
+
+    &:hover {
+      background-color: #ffca3a;
+    }
+  }
+}

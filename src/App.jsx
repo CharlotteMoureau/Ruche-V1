@@ -40,6 +40,12 @@ export default function App() {
 
   return (
     <DndProvider backend={HTML5Backend}>
+      <div className="titre">
+        <img src="./hexagone.png" alt="hexagone" />
+        <h1>La Ruche</h1>
+        <img src="./abeille.png" alt="abeille" />
+      </div>
+
       <div className="app">
         <Toolbar onReset={resetHive} />
         <CardLibrary cards={availableCards} />
@@ -49,6 +55,20 @@ export default function App() {
           onReturnToLibrary={handleReturnToLibrary}
         />
       </div>
+      <footer>
+        <a href="https://www.peca.be/" target="_blank">
+          <img src="./data/logos/peca.svg" alt="logo PECA" />
+        </a>
+        <a href="https://web.umons.ac.be/" target="_blank">
+          <img src="./data/logos/umons.png" alt="logo UMons" />
+        </a>
+        <a href="https://www.unamur.be/" target="_blank">
+          <img src="./data/logos/unamur.svg" alt="logo UNamur" />
+        </a>
+        <a href="https://www.uliege.be/" target="_blank">
+          <img src="./data/logos/uliège.png" alt="logo ULiège" />
+        </a>
+      </footer>
     </DndProvider>
   );
 }

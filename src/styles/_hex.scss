@@ -1,59 +1,129 @@
 @use "./variables" as *;
 
 .hex-card {
-  width: 100px;
-  height: 115px;
-  position: relative;
-  margin: 6px;
-  cursor: pointer;
+  color: white;
 
-  .hex-front,
-  .hex-back {
-    clip-path: polygon(50% 0%, 93% 25%, 93% 75%, 50% 100%, 7% 75%, 7% 25%);
-    position: absolute;
-    width: 100%;
-    height: 100%;
-    border-radius: 8px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    border: 3px solid;
-    padding: 4px;
-    text-align: center;
-    font-size: 0.8rem;
-    top: 0;
-    left: 0;
-    transition: opacity 0.3s;
+  .hex {
+    width: 125px;
+    aspect-ratio: 1;
+    perspective: 800px;
+    cursor: pointer;
+
+    .hex-shape {
+      stroke: none;
+      transition: all 0.3s ease;
+    }
+
+    &.reco-enseignant .hex-shape {
+      stroke: $orange;
+      stroke-width: 4;
+      stroke-dasharray: 10 5;
+    }
+
+    &.reco-equipe .hex-shape {
+      stroke: $mauve;
+      stroke-width: 4;
+      stroke-dasharray: 10 5;
+    }
+
+    .hex-inner {
+      width: 100%;
+      height: 100%;
+      transform-style: preserve-3d;
+      transition: transform 0.6s;
+      position: relative;
+
+      .hex-front,
+      .hex-back {
+        position: absolute;
+        top: 0;
+        left: 0;
+        backface-visibility: hidden;
+        width: 100%;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        font-family: sans-serif;
+        text-align: center;
+        font-size: 0.9rem;
+        padding: 10px;
+        box-sizing: border-box;
+      }
+
+      .hex-front {
+        span {
+          font-weight: bold;
+          padding-bottom: 5px;
+        }
+
+        h4 {
+          padding-bottom: 5px;
+          font-size: 0.65rem;
+        }
+
+        img {
+          height: 30px;
+        }
+      }
+
+      .hex-back {
+        transform: rotateY(180deg);
+        font-size: 0.8rem;
+        line-height: 1.1;
+        text-align: center;
+
+        /* Scroll toujours possible mais scrollbar cachée */
+        overflow-y: scroll;
+        overflow-x: hidden;
+
+        /* Pour Chrome, Edge, Safari */
+        &::-webkit-scrollbar {
+          display: none;
+        }
+
+        /* Pour Firefox */
+        scrollbar-width: none;
+      }
+    }
+
+    &:hover .hex-inner {
+      transform: rotateY(180deg);
+    }
   }
 
-  .hex-front {
-    z-index: 2;
-    opacity: 1;
-    background: $bg-visees; // default, overridden par catégorie plus bas
+  &.visees {
+    fill: $turquoise
   }
 
-  .hex-back {
-    z-index: 1;
-    opacity: 0;
-    background: #fff8e6;
+  &.conditions-enseignant {
+    fill: $orange;
   }
 
-  // Flip au hover
-  &:hover .hex-front {
-    opacity: 0;
-    z-index: 1;
-  }
-  &:hover .hex-back {
-    opacity: 1;
-    z-index: 2;
+  &.recommandations-enseignant {
+    fill: white;
+    color: $orange;
   }
 
-  &.visees .hex-front { border-color: $color-visees; background: $bg-visees; }
-  &.conditions-enseignant .hex-front { border-color: $color-conditions-enseignant; background: $bg-conditions-enseignant; }
-  &.recommandations-enseignant .hex-front { border: 3px dotted $color-recommandations-enseignant; background: $bg-recommandations-enseignant; }
-  &.conditions-equipe .hex-front { border-color: $color-conditions-equipe; background: $bg-conditions-equipe; }
-  &.recommandations-equipe .hex-front { border: 3px dotted $color-recommandations-equipe; background: $bg-recommandations-equipe; }
-  &.domaine .hex-front { border-color: $color-domaine; background: $bg-domaine; }
-  &.free .hex-front { border-color: $color-free; background: $bg-free; }
+  &.conditions-equipe {
+    fill: $mauve
+  }
+
+  &.recommandations-equipe {
+    fill: white;
+    color: $mauve;
+  }
+
+  &.domaine {
+    fill: $rose;
+  }
+}
+
+.capture-mode .hex-inner {
+  transform: none !important;
+}
+
+.capture-mode .hex-back {
+  display: none !important;
 }

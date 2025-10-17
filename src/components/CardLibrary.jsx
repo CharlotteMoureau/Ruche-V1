@@ -33,7 +33,7 @@ export default function CardLibrary({ cards }) {
       label: "Recommandation pour l’équipe éducative",
       key: "recommandations-equipe",
     },
-    { label: "Domaine d’expression culturelle et artistique", key: "domaine" },
+    { label: "Domaines d’expression culturelle et artistique", key: "domaine" },
     { label: "Free space", key: "free" },
   ];
 
