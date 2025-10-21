@@ -24,7 +24,7 @@ export default function Toolbar({ onReset }) {
     });
 
     // Attendre 5 secondes
-    await new Promise((resolve) => setTimeout(resolve, 1000));
+    await new Promise((resolve) => setTimeout(resolve, 5000));
 
     try {
       const dataUrl = await toPng(board, { cacheBust: true });
