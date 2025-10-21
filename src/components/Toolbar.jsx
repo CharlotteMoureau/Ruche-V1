@@ -1,4 +1,4 @@
-import { toPng } from "html-to-image";
+import domtoimage from "dom-to-image-more";
 
 export default function Toolbar({ onReset }) {
   const handleExport = async () => {
@@ -8,14 +8,6 @@ export default function Toolbar({ onReset }) {
     // Activer le mode capture
     document.body.classList.add("capture-mode");
 
-    // Cloner les styles du document dans le board
-    const styleElements = document.querySelectorAll(
-      "style, link[rel='stylesheet']"
-    );
-    styleElements.forEach((style) => {
-      board.appendChild(style.cloneNode(true));
-    });
-
     // Masquer les dos des cartes
     const backs = board.querySelectorAll(".hex-back");
     backs.forEach((el) => {
@@ -23,11 +15,16 @@ export default function Toolbar({ onReset }) {
       el.style.visibility = "hidden";
     });
 
-    // Attendre 5 secondes
-    await new Promise((resolve) => setTimeout(resolve, 5000));
+    // Attendre un petit délai pour que les styles s’appliquent
+    await new Promise((resolve) => setTimeout(resolve, 1000));
 
     try {
-      const dataUrl = await toPng(board, { cacheBust: true });
+      const dataUrl = await domtoimage.toPng(board, {
+        cacheBust: true,
+        style: {
+          // Tu peux forcer des styles ici si besoin
+        },
+      });
 
       const link = document.createElement("a");
       link.download = "ruche.png";
@@ -35,6 +32,7 @@ export default function Toolbar({ onReset }) {
       link.click();
     } catch (err) {
       console.error("Erreur lors de la capture :", err);
+      alert("Erreur lors de la capture : " + err.message);
     } finally {
       // Restaurer la visibilité des dos des cartes
       backs.forEach((el) => {

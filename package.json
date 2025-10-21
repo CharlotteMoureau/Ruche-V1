@@ -11,6 +11,7 @@
   },
   "dependencies": {
     "canvg": "^4.0.3",
+    "dom-to-image-more": "^3.7.1",
     "framer-motion": "^12.23.24",
     "html-to-image": "^1.11.13",
     "html2canvas": "^1.4.1",
