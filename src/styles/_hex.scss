@@ -4,7 +4,7 @@
   color: white;
 
   .hex {
-    width: 125px;
+    width: 145px;
     aspect-ratio: 1;
     perspective: 800px;
     cursor: pointer;
@@ -60,7 +60,7 @@
 
         h4 {
           padding-bottom: 5px;
-          font-size: 0.65rem;
+          font-size: 0.67rem;
         }
 
         img {
@@ -70,21 +70,26 @@
 
       .hex-back {
         transform: rotateY(180deg);
-        font-size: 0.8rem;
-        line-height: 1.1;
-        text-align: center;
 
-        /* Scroll toujours possible mais scrollbar cachée */
-        overflow-y: scroll;
-        overflow-x: hidden;
+        p {
+          font-size: 0.6rem;
+          line-height: 0.9;
+          text-align: center;
+          padding: 15px 0 15px 0;
+          cursor: ns-resize;
 
-        /* Pour Chrome, Edge, Safari */
-        &::-webkit-scrollbar {
-          display: none;
+          /* Scroll toujours possible mais scrollbar cachée */
+          overflow-y: scroll;
+          overflow-x: hidden;
+
+          /* Pour Chrome, Edge, Safari */
+          &::-webkit-scrollbar {
+            display: none;
+          }
+
+          /* Pour Firefox */
+          scrollbar-width: none;
         }
-
-        /* Pour Firefox */
-        scrollbar-width: none;
       }
     }
 

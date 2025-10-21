@@ -42,7 +42,7 @@ export default function HexCard({ card, position }) {
               <img src={`./data/icons/${card.id}.png`} alt={card.title} />
             </div>
             <div className="hex-back">
-              <p>{card.definition}</p>
+              <p className="hex-back-p">{card.definition}</p>
             </div>
           </div>
         </foreignObject>

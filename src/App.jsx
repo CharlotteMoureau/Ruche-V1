@@ -40,11 +40,11 @@ export default function App() {
 
   return (
     <DndProvider backend={HTML5Backend}>
-      <div className="titre">
+      <header className="titre">
         <img src="./hexagone.png" alt="hexagone" />
         <h1>La Ruche</h1>
         <img src="./abeille.png" alt="abeille" />
-      </div>
+      </header>
 
       <div className="app">
         <Toolbar onReset={resetHive} />

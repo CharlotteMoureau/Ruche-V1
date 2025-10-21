@@ -21,9 +21,6 @@ export default function Toolbar({ onReset }) {
     try {
       const dataUrl = await domtoimage.toPng(board, {
         cacheBust: true,
-        style: {
-          // Tu peux forcer des styles ici si besoin
-        },
       });
 
       const link = document.createElement("a");
