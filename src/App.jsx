@@ -5,6 +5,7 @@ import CardLibrary from "./components/CardLibrary";
 import HiveBoard from "./components/HiveBoard";
 import Toolbar from "./components/Toolbar";
 import cardsData from "./data/cards.json";
+import Footer from "./components/Footer";
 import "./styles/main.scss";
 
 export default function App() {
@@ -45,7 +46,6 @@ export default function App() {
         <h1>La Ruche</h1>
         <img src="./abeille.png" alt="abeille" />
       </header>
-
       <div className="app">
         <Toolbar onReset={resetHive} />
         <CardLibrary cards={availableCards} />
@@ -55,20 +55,7 @@ export default function App() {
           onReturnToLibrary={handleReturnToLibrary}
         />
       </div>
-      <footer>
-        <a href="https://www.peca.be/" target="_blank">
-          <img src="./data/logos/peca.svg" alt="logo PECA" />
-        </a>
-        <a href="https://web.umons.ac.be/" target="_blank">
-          <img src="./data/logos/umons.png" alt="logo UMons" />
-        </a>
-        <a href="https://www.unamur.be/" target="_blank">
-          <img src="./data/logos/unamur.svg" alt="logo UNamur" />
-        </a>
-        <a href="https://www.uliege.be/" target="_blank">
-          <img src="./data/logos/uliège.png" alt="logo ULiège" />
-        </a>
-      </footer>
+      <Footer />
     </DndProvider>
   );
 }
