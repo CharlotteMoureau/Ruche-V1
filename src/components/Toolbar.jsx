@@ -1,4 +1,6 @@
 import domtoimage from "dom-to-image-more";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faArrowsRotate, faCamera } from "@fortawesome/free-solid-svg-icons";
 
 export default function Toolbar({ onReset }) {
   const handleExport = async () => {
@@ -44,8 +46,12 @@ export default function Toolbar({ onReset }) {
 
   return (
     <div className="toolbar">
-      <button onClick={onReset}>🔄 Réinitialiser</button>
-      <button onClick={handleExport}>📷 Capture d'écran</button>
+      <button onClick={onReset}>
+        <FontAwesomeIcon icon={faArrowsRotate} /> Réinitialiser
+      </button>
+      <button onClick={handleExport}>
+        <FontAwesomeIcon icon={faCamera} /> Capture d'écran
+      </button>
     </div>
   );
 }
