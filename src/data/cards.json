@@ -254,49 +254,49 @@
   {
     "id": "a.",
     "title": "Audiovisuel",
-    "definition": "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt",
+    "definition": "Visionnage, analyse, critique, scénarisation, réalisation, montage...",
     "category": "domaine"
   },
   {
     "id": "b.",
     "title": "Musique",
-    "definition": "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt",
+    "definition": "Écoute, chant en choeur, polyrythmie, création sonore, lutherie sauvage, pratiques orchestrales...",
     "category": "domaine"
   },
   {
     "id": "c.",
     "title": "Langue française et lettres",
-    "definition": "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt",
+    "definition": "Lecture, écriture créative, slam, conte, narration...",
     "category": "domaine"
   },
   {
     "id": "d.",
     "title": "Arts plastiques et visuels",
-    "definition": "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt",
+    "definition": "Peinture, sculpture, photographie, installation interactive, réalité augmentée, web art...",
     "category": "domaine"
   },
   {
     "id": "e.",
     "title": "Théâtre",
-    "definition": "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt",
+    "definition": "Diction, éloquence, jeu, interprétation improvisation, théâtre-action, marionnettes...",
     "category": "domaine"
   },
   {
     "id": "f.",
     "title": "Arts forains, du cirque et de la rue",
-    "definition": "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt",
+    "definition": "Jonglerie, acrobatie, manipulation d'automates, clown, magie, street-art...",
     "category": "domaine"
   },
   {
     "id": "g.",
     "title": "Patrimoine culturel",
-    "definition": "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt",
+    "definition": "Sites et monuments historiques, contes et légendes, chants et artisanats traditionnels...",
     "category": "domaine"
   },
   {
     "id": "h.",
     "title": "Danse",
-    "definition": "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt",
+    "definition": "Chorégraphie, interprétation, expression corporelle, mime...",
     "category": "domaine"
   }
 ]

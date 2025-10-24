@@ -4,10 +4,10 @@
   color: white;
 
   .hex {
-    width: 145px;
+    width: 150px;
     aspect-ratio: 1;
     perspective: 800px;
-    cursor: pointer;
+    cursor: grab;
 
     .hex-shape {
       stroke: none;
@@ -76,19 +76,24 @@
           line-height: 0.9;
           text-align: center;
           padding: 15px 0 15px 0;
-          cursor: ns-resize;
-
-          /* Scroll toujours possible mais scrollbar cachée */
           overflow-y: scroll;
-          overflow-x: hidden;
+          scrollbar-width: thin;
+          scrollbar-color: rgba(0, 0, 0, 0.1) transparent;
 
-          /* Pour Chrome, Edge, Safari */
           &::-webkit-scrollbar {
-            display: none;
+            width: 4px;
+            cursor: pointer;
           }
 
-          /* Pour Firefox */
-          scrollbar-width: none;
+          &::-webkit-scrollbar-track {
+            background: transparent;
+          }
+
+          &::-webkit-scrollbar-thumb {
+            background-color: rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+          }
+
         }
       }
     }
