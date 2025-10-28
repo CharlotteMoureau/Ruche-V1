@@ -5,6 +5,8 @@
 @use "./hiveboard" as *;
 @use "./footer" as *;
 @use "./reset" as *;
+@use "./modal" as *;
+@use "./freespacecard" as *;
 
 body {
   margin: 0;

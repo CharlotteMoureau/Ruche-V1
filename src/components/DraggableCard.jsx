@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import HexCard from "./HexCard";
+import FreeHexCard from "./FreeSpaceCard";
 
 export default function DraggableCard({
   card,
@@ -78,7 +79,11 @@ export default function DraggableCard({
       }}
       onMouseDown={handleMouseDown}
     >
-      <HexCard card={card} />
+      {card.category === "free" ? (
+        <FreeHexCard card={card} />
+      ) : (
+        <HexCard card={card} />
+      )}
     </div>
   );
 }

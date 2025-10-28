@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import { useDrag } from "react-dnd";
 import { getEmptyImage } from "react-dnd-html5-backend";
 import HexCard from "./HexCard";
+import FreeHexCard from "./FreeSpaceCard";
 
 function DraggableCard({ card }) {
   const [{ isDragging }, drag, preview] = useDrag(() => ({
@@ -31,7 +32,7 @@ function DraggableCard({ card }) {
   );
 }
 
-export default function CardLibrary({ cards }) {
+export default function CardLibrary({ cards, onFreeSpaceClick, userCards }) {
   const categories = [
     { label: "Visées & effets pour les élèves", key: "visees" },
     {
@@ -48,7 +49,7 @@ export default function CardLibrary({ cards }) {
       key: "recommandations-equipe",
     },
     { label: "Domaines d’expression culturelle et artistique", key: "domaine" },
-    { label: "Free space", key: "free" },
+    { label: "À vous de jouer !", key: "free" },
   ];
 
   return (
@@ -56,6 +57,24 @@ export default function CardLibrary({ cards }) {
       <h2>Cartes disponibles</h2>
       {categories.map(({ label, key }) => {
         const cardsInCategory = cards.filter((card) => card.category === key);
+        if (key === "free") {
+          return (
+            <div key={key} className="card-category">
+              <h3>
+                {label}{" "}
+                <span className="counter">({10 - userCards} restantes)</span>
+              </h3>
+              <div className="card-list">
+                <div
+                  className="library-card free-space"
+                  onClick={onFreeSpaceClick}
+                >
+                  <FreeHexCard card={{ title: "À vous de jouer !" }} />
+                </div>
+              </div>
+            </div>
+          );
+        }
         if (!cardsInCategory.length) return null;
         return (
           <div key={key} className="card-category">
