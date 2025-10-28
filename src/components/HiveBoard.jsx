@@ -1,6 +1,6 @@
 import { useRef } from "react";
 import { useDrop } from "react-dnd";
-import DraggableCardBoard from "./DraggableCardBoard";
+import DraggableCard from "./DraggableCard";
 
 export default function HiveBoard({ cards, onDropCard, onReturnToLibrary }) {
   const boardRef = useRef(null);
@@ -50,7 +50,7 @@ export default function HiveBoard({ cards, onDropCard, onReturnToLibrary }) {
       style={{ position: "relative", width: "100%", height: "100%" }}
     >
       {cards.map((card) => (
-        <DraggableCardBoard
+        <DraggableCard
           key={card.id}
           card={card}
           boardRef={boardRef}

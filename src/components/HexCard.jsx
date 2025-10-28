@@ -10,10 +10,8 @@ export default function HexCard({ card, position }) {
     extraClass = "reco-equipe";
   }
 
-  const isLongText = card.definition && card.definition.length > 200;
-
   return (
-    <div className={`hex-card ${card.category}`} style={style}>
+    <div id="hex" className={`hex-card ${card.category}`} style={style}>
       <svg
         className={`hex ${extraClass}`}
         viewBox="0 0 100 100"
@@ -44,7 +42,7 @@ export default function HexCard({ card, position }) {
               <img src={`./data/icons/${card.id}.png`} alt={card.title} />
             </div>
             <div className="hex-back">
-              <p className={isLongText ? "long-def" : ""}>{card.definition}</p>
+              <p className="hex-back-p">{card.definition}</p>
             </div>
           </div>
         </foreignObject>
