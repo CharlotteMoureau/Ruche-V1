@@ -70,30 +70,13 @@
 
       .hex-back {
         transform: rotateY(180deg);
+        overflow: hidden;
 
         p {
-          font-size: 0.6rem;
+          font-size: 0.49rem;
           line-height: 0.9;
           text-align: center;
           padding: 15px 0 15px 0;
-          overflow-y: scroll;
-          scrollbar-width: thin;
-          scrollbar-color: rgba(0, 0, 0, 0.1) transparent;
-
-          &::-webkit-scrollbar {
-            width: 4px;
-            cursor: pointer;
-          }
-
-          &::-webkit-scrollbar-track {
-            background: transparent;
-          }
-
-          &::-webkit-scrollbar-thumb {
-            background-color: rgba(0, 0, 0, 0.1);
-            border-radius: 10px;
-          }
-
         }
       }
     }
@@ -136,4 +119,26 @@
 
 .capture-mode .hex-back {
   display: none !important;
+}
+
+.long-def {
+  
+    overflow-y: scroll;
+    scrollbar-width: thin !important;
+    scrollbar-color: rgba(0, 0, 0, 0.1) transparent;
+
+    &::-webkit-scrollbar {
+      width: 4px;
+      cursor: pointer;
+    }
+
+    &::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    &::-webkit-scrollbar-thumb {
+      background-color: rgba(0, 0, 0, 0.1);
+      border-radius: 10px;
+    }
+  
 }
