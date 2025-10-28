@@ -27,7 +27,11 @@ export default function FreeHexCard({ card }) {
         <div className="free-hex-inner">
           <div className="free-hex-front">
             <h4>{text}</h4>
-            <img src={`./data/icons/free.png`} alt={text} />
+            <img
+              className="free-img"
+              src={`./data/icons/free.png`}
+              alt={text}
+            />
           </div>
         </div>
       </foreignObject>

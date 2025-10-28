@@ -1,4 +1,6 @@
 export default function HexCard({ card, position, onlyFront }) {
+  if (!card) return null;
+
   const style = position
     ? { position: "absolute", left: position.x, top: position.y }
     : {};

@@ -9,6 +9,7 @@
     stroke-dasharray: 10 5;
     fill: white;
     color: $vert;
+    cursor: pointer;
 
     .free-hex-inner {
       width: 100%;
@@ -34,8 +35,9 @@
         padding: 10px;
         box-sizing: border-box;
 
-        img {
+        .free-img {
           height: 30px;
+          cursor: pointer;
         }
       }
     }
