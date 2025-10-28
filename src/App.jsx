@@ -13,6 +13,11 @@ export default function App() {
   const [availableCards, setAvailableCards] = useState(cardsData);
   const [boardCards, setBoardCards] = useState([]);
 
+  const orderMap = {};
+  cardsData.forEach((c, i) => {
+    orderMap[c.id] = i;
+  });
+
   const handleDropCard = (card, position, fromLibrary = false) => {
     if (fromLibrary && card.category !== "free") {
       setAvailableCards((prev) => prev.filter((c) => c.id !== card.id));
@@ -30,7 +35,13 @@ export default function App() {
 
   const handleReturnToLibrary = (card) => {
     if (card.category !== "free") {
-      setAvailableCards((prev) => [...prev, card]);
+      setAvailableCards((prev) => {
+        const newCards = prev.filter((c) => c.id !== card.id).concat(card);
+
+        return newCards.sort(
+          (a, b) => (orderMap[a.id] || 0) - (orderMap[b.id] || 0)
+        );
+      });
     }
     setBoardCards((prev) => prev.filter((c) => c.id !== card.id));
   };
