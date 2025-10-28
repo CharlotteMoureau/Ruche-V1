@@ -21,8 +21,7 @@ export default function CustomDragPreview() {
 
   return (
     <div style={{ ...layerStyles, transform: `translate(${x}px, ${y}px)` }}>
-      {/* 👉 on ne veut afficher que le recto */}
-      <div style={{ transform: "translate(-50%, -50%) scale(0.8)" }}>
+      <div style={{ transform: "translate(-50%, -50%)" }}>
         <HexCard card={item.card} onlyFront />
       </div>
     </div>
