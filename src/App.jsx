@@ -6,6 +6,7 @@ import HiveBoard from "./components/HiveBoard";
 import Toolbar from "./components/Toolbar";
 import cardsData from "./data/cards.json";
 import Footer from "./components/Footer";
+import CustomDragPreview from "./components/CustomDragPreview";
 import "./styles/main.scss";
 
 export default function App() {
@@ -54,6 +55,7 @@ export default function App() {
           onDropCard={handleDropCard}
           onReturnToLibrary={handleReturnToLibrary}
         />
+        <CustomDragPreview />
       </div>
       <Footer />
     </DndProvider>

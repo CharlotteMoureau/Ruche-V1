@@ -1,8 +1,10 @@
+import { useEffect } from "react";
 import { useDrag } from "react-dnd";
+import { getEmptyImage } from "react-dnd-html5-backend";
 import HexCard from "./HexCard";
 
 function DraggableCard({ card }) {
-  const [{ isDragging }, drag] = useDrag(() => ({
+  const [{ isDragging }, drag, preview] = useDrag(() => ({
     type: "CARD",
     item: { card, fromLibrary: true },
     collect: (monitor) => ({
@@ -10,8 +12,20 @@ function DraggableCard({ card }) {
     }),
   }));
 
+  useEffect(() => {
+    preview(getEmptyImage(), { captureDraggingState: true });
+  }, [preview]);
+
   return (
-    <div ref={drag} style={{ opacity: isDragging ? 0.4 : 1, margin: "4px" }}>
+    <div
+      ref={drag}
+      className={`library-card ${isDragging ? "dragging" : ""}`}
+      style={{
+        opacity: isDragging ? 0.4 : 1,
+        margin: "4px",
+        cursor: isDragging ? "grabbing" : "grab",
+      }}
+    >
       <HexCard card={card} />
     </div>
   );

@@ -1,4 +1,4 @@
-export default function HexCard({ card, position }) {
+export default function HexCard({ card, position, onlyFront }) {
   const style = position
     ? { position: "absolute", left: position.x, top: position.y }
     : {};
@@ -43,9 +43,13 @@ export default function HexCard({ card, position }) {
               <h4>{card.title}</h4>
               <img src={`./data/icons/${card.id}.png`} alt={card.title} />
             </div>
-            <div className="hex-back">
-              <p className={isLongText ? "long-def" : ""}>{card.definition}</p>
-            </div>
+            {!onlyFront && (
+              <div className="hex-back">
+                <p className={isLongText ? "long-def" : ""}>
+                  {card.definition}
+                </p>
+              </div>
+            )}
           </div>
         </foreignObject>
       </svg>
