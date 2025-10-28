@@ -1,3 +1,5 @@
+@use "./variables" as *;
+
 .modal-overlay {
   position: fixed;
   inset: 0;
@@ -61,7 +63,7 @@
 }
 
 .modal-box .btn:hover {
-  background-color: #ffcc00;
+  background-color: $jaune;
 }
 
 .modal-box .btn.secondary {
