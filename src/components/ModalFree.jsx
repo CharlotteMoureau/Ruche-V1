@@ -49,7 +49,7 @@ export default function AddCardModal({
       tabIndex={0}
     >
       <div className="modal-box">
-        <h2>À vous de jouer</h2>
+        <h2>À vous de jouer !</h2>
 
         <input
           ref={inputRef}

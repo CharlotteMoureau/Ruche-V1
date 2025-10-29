@@ -69,9 +69,7 @@ export default function CardLibrary({ cards, onFreeSpaceClick, userCards }) {
                   className="library-card free-space"
                   onClick={onFreeSpaceClick}
                 >
-                  <FreeHexCard
-                    card={{ title: "À vous de jouer !", category: "free" }}
-                  />
+                  <FreeHexCard card={{ category: "free" }} />
                 </div>
               </div>
             </div>
