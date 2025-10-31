@@ -33,8 +33,8 @@ export default function HiveBoard({ cards, onDropCard, onReturnToLibrary }) {
         return;
 
       const position = {
-        x: offset.x - boardRect.left - 70,
-        y: offset.y - boardRect.top - 70,
+        x: offset.x - boardRect.left - 102,
+        y: offset.y - boardRect.top - 103,
       };
 
       onDropCard(item.card, position, true);

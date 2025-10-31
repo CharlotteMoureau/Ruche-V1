@@ -101,7 +101,7 @@
 /* ----------------------- */
 @-moz-document url-prefix() {
   .hex {
-    perspective: none !important; /* désactive vraie 3D */
+    perspective: none !important;
   }
 
   .hex-inner {
@@ -125,13 +125,13 @@
   .hex:hover .hex-front {
     opacity: 0;
     z-index: 1;
-    transform: rotateY(-15deg); /* léger tilt pour effet 3D */
+    transform: rotateY(-15deg);
   }
 
   .hex:hover .hex-back {
     opacity: 1;
     z-index: 2;
-    transform: rotateY(0deg); /* léger tilt pour effet 3D */
+    transform: rotateY(0deg);
   }
 
   .hex-front img,
@@ -146,7 +146,7 @@
 
 @supports (-webkit-transform-style: preserve-3d) and (not (-moz-appearance: none)) {
   .hex-back {
-    transform: rotateY(180deg) translateZ(0); /* force GPU layer */
+    transform: rotateY(180deg) translateZ(0);
     will-change: transform, opacity;
     backface-visibility: hidden;
   }
