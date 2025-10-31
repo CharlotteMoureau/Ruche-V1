@@ -14,7 +14,7 @@ Le projet **Ruche** permet aux enseignants, intervenants et équipes éducatives
 - Visualiser et organiser des **cartes pédagogiques** sous forme d’alvéoles hexagonales.
 - Explorer des **visées éducatives**, des **conditions de mise en œuvre**, et des **recommandations** liées au PECA.
 - Manipuler les cartes via **drag & drop** pour construire des parcours ou des réflexions pédagogiques.
-- Mettre en avant certaines cartes spécifiques aux **Délégués au Contrat d'Objectifs (DCO)** via [une autre appli](https://la-ruche-dco.netlify.app/){:target="_blank"} dédiée.
+- Mettre en avant certaines cartes spécifiques aux **Délégués au Contrat d'Objectifs (DCO)** via [une autre appli](https://la-ruche-dco.netlify.app/) dédiée.
 
 ---
 
@@ -24,4 +24,4 @@ Le projet **Ruche** permet aux enseignants, intervenants et équipes éducatives
 
 ## 🌐 Voir l'application en ligne
 
-### [La Ruche](https://la-ruche.netlify.app/){:target="_blank"}
+### [La Ruche](https://la-ruche.netlify.app/)
