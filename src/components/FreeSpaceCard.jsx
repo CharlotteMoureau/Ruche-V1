@@ -178,8 +178,7 @@ z"
       >
         <div className="free-hex-inner">
           <div className="free-hex-front">
-            <h4>À vous de jouer !</h4>
-            <p>{text}</p>
+            <h4>{text}</h4>
             {svg}
           </div>
         </div>
