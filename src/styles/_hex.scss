@@ -34,7 +34,6 @@
 
       .hex-front,
       .hex-back {
-        transform: translateZ(0);
         position: absolute;
         top: 0;
         left: 0;
@@ -50,34 +49,19 @@
         font-size: 0.9rem;
         padding: 10px;
         box-sizing: border-box;
+        transition: opacity 0.4s ease, transform 0.6s ease;
       }
 
       .hex-front {
-        span {
-          font-weight: bold;
-          padding-bottom: 5px;
-        }
-
-        h4 {
-          padding-bottom: 5px;
-          font-size: 0.67rem;
-        }
-
-        img {
-          height: 30px;
-        }
+        span { font-weight: bold; padding-bottom: 5px; }
+        h4 { padding-bottom: 5px; font-size: 0.67rem; }
+        img { height: 30px; }
       }
 
       .hex-back {
         transform: rotateY(180deg);
         overflow: hidden;
-
-        p {
-          font-size: 0.45rem;
-          line-height: 0.9;
-          text-align: center;
-          padding: 15px 0 15px 0;
-        }
+        p { font-size: 0.45rem; line-height: 0.9; text-align: center; padding: 15px 0; }
       }
     }
 
@@ -86,73 +70,89 @@
     }
   }
 
-  &.visees {
-    fill: $turquoise
-  }
-
-  &.conditions-enseignant {
-    fill: $orange;
-  }
-
-  &.recommandations-enseignant {
-    fill: white;
-    color: $orange;
-  }
-
-  &.conditions-equipe {
-    fill: $mauve
-  }
-
-  &.recommandations-equipe {
-    fill: white;
-    color: $mauve;
-  }
-
-  &.domaine {
-    fill: $rose;
-  }
+  &.visees { fill: $turquoise; }
+  &.conditions-enseignant { fill: $orange; }
+  &.recommandations-enseignant { fill: white; color: $orange; }
+  &.conditions-equipe { fill: $mauve; }
+  &.recommandations-equipe { fill: white; color: $mauve; }
+  &.domaine { fill: $rose; }
 }
 
-.capture-mode .hex-inner {
-  transform: none !important;
-}
-
-.capture-mode .hex-back {
-  display: none !important;
-}
+.capture-mode .hex-inner { transform: none !important; }
+.capture-mode .hex-back { display: none !important; }
 
 .long-def {
-    overflow-y: scroll;
-    scrollbar-width: thin !important;
-    scrollbar-color: rgba(0, 0, 0, 0.1) transparent;
+  overflow-y: scroll;
+  scrollbar-width: thin !important;
+  scrollbar-color: rgba(0, 0, 0, 0.1) transparent;
 
-    &::-webkit-scrollbar {
-      width: 4px;
-      cursor: pointer;
-    }
-
-    &::-webkit-scrollbar-track {
-      background: transparent;
-    }
-
-    &::-webkit-scrollbar-thumb {
-      background-color: rgba(0, 0, 0, 0.1);
-      border-radius: 10px;
-    }
+  &::-webkit-scrollbar { width: 4px; cursor: pointer; }
+  &::-webkit-scrollbar-track { background: transparent; }
+  &::-webkit-scrollbar-thumb { background-color: rgba(0,0,0,0.1); border-radius: 10px; }
 }
 
-.draggable-card {
-  cursor: grab; 
+.draggable-card { cursor: grab; }
+.draggable-card.dragging { cursor: grabbing; }
+.card-list > div { cursor: grab; }
+.card-list > div:active { cursor: grabbing; }
+
+/* ----------------------- */
+/* Firefox spécifique       */
+/* ----------------------- */
+@-moz-document url-prefix() {
+  .hex {
+    perspective: none !important; /* désactive vraie 3D */
+  }
+
+  .hex-inner {
+    transform: none !important;
+  }
+
+  .hex-front,
+  .hex-back {
+    transform: none !important;
+    backface-visibility: visible !important;
+    opacity: 1;
+    z-index: 2;
+  }
+
+  .hex-back {
+    opacity: 0;
+    z-index: 1;
+  }
+
+  /* Hover / flip simulé */
+  .hex:hover .hex-front {
+    opacity: 0;
+    z-index: 1;
+    transform: rotateY(-15deg); /* léger tilt pour effet 3D */
+  }
+
+  .hex:hover .hex-back {
+    opacity: 1;
+    z-index: 2;
+    transform: rotateY(0deg); /* léger tilt pour effet 3D */
+  }
+
+  .hex-front img,
+  .hex-back img {
+    image-rendering: auto;
+  }
 }
 
-.draggable-card.dragging {
-  cursor: grabbing; 
-}
+/* ----------------------- */
+/* Hotfix flou Chrome      */
+/* ----------------------- */
 
-.card-list > div {
-  cursor: grab;
-}
+@supports (-webkit-transform-style: preserve-3d) and (not (-moz-appearance: none)) {
+  .hex-back {
+    transform: rotateY(180deg) translateZ(0); /* force GPU layer */
+    will-change: transform, opacity;
+    backface-visibility: hidden;
+  }
 
-.card-list > div:active {
-  cursor: grabbing;
+  .hex-front {
+    transform: rotateY(0deg) translateZ(0);
+    will-change: transform, opacity;
+  }
 }
