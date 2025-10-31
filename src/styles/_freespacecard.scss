@@ -9,63 +9,103 @@
   stroke-dasharray: 10 5;
   fill: white;
   color: $vert;
-  transition: transform 0.3s ease;
-  cursor: pointer;
 
   .free-hex-inner {
     width: 100%;
     height: 100%;
+    transform-style: preserve-3d;
+    transition: transform 0.6s;
     position: relative;
+
+    .free-hex-front {
+      position: absolute;
+      top: 0;
+      left: 0;
+      backface-visibility: hidden;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      font-family: sans-serif;
+      text-align: center;
+      font-size: 0.9rem;
+      padding: 10px;
+      box-sizing: border-box;
+
+      h4 {
+        font-size: 0.66rem;
+        padding-top: 10px;
+      }
+
+      p {
+        font-size: 0.45rem;
+      }
+
+      .free-img,
+      .icon {
+        height: 25px;
+      }
+    }
+  }
+}
+
+.library-card.free-space {
+  &:hover {
+    cursor: pointer;
+
+    .free-space-card {
+      fill: $vert;
+      color: white;
+      transition-duration: 0.4s;
+
+      #vert {
+        fill: white;
+        transition-duration: 0.4s;
+      }
+    }
+  }
+}
+
+/* ----------------------- */
+/* Firefox spécifique       */
+/* ----------------------- */
+@-moz-document url-prefix() {
+  .free-space-card {
+    perspective: none !important;
+
+    .free-hex-front {
+      backface-visibility: visible !important;
+      opacity: 1;
+      z-index: 2;
+      transition: background-color 0.4s, color 0.4s;
+
+      .free-img,
+      .icon {
+        transition: fill 0.4s;
+      }
+    }
+
+    &:hover {
+      fill: $vert;
+      color: white;
+
+      #vert {
+        fill: white;
+      }
+    }
+  }
+
+  .free-hex-inner {
+    transform: none !important;
   }
 
   .free-hex-front {
-    width: 100%;
-    height: 100%;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    font-family: sans-serif;
-    text-align: center;
-    font-size: 0.9rem;
-    padding: 10px;
-    box-sizing: border-box;
-    transition: color 0.3s ease;
-
-    h4 {
-      font-size: 0.66rem;
-      padding-top: 10px;
-    }
-
-    p {
-      font-size: 0.45rem;
-    }
-
-    .free-img,
-    .icon {
-      height: 25px;
-    }
+    transform: none !important;
   }
-}
 
-.library-card.free-space:hover .free-space-card {
-  fill: $vert;
-  color: white;
-
-  #vert {
-    fill: white;
-    transition: fill 0.3s ease;
-  }
-}
-
-/* Firefox spécifique */
-@-moz-document url-prefix() {
-  .library-card.free-space:hover .free-space-card {
-    fill: $vert;
-    color: white;
-
-    #vert {
-      fill: white;
-    }
+  .free-space-card:hover .free-hex-front {
+    transform: rotateY(0deg);
   }
 }
