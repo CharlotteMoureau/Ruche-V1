@@ -26,3 +26,64 @@ body {
     flex-direction: column;
   }
 }
+
+/* ----------------------- */
+/* Bloquer smartphone      */
+/* ----------------------- */
+@media (max-width: 767px) {
+  body > * { 
+    display: none !important; /* masque tout le contenu */
+  }
+
+  body::before {
+    content: "⚠️ Ce site n'est pas accessible sur smartphone. Veuillez utiliser une tablette en mode paysage ou un écran plus grand.";
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    height: 100vh;
+    box-sizing: border-box;
+    background-color: #fff;
+    color: #333;
+    font-size: 1rem;
+    font-family: sans-serif;
+    text-align: center;
+    padding: 20px;
+  }
+}
+
+/* ----------------------- */
+/* Tablette portrait       */
+/* ----------------------- */
+@media (min-width: 768px) and (max-width: 1024px) and (orientation: portrait) {
+  body > * { 
+    display: none !important; /* masque tout le contenu en portrait */
+  }
+
+  body::before {
+    content: "⚠️ Veuillez utiliser la tablette en mode paysage pour accéder au site.";
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    height: 100vh;
+    box-sizing: border-box;
+    background-color: #fff;
+    color: #333;
+    font-size: 1rem;
+    font-family: sans-serif;
+    text-align: center;
+    padding: 20px;
+  }
+}
+
+/* ----------------------- */
+/* Tablette paysage / PC   */
+/* ----------------------- */
+@media (min-width: 768px) and (orientation: landscape), (min-width: 1025px) {
+  body > * {
+    display: block !important; /* contenu visible */
+  }
+  body::before { display: none; }
+}
+
