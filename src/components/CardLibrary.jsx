@@ -1,8 +1,10 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useDrag } from "react-dnd";
 import { getEmptyImage } from "react-dnd-html5-backend";
 import HexCard from "./HexCard";
 import FreeHexCard from "./FreeSpaceCard";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faExclamationTriangle } from "@fortawesome/free-solid-svg-icons";
 
 function DraggableCard({ card }) {
   const [{ isDragging }, drag, preview] = useDrag(() => ({
@@ -52,11 +54,24 @@ export default function CardLibrary({ cards, onFreeSpaceClick, userCards }) {
     { label: "À vous de jouer !", key: "free" },
   ];
 
+  const [showPopup, setShowPopup] = useState(false);
+
+  const handleFreeSpaceClick = () => {
+    if (userCards >= 10) {
+      setShowPopup(true);
+      setTimeout(() => setShowPopup(false), 5000);
+      return;
+    }
+    onFreeSpaceClick();
+  };
+
   return (
     <aside className="card-library">
       <h2>Cartes disponibles</h2>
+
       {categories.map(({ label, key }) => {
         const cardsInCategory = cards.filter((card) => card.category === key);
+
         if (key === "free") {
           return (
             <div key={key} className="card-category">
@@ -67,7 +82,7 @@ export default function CardLibrary({ cards, onFreeSpaceClick, userCards }) {
               <div className="card-list">
                 <div
                   className="library-card free-space"
-                  onClick={onFreeSpaceClick}
+                  onClick={handleFreeSpaceClick}
                 >
                   <FreeHexCard
                     card={{ title: "À vous de jouer !", category: "free" }}
@@ -77,7 +92,9 @@ export default function CardLibrary({ cards, onFreeSpaceClick, userCards }) {
             </div>
           );
         }
+
         if (!cardsInCategory.length) return null;
+
         return (
           <div key={key} className="card-category">
             <h3>{label}</h3>
@@ -89,6 +106,14 @@ export default function CardLibrary({ cards, onFreeSpaceClick, userCards }) {
           </div>
         );
       })}
+
+      {/* Popup warning */}
+      {showPopup && (
+        <div className="popup-warning">
+          <FontAwesomeIcon icon={faExclamationTriangle} /> Vous avez déjà
+          atteint le maximum de 10 cartes libres !
+        </div>
+      )}
     </aside>
   );
 }
