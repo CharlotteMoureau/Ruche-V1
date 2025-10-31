@@ -43,7 +43,8 @@
         font-size: 0.45rem;
       }
 
-      .free-img, .icon {
+      .free-img,
+      .icon {
         height: 25px;
       }
     }
@@ -51,7 +52,7 @@
 }
 
 .library-card.free-space {
-    &:hover {
+  &:hover {
     cursor: pointer;
 
     .free-space-card {
@@ -64,5 +65,36 @@
         transition-duration: 0.4s;
       }
     }
+  }
+}
+
+/* ----------------------- */
+/* Firefox spécifique       */
+/* ----------------------- */
+@-moz-document url-prefix() {
+  .free-space-card {
+    perspective: none !important;
+  }
+
+  .free-hex-inner {
+    transform: none !important;
+  }
+
+  .free-hex-front {
+    transform: none !important;
+    backface-visibility: visible !important;
+    opacity: 1;
+    z-index: 2;
+  }
+
+  /* Hover / flip simulé */
+  .free-space-card:hover .free-hex-front {
+    opacity: 0;
+    z-index: 1;
+    transform: rotateY(-15deg);
+  }
+
+  .free-hex-front img {
+    image-rendering: auto;
   }
 }
