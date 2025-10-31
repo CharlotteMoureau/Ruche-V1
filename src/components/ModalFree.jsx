@@ -11,7 +11,6 @@ export default function AddCardModal({
 }) {
   const inputRef = useRef(null);
 
-  // Focus auto quand le modal s'ouvre
   useEffect(() => {
     if (show && inputRef.current) {
       inputRef.current.focus();
@@ -26,14 +25,14 @@ export default function AddCardModal({
     }
   };
 
-  // Gestion du clavier (fermeture avec Échap)
   const handleKeyDown = (e) => {
     if (e.key === "Escape") {
       onClose();
+    } else if (e.key === "Enter") {
+      onValidate();
     }
   };
 
-  // Empêche de dépasser 50 caractères
   const handleChange = (e) => {
     const value = e.target.value;
     if (value.length <= 50) {
