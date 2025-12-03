@@ -15,6 +15,7 @@ export default function DraggableFreeCard({
 
   const offsetRef = useRef({ x: 0, y: 0 });
 
+  /** Gestion souris **/
   const handleMouseDown = (e) => {
     e.preventDefault();
     setIsDragging(true);
@@ -36,7 +37,37 @@ export default function DraggableFreeCard({
   const handleMouseUp = () => {
     if (!isDragging) return;
     setIsDragging(false);
+    finalizePosition();
+  };
 
+  /** Gestion tactile **/
+  const handleTouchStart = (e) => {
+    const touch = e.touches[0];
+    setIsDragging(true);
+    offsetRef.current = {
+      x: touch.clientX - posRef.current.x,
+      y: touch.clientY - posRef.current.y,
+    };
+  };
+
+  const handleTouchMove = (e) => {
+    if (!isDragging || !cardRef.current) return;
+    const touch = e.touches[0];
+    const newX = touch.clientX - offsetRef.current.x;
+    const newY = touch.clientY - offsetRef.current.y;
+    posRef.current = { x: newX, y: newY };
+    cardRef.current.style.left = `${newX}px`;
+    cardRef.current.style.top = `${newY}px`;
+  };
+
+  const handleTouchEnd = () => {
+    if (!isDragging) return;
+    setIsDragging(false);
+    finalizePosition();
+  };
+
+  /** Fonction commune pour valider la position **/
+  const finalizePosition = () => {
     const boardRect = boardRef.current.getBoundingClientRect();
     const finalPos = posRef.current;
 
@@ -53,15 +84,22 @@ export default function DraggableFreeCard({
     }
   };
 
+  /** Ajout des listeners globaux **/
   useEffect(() => {
     document.addEventListener("mousemove", handleMouseMove);
     document.addEventListener("mouseup", handleMouseUp);
+    document.addEventListener("touchmove", handleTouchMove);
+    document.addEventListener("touchend", handleTouchEnd);
+
     return () => {
       document.removeEventListener("mousemove", handleMouseMove);
       document.removeEventListener("mouseup", handleMouseUp);
+      document.removeEventListener("touchmove", handleTouchMove);
+      document.removeEventListener("touchend", handleTouchEnd);
     };
   });
 
+  /** Mise à jour si la position change via props **/
   useEffect(() => {
     setPosition(card.position);
   }, [card.position]);
@@ -75,9 +113,12 @@ export default function DraggableFreeCard({
         left: position.x,
         top: position.y,
         zIndex: 1000,
+        width: "100px",
+        height: "100px",
         cursor: isDragging ? "grabbing" : "grab",
       }}
       onMouseDown={handleMouseDown}
+      onTouchStart={handleTouchStart}
     >
       <FreeHexCard card={card} />
     </div>
