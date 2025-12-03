@@ -53,15 +53,31 @@
       }
 
       .hex-front {
-        span { font-weight: bold; padding-bottom: 5px; }
-        h4 { padding-bottom: 5px; font-size: 0.67rem; }
-        img { height: 30px; }
+        span {
+          font-weight: bold;
+          padding-bottom: 5px;
+        }
+
+        h4 {
+          padding-bottom: 5px;
+          font-size: 0.67rem;
+        }
+
+        img {
+          height: 30px;
+        }
       }
 
       .hex-back {
         transform: rotateY(180deg);
         overflow: hidden;
-        p { font-size: 0.45rem; line-height: 0.9; text-align: center; padding: 15px 0; }
+
+        p {
+          font-size: 0.45rem;
+          line-height: 0.9;
+          text-align: center;
+          padding: 15px 0;
+        }
       }
     }
 
@@ -70,31 +86,76 @@
     }
   }
 
-  &.visees { fill: $turquoise; }
-  &.conditions-enseignant { fill: $orange; }
-  &.recommandations-enseignant { fill: white; color: $orange; }
-  &.conditions-equipe { fill: $mauve; }
-  &.recommandations-equipe { fill: white; color: $mauve; }
-  &.domaine { fill: $rose; }
+  &.visees {
+    fill: $turquoise;
+  }
+
+  &.conditions-enseignant {
+    fill: $orange;
+  }
+
+  &.recommandations-enseignant {
+    fill: white;
+    color: $orange;
+  }
+
+  &.conditions-equipe {
+    fill: $mauve;
+  }
+
+  &.recommandations-equipe {
+    fill: white;
+    color: $mauve;
+  }
+
+  &.domaine {
+    fill: $rose;
+  }
 }
 
-.capture-mode .hex-inner { transform: none !important; }
-.capture-mode .hex-back { display: none !important; }
+.capture-mode .hex-inner {
+  transform: none !important;
+}
+
+.capture-mode .hex-back {
+  display: none !important;
+}
 
 .long-def {
   overflow-y: scroll;
   scrollbar-width: thin !important;
   scrollbar-color: rgba(0, 0, 0, 0.1) transparent;
 
-  &::-webkit-scrollbar { width: 4px; cursor: pointer; }
-  &::-webkit-scrollbar-track { background: transparent; }
-  &::-webkit-scrollbar-thumb { background-color: rgba(0,0,0,0.1); border-radius: 10px; }
+  &::-webkit-scrollbar {
+    width: 4px;
+    cursor: pointer;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background-color: rgba(0, 0, 0, 0.1);
+    border-radius: 10px;
+  }
 }
 
-.draggable-card { cursor: grab; }
-.draggable-card.dragging { cursor: grabbing; }
-.card-list > div { cursor: grab; }
-.card-list > div:active { cursor: grabbing; }
+.draggable-card {
+  cursor: grab;
+}
+
+.draggable-card.dragging {
+  cursor: grabbing;
+}
+
+.card-list>div {
+  cursor: grab;
+}
+
+.card-list>div:active {
+  cursor: grabbing;
+}
 
 /* ----------------------- */
 /* Firefox spécifique       */
@@ -157,3 +218,40 @@
   }
 }
 
+/* ------------------------- */
+/* Hotfix bug affichage ios  */
+/* ------------------------- */
+
+body.ios {
+  .hex {
+    width: 180px;
+    height: 180px;
+    -webkit-perspective: 800px;
+  }
+
+  .hex-inner {
+    min-width: 180px;
+    min-height: 180px;
+    -webkit-transform-style: preserve-3d;
+  }
+
+  .hex-front,
+  .hex-back {
+    -webkit-backface-visibility: hidden;
+
+    img {
+      height: 50px !important;
+    }
+  }
+
+  .hex-front h4 {
+    font-size: 1.2rem !important;
+  }
+
+  .hex-back p {
+    font-size: 1rem !important;
+    margin: 15px;
+    line-height: 1;
+    overflow-y: scroll;
+  }
+}

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
 import CardLibrary from "./components/CardLibrary";
@@ -16,6 +16,20 @@ export default function App() {
   const [userCards, setUserCards] = useState([]);
   const [showModal, setShowModal] = useState(false);
   const [inputText, setInputText] = useState("");
+
+  // ✅ Détection iOS et ajout de la classe
+  useEffect(() => {
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+    const isSafari =
+      navigator.vendor &&
+      navigator.vendor.indexOf("Apple") > -1 &&
+      navigator.userAgent &&
+      navigator.userAgent.indexOf("CriOS") == -1 &&
+      navigator.userAgent.indexOf("FxiOS") == -1;
+    if (isIOS || isSafari) {
+      document.body.classList.add("ios");
+    }
+  }, []);
 
   const orderMap = {};
   cardsData.forEach((c, i) => {
@@ -62,9 +76,7 @@ export default function App() {
       position: defaultPosition,
     };
     setBoardCards((prev) => [...prev, newCard]);
-
     setUserCards((prev) => [...prev, newCard]);
-
     setShowModal(false);
     setInputText("");
   };
