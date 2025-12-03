@@ -109,3 +109,33 @@
     transform: rotateY(0deg);
   }
 }
+
+/* ----------------------- */
+/* IOS spécifique          */
+/* ----------------------- */
+
+body.ios {
+  .free-space-card {
+    width: 180px;
+    height: 180px;
+    -webkit-perspective: 800px;
+  }
+
+  .free-hex-inner {
+    min-width: 180px;
+    min-height: 180px;
+    -webkit-transform-style: preserve-3d;
+  }
+
+  .free-hex-front {
+    -webkit-backface-visibility: hidden;
+
+    .free-img, .icon  {
+      height: 50px !important;
+    }
+  }
+
+  .free-hex-front h4 {
+    font-size: 1.2rem !important;
+  }
+}
