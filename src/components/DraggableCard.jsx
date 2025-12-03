@@ -15,8 +15,17 @@ export default function DraggableCard({
   posRef.current = position;
 
   const offsetRef = useRef({ x: 0, y: 0 });
+  const longPressTimer = useRef(null);
+  const hasMovedBeforeDrag = useRef(false);
 
-  /** Gestion souris **/
+  /** Détection iOS + Safari **/
+  const ua = navigator.userAgent;
+  const isIOS =
+    /iPad|iPhone|iPod/.test(ua) ||
+    (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1); // iPadOS en mode desktop
+  const isSafari = /^((?!chrome|android).)*safari/i.test(ua);
+
+  /** Gestion souris (PC) → drag immédiat **/
   const handleMouseDown = (e) => {
     e.preventDefault();
     setIsDragging(true);
@@ -44,16 +53,41 @@ export default function DraggableCard({
   /** Gestion tactile **/
   const handleTouchStart = (e) => {
     const touch = e.touches[0];
-    setIsDragging(true);
-    offsetRef.current = {
-      x: touch.clientX - posRef.current.x,
-      y: touch.clientY - posRef.current.y,
-    };
+    hasMovedBeforeDrag.current = false;
+
+    if (isIOS && isSafari) {
+      // Sur iOS Safari → long press avant drag
+      longPressTimer.current = setTimeout(() => {
+        if (!hasMovedBeforeDrag.current) {
+          setIsDragging(true);
+          offsetRef.current = {
+            x: touch.clientX - posRef.current.x,
+            y: touch.clientY - posRef.current.y,
+          };
+        }
+      }, 400); // 400ms pour long press
+    } else {
+      // Autres mobiles → drag immédiat
+      setIsDragging(true);
+      offsetRef.current = {
+        x: touch.clientX - posRef.current.x,
+        y: touch.clientY - posRef.current.y,
+      };
+    }
   };
 
   const handleTouchMove = (e) => {
-    if (!isDragging || !cardRef.current) return;
     const touch = e.touches[0];
+
+    // Si on bouge avant la fin du long press → annuler
+    if (!isDragging && longPressTimer.current) {
+      hasMovedBeforeDrag.current = true;
+      clearTimeout(longPressTimer.current);
+      return; // Laisse le scroll se faire
+    }
+
+    if (!isDragging || !cardRef.current) return;
+
     const newX = touch.clientX - offsetRef.current.x;
     const newY = touch.clientY - offsetRef.current.y;
     posRef.current = { x: newX, y: newY };
@@ -62,6 +96,7 @@ export default function DraggableCard({
   };
 
   const handleTouchEnd = () => {
+    clearTimeout(longPressTimer.current);
     if (!isDragging) return;
     setIsDragging(false);
     finalizePosition();
@@ -85,11 +120,11 @@ export default function DraggableCard({
     }
   };
 
-  /** Ajout des listeners souris **/
+  /** Listeners globaux **/
   useEffect(() => {
     document.addEventListener("mousemove", handleMouseMove);
     document.addEventListener("mouseup", handleMouseUp);
-    document.addEventListener("touchmove", handleTouchMove);
+    document.addEventListener("touchmove", handleTouchMove, { passive: false });
     document.addEventListener("touchend", handleTouchEnd);
 
     return () => {
@@ -100,7 +135,6 @@ export default function DraggableCard({
     };
   });
 
-  /** Mise à jour si la position change via props **/
   useEffect(() => {
     setPosition(card.position);
   }, [card.position]);
@@ -116,6 +150,10 @@ export default function DraggableCard({
         zIndex: 1000,
         width: "140px",
         height: "140px",
+        userSelect: "none",
+        WebkitUserSelect: "none",
+        WebkitTouchCallout: "none",
+        // IMPORTANT : ne pas mettre touchAction: none pour garder le scroll
       }}
       onMouseDown={handleMouseDown}
       onTouchStart={handleTouchStart}

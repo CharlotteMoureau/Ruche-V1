@@ -8,6 +8,14 @@
     aspect-ratio: 1;
     perspective: 800px;
 
+    user-select: none;
+    /* Empêche la sélection du texte */
+    -webkit-user-select: none;
+    /* Pour Safari iOS */
+    -ms-user-select: none;
+    /* Pour IE (au cas où) */
+
+
     .hex-shape {
       stroke: none;
       transition: all 0.3s ease;

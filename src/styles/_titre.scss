@@ -1,17 +1,31 @@
-    .titre {
-        display: flex;
-        justify-content: center;
-        height: 80px;
+.titre {
+    display: flex;
+    justify-content: center;
+    height: 80px;
 
-        h1 {
-            font-family:'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
-            font-weight: bold;
-            font-size: 3rem;
-            padding: 20px;
-        }
-
-        img {
-            height: 50px;
-            padding: 20px 0 0 0;
-        }
+    h1 {
+        font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
+        font-weight: bold;
+        font-size: 3rem;
+        padding: 20px;
     }
+
+    img {
+        height: 50px;
+        padding: 20px 0 0 0;
+    }
+}
+
+.ios .titre {
+    height: 60px;
+
+    h1 {
+        font-size: 2.25rem;
+        padding: 15px;
+    }
+
+    img {
+        height: 37.5px;
+        padding: 15px 0 0 0;
+    }
+}
