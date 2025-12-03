@@ -32,9 +32,11 @@ export default function HiveBoard({ cards, onDropCard, onReturnToLibrary }) {
       )
         return;
 
+      const isIOS = document.body.classList.contains("ios");
+
       const position = {
-        x: offset.x - boardRect.left - 102,
-        y: offset.y - boardRect.top - 103,
+        x: offset.x - boardRect.left - (isIOS ? 92 : 102),
+        y: offset.y - boardRect.top - (isIOS ? 93 : 103),
       };
 
       onDropCard(item.card, position, true);
