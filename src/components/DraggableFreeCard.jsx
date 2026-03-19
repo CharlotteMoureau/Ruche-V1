@@ -4,23 +4,40 @@ import { useDraggableCard } from "../hooks/useDraggableCard";
 export default function DraggableFreeCard({
   card,
   boardRef,
+  isSelected,
+  selectedCards,
   onMoveCard,
+  onMoveCards,
   onReturnToLibrary,
+  onReturnCardsToLibrary,
+  onToggleSelection,
+  onClearSelection,
 }) {
-  const { cardRef, position, isDragging, handleMouseDown, handleTouchStart } =
-    useDraggableCard(card, boardRef, 100, 100, onMoveCard, onReturnToLibrary);
+  const { isDragging, handleMouseDown, handleTouchStart } = useDraggableCard({
+    card,
+    boardRef,
+    cardWidth: 200,
+    cardHeight: 200,
+    isSelected,
+    selectedCards,
+    onMoveCard,
+    onMoveCards,
+    onReturnToLibrary,
+    onReturnCardsToLibrary,
+    onToggleSelection,
+    onClearSelection,
+  });
 
   return (
     <div
-      ref={cardRef}
-      className={`draggable-card free-space ${isDragging ? "dragging" : ""}`}
+      className={`draggable-card free-space ${isSelected ? "selected" : ""} ${isDragging ? "dragging" : ""}`}
       style={{
         position: "absolute",
-        left: position.x,
-        top: position.y,
-        zIndex: 1000,
-        width: "100px",
-        height: "100px",
+        left: card.position.x,
+        top: card.position.y,
+        zIndex: isDragging || isSelected ? 1100 : 1000,
+        width: "200px",
+        height: "200px",
         cursor: isDragging ? "grabbing" : "grab",
       }}
       onMouseDown={handleMouseDown}

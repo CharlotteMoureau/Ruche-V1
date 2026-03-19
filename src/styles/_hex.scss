@@ -150,7 +150,28 @@
 }
 
 .draggable-card {
+  position: absolute;
   cursor: grab;
+  overflow: visible;
+  isolation: isolate;
+
+  &::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    pointer-events: none;
+    z-index: -1;
+    clip-path: polygon(50% 0%, 93% 25%, 93% 75%, 50% 100%, 7% 75%, 7% 25%);
+    background: $bleu-fonce;
+    transform: scale(1.08);
+    filter: drop-shadow(0 0 0.45rem rgba($bleu-fonce, 0.28));
+    transition: opacity 0.2s ease;
+  }
+}
+
+.draggable-card.selected::before {
+  opacity: 0.9;
 }
 
 .draggable-card.dragging {

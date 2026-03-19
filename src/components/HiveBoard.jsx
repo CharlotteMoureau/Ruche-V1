@@ -3,16 +3,19 @@ import { useDrop } from "react-dnd";
 import DraggableCard from "./DraggableCard";
 import DraggableFreeCard from "./DraggableFreeCard";
 
-export default function HiveBoard({ cards, onDropCard, onReturnToLibrary }) {
+export default function HiveBoard({
+  cards,
+  onDropCard,
+  onMoveCard,
+  onMoveCards,
+  onReturnToLibrary,
+  onReturnCardsToLibrary,
+  selectedCardIds,
+  onToggleCardSelection,
+  onClearSelection,
+}) {
   const boardRef = useRef(null);
-
-  const handleMoveCard = (id, position) => {
-    onDropCard(
-      cards.find((c) => c.id === id),
-      position,
-      false
-    );
-  };
+  const selectedCards = cards.filter((card) => selectedCardIds.has(card.id));
 
   const [, drop] = useDrop(() => ({
     accept: "CARD",
@@ -43,6 +46,12 @@ export default function HiveBoard({ cards, onDropCard, onReturnToLibrary }) {
     },
   }));
 
+  const handleBoardMouseDown = (event) => {
+    if (event.target === event.currentTarget) {
+      onClearSelection();
+    }
+  };
+
   return (
     <main
       ref={(node) => {
@@ -51,6 +60,8 @@ export default function HiveBoard({ cards, onDropCard, onReturnToLibrary }) {
       }}
       className="hive-board"
       style={{ position: "relative", width: "100%", height: "100%" }}
+      onMouseDown={handleBoardMouseDown}
+      onTouchStart={handleBoardMouseDown}
     >
       {cards.map((card) => {
         if (card.category === "free") {
@@ -59,8 +70,14 @@ export default function HiveBoard({ cards, onDropCard, onReturnToLibrary }) {
               key={card.id}
               card={card}
               boardRef={boardRef}
-              onMoveCard={handleMoveCard}
+              isSelected={selectedCardIds.has(card.id)}
+              selectedCards={selectedCards}
+              onMoveCard={onMoveCard}
+              onMoveCards={onMoveCards}
               onReturnToLibrary={onReturnToLibrary}
+              onReturnCardsToLibrary={onReturnCardsToLibrary}
+              onToggleSelection={onToggleCardSelection}
+              onClearSelection={onClearSelection}
             />
           );
         }
@@ -69,8 +86,14 @@ export default function HiveBoard({ cards, onDropCard, onReturnToLibrary }) {
             key={card.id}
             card={card}
             boardRef={boardRef}
-            onMoveCard={handleMoveCard}
+            isSelected={selectedCardIds.has(card.id)}
+            selectedCards={selectedCards}
+            onMoveCard={onMoveCard}
+            onMoveCards={onMoveCards}
             onReturnToLibrary={onReturnToLibrary}
+            onReturnCardsToLibrary={onReturnCardsToLibrary}
+            onToggleSelection={onToggleCardSelection}
+            onClearSelection={onClearSelection}
           />
         );
       })}

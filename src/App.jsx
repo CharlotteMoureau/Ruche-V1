@@ -17,6 +17,7 @@ export default function App() {
   const [userCards, setUserCards] = useState([]);
   const [showModal, setShowModal] = useState(false);
   const [inputText, setInputText] = useState("");
+  const [selectedCardIds, setSelectedCardIds] = useState(() => new Set());
 
   // Detect iOS/Safari and add class to document
   useDeviceDetection();
@@ -42,17 +43,73 @@ export default function App() {
     });
   };
 
-  const handleReturnToLibrary = (card) => {
-    if (card.category !== "free") {
+  const handleMoveCard = (cardId, position) => {
+    setBoardCards((prev) =>
+      prev.map((card) => (card.id === cardId ? { ...card, position } : card)),
+    );
+  };
+
+  const handleMoveCards = (cardUpdates) => {
+    const positionsById = new Map(
+      cardUpdates.map(({ id, position }) => [id, position]),
+    );
+
+    setBoardCards((prev) =>
+      prev.map((card) => {
+        const nextPosition = positionsById.get(card.id);
+
+        return nextPosition ? { ...card, position: nextPosition } : card;
+      }),
+    );
+  };
+
+  const handleToggleCardSelection = (cardId) => {
+    setSelectedCardIds((prev) => {
+      const newSet = new Set(prev);
+
+      if (newSet.has(cardId)) {
+        newSet.delete(cardId);
+      } else {
+        newSet.add(cardId);
+      }
+      return newSet;
+    });
+  };
+
+  const handleClearSelection = () => {
+    setSelectedCardIds((prev) => (prev.size ? new Set() : prev));
+  };
+
+  const handleReturnCardsToLibrary = (cards) => {
+    if (!cards.length) return;
+
+    const cardIds = new Set(cards.map((card) => card.id));
+    const regularCards = cards.filter((card) => card.category !== "free");
+    const freeCards = cards.filter((card) => card.category === "free");
+
+    if (regularCards.length) {
       setAvailableCards((prev) =>
-        [...prev.filter((c) => c.id !== card.id), card].sort(
-          (a, b) => (orderMap[a.id] || 0) - (orderMap[b.id] || 0)
-        )
+        [...prev.filter((c) => !cardIds.has(c.id)), ...regularCards].sort(
+          (a, b) => (orderMap[a.id] || 0) - (orderMap[b.id] || 0),
+        ),
       );
-    } else {
-      setUserCards((prev) => prev.filter((c) => c.id !== card.id));
     }
-    setBoardCards((prev) => prev.filter((c) => c.id !== card.id));
+
+    if (freeCards.length) {
+      setUserCards((prev) => prev.filter((card) => !cardIds.has(card.id)));
+    }
+
+    setBoardCards((prev) => prev.filter((card) => !cardIds.has(card.id)));
+    setSelectedCardIds((prev) => {
+      const nextSet = new Set(prev);
+
+      cards.forEach((card) => nextSet.delete(card.id));
+      return nextSet;
+    });
+  };
+
+  const handleReturnToLibrary = (card) => {
+    handleReturnCardsToLibrary([card]);
   };
 
   const handleAddUserCard = () => {
@@ -79,6 +136,7 @@ export default function App() {
     setBoardCards([]);
     setAvailableCards(cardsData);
     setUserCards([]);
+    setSelectedCardIds(new Set());
   };
 
   return (
@@ -98,7 +156,13 @@ export default function App() {
         <HiveBoard
           cards={boardCards}
           onDropCard={handleDropCard}
+          onMoveCard={handleMoveCard}
+          onMoveCards={handleMoveCards}
           onReturnToLibrary={handleReturnToLibrary}
+          onReturnCardsToLibrary={handleReturnCardsToLibrary}
+          selectedCardIds={selectedCardIds}
+          onToggleCardSelection={handleToggleCardSelection}
+          onClearSelection={handleClearSelection}
         />
         <CustomDragPreview />
       </div>
