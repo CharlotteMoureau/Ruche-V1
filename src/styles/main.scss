@@ -15,6 +15,70 @@ body {
   color: #333;
 }
 
+#root {
+  min-height: 100vh;
+}
+
+.site-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 12px 20px;
+  border-bottom: 1px solid #ddd;
+  background: #fff;
+  position: sticky;
+  top: 0;
+  z-index: 1500;
+}
+
+.brand-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  text-decoration: none;
+  color: inherit;
+
+  img {
+    width: 30px;
+    height: 30px;
+  }
+
+  h1 {
+    margin: 0;
+    font-size: 1.4rem;
+  }
+}
+
+.site-nav {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+
+  a {
+    text-decoration: none;
+    color: #333;
+    font-weight: 600;
+  }
+
+  button {
+    border: 0;
+    padding: 8px 12px;
+    border-radius: 8px;
+    background: #222;
+    color: #fff;
+    cursor: pointer;
+  }
+}
+
+.user-pill {
+  display: inline-flex;
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: #f2ece0;
+  font-size: 0.9rem;
+}
+
 .app {
   display: flex;
   flex-direction: row;
@@ -27,70 +91,146 @@ body {
   }
 }
 
-/* ----------------------- */
-/* Bloquer smartphone      */
-/* ----------------------- */
-@media (max-width: 767px) {
-  body>* {
-    display: none !important;
-    /* masque tout le contenu */
+.page-shell {
+  max-width: 980px;
+  margin: 24px auto;
+  padding: 20px;
+  background: #fff;
+  border-radius: 14px;
+  border: 1px solid #e2ded8;
+}
+
+.form-grid {
+  display: grid;
+  gap: 14px;
+
+  input,
+  select,
+  button {
+    margin-top: 6px;
   }
 
-  body::before {
-    content: "⚠️ Ce site n'est pas accessible sur smartphone. Veuillez utiliser une tablette en mode paysage ou un écran plus grand.";
-    display: flex;
-    justify-content: center;
-    align-items: center;
+  input,
+  select {
     width: 100%;
-    height: 100vh;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
     box-sizing: border-box;
-    background-color: #fff;
-    color: #333;
-    font-size: 1rem;
-    font-family: sans-serif;
-    text-align: center;
-    padding: 20px;
+  }
+
+  button {
+    width: fit-content;
+    border: 0;
+    background: #222;
+    color: #fff;
+    border-radius: 8px;
+    padding: 10px 14px;
+    cursor: pointer;
   }
 }
 
-/* ----------------------- */
-/* Tablette portrait       */
-/* ----------------------- */
-@media (min-width: 768px) and (max-width: 1024px) and (orientation: portrait) {
-  body>* {
-    display: none !important;
-    /* masque tout le contenu en portrait */
-  }
+.cta-grid,
+.meta-grid {
+  display: grid;
+  gap: 16px;
+}
 
-  body::before {
-    content: "⚠️ Veuillez utiliser la tablette en mode paysage pour accéder au site.";
+.cta-card {
+  display: block;
+  padding: 20px;
+  border: 1px solid #ddd;
+  border-radius: 12px;
+  text-decoration: none;
+  font-weight: 700;
+  color: #111;
+  background: #fffaf2;
+}
+
+.list-grid {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 8px;
+
+  li {
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
     display: flex;
-    justify-content: center;
     align-items: center;
-    width: 100%;
-    height: 100vh;
-    box-sizing: border-box;
-    background-color: #fff;
-    color: #333;
-    font-size: 1rem;
-    font-family: sans-serif;
-    text-align: center;
-    padding: 20px;
+    justify-content: space-between;
+    gap: 12px;
   }
 }
 
-/* ----------------------- */
-/* Tablette paysage / PC   */
-/* ----------------------- */
-@media (min-width: 768px) and (orientation: landscape),
-(min-width: 1025px) {
-  body>* {
-    display: block !important;
-    /* contenu visible */
+.inline-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.button-link {
+  display: inline-flex;
+  text-decoration: none;
+  color: #fff;
+  background: #222;
+  border-radius: 8px;
+  padding: 8px 12px;
+}
+
+.danger-btn,
+.inline-actions button,
+.list-grid button,
+.editor-topbar button {
+  border: 0;
+  border-radius: 8px;
+  padding: 8px 12px;
+  cursor: pointer;
+  background: #9f2d20;
+  color: #fff;
+}
+
+.editor-page {
+  padding: 12px;
+}
+
+.editor-topbar {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 12px;
+  flex-wrap: wrap;
+
+  input {
+    margin-left: 8px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    padding: 8px;
+  }
+}
+
+.form-error {
+  color: #9f2d20;
+  font-weight: 600;
+}
+
+.form-info,
+.page-status {
+  color: #2f6140;
+  font-weight: 600;
+}
+
+@media (max-width: 900px) {
+  .site-header {
+    flex-direction: column;
+    align-items: flex-start;
   }
 
-  body::before {
-    display: none;
+  .app {
+    height: auto;
+    min-height: 70vh;
   }
 }
 
