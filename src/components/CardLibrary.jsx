@@ -1,38 +1,8 @@
-import { useEffect, useState } from "react";
-import { useDrag } from "react-dnd";
-import { getEmptyImage } from "react-dnd-html5-backend";
-import HexCard from "./HexCard";
+import { useState, useCallback } from "react";
+import LibraryCard from "./LibraryCard";
 import FreeHexCard from "./FreeSpaceCard";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faExclamationTriangle } from "@fortawesome/free-solid-svg-icons";
-
-function DraggableCard({ card }) {
-  const [{ isDragging }, drag, preview] = useDrag(() => ({
-    type: "CARD",
-    item: { card, fromLibrary: true },
-    collect: (monitor) => ({
-      isDragging: !!monitor.isDragging(),
-    }),
-  }));
-
-  useEffect(() => {
-    preview(getEmptyImage(), { captureDraggingState: true });
-  }, [preview]);
-
-  return (
-    <div
-      ref={drag}
-      className={`library-card ${isDragging ? "dragging" : ""}`}
-      style={{
-        opacity: isDragging ? 0.4 : 1,
-        margin: "4px",
-        cursor: isDragging ? "grabbing" : "grab",
-      }}
-    >
-      <HexCard card={card} />
-    </div>
-  );
-}
 
 export default function CardLibrary({ cards, onFreeSpaceClick, userCards }) {
   const categories = [
@@ -56,14 +26,14 @@ export default function CardLibrary({ cards, onFreeSpaceClick, userCards }) {
 
   const [showPopup, setShowPopup] = useState(false);
 
-  const handleFreeSpaceClick = () => {
+  const handleFreeSpaceClick = useCallback(() => {
     if (userCards >= 10) {
       setShowPopup(true);
       setTimeout(() => setShowPopup(false), 5000);
       return;
     }
     onFreeSpaceClick();
-  };
+  }, [userCards, onFreeSpaceClick]);
 
   return (
     <aside className="card-library">
@@ -100,7 +70,7 @@ export default function CardLibrary({ cards, onFreeSpaceClick, userCards }) {
             <h3>{label}</h3>
             <div className="card-list">
               {cardsInCategory.map((card) => (
-                <DraggableCard key={card.id} card={card} />
+                <LibraryCard key={card.id} card={card} />
               ))}
             </div>
           </div>

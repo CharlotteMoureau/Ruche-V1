@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useMemo } from "react";
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
 import CardLibrary from "./components/CardLibrary";
@@ -9,6 +9,7 @@ import Footer from "./components/Footer";
 import CustomDragPreview from "./components/CustomDragPreview";
 import "./styles/main.scss";
 import AddCardModal from "./components/ModalFree";
+import { useDeviceDetection } from "./hooks/useDeviceDetection";
 
 export default function App() {
   const [availableCards, setAvailableCards] = useState(cardsData);
@@ -17,24 +18,17 @@ export default function App() {
   const [showModal, setShowModal] = useState(false);
   const [inputText, setInputText] = useState("");
 
-  // ✅ Détection iOS et ajout de la classe
-  useEffect(() => {
-    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
-    const isSafari =
-      navigator.vendor &&
-      navigator.vendor.indexOf("Apple") > -1 &&
-      navigator.userAgent &&
-      navigator.userAgent.indexOf("CriOS") == -1 &&
-      navigator.userAgent.indexOf("FxiOS") == -1;
-    if (isIOS || isSafari) {
-      document.body.classList.add("ios");
-    }
-  }, []);
+  // Detect iOS/Safari and add class to document
+  useDeviceDetection();
 
-  const orderMap = {};
-  cardsData.forEach((c, i) => {
-    orderMap[c.id] = i;
-  });
+  // Memoize orderMap to avoid recalculating on every render
+  const orderMap = useMemo(() => {
+    const map = {};
+    cardsData.forEach((c, i) => {
+      map[c.id] = i;
+    });
+    return map;
+  }, []);
 
   const handleDropCard = (card, position, fromLibrary = false) => {
     if (fromLibrary && card.category !== "free") {
