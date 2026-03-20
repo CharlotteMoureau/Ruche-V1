@@ -80,7 +80,18 @@ export function useDraggableCard({
       );
 
       if (shouldReturnAll) {
-        onReturnCardsToLibrary(finalCards.map((entry) => entry.card));
+        const didReturn = onReturnCardsToLibrary(
+          finalCards.map((entry) => entry.card),
+        );
+
+        if (!didReturn) {
+          onMoveCards(
+            finalCards.map((entry) => ({
+              id: entry.card.id,
+              position: entry.startPosition,
+            })),
+          );
+        }
       } else {
         onMoveCards(
           finalCards.map((entry) => ({
@@ -93,7 +104,10 @@ export function useDraggableCard({
       const [entry] = finalCards;
 
       if (isCardOutsideBoard(entry.position, cardWidth, cardHeight, boardRect)) {
-        onReturnToLibrary(card);
+        const didReturn = onReturnToLibrary(card);
+        if (!didReturn) {
+          onMoveCard(card.id, entry.startPosition);
+        }
       } else {
         onMoveCard(card.id, entry.position);
       }

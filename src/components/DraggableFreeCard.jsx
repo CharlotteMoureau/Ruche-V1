@@ -50,14 +50,29 @@ export default function DraggableFreeCard({
       }}
     >
       {hasComment ? (
-        <span className="card-comment-indicator" aria-label="Carte commentee">
+        <button
+          type="button"
+          className="card-comment-indicator"
+          aria-label="Ouvrir le commentaire de la carte"
+          onMouseDown={(event) => {
+            event.preventDefault();
+            event.stopPropagation();
+          }}
+          onTouchStart={(event) => {
+            event.stopPropagation();
+          }}
+          onClick={(event) => {
+            event.stopPropagation();
+            onOpenComment?.(card);
+          }}
+        >
           <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
             <path
               d="M4 4h16v11H8l-4 4V4zm2 2v8.17L7.17 13H18V6H6z"
               fill="currentColor"
             />
           </svg>
-        </span>
+        </button>
       ) : null}
       <FreeHexCard card={card} />
     </div>

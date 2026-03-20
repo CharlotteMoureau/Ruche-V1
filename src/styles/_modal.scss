@@ -357,12 +357,20 @@
 
   .card-comment-actions {
     display: flex;
-    gap: 0.5rem;
-    justify-content: flex-end;
+    align-items: center;
+    justify-content: space-between;
     margin-top: 0.75rem;
+
+    .card-comment-actions-right {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
 
     button {
       padding: 0.45rem 0.9rem;
+      width: 112px;
+      flex: 0 0 112px;
       border: none;
       border-radius: 6px;
       background: $jaune;

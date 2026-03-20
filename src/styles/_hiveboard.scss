@@ -40,6 +40,8 @@
   right: 14px;
   width: 24px;
   height: 24px;
+  border: none;
+  padding: 0;
   border-radius: 999px;
   background: #cc1f2f;
   color: #fff;
@@ -48,10 +50,16 @@
   justify-content: center;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
   z-index: 3;
-  pointer-events: none;
+  pointer-events: auto;
+  cursor: pointer;
 
   svg {
     width: 14px;
     height: 14px;
+  }
+
+  &:focus-visible {
+    outline: 2px solid #fff;
+    outline-offset: 2px;
   }
 }

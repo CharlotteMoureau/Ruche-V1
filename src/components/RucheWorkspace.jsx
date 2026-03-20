@@ -199,7 +199,7 @@ export default function RucheWorkspace({
   };
 
   const handleReturnCardsToLibrary = (cards) => {
-    if (!canEdit || !cards.length) return;
+    if (!canEdit || !cards.length) return false;
 
     const cardsWithComment = cards.filter((card) => {
       const comment = getCardComment(card);
@@ -214,7 +214,7 @@ export default function RucheWorkspace({
 
       const shouldDiscard = window.confirm(promptMessage);
       if (!shouldDiscard) {
-        return;
+        return false;
       }
     }
 
@@ -242,10 +242,12 @@ export default function RucheWorkspace({
       cards.forEach((card) => nextSet.delete(card.id));
       return nextSet;
     });
+
+    return true;
   };
 
   const handleReturnToLibrary = (card) => {
-    handleReturnCardsToLibrary([card]);
+    return handleReturnCardsToLibrary([card]);
   };
 
   const handleOpenCardComment = (card) => {
@@ -435,16 +437,6 @@ export default function RucheWorkspace({
                   />
                 </div>
                 <div className="card-comment-actions">
-                  <button type="button" onClick={handleSaveCardComment}>
-                    {activeComment?.message ? "Enregistrer" : "Ajouter"}
-                  </button>
-                  <button
-                    type="button"
-                    className="btn secondary"
-                    onClick={handleCloseCardCommentModal}
-                  >
-                    Annuler
-                  </button>
                   {activeComment?.message ? (
                     <button
                       type="button"
@@ -454,6 +446,18 @@ export default function RucheWorkspace({
                       Supprimer
                     </button>
                   ) : null}
+                  <div className="card-comment-actions-right">
+                    <button
+                      type="button"
+                      className="btn secondary"
+                      onClick={handleCloseCardCommentModal}
+                    >
+                      Annuler
+                    </button>
+                    <button type="button" onClick={handleSaveCardComment}>
+                      {activeComment?.message ? "Enregistrer" : "Ajouter"}
+                    </button>
+                  </div>
                 </div>
               </>
             ) : null}
