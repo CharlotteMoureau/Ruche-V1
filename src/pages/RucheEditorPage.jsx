@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { Link, useNavigate, useParams } from "react-router-dom";
+import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
 import { apiFetch } from "../lib/api";
 import { useAuth } from "../context/AuthContext";
 import RucheWorkspace from "../components/RucheWorkspace";
@@ -18,11 +18,16 @@ function formatDateTime(value) {
 
 export default function RucheEditorPage() {
   const { id } = useParams();
+  const location = useLocation();
   const navigate = useNavigate();
   const { token, user, isAdmin } = useAuth();
 
+  const isNew = !id;
+
   const [hive, setHive] = useState(null);
-  const [title, setTitle] = useState("Nouvelle Ruche");
+  const [title, setTitle] = useState(() =>
+    isNew && location.state?.title ? location.state.title : "Nouvelle Ruche",
+  );
   const [boardData, setBoardData] = useState(null);
   const [savedSnapshot, setSavedSnapshot] = useState("");
   const [error, setError] = useState("");
@@ -30,7 +35,6 @@ export default function RucheEditorPage() {
   const [inviteRole, setInviteRole] = useState("COMMENT");
   const [commentText, setCommentText] = useState("");
 
-  const isNew = !id;
   const isOwner = Boolean(
     hive?.owner?.id && user?.id && hive.owner.id === user.id,
   );
@@ -291,6 +295,7 @@ export default function RucheEditorPage() {
           <input
             value={title}
             onChange={(e) => setTitle(e.target.value)}
+            maxLength={100}
             disabled={!canEdit}
           />
         </label>

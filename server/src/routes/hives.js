@@ -9,7 +9,7 @@ export const hivesRouter = Router();
 hivesRouter.use(requireAuth);
 
 const hiveInputSchema = z.object({
-  title: z.string().trim().min(1).max(120),
+  title: z.string().trim().min(1).max(100),
   boardData: z.any(),
 });
 
