@@ -25,7 +25,7 @@ export default function App() {
         <Route
           path="/profile"
           element={
-            <ProtectedRoute>
+            <ProtectedRoute nonAdminOnly>
               <ProfilePage />
             </ProtectedRoute>
           }
@@ -33,7 +33,7 @@ export default function App() {
         <Route
           path="/hives/new"
           element={
-            <ProtectedRoute>
+            <ProtectedRoute nonAdminOnly>
               <RucheEditorPage />
             </ProtectedRoute>
           }
@@ -41,7 +41,7 @@ export default function App() {
         <Route
           path="/hives/:id"
           element={
-            <ProtectedRoute>
+            <ProtectedRoute nonAdminOnly>
               <RucheEditorPage />
             </ProtectedRoute>
           }

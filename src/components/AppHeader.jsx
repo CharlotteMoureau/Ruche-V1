@@ -17,7 +17,7 @@ export default function AppHeader() {
         {isAuthenticated ? (
           <>
             <span className="user-pill">{user?.username}</span>
-            <Link to="/profile">Profil</Link>
+            {!isAdmin ? <Link to="/profile">Profil</Link> : null}
             {isAdmin ? <Link to="/admin">Admin</Link> : null}
             <button
               type="button"
