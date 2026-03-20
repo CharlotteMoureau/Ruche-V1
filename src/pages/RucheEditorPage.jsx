@@ -3,6 +3,7 @@ import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
 import { apiFetch } from "../lib/api";
 import { useAuth } from "../context/AuthContext";
 import RucheWorkspace from "../components/RucheWorkspace";
+import UnifiedPromptModal from "../components/UnifiedPromptModal";
 
 function formatDateTime(value) {
   if (!value) return "-";
@@ -27,12 +28,19 @@ export default function RucheEditorPage() {
   const { token, user, isAdmin } = useAuth();
 
   const isNew = !id;
+  const duplicateSource = location.state?.duplicateSource || null;
+  const initialNewTitle =
+    isNew && location.state?.title
+      ? location.state.title
+      : isNew && duplicateSource?.title
+        ? duplicateSource.title
+        : "Nouvelle Ruche";
 
   const [hive, setHive] = useState(null);
-  const [title, setTitle] = useState(() =>
-    isNew && location.state?.title ? location.state.title : "Nouvelle Ruche",
+  const [title, setTitle] = useState(() => initialNewTitle);
+  const [boardData, setBoardData] = useState(() =>
+    isNew && duplicateSource?.boardData ? duplicateSource.boardData : null,
   );
-  const [boardData, setBoardData] = useState(null);
   const [savedSnapshot, setSavedSnapshot] = useState("");
   const [error, setError] = useState("");
 
@@ -42,6 +50,9 @@ export default function RucheEditorPage() {
   const [replyingTo, setReplyingTo] = useState(null);
   const [replyText, setReplyText] = useState("");
   const commentsEndRef = useRef(null);
+  const [showLeaveDirtyModal, setShowLeaveDirtyModal] = useState(false);
+  const [deleteTarget, setDeleteTarget] = useState(null);
+  const [editingTarget, setEditingTarget] = useState(null);
 
   const isOwner = Boolean(
     hive?.owner?.id && user?.id && hive.owner.id === user.id,
@@ -67,6 +78,9 @@ export default function RucheEditorPage() {
   const workspaceLoadKey = isNew
     ? "new-hive"
     : `${id}:${hive ? "loaded" : "init"}`;
+  const isDuplicateFlow = isNew && Boolean(duplicateSource?.title);
+  const hasRenamedDuplicate =
+    !isDuplicateFlow || title.trim() !== duplicateSource.title.trim();
 
   const currentSnapshot = useMemo(
     () => JSON.stringify({ title, boardData }),
@@ -76,8 +90,8 @@ export default function RucheEditorPage() {
 
   useEffect(() => {
     if (!isNew || savedSnapshot || boardData === null) return;
-    setSavedSnapshot(JSON.stringify({ title: "Nouvelle Ruche", boardData }));
-  }, [isNew, savedSnapshot, boardData]);
+    setSavedSnapshot(JSON.stringify({ title: initialNewTitle, boardData }));
+  }, [isNew, savedSnapshot, boardData, initialNewTitle]);
 
   useEffect(() => {
     if (isNew || canEdit) return;
@@ -150,12 +164,24 @@ export default function RucheEditorPage() {
 
   const saveHive = async () => {
     setError("");
+    const trimmedTitle = title.trim();
+
+    if (!trimmedTitle) {
+      setError("Veuillez renseigner un titre avant d'enregistrer.");
+      return;
+    }
+
+    if (isDuplicateFlow && !hasRenamedDuplicate) {
+      setError("Renommez la copie avant de l'enregistrer.");
+      return;
+    }
+
     try {
       if (isNew) {
         const created = await apiFetch("/hives", {
           method: "POST",
           token,
-          body: { title, boardData },
+          body: { title: trimmedTitle, boardData },
         });
         navigate(`/hives/${created.id}`, { replace: true });
         return;
@@ -164,16 +190,17 @@ export default function RucheEditorPage() {
       await apiFetch(`/hives/${id}`, {
         method: "PUT",
         token,
-        body: { title, boardData },
+        body: { title: trimmedTitle, boardData },
       });
-      const snapshot = JSON.stringify({ title, boardData });
+      const snapshot = JSON.stringify({ title: trimmedTitle, boardData });
       setSavedSnapshot(snapshot);
+      setTitle(trimmedTitle);
 
       setHive((prev) =>
         prev
           ? {
               ...prev,
-              title,
+              title: trimmedTitle,
               boardData,
             }
           : prev,
@@ -282,18 +309,20 @@ export default function RucheEditorPage() {
     }
   };
 
-  const editComment = async (comment, parentId = null) => {
-    const value = window.prompt("Modifier le commentaire", comment.message);
-    if (!value?.trim()) return;
+  const editComment = async () => {
+    if (!editingTarget?.comment) return;
 
-    const updated = await apiFetch(`/hives/${id}/comments/${comment.id}`, {
+    const value = editingTarget.value.trim();
+    if (!value) return;
+
+    const updated = await apiFetch(`/hives/${id}/comments/${editingTarget.comment.id}`, {
       method: "PATCH",
       token,
       body: { message: value },
     });
 
     setHive((prev) => {
-      if (!parentId) {
+      if (!editingTarget.parentId) {
         return {
           ...prev,
           comments: (prev?.comments || []).map((c) =>
@@ -304,7 +333,7 @@ export default function RucheEditorPage() {
       return {
         ...prev,
         comments: (prev?.comments || []).map((c) =>
-          c.id === parentId
+          c.id === editingTarget.parentId
             ? {
                 ...c,
                 replies: (c.replies || []).map((r) =>
@@ -315,36 +344,53 @@ export default function RucheEditorPage() {
         ),
       };
     });
+    setEditingTarget(null);
   };
 
-  const deleteComment = async (comment, parentId = null) => {
-    const confirmed = window.confirm("Supprimer ce commentaire ?");
-    if (!confirmed) return;
+  const deleteComment = async () => {
+    if (!deleteTarget?.comment) return;
 
-    await apiFetch(`/hives/${id}/comments/${comment.id}`, {
+    await apiFetch(`/hives/${id}/comments/${deleteTarget.comment.id}`, {
       method: "DELETE",
       token,
     });
 
     setHive((prev) => {
-      if (!parentId) {
+      if (!deleteTarget.parentId) {
         return {
           ...prev,
-          comments: (prev?.comments || []).filter((c) => c.id !== comment.id),
+          comments: (prev?.comments || []).filter(
+            (c) => c.id !== deleteTarget.comment.id,
+          ),
         };
       }
       return {
         ...prev,
         comments: (prev?.comments || []).map((c) =>
-          c.id === parentId
+          c.id === deleteTarget.parentId
             ? {
                 ...c,
-                replies: (c.replies || []).filter((r) => r.id !== comment.id),
+                replies: (c.replies || []).filter(
+                  (r) => r.id !== deleteTarget.comment.id,
+                ),
               }
             : c,
         ),
       };
     });
+    setDeleteTarget(null);
+  };
+
+  const openEditCommentModal = (comment, parentId = null) => {
+    setEditingTarget({
+      comment,
+      parentId,
+      value: comment.message || "",
+    });
+  };
+
+  const openDeleteCommentModal = (comment, parentId = null) => {
+    setDeleteTarget({ comment, parentId });
   };
 
   const startReply = (comment) => {
@@ -364,12 +410,8 @@ export default function RucheEditorPage() {
           className="button-link"
           onClick={(event) => {
             if (!isDirty) return;
-            const ok = window.confirm(
-              "Votre ruche contient des modifications non enregistrées. Quitter sans sauvegarder ?",
-            );
-            if (!ok) {
-              event.preventDefault();
-            }
+            event.preventDefault();
+            setShowLeaveDirtyModal(true);
           }}
         >
           Retour au profil
@@ -390,6 +432,12 @@ export default function RucheEditorPage() {
           </button>
         ) : null}
       </div>
+
+      {isDuplicateFlow ? (
+        <p className="form-info">
+          Cette ruche est une copie. Renommez-la avant de l&apos;enregistrer.
+        </p>
+      ) : null}
 
       {!isNew && hive ? (
         <p className="form-info">
@@ -476,14 +524,14 @@ export default function RucheEditorPage() {
                           <button
                             type="button"
                             className="comment-action-btn"
-                            onClick={() => editComment(comment)}
+                            onClick={() => openEditCommentModal(comment)}
                           >
                             Éditer
                           </button>
                           <button
                             type="button"
                             className="comment-action-btn comment-action-btn--danger"
-                            onClick={() => deleteComment(comment)}
+                            onClick={() => openDeleteCommentModal(comment)}
                           >
                             Supprimer
                           </button>
@@ -519,14 +567,18 @@ export default function RucheEditorPage() {
                             <button
                               type="button"
                               className="comment-action-btn"
-                              onClick={() => editComment(reply, comment.id)}
+                              onClick={() =>
+                                openEditCommentModal(reply, comment.id)
+                              }
                             >
                               Éditer
                             </button>
                             <button
                               type="button"
                               className="comment-action-btn comment-action-btn--danger"
-                              onClick={() => deleteComment(reply, comment.id)}
+                              onClick={() =>
+                                openDeleteCommentModal(reply, comment.id)
+                              }
                             >
                               Supprimer
                             </button>
@@ -586,6 +638,43 @@ export default function RucheEditorPage() {
           </div>
         </div>
       )}
+
+      <UnifiedPromptModal
+        isOpen={showLeaveDirtyModal}
+        title="Modifications non enregistrées"
+        message="Votre ruche contient des modifications non enregistrées. Quitter sans sauvegarder ?"
+        confirmLabel="Quitter"
+        onCancel={() => setShowLeaveDirtyModal(false)}
+        onConfirm={() => {
+          setShowLeaveDirtyModal(false);
+          navigate("/profile");
+        }}
+      />
+
+      <UnifiedPromptModal
+        isOpen={Boolean(editingTarget)}
+        mode="prompt"
+        title="Modifier le commentaire"
+        inputLabel="Nouveau message"
+        value={editingTarget?.value || ""}
+        onValueChange={(value) =>
+          setEditingTarget((prev) => (prev ? { ...prev, value } : prev))
+        }
+        confirmLabel="Enregistrer"
+        confirmDisabled={!editingTarget?.value?.trim()}
+        onCancel={() => setEditingTarget(null)}
+        onConfirm={editComment}
+      />
+
+      <UnifiedPromptModal
+        isOpen={Boolean(deleteTarget)}
+        title="Supprimer le commentaire"
+        message="Cette action est irreversible. Voulez-vous continuer ?"
+        confirmLabel="Supprimer"
+        confirmClassName="danger-btn"
+        onCancel={() => setDeleteTarget(null)}
+        onConfirm={deleteComment}
+      />
     </section>
   );
 }

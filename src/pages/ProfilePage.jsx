@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { apiFetch } from "../lib/api";
+import UnifiedPromptModal from "../components/UnifiedPromptModal";
 
 const HIVES_PER_PAGE = 10;
 
@@ -40,6 +41,13 @@ export default function ProfilePage() {
   const [sharedPage, setSharedPage] = useState(1);
   const [creatingHive, setCreatingHive] = useState(false);
   const [newHiveTitle, setNewHiveTitle] = useState("");
+  const [duplicatingHiveId, setDuplicatingHiveId] = useState(null);
+  const [confirmDeleteHiveId, setConfirmDeleteHiveId] = useState(null);
+  const [duplicateDraft, setDuplicateDraft] = useState({
+    hiveId: null,
+    sourceTitle: "",
+    nextTitle: "",
+  });
 
   useEffect(() => {
     let mounted = true;
@@ -66,13 +74,64 @@ export default function ProfilePage() {
     setSharedPage((current) => clampPage(current, profile.sharedHives.length));
   }, [profile]);
 
-  const deleteHive = async (id) => {
-    const confirmed = window.confirm("Supprimer cette ruche ?");
-    if (!confirmed) return;
+  const deleteHive = async () => {
+    if (!confirmDeleteHiveId) return;
 
-    await apiFetch(`/hives/${id}`, { method: "DELETE", token });
+    await apiFetch(`/hives/${confirmDeleteHiveId}`, {
+      method: "DELETE",
+      token,
+    });
     const data = await refreshMe();
     setProfile(data);
+    setConfirmDeleteHiveId(null);
+  };
+
+  const openDuplicateHiveModal = (hiveId) => {
+    const sourceHive = profile?.ownedHives.find((hive) => hive.id === hiveId);
+    const sourceTitle = sourceHive?.title || "Ruche";
+    setDuplicateDraft({
+      hiveId,
+      sourceTitle,
+      nextTitle: `${sourceTitle} (copie)`,
+    });
+  };
+
+  const duplicateHiveFromProfile = async () => {
+    if (!duplicateDraft.hiveId) return;
+
+    const trimmedTitle = duplicateDraft.nextTitle.trim();
+    if (!trimmedTitle) {
+      setError("Veuillez renseigner un titre pour la copie.");
+      return;
+    }
+
+    if (trimmedTitle === duplicateDraft.sourceTitle.trim()) {
+      setError("Renommez la copie avec un titre different.");
+      return;
+    }
+
+    try {
+      setError("");
+      setDuplicatingHiveId(duplicateDraft.hiveId);
+      const sourceHive = await apiFetch(`/hives/${duplicateDraft.hiveId}`, {
+        token,
+      });
+      await apiFetch("/hives", {
+        method: "POST",
+        token,
+        body: {
+          title: trimmedTitle,
+          boardData: sourceHive.boardData,
+        },
+      });
+      const data = await refreshMe();
+      setProfile(data);
+      setDuplicateDraft({ hiveId: null, sourceTitle: "", nextTitle: "" });
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setDuplicatingHiveId(null);
+    }
   };
 
   const deleteProfile = async (event) => {
@@ -240,7 +299,20 @@ export default function ProfilePage() {
                       <Link className="button-link" to={`/hives/${hive.id}`}>
                         Ouvrir
                       </Link>
-                      <button type="button" onClick={() => deleteHive(hive.id)}>
+                      <button
+                        type="button"
+                        className="button-link"
+                        onClick={() => openDuplicateHiveModal(hive.id)}
+                        disabled={duplicatingHiveId === hive.id}
+                      >
+                        {duplicatingHiveId === hive.id
+                          ? "Duplication..."
+                          : "Dupliquer"}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setConfirmDeleteHiveId(hive.id)}
+                      >
                         Supprimer
                       </button>
                     </div>
@@ -372,7 +444,9 @@ export default function ProfilePage() {
                     <input
                       type={showDeletePasswords ? "text" : "password"}
                       value={deletePassword}
-                      onChange={(event) => setDeletePassword(event.target.value)}
+                      onChange={(event) =>
+                        setDeletePassword(event.target.value)
+                      }
                       autoFocus
                       disabled={isDeleting}
                     />
@@ -393,7 +467,9 @@ export default function ProfilePage() {
                   <button
                     type="button"
                     className="button-link"
-                    onClick={() => setShowDeletePasswords((current) => !current)}
+                    onClick={() =>
+                      setShowDeletePasswords((current) => !current)
+                    }
                     disabled={isDeleting}
                   >
                     {showDeletePasswords ? "Masquer" : "Afficher"}
@@ -408,7 +484,11 @@ export default function ProfilePage() {
                     >
                       Annuler
                     </button>
-                    <button type="submit" className="danger-btn" disabled={isDeleting}>
+                    <button
+                      type="submit"
+                      className="danger-btn"
+                      disabled={isDeleting}
+                    >
                       {isDeleting ? "Suppression..." : "Supprimer mon profil"}
                     </button>
                   </div>
@@ -420,6 +500,34 @@ export default function ProfilePage() {
       ) : (
         <p>Chargement...</p>
       )}
+
+      <UnifiedPromptModal
+        isOpen={Boolean(confirmDeleteHiveId)}
+        title="Supprimer la ruche"
+        message="Cette action est irreversible. Voulez-vous continuer ?"
+        confirmLabel="Supprimer"
+        confirmClassName="danger-btn"
+        onCancel={() => setConfirmDeleteHiveId(null)}
+        onConfirm={deleteHive}
+      />
+
+      <UnifiedPromptModal
+        isOpen={Boolean(duplicateDraft.hiveId)}
+        mode="prompt"
+        title="Dupliquer la ruche"
+        message="Choisissez un nouveau nom pour la copie."
+        inputLabel="Nom de la copie"
+        value={duplicateDraft.nextTitle}
+        onValueChange={(value) =>
+          setDuplicateDraft((prev) => ({ ...prev, nextTitle: value }))
+        }
+        confirmLabel="Creer la copie"
+        confirmDisabled={!duplicateDraft.nextTitle.trim()}
+        onCancel={() =>
+          setDuplicateDraft({ hiveId: null, sourceTitle: "", nextTitle: "" })
+        }
+        onConfirm={duplicateHiveFromProfile}
+      />
     </section>
   );
 }

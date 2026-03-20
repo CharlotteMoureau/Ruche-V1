@@ -1,6 +1,7 @@
 import { Fragment, useCallback, useEffect, useMemo, useState } from "react";
 import { apiFetch } from "../lib/api";
 import { useAuth } from "../context/AuthContext";
+import UnifiedPromptModal from "../components/UnifiedPromptModal";
 
 const ITEMS_PER_PAGE = 10;
 
@@ -45,6 +46,7 @@ export default function AdminPage() {
   const [hiveSearch, setHiveSearch] = useState("");
   const [userSort, setUserSort] = useState("createdAt_desc");
   const [hiveSort, setHiveSort] = useState("updatedAt_desc");
+  const [deleteTarget, setDeleteTarget] = useState({ type: null, id: null });
 
   const userSortField = userSort.split("_")[0];
   const userSortDir = userSort.split("_")[1];
@@ -168,8 +170,6 @@ export default function AdminPage() {
   }, [filteredHives.length]);
 
   const removeUser = async (id) => {
-    const confirmed = window.confirm("Supprimer cet utilisateur ?");
-    if (!confirmed) return;
     try {
       await apiFetch(`/admin/users/${id}`, { method: "DELETE", token });
       await load();
@@ -179,14 +179,24 @@ export default function AdminPage() {
   };
 
   const removeHive = async (id) => {
-    const confirmed = window.confirm("Supprimer cette ruche ?");
-    if (!confirmed) return;
     try {
       await apiFetch(`/admin/hives/${id}`, { method: "DELETE", token });
       await load();
     } catch (err) {
       setError(err.message);
     }
+  };
+
+  const confirmDeleteTarget = async () => {
+    if (!deleteTarget.type || !deleteTarget.id) return;
+
+    if (deleteTarget.type === "user") {
+      await removeUser(deleteTarget.id);
+    } else if (deleteTarget.type === "hive") {
+      await removeHive(deleteTarget.id);
+    }
+
+    setDeleteTarget({ type: null, id: null });
   };
 
   const saveUser = async () => {
@@ -358,7 +368,10 @@ export default function AdminPage() {
                       >
                         {editingUser?.id === u.id ? "Annuler" : "Modifier"}
                       </button>
-                      <button type="button" onClick={() => removeUser(u.id)}>
+                      <button
+                        type="button"
+                        onClick={() => setDeleteTarget({ type: "user", id: u.id })}
+                      >
                         Supprimer
                       </button>
                     </div>
@@ -577,7 +590,12 @@ export default function AdminPage() {
                       >
                         {editingHive?.id === hive.id ? "Annuler" : "Modifier"}
                       </button>
-                      <button type="button" onClick={() => removeHive(hive.id)}>
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setDeleteTarget({ type: "hive", id: hive.id })
+                        }
+                      >
                         Supprimer
                       </button>
                     </div>
@@ -650,6 +668,20 @@ export default function AdminPage() {
           </button>
         </div>
       ) : null}
+
+      <UnifiedPromptModal
+        isOpen={Boolean(deleteTarget.type && deleteTarget.id)}
+        title={
+          deleteTarget.type === "user"
+            ? "Supprimer l'utilisateur"
+            : "Supprimer la ruche"
+        }
+        message="Cette action est irreversible. Voulez-vous continuer ?"
+        confirmLabel="Supprimer"
+        confirmClassName="danger-btn"
+        onCancel={() => setDeleteTarget({ type: null, id: null })}
+        onConfirm={confirmDeleteTarget}
+      />
     </section>
   );
 }

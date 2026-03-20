@@ -7,6 +7,7 @@ import {
   faComments,
   faUserPlus,
 } from "@fortawesome/free-solid-svg-icons";
+import UnifiedPromptModal from "./UnifiedPromptModal";
 
 export default function Toolbar({
   onReset,
@@ -27,6 +28,8 @@ export default function Toolbar({
   const [inviteLoading, setInviteLoading] = useState(false);
   const [manageLoadingId, setManageLoadingId] = useState(null);
   const [leaveLoading, setLeaveLoading] = useState(false);
+  const [showLeaveConfirmModal, setShowLeaveConfirmModal] = useState(false);
+  const [exportErrorMessage, setExportErrorMessage] = useState("");
 
   const isValidEmail = (value) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
   const getRoleLabel = (role) => {
@@ -82,7 +85,9 @@ export default function Toolbar({
       link.click();
     } catch (err) {
       console.error("Erreur lors de la capture :", err);
-      alert("Erreur lors de la capture : " + err.message);
+      setExportErrorMessage(
+        `Erreur lors de la capture : ${err?.message || "inconnue"}`,
+      );
     } finally {
       backs.forEach((el) => {
         el.style.visibility = el.getAttribute("data-original-visibility");
@@ -176,11 +181,6 @@ export default function Toolbar({
 
   const handleLeaveHive = async () => {
     if (!onLeaveHive) return;
-
-    const confirmed = window.confirm(
-      "Voulez-vous vraiment quitter cette ruche ?",
-    );
-    if (!confirmed) return;
 
     setLeaveLoading(true);
     try {
@@ -332,7 +332,7 @@ export default function Toolbar({
                 <button
                   type="button"
                   className="toolbar-leave-btn"
-                  onClick={handleLeaveHive}
+                  onClick={() => setShowLeaveConfirmModal(true)}
                   disabled={leaveLoading}
                 >
                   {leaveLoading ? "Sortie..." : "Quitter la ruche"}
@@ -342,6 +342,28 @@ export default function Toolbar({
           </div>
         </div>
       ) : null}
+
+      <UnifiedPromptModal
+        isOpen={showLeaveConfirmModal}
+        title="Quitter la ruche"
+        message="Voulez-vous vraiment quitter cette ruche ?"
+        confirmLabel="Quitter"
+        onCancel={() => setShowLeaveConfirmModal(false)}
+        onConfirm={async () => {
+          setShowLeaveConfirmModal(false);
+          await handleLeaveHive();
+        }}
+      />
+
+      <UnifiedPromptModal
+        isOpen={Boolean(exportErrorMessage)}
+        title="Capture d'ecran"
+        message={exportErrorMessage}
+        cancelLabel="Fermer"
+        confirmLabel="OK"
+        onCancel={() => setExportErrorMessage("")}
+        onConfirm={() => setExportErrorMessage("")}
+      />
     </>
   );
 }

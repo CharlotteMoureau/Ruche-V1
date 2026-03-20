@@ -10,6 +10,7 @@ import CustomDragPreview from "./CustomDragPreview";
 import AddCardModal from "./ModalFree";
 import { useDeviceDetection } from "../hooks/useDeviceDetection";
 import { useAuth } from "../context/AuthContext";
+import UnifiedPromptModal from "./UnifiedPromptModal";
 
 function formatDateTime(value) {
   if (!value) return "-";
@@ -101,6 +102,9 @@ export default function RucheWorkspace({
   const [activeLoadKey, setActiveLoadKey] = useState(loadKey);
   const [commentModalCardId, setCommentModalCardId] = useState(null);
   const [commentDraft, setCommentDraft] = useState("");
+  const [pendingReturnCardIds, setPendingReturnCardIds] = useState([]);
+  const [showDeleteCardCommentModal, setShowDeleteCardCommentModal] =
+    useState(false);
 
   useEffect(() => {
     if (loadKey === activeLoadKey) return;
@@ -205,25 +209,8 @@ export default function RucheWorkspace({
     setSelectedCardIds((prev) => (prev.size ? new Set() : prev));
   };
 
-  const handleReturnCardsToLibrary = (cards) => {
+  const applyReturnCardsToLibrary = (cards) => {
     if (!canEdit || !cards.length) return false;
-
-    const cardsWithComment = cards.filter((card) => {
-      const comment = getCardComment(card);
-      return Boolean(comment?.message?.trim());
-    });
-
-    if (cardsWithComment.length) {
-      const promptMessage =
-        cardsWithComment.length === 1
-          ? "Cette carte contient un commentaire. La remettre dans la bibliothèque supprimera ce commentaire. Continuer ?"
-          : "Certaines cartes contiennent un commentaire. Les remettre dans la bibliothèque supprimera ces commentaires. Continuer ?";
-
-      const shouldDiscard = window.confirm(promptMessage);
-      if (!shouldDiscard) {
-        return false;
-      }
-    }
 
     const cardIds = new Set(cards.map((card) => card.id));
     const regularCards = cards
@@ -251,6 +238,22 @@ export default function RucheWorkspace({
     });
 
     return true;
+  };
+
+  const handleReturnCardsToLibrary = (cards) => {
+    if (!canEdit || !cards.length) return false;
+
+    const cardsWithComment = cards.filter((card) => {
+      const comment = getCardComment(card);
+      return Boolean(comment?.message?.trim());
+    });
+
+    if (cardsWithComment.length) {
+      setPendingReturnCardIds(cards.map((card) => card.id));
+      return false;
+    }
+
+    return applyReturnCardsToLibrary(cards);
   };
 
   const handleReturnToLibrary = (card) => {
@@ -311,9 +314,6 @@ export default function RucheWorkspace({
   const handleDeleteCardComment = () => {
     if (!canComment || !commentModalCardId) return;
 
-    const confirmed = window.confirm("Supprimer ce commentaire de carte ?");
-    if (!confirmed) return;
-
     setBoardCards((prev) =>
       prev.map((card) => {
         if (card.id !== commentModalCardId) return card;
@@ -322,6 +322,13 @@ export default function RucheWorkspace({
     );
 
     handleCloseCardCommentModal();
+  };
+
+  const confirmPendingCardReturn = () => {
+    const pendingIds = new Set(pendingReturnCardIds);
+    const cards = boardCards.filter((card) => pendingIds.has(card.id));
+    applyReturnCardsToLibrary(cards);
+    setPendingReturnCardIds([]);
   };
 
   const handleAddUserCard = () => {
@@ -459,7 +466,7 @@ export default function RucheWorkspace({
                     <button
                       type="button"
                       className="btn card-comment-delete"
-                      onClick={handleDeleteCardComment}
+                      onClick={() => setShowDeleteCardCommentModal(true)}
                     >
                       Supprimer
                     </button>
@@ -482,6 +489,31 @@ export default function RucheWorkspace({
           </div>
         </div>
       ) : null}
+      <UnifiedPromptModal
+        isOpen={pendingReturnCardIds.length > 0}
+        title="Supprimer les commentaires de carte"
+        message={
+          pendingReturnCardIds.length === 1
+            ? "Cette carte contient un commentaire. La remettre dans la bibliotheque supprimera ce commentaire. Continuer ?"
+            : "Certaines cartes contiennent un commentaire. Les remettre dans la bibliotheque supprimera ces commentaires. Continuer ?"
+        }
+        confirmLabel="Continuer"
+        onCancel={() => setPendingReturnCardIds([])}
+        onConfirm={confirmPendingCardReturn}
+      />
+
+      <UnifiedPromptModal
+        isOpen={showDeleteCardCommentModal}
+        title="Supprimer le commentaire de carte"
+        message="Cette action est irreversible. Voulez-vous continuer ?"
+        confirmLabel="Supprimer"
+        confirmClassName="danger-btn"
+        onCancel={() => setShowDeleteCardCommentModal(false)}
+        onConfirm={() => {
+          setShowDeleteCardCommentModal(false);
+          handleDeleteCardComment();
+        }}
+      />
       <Footer />
     </DndProvider>
   );

@@ -467,3 +467,25 @@
     }
   }
 }
+
+.unified-prompt-modal {
+  max-width: 460px;
+  text-align: left;
+
+  h2 {
+    margin: 0 0 0.8rem;
+  }
+}
+
+.unified-prompt-message {
+  margin: 0 0 0.8rem;
+  color: #444;
+}
+
+.unified-prompt-form {
+  margin: 0;
+
+  .modal-actions {
+    margin-bottom: 0;
+  }
+}
