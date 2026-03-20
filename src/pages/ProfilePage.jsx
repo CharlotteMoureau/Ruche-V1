@@ -33,6 +33,7 @@ export default function ProfilePage() {
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [deletePassword, setDeletePassword] = useState("");
   const [deletePasswordConfirm, setDeletePasswordConfirm] = useState("");
+  const [showDeletePasswords, setShowDeletePasswords] = useState(false);
   const [deleteError, setDeleteError] = useState("");
   const [isDeleting, setIsDeleting] = useState(false);
   const [ownedPage, setOwnedPage] = useState(1);
@@ -74,7 +75,11 @@ export default function ProfilePage() {
     setProfile(data);
   };
 
-  const deleteProfile = async () => {
+  const deleteProfile = async (event) => {
+    if (event) {
+      event.preventDefault();
+    }
+
     const trimmedPassword = deletePassword.trim();
     const trimmedPasswordConfirm = deletePasswordConfirm.trim();
 
@@ -111,6 +116,7 @@ export default function ProfilePage() {
   const openDeleteModal = () => {
     setDeletePassword("");
     setDeletePasswordConfirm("");
+    setShowDeletePasswords(false);
     setDeleteError("");
     setIsDeleteModalOpen(true);
   };
@@ -120,6 +126,7 @@ export default function ProfilePage() {
     setIsDeleteModalOpen(false);
     setDeletePassword("");
     setDeletePasswordConfirm("");
+    setShowDeletePasswords(false);
     setDeleteError("");
   };
 
@@ -359,47 +366,53 @@ export default function ProfilePage() {
                   <p className="form-error">{deleteError}</p>
                 ) : null}
 
-                <label>
-                  Mot de passe
-                  <input
-                    type="password"
-                    value={deletePassword}
-                    onChange={(event) => setDeletePassword(event.target.value)}
-                    autoFocus
-                    disabled={isDeleting}
-                  />
-                </label>
+                <form onSubmit={deleteProfile} className="form-grid">
+                  <label>
+                    Mot de passe
+                    <input
+                      type={showDeletePasswords ? "text" : "password"}
+                      value={deletePassword}
+                      onChange={(event) => setDeletePassword(event.target.value)}
+                      autoFocus
+                      disabled={isDeleting}
+                    />
+                  </label>
 
-                <label>
-                  Confirmer le mot de passe
-                  <input
-                    type="password"
-                    value={deletePasswordConfirm}
-                    onChange={(event) =>
-                      setDeletePasswordConfirm(event.target.value)
-                    }
-                    disabled={isDeleting}
-                  />
-                </label>
+                  <label>
+                    Confirmer le mot de passe
+                    <input
+                      type={showDeletePasswords ? "text" : "password"}
+                      value={deletePasswordConfirm}
+                      onChange={(event) =>
+                        setDeletePasswordConfirm(event.target.value)
+                      }
+                      disabled={isDeleting}
+                    />
+                  </label>
 
-                <div className="modal-actions">
                   <button
                     type="button"
-                    className="btn secondary"
-                    onClick={closeDeleteModal}
+                    className="button-link"
+                    onClick={() => setShowDeletePasswords((current) => !current)}
                     disabled={isDeleting}
                   >
-                    Annuler
+                    {showDeletePasswords ? "Masquer" : "Afficher"}
                   </button>
-                  <button
-                    type="button"
-                    className="danger-btn"
-                    onClick={deleteProfile}
-                    disabled={isDeleting}
-                  >
-                    {isDeleting ? "Suppression..." : "Supprimer mon profil"}
-                  </button>
-                </div>
+
+                  <div className="modal-actions">
+                    <button
+                      type="button"
+                      className="btn secondary"
+                      onClick={closeDeleteModal}
+                      disabled={isDeleting}
+                    >
+                      Annuler
+                    </button>
+                    <button type="submit" className="danger-btn" disabled={isDeleting}>
+                      {isDeleting ? "Suppression..." : "Supprimer mon profil"}
+                    </button>
+                  </div>
+                </form>
               </div>
             </div>
           ) : null}

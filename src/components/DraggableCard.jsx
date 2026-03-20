@@ -78,7 +78,11 @@ export default function DraggableCard({
           </svg>
         </button>
       ) : null}
-      {card.category === "free" ? <FreeHexCard card={card} /> : <HexCard card={card} />}
+      {card.category === "free" ? (
+        <FreeHexCard card={card} />
+      ) : (
+        <HexCard card={card} />
+      )}
     </div>
   );
 }

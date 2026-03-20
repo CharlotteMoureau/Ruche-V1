@@ -7,6 +7,7 @@ export default function LoginPage() {
   const navigate = useNavigate();
   const [identifier, setIdentifier] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -41,12 +42,20 @@ export default function LoginPage() {
         <label>
           Mot de passe
           <input
-            type="password"
+            type={showPassword ? "text" : "password"}
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
           />
         </label>
+
+        <button
+          type="button"
+          className="button-link"
+          onClick={() => setShowPassword((current) => !current)}
+        >
+          {showPassword ? "Masquer" : "Afficher"}
+        </button>
 
         {error ? <p className="form-error">{error}</p> : null}
         <button disabled={loading} type="submit">

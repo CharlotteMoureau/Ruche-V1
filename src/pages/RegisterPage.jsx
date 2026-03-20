@@ -29,6 +29,7 @@ export default function RegisterPage() {
     roleOtherText: "",
   });
   const [loading, setLoading] = useState(false);
+  const [showPasswords, setShowPasswords] = useState(false);
   const [error, setError] = useState("");
 
   const onChange = (key, value) => {
@@ -102,7 +103,7 @@ export default function RegisterPage() {
         <label>
           Mot de passe
           <input
-            type="password"
+            type={showPasswords ? "text" : "password"}
             value={form.password}
             onChange={(e) => onChange("password", e.target.value)}
             required
@@ -113,13 +114,21 @@ export default function RegisterPage() {
         <label>
           Confirmation du mot de passe
           <input
-            type="password"
+            type={showPasswords ? "text" : "password"}
             value={form.passwordConfirm}
             onChange={(e) => onChange("passwordConfirm", e.target.value)}
             required
             minLength={8}
           />
         </label>
+
+        <button
+          type="button"
+          className="button-link"
+          onClick={() => setShowPasswords((current) => !current)}
+        >
+          {showPasswords ? "Masquer" : "Afficher"}
+        </button>
 
         {error ? <p className="form-error">{error}</p> : null}
         <button disabled={loading} type="submit">
