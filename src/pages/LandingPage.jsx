@@ -10,13 +10,13 @@ export default function LandingPage() {
       <p>Choisissez ce que vous voulez faire.</p>
       <div className="cta-grid">
         <Link to={isAuthenticated ? "/profile" : "/login"} className="cta-card">
-          Acceder au profil
+          Accéder au profil
         </Link>
         <Link
           to={isAuthenticated ? "/hives/new" : "/login"}
           className="cta-card"
         >
-          Creer une Ruche
+          Créer une Ruche
         </Link>
       </div>
     </section>

@@ -298,8 +298,11 @@ hivesRouter.delete("/:id/collaborators/:userId", async (req, res) => {
     return res.status(404).json({ error: "Ruche introuvable" });
   }
 
-  if (!(req.user.isAdmin || hive.ownerId === req.user.id)) {
-    return res.status(403).json({ error: "Seul le proprietaire peut supprimer un collaborateur" });
+  const isOwnerOrAdmin = req.user.isAdmin || hive.ownerId === req.user.id;
+  const isSelfRemoval = req.user.id === req.params.userId;
+
+  if (!(isOwnerOrAdmin || isSelfRemoval)) {
+    return res.status(403).json({ error: "Action non autorisee" });
   }
 
   await prisma.hiveCollaborator.delete({

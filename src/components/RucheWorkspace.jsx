@@ -75,6 +75,13 @@ export default function RucheWorkspace({
   onStateChange,
   canEdit = true,
   canComment = false,
+  canInvite = false,
+  canLeaveHive = false,
+  collaborators = [],
+  onInviteCollaborator,
+  onChangeCollaboratorRole,
+  onRemoveCollaborator,
+  onLeaveHive,
   onOpenComments,
   commentCount = 0,
 }) {
@@ -209,8 +216,8 @@ export default function RucheWorkspace({
     if (cardsWithComment.length) {
       const promptMessage =
         cardsWithComment.length === 1
-          ? "Cette carte contient un commentaire. La remettre dans la bibliotheque supprimera ce commentaire. Continuer ?"
-          : "Certaines cartes contiennent un commentaire. Les remettre dans la bibliotheque supprimera ces commentaires. Continuer ?";
+          ? "Cette carte contient un commentaire. La remettre dans la bibliothèque supprimera ce commentaire. Continuer ?"
+          : "Certaines cartes contiennent un commentaire. Les remettre dans la bibliothèque supprimera ces commentaires. Continuer ?";
 
       const shouldDiscard = window.confirm(promptMessage);
       if (!shouldDiscard) {
@@ -355,6 +362,13 @@ export default function RucheWorkspace({
       <div className="app editor-app">
         <Toolbar
           onReset={resetHive}
+          canInvite={canInvite}
+          canLeaveHive={canLeaveHive}
+          collaborators={collaborators}
+          onInviteCollaborator={onInviteCollaborator}
+          onChangeCollaboratorRole={onChangeCollaboratorRole}
+          onRemoveCollaborator={onRemoveCollaborator}
+          onLeaveHive={onLeaveHive}
           onOpenComments={onOpenComments}
           commentCount={commentCount}
         />
@@ -405,7 +419,7 @@ export default function RucheWorkspace({
               x
             </button>
 
-            <p className="card-comment-card-title">Carte: {activeCommentCard.title}</p>
+            <p className="card-comment-card-title">Carte : {activeCommentCard.title}</p>
 
             {activeComment?.message ? (
               <div className="card-comment-meta">

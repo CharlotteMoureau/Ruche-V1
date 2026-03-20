@@ -35,8 +35,6 @@ export default function RucheEditorPage() {
   const [boardData, setBoardData] = useState(null);
   const [savedSnapshot, setSavedSnapshot] = useState("");
   const [error, setError] = useState("");
-  const [inviteEmail, setInviteEmail] = useState("");
-  const [inviteRole, setInviteRole] = useState("COMMENT");
 
   // Comments modal state
   const [showCommentsModal, setShowCommentsModal] = useState(false);
@@ -51,6 +49,7 @@ export default function RucheEditorPage() {
   const collaboratorRole =
     hive?.collaborators?.find((collaborator) => collaborator.id === user?.id)
       ?.role || null;
+  const isCollaborator = Boolean(collaboratorRole);
   const canEdit = isNew
     ? true
     : Boolean(
@@ -184,26 +183,19 @@ export default function RucheEditorPage() {
     }
   };
 
-  const inviteCollaborator = async () => {
-    try {
-      const collaborator = await apiFetch(`/hives/${id}/collaborators`, {
-        method: "POST",
-        token,
-        body: { email: inviteEmail, role: inviteRole },
-      });
-      setHive((prev) => ({
-        ...prev,
-        collaborators: [
-          ...(prev?.collaborators || []).filter(
-            (c) => c.id !== collaborator.id,
-          ),
-          collaborator,
-        ],
-      }));
-      setInviteEmail("");
-    } catch (err) {
-      setError(err.message);
-    }
+  const inviteCollaborator = async (email, role) => {
+    const collaborator = await apiFetch(`/hives/${id}/collaborators`, {
+      method: "POST",
+      token,
+      body: { email, role },
+    });
+    setHive((prev) => ({
+      ...prev,
+      collaborators: [
+        ...(prev?.collaborators || []).filter((c) => c.id !== collaborator.id),
+        collaborator,
+      ],
+    }));
   };
 
   const removeCollaborator = async (collaboratorId) => {
@@ -217,6 +209,13 @@ export default function RucheEditorPage() {
         (c) => c.id !== collaboratorId,
       ),
     }));
+  };
+
+  const leaveHive = async () => {
+    if (!user?.id) return;
+
+    await removeCollaborator(user.id);
+    navigate("/profile");
   };
 
   const changeCollaboratorRole = async (collaboratorId, role) => {
@@ -366,7 +365,7 @@ export default function RucheEditorPage() {
           onClick={(event) => {
             if (!isDirty) return;
             const ok = window.confirm(
-              "Votre ruche contient des modifications non enregistrees. Quitter sans sauvegarder ?",
+              "Votre ruche contient des modifications non enregistrées. Quitter sans sauvegarder ?",
             );
             if (!ok) {
               event.preventDefault();
@@ -394,7 +393,7 @@ export default function RucheEditorPage() {
 
       {!isNew && hive ? (
         <p className="form-info">
-          Creee le: {formatDateTime(hive.createdAt)} | Derniere edition:{" "}
+          Créée le: {formatDateTime(hive.createdAt)} | Dernière édition:{" "}
           {formatDateTime(hive.updatedAt)}
         </p>
       ) : null}
@@ -405,76 +404,21 @@ export default function RucheEditorPage() {
         loadKey={workspaceLoadKey}
         canEdit={canEdit}
         canComment={canComment}
+        canInvite={
+          !isNew && Boolean(hive) && (hive.owner?.id === user?.id || isAdmin)
+        }
+        canLeaveHive={!isNew && Boolean(hive) && isCollaborator}
+        collaborators={hive?.collaborators || []}
+        onInviteCollaborator={!isNew && hive ? inviteCollaborator : undefined}
+        onChangeCollaboratorRole={
+          !isNew && hive ? changeCollaboratorRole : undefined
+        }
+        onRemoveCollaborator={!isNew && hive ? removeCollaborator : undefined}
+        onLeaveHive={!isNew && hive && isCollaborator ? leaveHive : undefined}
         onStateChange={setBoardData}
         onOpenComments={!isNew ? () => setShowCommentsModal(true) : undefined}
         commentCount={commentCount}
       />
-
-      {!isNew && hive ? (
-        <div className="meta-grid">
-          <section className="page-shell">
-            <h3>Collaborateurs</h3>
-            {(hive.owner?.id === user?.id || isAdmin) && (
-              <div className="form-grid">
-                <label>
-                  Email
-                  <input
-                    type="email"
-                    value={inviteEmail}
-                    onChange={(e) => setInviteEmail(e.target.value)}
-                  />
-                </label>
-                <label>
-                  Role
-                  <select
-                    value={inviteRole}
-                    onChange={(e) => setInviteRole(e.target.value)}
-                  >
-                    <option value="ADMIN">Admin</option>
-                    <option value="COMMENT">Comment only</option>
-                    <option value="READ">Read only</option>
-                  </select>
-                </label>
-                <button type="button" onClick={inviteCollaborator}>
-                  Inviter
-                </button>
-              </div>
-            )}
-            <ul className="list-grid">
-              {(hive.collaborators || []).map((collaborator) => (
-                <li key={collaborator.id}>
-                  <span>
-                    {collaborator.username} - {collaborator.role}
-                  </span>
-                  {(hive.owner?.id === user?.id || isAdmin) && (
-                    <div className="inline-actions">
-                      <select
-                        value={collaborator.role}
-                        onChange={(e) =>
-                          changeCollaboratorRole(
-                            collaborator.id,
-                            e.target.value,
-                          )
-                        }
-                      >
-                        <option value="ADMIN">Admin</option>
-                        <option value="COMMENT">Comment only</option>
-                        <option value="READ">Read only</option>
-                      </select>
-                      <button
-                        type="button"
-                        onClick={() => removeCollaborator(collaborator.id)}
-                      >
-                        Retirer
-                      </button>
-                    </div>
-                  )}
-                </li>
-              ))}
-            </ul>
-          </section>
-        </div>
-      ) : null}
 
       {showCommentsModal && (
         <div

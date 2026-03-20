@@ -24,7 +24,7 @@ export default function ForgotPasswordPage() {
 
   return (
     <section className="page-shell">
-      <h2>Mot de passe oublie</h2>
+      <h2>Mot de passe oublié</h2>
       <form onSubmit={onSubmit} className="form-grid">
         <label>
           Email
