@@ -44,6 +44,7 @@ export default function RucheEditorPage() {
   );
   const [savedSnapshot, setSavedSnapshot] = useState("");
   const [error, setError] = useState("");
+  const [isSaving, setIsSaving] = useState(false);
 
   // Comments modal state
   const [showCommentsModal, setShowCommentsModal] = useState(false);
@@ -164,6 +165,8 @@ export default function RucheEditorPage() {
   }, [showCommentsModal]);
 
   const saveHive = async () => {
+    if (isSaving) return false;
+
     setError("");
     const trimmedTitle = title.trim();
 
@@ -177,6 +180,7 @@ export default function RucheEditorPage() {
       return;
     }
 
+    setIsSaving(true);
     try {
       if (isNew) {
         const created = await apiFetch("/hives", {
@@ -210,6 +214,8 @@ export default function RucheEditorPage() {
     } catch (err) {
       setError(err.message);
       return false;
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -439,8 +445,8 @@ export default function RucheEditorPage() {
           />
         </label>
         {canEdit ? (
-          <button type="button" onClick={saveHive}>
-            Enregistrer la ruche
+          <button type="button" onClick={saveHive} disabled={isSaving}>
+            {isSaving ? "Enregistrement..." : "Enregistrer la ruche"}
           </button>
         ) : null}
       </div>
@@ -455,6 +461,12 @@ export default function RucheEditorPage() {
         <p className="form-info">
           Créée le: {formatDateTime(hive.createdAt)} | Dernière édition:{" "}
           {formatDateTime(hive.updatedAt)}
+        </p>
+      ) : null}
+
+      {isSaving ? (
+        <p className="form-info" aria-live="polite">
+          Mise à jour en cours...
         </p>
       ) : null}
 
