@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { apiFetch } from "../lib/api";
 import UnifiedPromptModal from "../components/UnifiedPromptModal";
+import PageLoader from "../components/PageLoader";
 
 const HIVES_PER_PAGE = 10;
 
@@ -498,13 +499,17 @@ export default function ProfilePage() {
           ) : null}
         </>
       ) : (
-        <p>Chargement...</p>
+        <PageLoader
+          title="Chargement du profil"
+          subtitle="Nous récupérons vos informations et vos ruches."
+          variant="profile"
+        />
       )}
 
       <UnifiedPromptModal
         isOpen={Boolean(confirmDeleteHiveId)}
         title="Supprimer la ruche"
-        message="Cette action est irreversible. Voulez-vous continuer ?"
+        message="Cette action est irréversible. Voulez-vous continuer ?"
         confirmLabel="Supprimer"
         confirmClassName="danger-btn"
         onCancel={() => setConfirmDeleteHiveId(null)}

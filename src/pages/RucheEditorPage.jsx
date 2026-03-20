@@ -4,6 +4,7 @@ import { apiFetch } from "../lib/api";
 import { useAuth } from "../context/AuthContext";
 import RucheWorkspace from "../components/RucheWorkspace";
 import UnifiedPromptModal from "../components/UnifiedPromptModal";
+import PageLoader from "../components/PageLoader";
 
 function formatDateTime(value) {
   if (!value) return "-";
@@ -401,6 +402,7 @@ export default function RucheEditorPage() {
 
   const comments = hive?.comments || [];
   const commentCount = totalCommentCount(comments);
+  const isHiveLoading = !isNew && !hive && !error;
 
   return (
     <section className="editor-page">
@@ -447,26 +449,34 @@ export default function RucheEditorPage() {
       ) : null}
 
       {error ? <p className="form-error">{error}</p> : null}
-      <RucheWorkspace
-        initialBoardData={boardData}
-        loadKey={workspaceLoadKey}
-        canEdit={canEdit}
-        canComment={canComment}
-        canInvite={
-          !isNew && Boolean(hive) && (hive.owner?.id === user?.id || isAdmin)
-        }
-        canLeaveHive={!isNew && Boolean(hive) && isCollaborator}
-        collaborators={hive?.collaborators || []}
-        onInviteCollaborator={!isNew && hive ? inviteCollaborator : undefined}
-        onChangeCollaboratorRole={
-          !isNew && hive ? changeCollaboratorRole : undefined
-        }
-        onRemoveCollaborator={!isNew && hive ? removeCollaborator : undefined}
-        onLeaveHive={!isNew && hive && isCollaborator ? leaveHive : undefined}
-        onStateChange={setBoardData}
-        onOpenComments={!isNew ? () => setShowCommentsModal(true) : undefined}
-        commentCount={commentCount}
-      />
+      {isHiveLoading ? (
+        <PageLoader
+          title="Chargement de la ruche"
+          subtitle="Les cartes et les commentaires arrivent."
+          variant="hive"
+        />
+      ) : (
+        <RucheWorkspace
+          initialBoardData={boardData}
+          loadKey={workspaceLoadKey}
+          canEdit={canEdit}
+          canComment={canComment}
+          canInvite={
+            !isNew && Boolean(hive) && (hive.owner?.id === user?.id || isAdmin)
+          }
+          canLeaveHive={!isNew && Boolean(hive) && isCollaborator}
+          collaborators={hive?.collaborators || []}
+          onInviteCollaborator={!isNew && hive ? inviteCollaborator : undefined}
+          onChangeCollaboratorRole={
+            !isNew && hive ? changeCollaboratorRole : undefined
+          }
+          onRemoveCollaborator={!isNew && hive ? removeCollaborator : undefined}
+          onLeaveHive={!isNew && hive && isCollaborator ? leaveHive : undefined}
+          onStateChange={setBoardData}
+          onOpenComments={!isNew ? () => setShowCommentsModal(true) : undefined}
+          commentCount={commentCount}
+        />
+      )}
 
       {showCommentsModal && (
         <div

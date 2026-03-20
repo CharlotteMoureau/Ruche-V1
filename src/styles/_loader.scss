@@ -1,0 +1,111 @@
+.page-loader {
+  --loader-accent: #d17a1f;
+  --loader-accent-soft: #f4c88a;
+  --loader-ink: #3b2c16;
+  position: relative;
+  margin: 20px auto;
+  max-width: 520px;
+  border-radius: 20px;
+  border: 1px solid #e8dcc8;
+  background:
+    radial-gradient(circle at 14% 18%, rgba(255, 245, 225, 0.9) 0, transparent 38%),
+    radial-gradient(circle at 84% 8%, rgba(245, 202, 143, 0.32) 0, transparent 48%),
+    linear-gradient(145deg, #fffdfa 0%, #f7efe3 100%);
+  box-shadow: 0 18px 40px rgba(101, 62, 17, 0.14);
+  padding: 30px 24px 24px;
+  text-align: center;
+  overflow: hidden;
+}
+
+.page-loader--hive {
+  --loader-accent: #3a8f52;
+  --loader-accent-soft: #9fd6ad;
+  --loader-ink: #143621;
+}
+
+.page-loader__halo {
+  position: absolute;
+  inset: -20% 35% auto -30%;
+  height: 140px;
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.8) 0, transparent 70%);
+  pointer-events: none;
+}
+
+.page-loader__honeycomb {
+  display: grid;
+  grid-template-columns: repeat(3, 30px);
+  justify-content: center;
+  gap: 8px 10px;
+  margin: 6px auto 18px;
+}
+
+.page-loader__cell {
+  width: 30px;
+  height: 34px;
+  clip-path: polygon(50% 0%, 96% 25%, 96% 75%, 50% 100%, 4% 75%, 4% 25%);
+  background: linear-gradient(170deg, var(--loader-accent-soft), var(--loader-accent));
+  box-shadow: 0 6px 12px rgba(76, 49, 15, 0.15);
+  animation: loaderPulse 1.25s ease-in-out infinite;
+  animation-delay: calc(var(--delay-index) * 0.12s);
+}
+
+.page-loader__cell:nth-child(1),
+.page-loader__cell:nth-child(5),
+.page-loader__cell:nth-child(7) {
+  transform: translateY(2px);
+}
+
+.page-loader__cell:nth-child(2),
+.page-loader__cell:nth-child(4),
+.page-loader__cell:nth-child(6) {
+  transform: translateY(-2px);
+}
+
+.page-loader__title {
+  margin: 0;
+  color: var(--loader-ink);
+  font-size: 1.1rem;
+  font-weight: 700;
+}
+
+.page-loader__subtitle {
+  margin: 8px 0 0;
+  color: #6a5c44;
+  font-size: 0.95rem;
+}
+
+@keyframes loaderPulse {
+  0%,
+  100% {
+    opacity: 0.45;
+    transform: translateY(0) scale(0.92);
+  }
+
+  40% {
+    opacity: 1;
+    transform: translateY(-3px) scale(1);
+  }
+
+  70% {
+    opacity: 0.7;
+    transform: translateY(1px) scale(0.96);
+  }
+}
+
+@media (max-width: 640px) {
+  .page-loader {
+    margin: 14px auto;
+    border-radius: 16px;
+    padding: 24px 16px 18px;
+  }
+
+  .page-loader__honeycomb {
+    grid-template-columns: repeat(3, 26px);
+    gap: 7px 8px;
+  }
+
+  .page-loader__cell {
+    width: 26px;
+    height: 30px;
+  }
+}
