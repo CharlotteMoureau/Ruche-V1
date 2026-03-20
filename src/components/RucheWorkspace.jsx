@@ -9,6 +9,36 @@ import Footer from "./Footer";
 import CustomDragPreview from "./CustomDragPreview";
 import AddCardModal from "./ModalFree";
 import { useDeviceDetection } from "../hooks/useDeviceDetection";
+import { useAuth } from "../context/AuthContext";
+
+function formatDateTime(value) {
+  if (!value) return "-";
+
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "-";
+
+  return new Intl.DateTimeFormat("fr-BE", {
+    dateStyle: "medium",
+    timeStyle: "short",
+  }).format(date);
+}
+
+function getUserLabel(actor) {
+  return actor?.username || actor?.email || "Utilisateur inconnu";
+}
+
+function getCardComment(card) {
+  if (!card || typeof card !== "object") return null;
+  return card.comment && typeof card.comment === "object" ? card.comment : null;
+}
+
+function stripCardComment(card) {
+  if (!card || typeof card !== "object") return card;
+
+  const rest = { ...card };
+  delete rest.comment;
+  return rest;
+}
 
 function normalizeBoardData(data) {
   if (!data || typeof data !== "object") {
@@ -44,9 +74,11 @@ export default function RucheWorkspace({
   loadKey,
   onStateChange,
   canEdit = true,
+  canComment = false,
   onOpenComments,
   commentCount = 0,
 }) {
+  const { user } = useAuth();
   const [availableCards, setAvailableCards] = useState(
     () => normalizeBoardData(initialBoardData).availableCards,
   );
@@ -60,6 +92,8 @@ export default function RucheWorkspace({
   const [inputText, setInputText] = useState("");
   const [selectedCardIds, setSelectedCardIds] = useState(() => new Set());
   const [activeLoadKey, setActiveLoadKey] = useState(loadKey);
+  const [commentModalCardId, setCommentModalCardId] = useState(null);
+  const [commentDraft, setCommentDraft] = useState("");
 
   useEffect(() => {
     if (loadKey === activeLoadKey) return;
@@ -79,6 +113,23 @@ export default function RucheWorkspace({
       userCards,
     });
   }, [availableCards, boardCards, userCards, onStateChange]);
+
+  useEffect(() => {
+    if (!commentModalCardId) return;
+
+    const hasCard = boardCards.some((card) => card.id === commentModalCardId);
+    if (!hasCard) {
+      setCommentModalCardId(null);
+      setCommentDraft("");
+    }
+  }, [boardCards, commentModalCardId]);
+
+  useEffect(() => {
+    document.body.style.overflow = commentModalCardId ? "hidden" : "";
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [commentModalCardId]);
 
   useDeviceDetection();
 
@@ -150,8 +201,27 @@ export default function RucheWorkspace({
   const handleReturnCardsToLibrary = (cards) => {
     if (!canEdit || !cards.length) return;
 
+    const cardsWithComment = cards.filter((card) => {
+      const comment = getCardComment(card);
+      return Boolean(comment?.message?.trim());
+    });
+
+    if (cardsWithComment.length) {
+      const promptMessage =
+        cardsWithComment.length === 1
+          ? "Cette carte contient un commentaire. La remettre dans la bibliotheque supprimera ce commentaire. Continuer ?"
+          : "Certaines cartes contiennent un commentaire. Les remettre dans la bibliotheque supprimera ces commentaires. Continuer ?";
+
+      const shouldDiscard = window.confirm(promptMessage);
+      if (!shouldDiscard) {
+        return;
+      }
+    }
+
     const cardIds = new Set(cards.map((card) => card.id));
-    const regularCards = cards.filter((card) => card.category !== "free");
+    const regularCards = cards
+      .filter((card) => card.category !== "free")
+      .map(stripCardComment);
     const freeCards = cards.filter((card) => card.category === "free");
 
     if (regularCards.length) {
@@ -176,6 +246,71 @@ export default function RucheWorkspace({
 
   const handleReturnToLibrary = (card) => {
     handleReturnCardsToLibrary([card]);
+  };
+
+  const handleOpenCardComment = (card) => {
+    if (!canComment) return;
+
+    const existingComment = getCardComment(card);
+    setCommentModalCardId(card.id);
+    setCommentDraft(existingComment?.message || "");
+  };
+
+  const handleCloseCardCommentModal = () => {
+    setCommentModalCardId(null);
+    setCommentDraft("");
+  };
+
+  const handleSaveCardComment = () => {
+    if (!canComment || !commentModalCardId) return;
+
+    const message = commentDraft.trim();
+    if (!message) return;
+
+    const now = new Date().toISOString();
+    const actor = {
+      id: user?.id || null,
+      username: user?.username || null,
+      email: user?.email || null,
+    };
+
+    setBoardCards((prev) =>
+      prev.map((card) => {
+        if (card.id !== commentModalCardId) return card;
+
+        const existingComment = getCardComment(card);
+        const isNewComment = !existingComment?.message;
+
+        return {
+          ...card,
+          comment: {
+            message,
+            createdAt: existingComment?.createdAt || now,
+            createdBy: existingComment?.createdBy || actor,
+            updatedAt: now,
+            updatedBy: isNewComment ? existingComment?.createdBy || actor : actor,
+          },
+        };
+      }),
+    );
+
+    handleCloseCardCommentModal();
+  };
+
+  const handleDeleteCardComment = () => {
+    if (!canComment || !commentModalCardId) return;
+
+    const confirmed = window.confirm("Supprimer ce commentaire de carte ?");
+    if (!confirmed) return;
+
+    setBoardCards((prev) =>
+      prev.map((card) => {
+        if (card.id !== commentModalCardId) return card;
+        return stripCardComment(card);
+      }),
+    );
+
+    handleCloseCardCommentModal();
   };
 
   const handleAddUserCard = () => {
@@ -205,7 +340,13 @@ export default function RucheWorkspace({
     setAvailableCards(cardsData);
     setUserCards([]);
     setSelectedCardIds(new Set());
+    handleCloseCardCommentModal();
   };
+
+  const activeCommentCard = commentModalCardId
+    ? boardCards.find((card) => card.id === commentModalCardId) || null
+    : null;
+  const activeComment = getCardComment(activeCommentCard);
 
   return (
     <DndProvider backend={HTML5Backend}>
@@ -230,6 +371,7 @@ export default function RucheWorkspace({
           selectedCardIds={selectedCardIds}
           onToggleCardSelection={handleToggleCardSelection}
           onClearSelection={handleClearSelection}
+          onOpenCardComment={handleOpenCardComment}
         />
         <CustomDragPreview />
       </div>
@@ -241,6 +383,83 @@ export default function RucheWorkspace({
         setInputText={setInputText}
         userCardsCount={userCards.length}
       />
+      {commentModalCardId && activeCommentCard ? (
+        <div
+          className="modal-overlay"
+          onClick={(event) => {
+            if (event.target === event.currentTarget) {
+              handleCloseCardCommentModal();
+            }
+          }}
+        >
+          <div className="modal-box comments-modal card-comment-modal">
+            <h2>Commentaire de carte</h2>
+            <button
+              type="button"
+              className="modal-close-btn"
+              onClick={handleCloseCardCommentModal}
+              aria-label="Fermer"
+            >
+              x
+            </button>
+
+            <p className="card-comment-card-title">Carte: {activeCommentCard.title}</p>
+
+            {activeComment?.message ? (
+              <div className="card-comment-meta">
+                <p>
+                  Cree le {formatDateTime(activeComment.createdAt)} par{" "}
+                  {getUserLabel(activeComment.createdBy)}
+                </p>
+                <p>
+                  Derniere edition le {formatDateTime(activeComment.updatedAt)} par{" "}
+                  {getUserLabel(activeComment.updatedBy)}
+                </p>
+              </div>
+            ) : (
+              <p className="comments-empty">
+                Aucun commentaire pour cette carte.
+              </p>
+            )}
+
+            {canComment ? (
+              <>
+                <div className="comments-new card-comment-editor">
+                  <textarea
+                    value={commentDraft}
+                    onChange={(event) => setCommentDraft(event.target.value)}
+                    placeholder="Ajouter un commentaire a cette carte..."
+                    rows={4}
+                    maxLength={1200}
+                    autoFocus
+                  />
+                </div>
+                <div className="card-comment-actions">
+                  <button type="button" onClick={handleSaveCardComment}>
+                    {activeComment?.message ? "Enregistrer" : "Ajouter"}
+                  </button>
+                  <button
+                    type="button"
+                    className="btn secondary"
+                    onClick={handleCloseCardCommentModal}
+                  >
+                    Annuler
+                  </button>
+                  {activeComment?.message ? (
+                    <button
+                      type="button"
+                      className="btn card-comment-delete"
+                      onClick={handleDeleteCardComment}
+                    >
+                      Supprimer
+                    </button>
+                  ) : null}
+                </div>
+              </>
+            ) : null}
+          </div>
+        </div>
+      ) : null}
       <Footer />
     </DndProvider>
   );

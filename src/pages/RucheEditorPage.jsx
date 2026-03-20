@@ -103,7 +103,7 @@ export default function RucheEditorPage() {
     return () => {
       mounted = false;
     };
-  }, [id, isNew, token]);
+  }, [canEdit, id, isNew, token]);
 
   useEffect(() => {
     if (isNew) return;
@@ -404,6 +404,7 @@ export default function RucheEditorPage() {
         initialBoardData={boardData}
         loadKey={workspaceLoadKey}
         canEdit={canEdit}
+        canComment={canComment}
         onStateChange={setBoardData}
         onOpenComments={!isNew ? () => setShowCommentsModal(true) : undefined}
         commentCount={commentCount}

@@ -12,6 +12,7 @@ export default function DraggableFreeCard({
   onReturnCardsToLibrary,
   onToggleSelection,
   onClearSelection,
+  onOpenComment,
 }) {
   const { isDragging, handleMouseDown, handleTouchStart } = useDraggableCard({
     card,
@@ -27,6 +28,7 @@ export default function DraggableFreeCard({
     onToggleSelection,
     onClearSelection,
   });
+  const hasComment = Boolean(card?.comment?.message?.trim());
 
   return (
     <div
@@ -42,7 +44,21 @@ export default function DraggableFreeCard({
       }}
       onMouseDown={handleMouseDown}
       onTouchStart={handleTouchStart}
+      onDoubleClick={(event) => {
+        event.stopPropagation();
+        onOpenComment?.(card);
+      }}
     >
+      {hasComment ? (
+        <span className="card-comment-indicator" aria-label="Carte commentee">
+          <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+            <path
+              d="M4 4h16v11H8l-4 4V4zm2 2v8.17L7.17 13H18V6H6z"
+              fill="currentColor"
+            />
+          </svg>
+        </span>
+      ) : null}
       <FreeHexCard card={card} />
     </div>
   );

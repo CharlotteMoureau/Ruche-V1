@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import { useDeviceDetection } from "./useDeviceDetection";
 
-function getCardDimensions(card) {
+function getCardDimensions() {
   return { width: 200, height: 200 };
 }
 

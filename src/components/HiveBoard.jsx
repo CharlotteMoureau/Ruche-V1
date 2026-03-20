@@ -13,6 +13,7 @@ export default function HiveBoard({
   selectedCardIds,
   onToggleCardSelection,
   onClearSelection,
+  onOpenCardComment,
 }) {
   const boardRef = useRef(null);
   const selectedCards = cards.filter((card) => selectedCardIds.has(card.id));
@@ -103,6 +104,7 @@ export default function HiveBoard({
               onReturnCardsToLibrary={onReturnCardsToLibrary}
               onToggleSelection={onToggleCardSelection}
               onClearSelection={onClearSelection}
+              onOpenComment={onOpenCardComment}
             />
           );
         }
@@ -119,6 +121,7 @@ export default function HiveBoard({
             onReturnCardsToLibrary={onReturnCardsToLibrary}
             onToggleSelection={onToggleCardSelection}
             onClearSelection={onClearSelection}
+            onOpenComment={onOpenCardComment}
           />
         );
       })}

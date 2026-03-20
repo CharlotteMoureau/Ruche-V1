@@ -329,3 +329,55 @@
   vertical-align: middle;
   line-height: 1;
 }
+
+// ── Card comment modal ─────────────────────────────────────────────────────
+
+.card-comment-modal {
+  max-width: 620px;
+
+  .card-comment-card-title {
+    margin: 0 0 0.5rem;
+    font-weight: 700;
+  }
+
+  .card-comment-meta {
+    margin-bottom: 0.75rem;
+
+    p {
+      margin: 0;
+      font-size: 0.82rem;
+      color: #666;
+    }
+  }
+
+  .card-comment-editor {
+    border-top: none;
+    padding-top: 0;
+  }
+
+  .card-comment-actions {
+    display: flex;
+    gap: 0.5rem;
+    justify-content: flex-end;
+    margin-top: 0.75rem;
+
+    button {
+      padding: 0.45rem 0.9rem;
+      border: none;
+      border-radius: 6px;
+      background: $jaune;
+      color: #333;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .secondary {
+      background: #ddd;
+    }
+
+    .card-comment-delete {
+      background: #9f2d20;
+      color: #fff;
+    }
+  }
+}
