@@ -74,6 +74,15 @@
   background-color: #ccc;
 }
 
+.modal-box .btn.danger {
+  background-color: $rose;
+  color: #fff;
+}
+
+.modal-box .btn.danger:hover {
+  background-color: darken($rose, 10%);
+}
+
 .counter-text {
   font-size: 0.9rem;
   color: #666;

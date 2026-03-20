@@ -382,6 +382,7 @@ export default function Toolbar({
         title="Quitter la ruche"
         message="Voulez-vous vraiment quitter cette ruche ?"
         confirmLabel="Quitter"
+        confirmClassName="danger"
         onCancel={() => setShowLeaveConfirmModal(false)}
         onConfirm={async () => {
           setShowLeaveConfirmModal(false);

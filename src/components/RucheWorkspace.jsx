@@ -498,6 +498,7 @@ export default function RucheWorkspace({
             : "Certaines cartes contiennent un commentaire. Les remettre dans la bibliotheque supprimera ces commentaires. Continuer ?"
         }
         confirmLabel="Continuer"
+        confirmClassName="danger"
         onCancel={() => setPendingReturnCardIds([])}
         onConfirm={confirmPendingCardReturn}
       />
@@ -507,7 +508,7 @@ export default function RucheWorkspace({
         title="Supprimer le commentaire de carte"
         message="Cette action est irreversible. Voulez-vous continuer ?"
         confirmLabel="Supprimer"
-        confirmClassName="danger-btn"
+        confirmClassName="danger"
         onCancel={() => setShowDeleteCardCommentModal(false)}
         onConfirm={() => {
           setShowDeleteCardCommentModal(false);

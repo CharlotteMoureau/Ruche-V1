@@ -485,7 +485,7 @@ export default function ProfilePage() {
         title="Supprimer la ruche"
         message="Cette action est irréversible. Voulez-vous continuer ?"
         confirmLabel="Supprimer"
-        confirmClassName="danger-btn"
+        confirmClassName="danger"
         onCancel={() => setConfirmDeleteHiveId(null)}
         onConfirm={deleteHive}
       />
@@ -514,7 +514,7 @@ export default function ProfilePage() {
         title="Créer une nouvelle ruche"
         message="Choisissez un nom pour votre nouvelle ruche."
         inputLabel="Nom de la ruche"
-        inputPlaceholder="Ex : Ruche projet Théâtre P2 école communale de Wavre 2024"
+        inputPlaceholder="Ex : Ruche projet Théâtre P2 école du renard 2024"
         value={newHiveTitle}
         onValueChange={setNewHiveTitle}
         confirmLabel="Confirmer"

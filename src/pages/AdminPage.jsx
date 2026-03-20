@@ -678,7 +678,7 @@ export default function AdminPage() {
         }
         message="Cette action est irreversible. Voulez-vous continuer ?"
         confirmLabel="Supprimer"
-        confirmClassName="danger-btn"
+        confirmClassName="danger"
         onCancel={() => setDeleteTarget({ type: null, id: null })}
         onConfirm={confirmDeleteTarget}
       />

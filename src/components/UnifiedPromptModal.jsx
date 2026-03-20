@@ -15,6 +15,9 @@ export default function UnifiedPromptModal({
   confirmClassName = "",
   onConfirm,
   onCancel,
+  extraActionLabel,
+  onExtraAction,
+  extraActionClassName = "",
 }) {
   const inputRef = useRef(null);
   const confirmRef = useRef(null);
@@ -84,6 +87,15 @@ export default function UnifiedPromptModal({
             <button type="button" className="btn secondary" onClick={onCancel}>
               {cancelLabel}
             </button>
+            {onExtraAction && extraActionLabel ? (
+              <button
+                type="button"
+                className={`btn ${extraActionClassName}`.trim()}
+                onClick={onExtraAction}
+              >
+                {extraActionLabel}
+              </button>
+            ) : null}
             <button
               ref={confirmRef}
               type="submit"

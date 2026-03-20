@@ -185,7 +185,7 @@ export default function RucheEditorPage() {
           body: { title: trimmedTitle, boardData },
         });
         navigate(`/hives/${created.id}`, { replace: true });
-        return;
+        return true;
       }
 
       await apiFetch(`/hives/${id}`, {
@@ -206,8 +206,18 @@ export default function RucheEditorPage() {
             }
           : prev,
       );
+      return true;
     } catch (err) {
       setError(err.message);
+      return false;
+    }
+  };
+
+  const saveAndLeave = async () => {
+    setShowLeaveDirtyModal(false);
+    const success = await saveHive();
+    if (success && !isNew) {
+      navigate("/profile");
     }
   };
 
@@ -653,7 +663,11 @@ export default function RucheEditorPage() {
         isOpen={showLeaveDirtyModal}
         title="Modifications non enregistrées"
         message="Votre ruche contient des modifications non enregistrées. Quitter sans sauvegarder ?"
-        confirmLabel="Quitter"
+        cancelLabel="Rester"
+        extraActionLabel="Enregistrer et quitter"
+        onExtraAction={saveAndLeave}
+        confirmLabel="Quitter sans enregistrer"
+        confirmClassName="danger"
         onCancel={() => setShowLeaveDirtyModal(false)}
         onConfirm={() => {
           setShowLeaveDirtyModal(false);
@@ -681,7 +695,7 @@ export default function RucheEditorPage() {
         title="Supprimer le commentaire"
         message="Cette action est irreversible. Voulez-vous continuer ?"
         confirmLabel="Supprimer"
-        confirmClassName="danger-btn"
+        confirmClassName="danger"
         onCancel={() => setDeleteTarget(null)}
         onConfirm={deleteComment}
       />
