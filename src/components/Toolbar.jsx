@@ -60,24 +60,62 @@ export default function Toolbar({
     return () => window.clearTimeout(timeoutId);
   }, [inviteWarning]);
 
+  const waitForCaptureFrame = () =>
+    new Promise((resolve) => {
+      window.setTimeout(resolve, 300);
+    });
+
+  const loadImage = (dataUrl) =>
+    new Promise((resolve, reject) => {
+      const image = new Image();
+      image.onload = () => resolve(image);
+      image.onerror = reject;
+      image.src = dataUrl;
+    });
+
+  const mergeFrontAndBackCapture = async (frontDataUrl, backDataUrl) => {
+    const [frontImage, backImage] = await Promise.all([
+      loadImage(frontDataUrl),
+      loadImage(backDataUrl),
+    ]);
+
+    const spacing = 24;
+    const canvas = document.createElement("canvas");
+    canvas.width = Math.max(frontImage.width, backImage.width);
+    canvas.height = frontImage.height + backImage.height + spacing;
+
+    const context = canvas.getContext("2d");
+    if (!context) {
+      throw new Error("Impossible de generer l'image fusionnee.");
+    }
+
+    context.drawImage(frontImage, 0, 0);
+    context.drawImage(backImage, 0, frontImage.height + spacing);
+
+    return canvas.toDataURL("image/png");
+  };
+
   const handleExport = async () => {
     const board = document.querySelector(".hive-board");
     if (!board) return;
 
     document.body.classList.add("capture-mode");
 
-    const backs = board.querySelectorAll(".hex-back");
-    backs.forEach((el) => {
-      el.setAttribute("data-original-visibility", el.style.visibility || "");
-      el.style.visibility = "hidden";
-    });
-
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-
     try {
-      const dataUrl = await domtoimage.toPng(board, {
+      await waitForCaptureFrame();
+
+      const frontDataUrl = await domtoimage.toPng(board, {
         cacheBust: true,
       });
+
+      document.body.classList.add("capture-mode-back");
+      await waitForCaptureFrame();
+
+      const backDataUrl = await domtoimage.toPng(board, {
+        cacheBust: true,
+      });
+
+      const dataUrl = await mergeFrontAndBackCapture(frontDataUrl, backDataUrl);
 
       const link = document.createElement("a");
       link.download = "ruche.png";
@@ -89,11 +127,7 @@ export default function Toolbar({
         `Erreur lors de la capture : ${err?.message || "inconnue"}`,
       );
     } finally {
-      backs.forEach((el) => {
-        el.style.visibility = el.getAttribute("data-original-visibility");
-        el.removeAttribute("data-original-visibility");
-      });
-
+      document.body.classList.remove("capture-mode-back");
       document.body.classList.remove("capture-mode");
     }
   };

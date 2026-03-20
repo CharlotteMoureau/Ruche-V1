@@ -129,6 +129,18 @@
   display: none !important;
 }
 
+.capture-mode.capture-mode-back .hex-inner {
+  transform: rotateY(180deg) !important;
+}
+
+.capture-mode.capture-mode-back .hex-front {
+  display: none !important;
+}
+
+.capture-mode.capture-mode-back .hex-back {
+  display: flex !important;
+}
+
 .long-def {
   overflow-y: scroll;
   scrollbar-width: thin !important;
