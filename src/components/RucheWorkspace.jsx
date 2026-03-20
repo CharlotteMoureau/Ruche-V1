@@ -297,7 +297,9 @@ export default function RucheWorkspace({
             createdAt: existingComment?.createdAt || now,
             createdBy: existingComment?.createdBy || actor,
             updatedAt: now,
-            updatedBy: isNewComment ? existingComment?.createdBy || actor : actor,
+            updatedBy: isNewComment
+              ? existingComment?.createdBy || actor
+              : actor,
           },
         };
       }),
@@ -419,17 +421,19 @@ export default function RucheWorkspace({
               x
             </button>
 
-            <p className="card-comment-card-title">Carte : {activeCommentCard.title}</p>
+            <p className="card-comment-card-title">
+              Carte : {activeCommentCard.title}
+            </p>
 
             {activeComment?.message ? (
               <div className="card-comment-meta">
                 <p>
-                  Cree le {formatDateTime(activeComment.createdAt)} par{" "}
+                  Créé le {formatDateTime(activeComment.createdAt)} par{" "}
                   {getUserLabel(activeComment.createdBy)}
                 </p>
                 <p>
-                  Derniere edition le {formatDateTime(activeComment.updatedAt)} par{" "}
-                  {getUserLabel(activeComment.updatedBy)}
+                  Dernière édition le {formatDateTime(activeComment.updatedAt)}{" "}
+                  par {getUserLabel(activeComment.updatedBy)}
                 </p>
               </div>
             ) : (
@@ -444,7 +448,7 @@ export default function RucheWorkspace({
                   <textarea
                     value={commentDraft}
                     onChange={(event) => setCommentDraft(event.target.value)}
-                    placeholder="Ajouter un commentaire a cette carte..."
+                    placeholder="Ajouter un commentaire à cette carte..."
                     rows={4}
                     maxLength={1200}
                     autoFocus

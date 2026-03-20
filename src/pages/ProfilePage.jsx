@@ -30,7 +30,11 @@ export default function ProfilePage() {
   const navigate = useNavigate();
   const [profile, setProfile] = useState(null);
   const [error, setError] = useState("");
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [deletePassword, setDeletePassword] = useState("");
+  const [deletePasswordConfirm, setDeletePasswordConfirm] = useState("");
+  const [deleteError, setDeleteError] = useState("");
+  const [isDeleting, setIsDeleting] = useState(false);
   const [ownedPage, setOwnedPage] = useState(1);
   const [sharedPage, setSharedPage] = useState(1);
   const [creatingHive, setCreatingHive] = useState(false);
@@ -71,25 +75,52 @@ export default function ProfilePage() {
   };
 
   const deleteProfile = async () => {
-    const confirmed = window.confirm(
-      "Confirmez-vous la suppression de votre profil ?",
-    );
-    if (!confirmed) return;
+    const trimmedPassword = deletePassword.trim();
+    const trimmedPasswordConfirm = deletePasswordConfirm.trim();
+
+    if (!trimmedPassword || !trimmedPasswordConfirm) {
+      setDeleteError("Veuillez renseigner les deux champs de mot de passe.");
+      return;
+    }
+
+    if (trimmedPassword !== trimmedPasswordConfirm) {
+      setDeleteError("Les mots de passe ne correspondent pas.");
+      return;
+    }
 
     try {
+      setDeleteError("");
+      setIsDeleting(true);
       await apiFetch("/users/me", {
         method: "DELETE",
         token,
         body: {
           confirmation: "DELETE",
-          password: deletePassword,
+          password: trimmedPassword,
         },
       });
       logout();
       navigate("/");
     } catch (err) {
-      setError(err.message);
+      setDeleteError(err.message);
+    } finally {
+      setIsDeleting(false);
     }
+  };
+
+  const openDeleteModal = () => {
+    setDeletePassword("");
+    setDeletePasswordConfirm("");
+    setDeleteError("");
+    setIsDeleteModalOpen(true);
+  };
+
+  const closeDeleteModal = () => {
+    if (isDeleting) return;
+    setIsDeleteModalOpen(false);
+    setDeletePassword("");
+    setDeletePasswordConfirm("");
+    setDeleteError("");
   };
 
   const ownedTotalPages = profile
@@ -122,13 +153,13 @@ export default function ProfilePage() {
       {profile ? (
         <>
           <p>
-            <strong>Username:</strong> {profile.user.username}
+            <strong>Nom d'utilisateur :</strong> {profile.user.username}
           </p>
           <p>
-            <strong>Email:</strong> {profile.user.email}
+            <strong>Email :</strong> {profile.user.email}
           </p>
           <p>
-            <strong>Role:</strong> {profile.user.roleLabel}
+            <strong>Rôle :</strong> {profile.user.roleLabel}
             {profile.user.roleLabel === "Autre" && profile.user.roleOtherText
               ? ` - ${profile.user.roleOtherText}`
               : ""}
@@ -180,7 +211,7 @@ export default function ProfilePage() {
                 className="button-link"
                 onClick={() => setCreatingHive(true)}
               >
-                Creer une nouvelle Ruche
+                Créer une nouvelle Ruche
               </button>
             </div>
           )}
@@ -194,9 +225,9 @@ export default function ProfilePage() {
                     <span>
                       <strong>{hive.title}</strong>
                       <br />
-                      Creee le: {formatDateTime(hive.createdAt)}
+                      Créée le : {formatDateTime(hive.createdAt)}
                       <br />
-                      Derniere edition: {formatDateTime(hive.updatedAt)}
+                      Dernière édition : {formatDateTime(hive.updatedAt)}
                     </span>
                     <div className="inline-actions">
                       <Link className="button-link" to={`/hives/${hive.id}`}>
@@ -241,7 +272,7 @@ export default function ProfilePage() {
 
           {sharedCount > 0 ? (
             <>
-              <h3>Ruches partagees</h3>
+              <h3>Ruches partagées</h3>
               <ul className="list-grid">
                 {pagedSharedHives.map((hive) => (
                   <li key={hive.id}>
@@ -250,9 +281,9 @@ export default function ProfilePage() {
                         {hive.title} ({hive.collaboratorRole})
                       </strong>
                       <br />
-                      Creee le: {formatDateTime(hive.createdAt)}
+                      Créée le : {formatDateTime(hive.createdAt)}
                       <br />
-                      Derniere edition: {formatDateTime(hive.updatedAt)}
+                      Dernière édition : {formatDateTime(hive.updatedAt)}
                     </span>
                     <Link className="button-link" to={`/hives/${hive.id}`}>
                       Ouvrir
@@ -269,7 +300,7 @@ export default function ProfilePage() {
                     }
                     disabled={sharedPage === 1}
                   >
-                    Precedent
+                    Précédent
                   </button>
                   <span>
                     Page {sharedPage}/{sharedTotalPages}
@@ -291,18 +322,87 @@ export default function ProfilePage() {
           ) : null}
 
           <h3>Supprimer mon profil</h3>
-          <p>Double confirmation requise.</p>
-          <label>
-            Mot de passe
-            <input
-              type="password"
-              value={deletePassword}
-              onChange={(e) => setDeletePassword(e.target.value)}
-            />
-          </label>
-          <button type="button" className="danger-btn" onClick={deleteProfile}>
+          <p>Cette action est irréversible et supprimera vos données.</p>
+          <button
+            type="button"
+            className="danger-btn"
+            onClick={openDeleteModal}
+          >
             Supprimer mon profil
           </button>
+
+          {isDeleteModalOpen ? (
+            <div
+              className="modal-overlay"
+              onClick={(event) => {
+                if (event.target.classList.contains("modal-overlay")) {
+                  closeDeleteModal();
+                }
+              }}
+              onKeyDown={(event) => {
+                if (event.key === "Escape") {
+                  closeDeleteModal();
+                }
+              }}
+              tabIndex={0}
+            >
+              <div
+                className="modal-box"
+                onClick={(event) => event.stopPropagation()}
+              >
+                <h2>Confirmer la suppression</h2>
+                <p>
+                  Entrez votre mot de passe deux fois pour supprimer le compte.
+                </p>
+
+                {deleteError ? (
+                  <p className="form-error">{deleteError}</p>
+                ) : null}
+
+                <label>
+                  Mot de passe
+                  <input
+                    type="password"
+                    value={deletePassword}
+                    onChange={(event) => setDeletePassword(event.target.value)}
+                    autoFocus
+                    disabled={isDeleting}
+                  />
+                </label>
+
+                <label>
+                  Confirmer le mot de passe
+                  <input
+                    type="password"
+                    value={deletePasswordConfirm}
+                    onChange={(event) =>
+                      setDeletePasswordConfirm(event.target.value)
+                    }
+                    disabled={isDeleting}
+                  />
+                </label>
+
+                <div className="modal-actions">
+                  <button
+                    type="button"
+                    className="btn secondary"
+                    onClick={closeDeleteModal}
+                    disabled={isDeleting}
+                  >
+                    Annuler
+                  </button>
+                  <button
+                    type="button"
+                    className="danger-btn"
+                    onClick={deleteProfile}
+                    disabled={isDeleting}
+                  >
+                    {isDeleting ? "Suppression..." : "Supprimer mon profil"}
+                  </button>
+                </div>
+              </div>
+            </div>
+          ) : null}
         </>
       ) : (
         <p>Chargement...</p>
