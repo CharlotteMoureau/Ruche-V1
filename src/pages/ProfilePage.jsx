@@ -190,6 +190,21 @@ export default function ProfilePage() {
     setDeleteError("");
   };
 
+  const closeCreateHiveModal = () => {
+    setCreatingHive(false);
+    setNewHiveTitle("");
+  };
+
+  const confirmCreateHive = () => {
+    const trimmedTitle = newHiveTitle.trim();
+    if (!trimmedTitle) return;
+
+    navigate("/hives/new", {
+      state: { title: trimmedTitle },
+    });
+    closeCreateHiveModal();
+  };
+
   const ownedTotalPages = profile
     ? getTotalPages(profile.ownedHives.length)
     : 1;
@@ -232,56 +247,15 @@ export default function ProfilePage() {
               : ""}
           </p>
 
-          {creatingHive ? (
-            <div className="form-grid">
-              <label>
-                Nom de la Ruche
-                <input
-                  type="text"
-                  value={newHiveTitle}
-                  onChange={(e) => setNewHiveTitle(e.target.value)}
-                  maxLength={100}
-                  autoFocus
-                />
-              </label>
-              <span className="char-counter">{newHiveTitle.length}/100</span>
-              <div className="inline-actions">
-                <button
-                  type="button"
-                  className="button-link"
-                  disabled={!newHiveTitle.trim()}
-                  onClick={() => {
-                    navigate("/hives/new", {
-                      state: { title: newHiveTitle.trim() },
-                    });
-                    setCreatingHive(false);
-                    setNewHiveTitle("");
-                  }}
-                >
-                  Confirmer
-                </button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setCreatingHive(false);
-                    setNewHiveTitle("");
-                  }}
-                >
-                  Annuler
-                </button>
-              </div>
-            </div>
-          ) : (
-            <div className="inline-actions">
-              <button
-                type="button"
-                className="button-link"
-                onClick={() => setCreatingHive(true)}
-              >
-                Créer une nouvelle Ruche
-              </button>
-            </div>
-          )}
+          <div className="inline-actions">
+            <button
+              type="button"
+              className="button-link"
+              onClick={() => setCreatingHive(true)}
+            >
+              Créer une nouvelle Ruche
+            </button>
+          </div>
 
           {ownedCount > 0 ? (
             <>
@@ -526,12 +500,27 @@ export default function ProfilePage() {
         onValueChange={(value) =>
           setDuplicateDraft((prev) => ({ ...prev, nextTitle: value }))
         }
-        confirmLabel="Creer la copie"
+        confirmLabel="Créer la copie"
         confirmDisabled={!duplicateDraft.nextTitle.trim()}
         onCancel={() =>
           setDuplicateDraft({ hiveId: null, sourceTitle: "", nextTitle: "" })
         }
         onConfirm={duplicateHiveFromProfile}
+      />
+
+      <UnifiedPromptModal
+        isOpen={creatingHive}
+        mode="prompt"
+        title="Créer une nouvelle ruche"
+        message="Choisissez un nom pour votre nouvelle ruche."
+        inputLabel="Nom de la ruche"
+        inputPlaceholder="Ex : Ruche projet Théâtre P2 école communale de Wavre 2024"
+        value={newHiveTitle}
+        onValueChange={setNewHiveTitle}
+        confirmLabel="Confirmer"
+        confirmDisabled={!newHiveTitle.trim()}
+        onCancel={closeCreateHiveModal}
+        onConfirm={confirmCreateHive}
       />
     </section>
   );
