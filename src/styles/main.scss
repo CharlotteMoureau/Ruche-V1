@@ -182,7 +182,6 @@ body {
   padding: 8px 12px;
 }
 
-.danger-btn,
 .inline-actions button,
 .list-grid button,
 .editor-topbar button {
@@ -190,7 +189,7 @@ body {
   border-radius: 8px;
   padding: 8px 12px;
   cursor: pointer;
-  background: #9f2d20;
+  background: $rose;
   color: #fff;
 }
 
