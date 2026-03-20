@@ -44,6 +44,8 @@ export default function RucheWorkspace({
   loadKey,
   onStateChange,
   canEdit = true,
+  onOpenComments,
+  commentCount = 0,
 }) {
   const [availableCards, setAvailableCards] = useState(
     () => normalizeBoardData(initialBoardData).availableCards,
@@ -208,7 +210,11 @@ export default function RucheWorkspace({
   return (
     <DndProvider backend={HTML5Backend}>
       <div className="app editor-app">
-        <Toolbar onReset={resetHive} />
+        <Toolbar
+          onReset={resetHive}
+          onOpenComments={onOpenComments}
+          commentCount={commentCount}
+        />
         <CardLibrary
           cards={availableCards}
           onFreeSpaceClick={() => setShowModal(true)}

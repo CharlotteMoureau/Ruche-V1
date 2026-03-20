@@ -53,14 +53,17 @@ model HiveCollaborator {
 }
 
 model HiveComment {
-  id        String   @id @default(cuid())
+  id        String        @id @default(cuid())
   hiveId    String
   authorId  String
   message   String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  hive      Hive     @relation(fields: [hiveId], references: [id], onDelete: Cascade)
-  author    User     @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  parentId  String?
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+  hive      Hive          @relation(fields: [hiveId], references: [id], onDelete: Cascade)
+  author    User          @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  parent    HiveComment?  @relation("CommentReplies", fields: [parentId], references: [id], onDelete: Cascade)
+  replies   HiveComment[] @relation("CommentReplies")
 }
 
 model PasswordResetToken {

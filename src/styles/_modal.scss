@@ -124,3 +124,208 @@
     transform: translateX(-50%) translateY(-20px);
   }
 }
+
+// ── Comments modal ─────────────────────────────────────────────────────────
+
+.comments-modal {
+  max-width: 560px;
+  width: 94%;
+  max-height: 85vh;
+  display: flex;
+  flex-direction: column;
+  text-align: left;
+  padding: 1.5rem;
+  position: relative;
+
+  h2 {
+    margin: 0 0 1rem;
+    font-size: 1.25rem;
+    padding-right: 2rem;
+  }
+}
+
+.modal-close-btn {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  line-height: 1;
+  cursor: pointer;
+  color: #666;
+  padding: 0 0.25rem;
+
+  &:hover { color: #333; }
+}
+
+.comments-scroll {
+  flex: 1;
+  overflow-y: auto;
+  padding-right: 4px;
+  margin-bottom: 1rem;
+}
+
+.comments-empty {
+  color: #888;
+  font-style: italic;
+  text-align: center;
+  padding: 1rem 0;
+}
+
+.comment-thread {
+  margin-bottom: 0.75rem;
+}
+
+.comment-item {
+  background: #f9f7f4;
+  border: 1px solid #e0dcd5;
+  border-radius: 8px;
+  padding: 0.6rem 0.75rem;
+
+  &--reply {
+    margin-left: 1.5rem;
+    margin-top: 0.4rem;
+    background: #f3f0ea;
+    border-left: 3px solid $jaune;
+  }
+}
+
+.comment-header {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+  margin-bottom: 0.25rem;
+
+  strong {
+    font-size: 0.9rem;
+  }
+}
+
+.comment-date {
+  font-size: 0.75rem;
+  color: #999;
+}
+
+.comment-message {
+  margin: 0 0 0.4rem;
+  font-size: 0.9rem;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.comment-actions {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.comment-action-btn {
+  background: none;
+  border: none;
+  padding: 0;
+  font-size: 0.78rem;
+  color: $bleu-clair;
+  cursor: pointer;
+  text-decoration: underline;
+
+  &:hover { color: $bleu-fonce; }
+
+  &--danger {
+    color: $rose;
+    &:hover { color: darken($rose, 10%); }
+  }
+}
+
+.comment-reply-form {
+  margin-left: 1.5rem;
+  margin-top: 0.4rem;
+
+  textarea {
+    width: 100%;
+    box-sizing: border-box;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    padding: 0.4rem 0.6rem;
+    font-size: 0.88rem;
+    resize: vertical;
+    font-family: inherit;
+
+    &:focus { outline: none; border-color: $turquoise; }
+  }
+}
+
+.comment-reply-actions {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.4rem;
+
+  button {
+    padding: 0.3rem 0.75rem;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 0.85rem;
+    font-weight: 600;
+    background: $jaune;
+    color: #333;
+
+    &.secondary { background: #ddd; }
+  }
+}
+
+.comments-new {
+  display: flex;
+  gap: 0.5rem;
+  align-items: flex-end;
+  border-top: 1px solid #eee;
+  padding-top: 0.75rem;
+  flex-shrink: 0;
+
+  textarea {
+    flex: 1;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    padding: 0.4rem 0.6rem;
+    font-size: 0.9rem;
+    resize: vertical;
+    font-family: inherit;
+
+    &:focus { outline: none; border-color: $turquoise; }
+  }
+
+  button {
+    padding: 0.45rem 1rem;
+    border: none;
+    border-radius: 6px;
+    background: $jaune;
+    color: #333;
+    font-weight: 600;
+    cursor: pointer;
+    white-space: nowrap;
+    align-self: flex-end;
+  }
+}
+
+// ── Toolbar comments badge ──────────────────────────────────────────────────
+
+.toolbar-comments-btn {
+  position: relative;
+}
+
+.toolbar-comments-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: $rose;
+  color: #fff;
+  font-size: 0.7rem;
+  font-weight: 700;
+  border-radius: 999px;
+  min-width: 1.1em;
+  height: 1.1em;
+  padding: 0 0.25em;
+  margin-left: 0.35em;
+  vertical-align: middle;
+  line-height: 1;
+}

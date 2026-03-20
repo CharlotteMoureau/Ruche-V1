@@ -109,11 +109,17 @@ hivesRouter.get("/:id", async (req, res) => {
   }
 
   const comments = await prisma.hiveComment.findMany({
-    where: { hiveId: hive.id },
+    where: { hiveId: hive.id, parentId: null },
     include: {
       author: { select: { id: true, username: true, email: true } },
+      replies: {
+        include: {
+          author: { select: { id: true, username: true, email: true } },
+        },
+        orderBy: { createdAt: "asc" },
+      },
     },
-    orderBy: { createdAt: "asc" },
+    orderBy: { createdAt: "desc" },
   });
 
   return res.json({
@@ -137,6 +143,14 @@ hivesRouter.get("/:id", async (req, res) => {
       createdAt: comment.createdAt,
       updatedAt: comment.updatedAt,
       author: comment.author,
+      replies: comment.replies.map((reply) => ({
+        id: reply.id,
+        message: reply.message,
+        createdAt: reply.createdAt,
+        updatedAt: reply.updatedAt,
+        author: reply.author,
+        parentId: reply.parentId,
+      })),
     })),
   });
 });
@@ -302,6 +316,7 @@ hivesRouter.delete("/:id/collaborators/:userId", async (req, res) => {
 
 const commentSchema = z.object({
   message: z.string().trim().min(1).max(1200),
+  parentId: z.string().optional(),
 });
 
 hivesRouter.post("/:id/comments", async (req, res) => {
@@ -319,11 +334,22 @@ hivesRouter.post("/:id/comments", async (req, res) => {
     return res.status(403).json({ error: "Vous ne pouvez pas commenter cette ruche" });
   }
 
+  let resolvedParentId = null;
+  if (parsed.data.parentId) {
+    const parent = await prisma.hiveComment.findUnique({ where: { id: parsed.data.parentId } });
+    if (!parent || parent.hiveId !== hive.id) {
+      return res.status(400).json({ error: "Commentaire parent introuvable" });
+    }
+    // Replies always attach to the top-level parent (no third tier)
+    resolvedParentId = parent.parentId ?? parent.id;
+  }
+
   const comment = await prisma.hiveComment.create({
     data: {
       hiveId: hive.id,
       authorId: req.user.id,
       message: parsed.data.message,
+      parentId: resolvedParentId,
     },
     include: {
       author: { select: { id: true, username: true, email: true } },

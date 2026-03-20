@@ -1,8 +1,12 @@
 import domtoimage from "dom-to-image-more";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faArrowsRotate, faCamera } from "@fortawesome/free-solid-svg-icons";
+import {
+  faArrowsRotate,
+  faCamera,
+  faComments,
+} from "@fortawesome/free-solid-svg-icons";
 
-export default function Toolbar({ onReset }) {
+export default function Toolbar({ onReset, onOpenComments, commentCount = 0 }) {
   const handleExport = async () => {
     const board = document.querySelector(".hive-board");
     if (!board) return;
@@ -47,6 +51,14 @@ export default function Toolbar({ onReset }) {
       <button onClick={handleExport}>
         <FontAwesomeIcon icon={faCamera} /> Capture d'écran
       </button>
+      {onOpenComments && (
+        <button onClick={onOpenComments} className="toolbar-comments-btn">
+          <FontAwesomeIcon icon={faComments} /> Commentaires
+          {commentCount > 0 && (
+            <span className="toolbar-comments-badge">{commentCount}</span>
+          )}
+        </button>
+      )}
     </div>
   );
 }

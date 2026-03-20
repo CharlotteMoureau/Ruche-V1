@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+﻿import { useEffect, useMemo, useRef, useState } from "react";
 import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
 import { apiFetch } from "../lib/api";
 import { useAuth } from "../context/AuthContext";
@@ -14,6 +14,10 @@ function formatDateTime(value) {
     dateStyle: "medium",
     timeStyle: "short",
   }).format(date);
+}
+
+function totalCommentCount(comments = []) {
+  return comments.reduce((sum, c) => sum + 1 + (c.replies?.length || 0), 0);
 }
 
 export default function RucheEditorPage() {
@@ -33,7 +37,13 @@ export default function RucheEditorPage() {
   const [error, setError] = useState("");
   const [inviteEmail, setInviteEmail] = useState("");
   const [inviteRole, setInviteRole] = useState("COMMENT");
+
+  // Comments modal state
+  const [showCommentsModal, setShowCommentsModal] = useState(false);
   const [commentText, setCommentText] = useState("");
+  const [replyingTo, setReplyingTo] = useState(null);
+  const [replyText, setReplyText] = useState("");
+  const commentsEndRef = useRef(null);
 
   const isOwner = Boolean(
     hive?.owner?.id && user?.id && hive.owner.id === user.id,
@@ -132,6 +142,13 @@ export default function RucheEditorPage() {
     return () => window.removeEventListener("beforeunload", handler);
   }, [isDirty]);
 
+  useEffect(() => {
+    document.body.style.overflow = showCommentsModal ? "hidden" : "";
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [showCommentsModal]);
+
   const saveHive = async () => {
     setError("");
     try {
@@ -221,16 +238,18 @@ export default function RucheEditorPage() {
   };
 
   const submitComment = async () => {
+    const text = commentText.trim();
+    if (!text) return;
     try {
       const comment = await apiFetch(`/hives/${id}/comments`, {
         method: "POST",
         token,
-        body: { message: commentText },
+        body: { message: text },
       });
 
       setHive((prev) => ({
         ...prev,
-        comments: [...(prev?.comments || []), comment],
+        comments: [{ ...comment, replies: [] }, ...(prev?.comments || [])],
       }));
       setCommentText("");
     } catch (err) {
@@ -238,7 +257,33 @@ export default function RucheEditorPage() {
     }
   };
 
-  const editComment = async (comment) => {
+  const submitReply = async (parentId) => {
+    const text = replyText.trim();
+    if (!text) return;
+    try {
+      const reply = await apiFetch(`/hives/${id}/comments`, {
+        method: "POST",
+        token,
+        body: { message: text, parentId },
+      });
+
+      const resolvedParentId = reply.parentId;
+      setHive((prev) => ({
+        ...prev,
+        comments: (prev?.comments || []).map((c) =>
+          c.id === resolvedParentId
+            ? { ...c, replies: [...(c.replies || []), reply] }
+            : c,
+        ),
+      }));
+      setReplyText("");
+      setReplyingTo(null);
+    } catch (err) {
+      setError(err.message);
+    }
+  };
+
+  const editComment = async (comment, parentId = null) => {
     const value = window.prompt("Modifier le commentaire", comment.message);
     if (!value?.trim()) return;
 
@@ -248,15 +293,32 @@ export default function RucheEditorPage() {
       body: { message: value },
     });
 
-    setHive((prev) => ({
-      ...prev,
-      comments: (prev?.comments || []).map((c) =>
-        c.id === updated.id ? updated : c,
-      ),
-    }));
+    setHive((prev) => {
+      if (!parentId) {
+        return {
+          ...prev,
+          comments: (prev?.comments || []).map((c) =>
+            c.id === updated.id ? { ...updated, replies: c.replies || [] } : c,
+          ),
+        };
+      }
+      return {
+        ...prev,
+        comments: (prev?.comments || []).map((c) =>
+          c.id === parentId
+            ? {
+                ...c,
+                replies: (c.replies || []).map((r) =>
+                  r.id === updated.id ? updated : r,
+                ),
+              }
+            : c,
+        ),
+      };
+    });
   };
 
-  const deleteComment = async (comment) => {
+  const deleteComment = async (comment, parentId = null) => {
     const confirmed = window.confirm("Supprimer ce commentaire ?");
     if (!confirmed) return;
 
@@ -265,11 +327,35 @@ export default function RucheEditorPage() {
       token,
     });
 
-    setHive((prev) => ({
-      ...prev,
-      comments: (prev?.comments || []).filter((c) => c.id !== comment.id),
-    }));
+    setHive((prev) => {
+      if (!parentId) {
+        return {
+          ...prev,
+          comments: (prev?.comments || []).filter((c) => c.id !== comment.id),
+        };
+      }
+      return {
+        ...prev,
+        comments: (prev?.comments || []).map((c) =>
+          c.id === parentId
+            ? {
+                ...c,
+                replies: (c.replies || []).filter((r) => r.id !== comment.id),
+              }
+            : c,
+        ),
+      };
+    });
   };
+
+  const startReply = (comment) => {
+    const targetId = comment.parentId ?? comment.id;
+    setReplyingTo(targetId);
+    setReplyText("");
+  };
+
+  const comments = hive?.comments || [];
+  const commentCount = totalCommentCount(comments);
 
   return (
     <section className="editor-page">
@@ -319,6 +405,8 @@ export default function RucheEditorPage() {
         loadKey={workspaceLoadKey}
         canEdit={canEdit}
         onStateChange={setBoardData}
+        onOpenComments={!isNew ? () => setShowCommentsModal(true) : undefined}
+        commentCount={commentCount}
       />
 
       {!isNew && hive ? (
@@ -384,54 +472,175 @@ export default function RucheEditorPage() {
               ))}
             </ul>
           </section>
+        </div>
+      ) : null}
 
-          <section className="page-shell">
-            <h3>Chat de la Ruche</h3>
-            {canComment ? (
-              <div className="inline-actions">
-                <input
+      {showCommentsModal && (
+        <div
+          className="modal-overlay"
+          onClick={(e) => {
+            if (e.target === e.currentTarget) {
+              setShowCommentsModal(false);
+              setReplyingTo(null);
+              setReplyText("");
+            }
+          }}
+        >
+          <div className="modal-box comments-modal">
+            <h2>Chat de la Ruche</h2>
+            <button
+              className="modal-close-btn"
+              onClick={() => {
+                setShowCommentsModal(false);
+                setReplyingTo(null);
+                setReplyText("");
+              }}
+              aria-label="Fermer"
+            >
+              ×
+            </button>
+
+            <div className="comments-scroll">
+              {comments.length === 0 && (
+                <p className="comments-empty">
+                  Aucun commentaire pour l&apos;instant.
+                </p>
+              )}
+              {comments.map((comment) => (
+                <div key={comment.id} className="comment-thread">
+                  <div className="comment-item">
+                    <div className="comment-header">
+                      <strong>{comment.author?.username}</strong>
+                      <span className="comment-date">
+                        {formatDateTime(comment.createdAt)}
+                      </span>
+                    </div>
+                    <p className="comment-message">{comment.message}</p>
+                    <div className="comment-actions">
+                      {canComment && (
+                        <button
+                          type="button"
+                          className="comment-action-btn"
+                          onClick={() => startReply(comment)}
+                        >
+                          Répondre
+                        </button>
+                      )}
+                      {(comment.author?.id === user?.id || isAdmin) && (
+                        <>
+                          <button
+                            type="button"
+                            className="comment-action-btn"
+                            onClick={() => editComment(comment)}
+                          >
+                            Éditer
+                          </button>
+                          <button
+                            type="button"
+                            className="comment-action-btn comment-action-btn--danger"
+                            onClick={() => deleteComment(comment)}
+                          >
+                            Supprimer
+                          </button>
+                        </>
+                      )}
+                    </div>
+                  </div>
+
+                  {(comment.replies || []).map((reply) => (
+                    <div
+                      key={reply.id}
+                      className="comment-item comment-item--reply"
+                    >
+                      <div className="comment-header">
+                        <strong>{reply.author?.username}</strong>
+                        <span className="comment-date">
+                          {formatDateTime(reply.createdAt)}
+                        </span>
+                      </div>
+                      <p className="comment-message">{reply.message}</p>
+                      <div className="comment-actions">
+                        {canComment && (
+                          <button
+                            type="button"
+                            className="comment-action-btn"
+                            onClick={() => startReply(reply)}
+                          >
+                            Répondre
+                          </button>
+                        )}
+                        {(reply.author?.id === user?.id || isAdmin) && (
+                          <>
+                            <button
+                              type="button"
+                              className="comment-action-btn"
+                              onClick={() => editComment(reply, comment.id)}
+                            >
+                              Éditer
+                            </button>
+                            <button
+                              type="button"
+                              className="comment-action-btn comment-action-btn--danger"
+                              onClick={() => deleteComment(reply, comment.id)}
+                            >
+                              Supprimer
+                            </button>
+                          </>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+
+                  {replyingTo === comment.id && (
+                    <div className="comment-reply-form">
+                      <textarea
+                        value={replyText}
+                        onChange={(e) => setReplyText(e.target.value)}
+                        placeholder="Écrire une réponse…"
+                        rows={2}
+                        autoFocus
+                      />
+                      <div className="comment-reply-actions">
+                        <button
+                          type="button"
+                          onClick={() => submitReply(comment.id)}
+                        >
+                          Envoyer
+                        </button>
+                        <button
+                          type="button"
+                          className="btn secondary"
+                          onClick={() => {
+                            setReplyingTo(null);
+                            setReplyText("");
+                          }}
+                        >
+                          Annuler
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              ))}
+              <div ref={commentsEndRef} />
+            </div>
+
+            {canComment && (
+              <div className="comments-new">
+                <textarea
                   value={commentText}
                   onChange={(e) => setCommentText(e.target.value)}
-                  placeholder="Ajouter un commentaire"
+                  placeholder="Ajouter un commentaire…"
+                  rows={2}
                 />
                 <button type="button" onClick={submitComment}>
                   Envoyer
                 </button>
               </div>
-            ) : null}
-            <ul className="list-grid">
-              {(hive.comments || []).map((comment) => (
-                <li key={comment.id}>
-                  <span>
-                    <strong>{comment.author?.username}</strong>:{" "}
-                    {comment.message}
-                    <br />
-                    Cree le: {formatDateTime(comment.createdAt)}
-                    <br />
-                    Derniere edition: {formatDateTime(comment.updatedAt)}
-                  </span>
-                  {(comment.author?.id === user?.id || isAdmin) && (
-                    <div className="inline-actions">
-                      <button
-                        type="button"
-                        onClick={() => editComment(comment)}
-                      >
-                        Editer
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => deleteComment(comment)}
-                      >
-                        Supprimer
-                      </button>
-                    </div>
-                  )}
-                </li>
-              ))}
-            </ul>
-          </section>
+            )}
+          </div>
         </div>
-      ) : null}
+      )}
     </section>
   );
 }
