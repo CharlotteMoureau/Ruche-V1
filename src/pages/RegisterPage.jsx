@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import PasswordField from "../components/PasswordField";
 
 const ROLE_OPTIONS = [
   "Délégué PECA",
@@ -29,7 +30,6 @@ export default function RegisterPage() {
     roleOtherText: "",
   });
   const [loading, setLoading] = useState(false);
-  const [showPasswords, setShowPasswords] = useState(false);
   const [error, setError] = useState("");
 
   const onChange = (key, value) => {
@@ -100,35 +100,23 @@ export default function RegisterPage() {
           </label>
         ) : null}
 
-        <label>
-          Mot de passe
-          <input
-            type={showPasswords ? "text" : "password"}
-            value={form.password}
-            onChange={(e) => onChange("password", e.target.value)}
-            required
-            minLength={8}
-          />
-        </label>
+        <PasswordField
+          label="Mot de passe"
+          value={form.password}
+          onChange={(e) => onChange("password", e.target.value)}
+          required
+          minLength={8}
+          autoComplete="new-password"
+        />
 
-        <label>
-          Confirmation du mot de passe
-          <input
-            type={showPasswords ? "text" : "password"}
-            value={form.passwordConfirm}
-            onChange={(e) => onChange("passwordConfirm", e.target.value)}
-            required
-            minLength={8}
-          />
-        </label>
-
-        <button
-          type="button"
-          className="button-link"
-          onClick={() => setShowPasswords((current) => !current)}
-        >
-          {showPasswords ? "Masquer" : "Afficher"}
-        </button>
+        <PasswordField
+          label="Confirmation du mot de passe"
+          value={form.passwordConfirm}
+          onChange={(e) => onChange("passwordConfirm", e.target.value)}
+          required
+          minLength={8}
+          autoComplete="new-password"
+        />
 
         {error ? <p className="form-error">{error}</p> : null}
         <button disabled={loading} type="submit">

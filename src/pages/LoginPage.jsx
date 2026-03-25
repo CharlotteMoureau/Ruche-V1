@@ -1,13 +1,13 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import PasswordField from "../components/PasswordField";
 
 export default function LoginPage() {
   const { login } = useAuth();
   const navigate = useNavigate();
   const [identifier, setIdentifier] = useState("");
   const [password, setPassword] = useState("");
-  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -39,23 +39,13 @@ export default function LoginPage() {
           />
         </label>
 
-        <label>
-          Mot de passe
-          <input
-            type={showPassword ? "text" : "password"}
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-          />
-        </label>
-
-        <button
-          type="button"
-          className="button-link"
-          onClick={() => setShowPassword((current) => !current)}
-        >
-          {showPassword ? "Masquer" : "Afficher"}
-        </button>
+        <PasswordField
+          label="Mot de passe"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          required
+          autoComplete="current-password"
+        />
 
         {error ? <p className="form-error">{error}</p> : null}
         <button disabled={loading} type="submit">
