@@ -1,43 +1,41 @@
 import { Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import { useLanguage } from "../context/LanguageContext";
 
 export default function LandingPage() {
   const { isAuthenticated, isLoading } = useAuth();
+  const { t } = useLanguage();
 
   if (isLoading) {
     return (
       <section className="page-shell">
-        <h2>Bienvenue dans La Ruche</h2>
-        <p>Chargement de votre session...</p>
+        <h2>{t("landing.title")}</h2>
+        <p>{t("landing.loading")}</p>
       </section>
     );
   }
 
   return (
     <section className="page-shell">
-      <h2>Bienvenue dans La Ruche</h2>
-      <p>
-        {isAuthenticated
-          ? "Continuez votre activité en quelques clics."
-          : "Connectez-vous ou créez votre compte pour commencer."}
-      </p>
+      <h2>{t("landing.title")}</h2>
+      <p>{isAuthenticated ? t("landing.connected") : t("landing.guest")}</p>
       <div className="cta-grid">
         {isAuthenticated ? (
           <>
             <Link to="/profile" className="cta-card">
-              Accéder au profil
+              {t("landing.goProfile")}
             </Link>
             <Link to="/hives/new" className="cta-card">
-              Créer une Ruche
+              {t("landing.createHive")}
             </Link>
           </>
         ) : (
           <>
             <Link to="/login" className="cta-card">
-              Se connecter
+              {t("landing.signIn")}
             </Link>
             <Link to="/register" className="cta-card">
-              Créer un compte
+              {t("landing.createAccount")}
             </Link>
           </>
         )}

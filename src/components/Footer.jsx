@@ -3,7 +3,7 @@ export default function Footer() {
     <footer>
       <div className="administration">
         <a href="https://www.peca.be/" target="_blank">
-          <img src="/data/logos/peca.svg" alt="logo PECA" />
+          <img src="/data/logos/peca.svg" alt="PECA logo" />
         </a>
         <a href="https://www.federation-wallonie-bruxelles.be/" target="_blank">
           <img src="/data/logos/fwb.png" alt="logo FW-B" />

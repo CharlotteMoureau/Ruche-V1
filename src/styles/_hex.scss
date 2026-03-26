@@ -268,17 +268,20 @@ body.ios {
     width: 180px;
     height: 180px;
     -webkit-perspective: 800px;
+    perspective: 800px;
   }
 
   .hex-inner {
     min-width: 180px;
     min-height: 180px;
     -webkit-transform-style: preserve-3d;
+    transform-style: preserve-3d;
   }
 
   .hex-front,
   .hex-back {
     -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
 
     img {
       height: 50px !important;

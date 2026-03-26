@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useLanguage } from "../context/LanguageContext";
 
 function EyeIcon({ visible }) {
   return (
@@ -47,6 +48,7 @@ export default function PasswordField({
   required = false,
   autoComplete,
 }) {
+  const { t } = useLanguage();
   const [isRevealing, setIsRevealing] = useState(false);
 
   const startReveal = () => setIsRevealing(true);
@@ -81,8 +83,8 @@ export default function PasswordField({
         <button
           type="button"
           className="password-visibility-button"
-          title="Afficher le mot de passe"
-          aria-label="Afficher le mot de passe"
+          title={t("passwordField.showPassword")}
+          aria-label={t("passwordField.showPassword")}
           onMouseDown={startReveal}
           onMouseUp={stopReveal}
           onMouseLeave={stopReveal}

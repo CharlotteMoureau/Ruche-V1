@@ -2,8 +2,10 @@ import { useMemo, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { apiFetch } from "../lib/api";
 import PasswordField from "../components/PasswordField";
+import { useLanguage } from "../context/LanguageContext";
 
 export default function ResetPasswordPage() {
+  const { t } = useLanguage();
   const [searchParams] = useSearchParams();
   const token = useMemo(() => searchParams.get("token") || "", [searchParams]);
   const navigate = useNavigate();
@@ -33,17 +35,17 @@ export default function ResetPasswordPage() {
   if (!token) {
     return (
       <section className="page-shell">
-        <h2>Lien invalide</h2>
+        <h2>{t("resetPassword.invalidLink")}</h2>
       </section>
     );
   }
 
   return (
     <section className="page-shell">
-      <h2>Nouveau mot de passe</h2>
+      <h2>{t("resetPassword.title")}</h2>
       <form onSubmit={onSubmit} className="form-grid">
         <PasswordField
-          label="Mot de passe"
+          label={t("resetPassword.password")}
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           required
@@ -51,7 +53,7 @@ export default function ResetPasswordPage() {
           autoComplete="new-password"
         />
         <PasswordField
-          label="Confirmer le mot de passe"
+          label={t("resetPassword.passwordConfirm")}
           value={passwordConfirm}
           onChange={(e) => setPasswordConfirm(e.target.value)}
           required
@@ -60,7 +62,7 @@ export default function ResetPasswordPage() {
         />
         {error ? <p className="form-error">{error}</p> : null}
         {message ? <p className="form-info">{message}</p> : null}
-        <button type="submit">Mettre a jour</button>
+        <button type="submit">{t("resetPassword.submit")}</button>
       </form>
     </section>
   );

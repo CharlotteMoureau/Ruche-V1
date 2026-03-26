@@ -1,10 +1,12 @@
+import { useLanguage } from "../context/LanguageContext";
+
 const cells = Array.from({ length: 7 }, (_, index) => index + 1);
 
-export default function PageLoader({
-  title = "Chargement...",
-  subtitle = "Un instant, nous preparons votre espace.",
-  variant = "default",
-}) {
+export default function PageLoader({ title, subtitle, variant = "default" }) {
+  const { t } = useLanguage();
+  const resolvedTitle = title || t("common.loading");
+  const resolvedSubtitle = subtitle || t("profile.loadingSubtitle");
+
   return (
     <div
       className={`page-loader page-loader--${variant}`}
@@ -21,8 +23,8 @@ export default function PageLoader({
           />
         ))}
       </div>
-      <p className="page-loader__title">{title}</p>
-      <p className="page-loader__subtitle">{subtitle}</p>
+      <p className="page-loader__title">{resolvedTitle}</p>
+      <p className="page-loader__subtitle">{resolvedSubtitle}</p>
     </div>
   );
 }

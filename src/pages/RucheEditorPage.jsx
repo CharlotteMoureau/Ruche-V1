@@ -5,14 +5,15 @@ import { useAuth } from "../context/AuthContext";
 import RucheWorkspace from "../components/RucheWorkspace";
 import UnifiedPromptModal from "../components/UnifiedPromptModal";
 import PageLoader from "../components/PageLoader";
+import { useLanguage } from "../context/LanguageContext";
 
-function formatDateTime(value) {
+function formatDateTime(value, locale) {
   if (!value) return "-";
 
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return "-";
 
-  return new Intl.DateTimeFormat("fr-BE", {
+  return new Intl.DateTimeFormat(locale, {
     dateStyle: "medium",
     timeStyle: "short",
   }).format(date);
@@ -27,6 +28,7 @@ export default function RucheEditorPage() {
   const location = useLocation();
   const navigate = useNavigate();
   const { token, user, isAdmin } = useAuth();
+  const { t, dateLocale } = useLanguage();
 
   const isNew = !id;
   const duplicateSource = location.state?.duplicateSource || null;
@@ -35,7 +37,7 @@ export default function RucheEditorPage() {
       ? location.state.title
       : isNew && duplicateSource?.title
         ? duplicateSource.title
-        : "Nouvelle Ruche";
+        : t("editor.newHiveTitle");
 
   const [hive, setHive] = useState(null);
   const [title, setTitle] = useState(() => initialNewTitle);
@@ -171,12 +173,12 @@ export default function RucheEditorPage() {
     const trimmedTitle = title.trim();
 
     if (!trimmedTitle) {
-      setError("Veuillez renseigner un titre avant d'enregistrer.");
+      setError(t("editor.saveTitleError"));
       return;
     }
 
     if (isDuplicateFlow && !hasRenamedDuplicate) {
-      setError("Renommez la copie avant de l'enregistrer.");
+      setError(t("editor.duplicateRenameError"));
       return;
     }
 
@@ -332,11 +334,14 @@ export default function RucheEditorPage() {
     const value = editingTarget.value.trim();
     if (!value) return;
 
-    const updated = await apiFetch(`/hives/${id}/comments/${editingTarget.comment.id}`, {
-      method: "PATCH",
-      token,
-      body: { message: value },
-    });
+    const updated = await apiFetch(
+      `/hives/${id}/comments/${editingTarget.comment.id}`,
+      {
+        method: "PATCH",
+        token,
+        body: { message: value },
+      },
+    );
 
     setHive((prev) => {
       if (!editingTarget.parentId) {
@@ -432,11 +437,11 @@ export default function RucheEditorPage() {
             setShowLeaveDirtyModal(true);
           }}
         >
-          Retour au profil
+          {t("editor.backToProfile")}
         </Link>
 
         <label>
-          Titre de la Ruche
+          {t("editor.hiveTitleLabel")}
           <input
             value={title}
             onChange={(e) => setTitle(e.target.value)}
@@ -446,35 +451,34 @@ export default function RucheEditorPage() {
         </label>
         {canEdit ? (
           <button type="button" onClick={saveHive} disabled={isSaving}>
-            {isSaving ? "Enregistrement..." : "Enregistrer la ruche"}
+            {isSaving ? t("editor.saving") : t("editor.saveHive")}
           </button>
         ) : null}
       </div>
 
       {isDuplicateFlow ? (
-        <p className="form-info">
-          Cette ruche est une copie. Renommez-la avant de l&apos;enregistrer.
-        </p>
+        <p className="form-info">{t("editor.duplicateInfo")}</p>
       ) : null}
 
       {!isNew && hive ? (
         <p className="form-info">
-          Créée le: {formatDateTime(hive.createdAt)} | Dernière édition:{" "}
-          {formatDateTime(hive.updatedAt)}
+          {t("editor.createdAt")}: {formatDateTime(hive.createdAt, dateLocale)}{" "}
+          | {t("editor.updatedAt")}:{" "}
+          {formatDateTime(hive.updatedAt, dateLocale)}
         </p>
       ) : null}
 
       {isSaving ? (
         <p className="form-info" aria-live="polite">
-          Mise à jour en cours...
+          {t("editor.updating")}
         </p>
       ) : null}
 
       {error ? <p className="form-error">{error}</p> : null}
       {isHiveLoading ? (
         <PageLoader
-          title="Chargement de la ruche"
-          subtitle="Les cartes et les commentaires arrivent."
+          title={t("editor.loadingTitle")}
+          subtitle={t("editor.loadingSubtitle")}
           variant="hive"
         />
       ) : (
@@ -512,7 +516,7 @@ export default function RucheEditorPage() {
           }}
         >
           <div className="modal-box comments-modal">
-            <h2>Chat de la Ruche</h2>
+            <h2>{t("editor.commentsTitle")}</h2>
             <button
               className="modal-close-btn"
               onClick={() => {
@@ -520,16 +524,14 @@ export default function RucheEditorPage() {
                 setReplyingTo(null);
                 setReplyText("");
               }}
-              aria-label="Fermer"
+              aria-label={t("common.close")}
             >
               ×
             </button>
 
             <div className="comments-scroll">
               {comments.length === 0 && (
-                <p className="comments-empty">
-                  Aucun commentaire pour l&apos;instant.
-                </p>
+                <p className="comments-empty">{t("editor.noComments")}</p>
               )}
               {comments.map((comment) => (
                 <div key={comment.id} className="comment-thread">
@@ -548,7 +550,7 @@ export default function RucheEditorPage() {
                           className="comment-action-btn"
                           onClick={() => startReply(comment)}
                         >
-                          Répondre
+                          {t("editor.reply")}
                         </button>
                       )}
                       {(comment.author?.id === user?.id || isAdmin) && (
@@ -558,14 +560,14 @@ export default function RucheEditorPage() {
                             className="comment-action-btn"
                             onClick={() => openEditCommentModal(comment)}
                           >
-                            Éditer
+                            {t("editor.edit")}
                           </button>
                           <button
                             type="button"
                             className="comment-action-btn comment-action-btn--danger"
                             onClick={() => openDeleteCommentModal(comment)}
                           >
-                            Supprimer
+                            {t("editor.delete")}
                           </button>
                         </>
                       )}
@@ -591,7 +593,7 @@ export default function RucheEditorPage() {
                             className="comment-action-btn"
                             onClick={() => startReply(reply)}
                           >
-                            Répondre
+                            {t("editor.reply")}
                           </button>
                         )}
                         {(reply.author?.id === user?.id || isAdmin) && (
@@ -603,7 +605,7 @@ export default function RucheEditorPage() {
                                 openEditCommentModal(reply, comment.id)
                               }
                             >
-                              Éditer
+                              {t("editor.edit")}
                             </button>
                             <button
                               type="button"
@@ -612,7 +614,7 @@ export default function RucheEditorPage() {
                                 openDeleteCommentModal(reply, comment.id)
                               }
                             >
-                              Supprimer
+                              {t("editor.delete")}
                             </button>
                           </>
                         )}
@@ -625,7 +627,7 @@ export default function RucheEditorPage() {
                       <textarea
                         value={replyText}
                         onChange={(e) => setReplyText(e.target.value)}
-                        placeholder="Écrire une réponse…"
+                        placeholder={t("editor.replyPlaceholder")}
                         rows={2}
                         autoFocus
                       />
@@ -634,7 +636,7 @@ export default function RucheEditorPage() {
                           type="button"
                           onClick={() => submitReply(comment.id)}
                         >
-                          Envoyer
+                          {t("editor.send")}
                         </button>
                         <button
                           type="button"
@@ -644,7 +646,7 @@ export default function RucheEditorPage() {
                             setReplyText("");
                           }}
                         >
-                          Annuler
+                          {t("common.cancel")}
                         </button>
                       </div>
                     </div>
@@ -659,11 +661,11 @@ export default function RucheEditorPage() {
                 <textarea
                   value={commentText}
                   onChange={(e) => setCommentText(e.target.value)}
-                  placeholder="Ajouter un commentaire…"
+                  placeholder={t("editor.addCommentPlaceholder")}
                   rows={2}
                 />
                 <button type="button" onClick={submitComment}>
-                  Envoyer
+                  {t("editor.send")}
                 </button>
               </div>
             )}
@@ -673,12 +675,12 @@ export default function RucheEditorPage() {
 
       <UnifiedPromptModal
         isOpen={showLeaveDirtyModal}
-        title="Modifications non enregistrées"
-        message="Votre ruche contient des modifications non enregistrées. Quitter sans sauvegarder ?"
-        cancelLabel="Rester"
-        extraActionLabel="Enregistrer et quitter"
+        title={t("editor.unsavedTitle")}
+        message={t("editor.unsavedMessage")}
+        cancelLabel={t("editor.stay")}
+        extraActionLabel={t("editor.saveAndLeave")}
         onExtraAction={saveAndLeave}
-        confirmLabel="Quitter sans enregistrer"
+        confirmLabel={t("editor.leaveWithoutSaving")}
         confirmClassName="danger"
         onCancel={() => setShowLeaveDirtyModal(false)}
         onConfirm={() => {
@@ -690,13 +692,13 @@ export default function RucheEditorPage() {
       <UnifiedPromptModal
         isOpen={Boolean(editingTarget)}
         mode="prompt"
-        title="Modifier le commentaire"
-        inputLabel="Nouveau message"
+        title={t("editor.editCommentTitle")}
+        inputLabel={t("editor.newMessage")}
         value={editingTarget?.value || ""}
         onValueChange={(value) =>
           setEditingTarget((prev) => (prev ? { ...prev, value } : prev))
         }
-        confirmLabel="Enregistrer"
+        confirmLabel={t("common.save")}
         confirmDisabled={!editingTarget?.value?.trim()}
         onCancel={() => setEditingTarget(null)}
         onConfirm={editComment}
@@ -704,9 +706,9 @@ export default function RucheEditorPage() {
 
       <UnifiedPromptModal
         isOpen={Boolean(deleteTarget)}
-        title="Supprimer le commentaire"
-        message="Cette action est irreversible. Voulez-vous continuer ?"
-        confirmLabel="Supprimer"
+        title={t("editor.deleteCommentTitle")}
+        message={t("workspace.irreversible")}
+        confirmLabel={t("common.delete")}
         confirmClassName="danger"
         onCancel={() => setDeleteTarget(null)}
         onConfirm={deleteComment}

@@ -4,6 +4,7 @@ import { useAuth } from "../context/AuthContext";
 import { apiFetch } from "../lib/api";
 import UnifiedPromptModal from "../components/UnifiedPromptModal";
 import PageLoader from "../components/PageLoader";
+import { useLanguage } from "../context/LanguageContext";
 
 const HIVES_PER_PAGE = 10;
 
@@ -15,13 +16,13 @@ function clampPage(page, count) {
   return Math.min(Math.max(1, page), getTotalPages(count));
 }
 
-function formatDateTime(value) {
+function formatDateTime(value, locale) {
   if (!value) return "-";
 
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return "-";
 
-  return new Intl.DateTimeFormat("fr-BE", {
+  return new Intl.DateTimeFormat(locale, {
     dateStyle: "medium",
     timeStyle: "short",
   }).format(date);
@@ -29,6 +30,7 @@ function formatDateTime(value) {
 
 export default function ProfilePage() {
   const { token, refreshMe, logout } = useAuth();
+  const { t, dateLocale, translateRole } = useLanguage();
   const navigate = useNavigate();
   const [profile, setProfile] = useState(null);
   const [error, setError] = useState("");
@@ -93,7 +95,7 @@ export default function ProfilePage() {
     setDuplicateDraft({
       hiveId,
       sourceTitle,
-      nextTitle: `${sourceTitle} (copie)`,
+      nextTitle: `${sourceTitle} (${t("profile.copySuffix")})`,
     });
   };
 
@@ -102,12 +104,12 @@ export default function ProfilePage() {
 
     const trimmedTitle = duplicateDraft.nextTitle.trim();
     if (!trimmedTitle) {
-      setError("Veuillez renseigner un titre pour la copie.");
+      setError(t("profile.duplicateNeedTitle"));
       return;
     }
 
     if (trimmedTitle === duplicateDraft.sourceTitle.trim()) {
-      setError("Renommez la copie avec un titre different.");
+      setError(t("profile.duplicateRenameRequired"));
       return;
     }
 
@@ -144,12 +146,12 @@ export default function ProfilePage() {
     const trimmedPasswordConfirm = deletePasswordConfirm.trim();
 
     if (!trimmedPassword || !trimmedPasswordConfirm) {
-      setDeleteError("Veuillez renseigner les deux champs de mot de passe.");
+      setDeleteError(t("profile.missingPasswordFields"));
       return;
     }
 
     if (trimmedPassword !== trimmedPasswordConfirm) {
-      setDeleteError("Les mots de passe ne correspondent pas.");
+      setDeleteError(t("profile.passwordMismatch"));
       return;
     }
 
@@ -230,18 +232,19 @@ export default function ProfilePage() {
 
   return (
     <section className="page-shell">
-      <h2>Mon profil</h2>
+      <h2>{t("profile.title")}</h2>
       {error ? <p className="form-error">{error}</p> : null}
       {profile ? (
         <>
           <p>
-            <strong>Nom d'utilisateur :</strong> {profile.user.username}
+            <strong>{t("profile.username")} :</strong> {profile.user.username}
           </p>
           <p>
-            <strong>Email :</strong> {profile.user.email}
+            <strong>{t("profile.email")} :</strong> {profile.user.email}
           </p>
           <p>
-            <strong>Rôle :</strong> {profile.user.roleLabel}
+            <strong>{t("profile.role")} :</strong>{" "}
+            {translateRole(profile.user.roleLabel)}
             {profile.user.roleLabel === "Autre" && profile.user.roleOtherText
               ? ` - ${profile.user.roleOtherText}`
               : ""}
@@ -253,26 +256,28 @@ export default function ProfilePage() {
               className="button-link"
               onClick={() => setCreatingHive(true)}
             >
-              Créer une nouvelle Ruche
+              {t("profile.createNewHive")}
             </button>
           </div>
 
           {ownedCount > 0 ? (
             <>
-              <h3>Mes Ruches</h3>
+              <h3>{t("profile.myHives")}</h3>
               <ul className="list-grid">
                 {pagedOwnedHives.map((hive) => (
                   <li key={hive.id}>
                     <span>
                       <strong>{hive.title}</strong>
                       <br />
-                      Créée le : {formatDateTime(hive.createdAt)}
+                      {t("profile.createdAt")} :{" "}
+                      {formatDateTime(hive.createdAt, dateLocale)}
                       <br />
-                      Dernière édition : {formatDateTime(hive.updatedAt)}
+                      {t("profile.updatedAt")} :{" "}
+                      {formatDateTime(hive.updatedAt, dateLocale)}
                     </span>
                     <div className="inline-actions">
                       <Link className="button-link" to={`/hives/${hive.id}`}>
-                        Ouvrir
+                        {t("profile.open")}
                       </Link>
                       <button
                         type="button"
@@ -281,14 +286,14 @@ export default function ProfilePage() {
                         disabled={duplicatingHiveId === hive.id}
                       >
                         {duplicatingHiveId === hive.id
-                          ? "Duplication..."
-                          : "Dupliquer"}
+                          ? t("profile.duplicating")
+                          : t("profile.duplicate")}
                       </button>
                       <button
                         type="button"
                         onClick={() => setConfirmDeleteHiveId(hive.id)}
                       >
-                        Supprimer
+                        {t("common.delete")}
                       </button>
                     </div>
                   </li>
@@ -303,10 +308,10 @@ export default function ProfilePage() {
                     }
                     disabled={ownedPage === 1}
                   >
-                    Precedent
+                    {t("common.previous")}
                   </button>
                   <span>
-                    Page {ownedPage}/{ownedTotalPages}
+                    {t("common.page")} {ownedPage}/{ownedTotalPages}
                   </span>
                   <button
                     type="button"
@@ -317,7 +322,7 @@ export default function ProfilePage() {
                     }
                     disabled={ownedPage === ownedTotalPages}
                   >
-                    Suivant
+                    {t("common.next")}
                   </button>
                 </div>
               ) : null}
@@ -326,7 +331,7 @@ export default function ProfilePage() {
 
           {sharedCount > 0 ? (
             <>
-              <h3>Ruches partagées</h3>
+              <h3>{t("profile.sharedHives")}</h3>
               <ul className="list-grid">
                 {pagedSharedHives.map((hive) => (
                   <li key={hive.id}>
@@ -335,12 +340,14 @@ export default function ProfilePage() {
                         {hive.title} ({hive.collaboratorRole})
                       </strong>
                       <br />
-                      Créée le : {formatDateTime(hive.createdAt)}
+                      {t("profile.createdAt")} :{" "}
+                      {formatDateTime(hive.createdAt, dateLocale)}
                       <br />
-                      Dernière édition : {formatDateTime(hive.updatedAt)}
+                      {t("profile.updatedAt")} :{" "}
+                      {formatDateTime(hive.updatedAt, dateLocale)}
                     </span>
                     <Link className="button-link" to={`/hives/${hive.id}`}>
-                      Ouvrir
+                      {t("profile.open")}
                     </Link>
                   </li>
                 ))}
@@ -354,10 +361,10 @@ export default function ProfilePage() {
                     }
                     disabled={sharedPage === 1}
                   >
-                    Précédent
+                    {t("common.previous")}
                   </button>
                   <span>
-                    Page {sharedPage}/{sharedTotalPages}
+                    {t("common.page")} {sharedPage}/{sharedTotalPages}
                   </span>
                   <button
                     type="button"
@@ -368,21 +375,21 @@ export default function ProfilePage() {
                     }
                     disabled={sharedPage === sharedTotalPages}
                   >
-                    Suivant
+                    {t("common.next")}
                   </button>
                 </div>
               ) : null}
             </>
           ) : null}
 
-          <h3>Supprimer mon profil</h3>
-          <p>Cette action est irréversible et supprimera vos données.</p>
+          <h3>{t("profile.deleteProfileTitle")}</h3>
+          <p>{t("profile.deleteProfileDesc")}</p>
           <button
             type="button"
             className="danger-btn"
             onClick={openDeleteModal}
           >
-            Supprimer mon profil
+            {t("profile.deleteProfileTitle")}
           </button>
 
           {isDeleteModalOpen ? (
@@ -404,10 +411,8 @@ export default function ProfilePage() {
                 className="modal-box"
                 onClick={(event) => event.stopPropagation()}
               >
-                <h2>Confirmer la suppression</h2>
-                <p>
-                  Entrez votre mot de passe deux fois pour supprimer le compte.
-                </p>
+                <h2>{t("profile.confirmDeletion")}</h2>
+                <p>{t("profile.enterPasswords")}</p>
 
                 {deleteError ? (
                   <p className="form-error">{deleteError}</p>
@@ -415,7 +420,7 @@ export default function ProfilePage() {
 
                 <form onSubmit={deleteProfile} className="form-grid">
                   <label>
-                    Mot de passe
+                    {t("register.password")}
                     <input
                       type={showDeletePasswords ? "text" : "password"}
                       value={deletePassword}
@@ -428,7 +433,7 @@ export default function ProfilePage() {
                   </label>
 
                   <label>
-                    Confirmer le mot de passe
+                    {t("profile.confirmPassword")}
                     <input
                       type={showDeletePasswords ? "text" : "password"}
                       value={deletePasswordConfirm}
@@ -447,7 +452,9 @@ export default function ProfilePage() {
                     }
                     disabled={isDeleting}
                   >
-                    {showDeletePasswords ? "Masquer" : "Afficher"}
+                    {showDeletePasswords
+                      ? t("profile.hide")
+                      : t("profile.show")}
                   </button>
 
                   <div className="modal-actions">
@@ -457,14 +464,16 @@ export default function ProfilePage() {
                       onClick={closeDeleteModal}
                       disabled={isDeleting}
                     >
-                      Annuler
+                      {t("common.cancel")}
                     </button>
                     <button
                       type="submit"
                       className="danger-btn"
                       disabled={isDeleting}
                     >
-                      {isDeleting ? "Suppression..." : "Supprimer mon profil"}
+                      {isDeleting
+                        ? t("profile.deleting")
+                        : t("profile.deleteProfileTitle")}
                     </button>
                   </div>
                 </form>
@@ -474,17 +483,17 @@ export default function ProfilePage() {
         </>
       ) : (
         <PageLoader
-          title="Chargement du profil"
-          subtitle="Nous récupérons vos informations et vos ruches."
+          title={t("profile.loadingTitle")}
+          subtitle={t("profile.loadingSubtitle")}
           variant="profile"
         />
       )}
 
       <UnifiedPromptModal
         isOpen={Boolean(confirmDeleteHiveId)}
-        title="Supprimer la ruche"
-        message="Cette action est irréversible. Voulez-vous continuer ?"
-        confirmLabel="Supprimer"
+        title={t("profile.modalDeleteHiveTitle")}
+        message={t("profile.modalDeleteHiveMessage")}
+        confirmLabel={t("common.delete")}
         confirmClassName="danger"
         onCancel={() => setConfirmDeleteHiveId(null)}
         onConfirm={deleteHive}
@@ -493,14 +502,14 @@ export default function ProfilePage() {
       <UnifiedPromptModal
         isOpen={Boolean(duplicateDraft.hiveId)}
         mode="prompt"
-        title="Dupliquer la ruche"
-        message="Choisissez un nouveau nom pour la copie."
-        inputLabel="Nom de la copie"
+        title={t("profile.modalDuplicateTitle")}
+        message={t("profile.modalDuplicateMessage")}
+        inputLabel={t("profile.modalDuplicateInput")}
         value={duplicateDraft.nextTitle}
         onValueChange={(value) =>
           setDuplicateDraft((prev) => ({ ...prev, nextTitle: value }))
         }
-        confirmLabel="Créer la copie"
+        confirmLabel={t("profile.modalDuplicateConfirm")}
         confirmDisabled={!duplicateDraft.nextTitle.trim()}
         onCancel={() =>
           setDuplicateDraft({ hiveId: null, sourceTitle: "", nextTitle: "" })
@@ -511,13 +520,13 @@ export default function ProfilePage() {
       <UnifiedPromptModal
         isOpen={creatingHive}
         mode="prompt"
-        title="Créer une nouvelle ruche"
-        message="Choisissez un nom pour votre nouvelle ruche."
-        inputLabel="Nom de la ruche"
-        inputPlaceholder="Ex : Ruche projet Théâtre P2 école du renard 2024"
+        title={t("profile.modalCreateTitle")}
+        message={t("profile.modalCreateMessage")}
+        inputLabel={t("profile.modalCreateInput")}
+        inputPlaceholder={t("profile.modalCreatePlaceholder")}
         value={newHiveTitle}
         onValueChange={setNewHiveTitle}
-        confirmLabel="Confirmer"
+        confirmLabel={t("common.confirm")}
         confirmDisabled={!newHiveTitle.trim()}
         onCancel={closeCreateHiveModal}
         onConfirm={confirmCreateHive}

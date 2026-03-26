@@ -1,0 +1,302 @@
+[
+  {
+    "id": "I",
+    "title": "Onderdompeling",
+    "definition": "Leerlingen worden ondergedompeld en echt betrokken bij de culturele of artistieke ontmoeting, praktijk of kennis die aan bod komt. Ze tonen aandacht en nieuwsgierigheid.",
+    "category": "doelen"
+  },
+  {
+    "id": "II",
+    "title": "Woordenschat",
+    "definition": "Leerlingen verwerven nieuwe termen die verbonden zijn met de culturele en artistieke domeinen die worden aangesneden.",
+    "category": "doelen"
+  },
+  {
+    "id": "III",
+    "title": "Ontdekkingen",
+    "definition": "Leerlingen ontdekken personages, werken, plaatsen, gebeurtenissen en/of artistieke of culturele stromingen via ontmoetingen.",
+    "category": "doelen"
+  },
+  {
+    "id": "IV",
+    "title": "Multisensorialiteit",
+    "definition": "Leerlingen gebruiken verschillende zintuigen om artistieke werken, objecten of culturele locaties te waarderen en te bevragen.",
+    "category": "doelen"
+  },
+  {
+    "id": "V",
+    "title": "Expressies",
+    "definition": "Leerlingen gebruiken – en combineren soms – artistieke en/of culturele tools en dragers om gevoelens, emoties en ideeën uit te drukken.",
+    "category": "doelen"
+  },
+  {
+    "id": "VI",
+    "title": "Experimentatie",
+    "definition": "Leerlingen verkennen technieken, tools en materialen. Ze nemen initiatief en aanvaardbare risico’s binnen een leerproces gebaseerd op experimenteren.",
+    "category": "doelen"
+  },
+  {
+    "id": "VII",
+    "title": "Vragen stellen",
+    "definition": "Leerlingen onderzoeken de oorsprong van het werk en/of de artistieke praktijk, de plaats ervan in de geschiedenis (vroeger en nu) en de band met tradities (lokaal, cultureel, enz.).",
+    "category": "doelen"
+  },
+  {
+    "id": "VIII",
+    "title": "Onderscheid",
+    "definition": "Leerlingen gebruiken één of meerdere criteria (zintuiglijk/emotioneel, technisch, historisch, cultureel, enz.) om culturele en artistieke praktijken of creaties van elkaar te onderscheiden.",
+    "category": "doelen"
+  },
+  {
+    "id": "IX",
+    "title": "Wederzijds luisteren",
+    "definition": "Leerlingen zijn aandachtig en ontvankelijk voor elkaars ervaringen.",
+    "category": "doelen"
+  },
+  {
+    "id": "X",
+    "title": "Samen creëren",
+    "definition": "Leerlingen organiseren zich door rollen en taken te verdelen en te coördineren om gezamenlijk een creatie te realiseren.",
+    "category": "doelen"
+  },
+  {
+    "id": "XI",
+    "title": "Herinneringen (sporen)",
+    "definition": "Leerlingen bewaren waardevolle herinneringen aan hun culturele en artistieke ervaringen.",
+    "category": "doelen"
+  },
+  {
+    "id": "XII",
+    "title": "Betekenis geven",
+    "definition": "Leerlingen leggen verbanden tussen vroegere en huidige culturele en artistieke ervaringen om betekenis op te bouwen (bijvoorbeeld via een verhaal of uitleg).",
+    "category": "doelen"
+  },
+  {
+    "id": "XIII",
+    "title": "Delen",
+    "definition": "Leerlingen delen de processen en/of artistieke creaties waarbij ze betrokken waren met andere leden van de onderwijsgemeenschap.",
+    "category": "doelen"
+  },
+  {
+    "id": "XIV",
+    "title": "Transfer",
+    "definition": "Leerlingen identificeren en brengen leerervaringen over naar andere schoolvakken en/of transversale competenties.",
+    "category": "doelen"
+  },
+  {
+    "id": "1",
+    "title": "Traject",
+    "definition": "Ik bouw mijn interventie op in samenhang met het PECA-traject van de leerlingen, met aandacht voor diversiteit en opbouw in het leren.",
+    "category": "voorwaarden-leerkracht"
+  },
+  {
+    "id": "2",
+    "title": "Ontmoeten – Kennen – Praktijken",
+    "definition": "Ik combineer minstens twee van de drie PECA-componenten met het oog op complementariteit.",
+    "category": "voorwaarden-leerkracht"
+  },
+  {
+    "id": "3",
+    "title": "Doelen",
+    "definition": "Ik bepaal vooraf de doelen van de interventie en licht deze toe aan de leerlingen. In partnerschap worden doelen gezamenlijk bepaald.",
+    "category": "voorwaarden-leerkracht"
+  },
+  {
+    "id": "4",
+    "title": "Ruimte",
+    "definition": "Ik zoek een geschikte ruimte voor de interventie, op school en/of in een culturele of artistieke omgeving.",
+    "category": "voorwaarden-leerkracht"
+  },
+  {
+    "id": "5",
+    "title": "Materiaal",
+    "definition": "Ik voorzie functioneel en kwalitatief materiaal voor de leerlingen.",
+    "category": "voorwaarden-leerkracht"
+  },
+  {
+    "id": "6",
+    "title": "Budget",
+    "definition": "Ik stel samen met de schoolleiding een budget op dat deelname van alle leerlingen mogelijk maakt en zoek eventuele steun van de FWB, enz.",
+    "category": "voorwaarden-leerkracht"
+  },
+  {
+    "id": "7",
+    "title": "Duur",
+    "definition": "Ik plan een gepaste duur voor de betrokkenheid van de leerlingen, zowel voor de gehele interventie als voor afzonderlijke sessies.",
+    "category": "voorwaarden-leerkracht"
+  },
+  {
+    "id": "8",
+    "title": "Proces",
+    "definition": "Ik hecht evenveel waarde aan het proces als aan het eindresultaat (voorstelling, tentoonstelling, enz.).",
+    "category": "voorwaarden-leerkracht"
+  },
+  {
+    "id": "9",
+    "title": "Respect & vertrouwen",
+    "definition": "Ik toon respect en vertrouwen tegenover leerlingen en partners en waardeer ieders bijdrage.",
+    "category": "voorwaarden-leerkracht"
+  },
+  {
+    "id": "10",
+    "title": "Zelfevaluatie",
+    "definition": "Ik voorzie momenten en tools zodat leerlingen afstand kunnen nemen, onder andere via sporen die discussie en kritisch denken stimuleren.",
+    "category": "voorwaarden-leerkracht"
+  },
+  {
+    "id": "11",
+    "title": "Reflectie",
+    "definition": "Ik maak een balans op van de interventie in relatie tot de vooropgestelde doelen.",
+    "category": "voorwaarden-leerkracht"
+  },
+  {
+    "id": "12",
+    "title": "Moeilijkheidsgraden",
+    "definition": "Ik voorzie taken met een aangepast moeilijkheidsniveau zodat elke leerling kan groeien.",
+    "category": "aanbevelingen-leerkracht"
+  },
+  {
+    "id": "13",
+    "title": "Interdisciplinariteit",
+    "definition": "Ik betrek of verbind andere schoolvakken.",
+    "category": "aanbevelingen-leerkracht"
+  },
+  {
+    "id": "14",
+    "title": "Context van de leerlingen",
+    "definition": "Ik maak linken met de (mogelijke) interesses van leerlingen, de actualiteit en/of hun socio-culturele achtergrond.",
+    "category": "aanbevelingen-leerkracht"
+  },
+  {
+    "id": "15",
+    "title": "Lokale middelen",
+    "definition": "Ik betrek lokale personen of middelen (culturele organisaties, vzw’s, enz.) om activiteiten in of buiten de school op te zetten (bezoeken aan regionale culturele en artistieke plekken, erfgoed, enz.).",
+    "category": "aanbevelingen-leerkracht"
+  },
+  {
+    "id": "16",
+    "title": "Betrokkenheid van families",
+    "definition": "Ik voorzie momenten en tools om families te betrekken tijdens het proces en/of op het einde van de interventie.",
+    "category": "aanbevelingen-leerkracht"
+  },
+  {
+    "id": "17",
+    "title": "Samenwerking",
+    "definition": "Bij partnerschap houden partners rekening met de eigenheid van elke context (klas, artistiek, cultureel). Ze stemmen de ‘voorwaarden’-cellen af en bepalen rollen en verantwoordelijkheden.",
+    "category": "aanbevelingen-leerkracht"
+  },
+  {
+    "id": "18",
+    "title": "Projectwerking",
+    "definition": "Ik veranker de interventie binnen projectwerking (of een gelijkaardige pedagogie).",
+    "category": "aanbevelingen-leerkracht"
+  },
+  {
+    "id": "19",
+    "title": "Communicatie",
+    "definition": "Ik licht de interventie, de stappen en/of de verwachtingen toe aan de schoolleiding, collega’s, families en/of collega’s van andere scholen.",
+    "category": "aanbevelingen-leerkracht"
+  },
+  {
+    "id": "20",
+    "title": "Voorstellingen",
+    "definition": "Ik bevraag leerlingen over hun voorstellingen van culturele en/of artistieke praktijken, de artiest, het werk en/of het erfgoed.",
+    "category": "aanbevelingen-leerkracht"
+  },
+  {
+    "id": "21",
+    "title": "Participatie",
+    "definition": "Ik neem deel aan taken van leerlingen, in een houding van lerende, model en/of co-creator.",
+    "category": "aanbevelingen-leerkracht"
+  },
+  {
+    "id": "22",
+    "title": "Teamgeest",
+    "definition": "Ik stimuleer groepswerk, samenwerking en teamgeest bij leerlingen.",
+    "category": "aanbevelingen-leerkracht"
+  },
+  {
+    "id": "23",
+    "title": "Flexibiliteit",
+    "definition": "Ik toon flexibiliteit om in te spelen op de noden van leerlingen en maak gebruik van hun reacties.",
+    "category": "aanbevelingen-leerkracht"
+  },
+  {
+    "id": "24",
+    "title": "Recht op fouten",
+    "definition": "Ik stimuleer risiconemen, loslaten en het recht om fouten te maken binnen het creatieve proces.",
+    "category": "aanbevelingen-leerkracht"
+  },
+  {
+    "id": "P",
+    "title": "Planning",
+    "definition": "Het schoolteam plant, in samenwerking met partners, de integratie van interventies binnen het PECA-traject van leerlingen, met aandacht voor samenhang en complementariteit. Het PECA wordt opgenomen in het schoolontwikkelingsplan.",
+    "category": "voorwaarden-team"
+  },
+  {
+    "id": "R",
+    "title": "PECA-contactpersonen",
+    "definition": "Het schoolteam doet een beroep op PECA-contactpersonen (leerkrachten-relais, cultuurcoördinatoren, inspecteurs, schoolbegeleiders, culturele operatoren, enz.).",
+    "category": "voorwaarden-team"
+  },
+  {
+    "id": "E",
+    "title": "Evaluatie",
+    "definition": "Het schoolteam evalueert (samen met partners indien relevant) de integratie, diversiteit en coördinatie van interventies in het traject van leerlingen, bijvoorbeeld door Ruches te vergelijken.",
+    "category": "voorwaarden-team"
+  },
+  {
+    "id": "VA",
+    "title": "Valorisatie",
+    "definition": "Het schoolteam gebruikt en animeert regelmatig één of meerdere ‘kunst en cultuur’-ruimtes in de school (werken van leerlingen en artiesten, info over academies, affiches van lokale expo’s of voorstellingen, citaten van artiesten, enz.).",
+    "category": "aanbevelingen-team"
+  },
+  {
+    "id": "a.",
+    "title": "Audiovisueel",
+    "definition": "Kijken, analyseren, kritisch benaderen, scenario’s maken, produceren, monteren...",
+    "category": "domein"
+  },
+  {
+    "id": "b.",
+    "title": "Muziek",
+    "definition": "Luisteren, koorzang, polyritmiek, klankcreatie, instrumenten bouwen, orkestpraktijken...",
+    "category": "domein"
+  },
+  {
+    "id": "c.",
+    "title": "Franse taal en literatuur",
+    "definition": "Lezen, creatief schrijven, slam, verhalen vertellen, narratie...",
+    "category": "domein"
+  },
+  {
+    "id": "d.",
+    "title": "Beeldende en visuele kunsten",
+    "definition": "Schilderkunst, sculptuur, fotografie, interactieve installaties, augmented reality, web art...",
+    "category": "domein"
+  },
+  {
+    "id": "e.",
+    "title": "Theater",
+    "definition": "Dictie, welsprekendheid, spel, improvisatie, sociaal-artistiek theater, poppenspel...",
+    "category": "domein"
+  },
+  {
+    "id": "f.",
+    "title": "Kermis-, circus- en straattheaterkunsten",
+    "definition": "Jongleren, acrobatie, automaten manipuleren, clowning, magie, street art...",
+    "category": "domein"
+  },
+  {
+    "id": "g.",
+    "title": "Cultureel erfgoed",
+    "definition": "Historische sites en monumenten, verhalen en legendes, traditionele liederen en ambachten...",
+    "category": "domein"
+  },
+  {
+    "id": "h.",
+    "title": "Dans",
+    "definition": "Choreografie, interpretatie, lichaamsexpressie, mime...",
+    "category": "domein"
+  }
+]

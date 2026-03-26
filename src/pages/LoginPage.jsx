@@ -2,9 +2,11 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import PasswordField from "../components/PasswordField";
+import { useLanguage } from "../context/LanguageContext";
 
 export default function LoginPage() {
   const { login } = useAuth();
+  const { t } = useLanguage();
   const navigate = useNavigate();
   const [identifier, setIdentifier] = useState("");
   const [password, setPassword] = useState("");
@@ -28,10 +30,10 @@ export default function LoginPage() {
 
   return (
     <section className="page-shell">
-      <h2>Connexion</h2>
+      <h2>{t("login.title")}</h2>
       <form onSubmit={onSubmit} className="form-grid">
         <label>
-          Nom d'utilisateur ou email
+          {t("login.identifier")}
           <input
             value={identifier}
             onChange={(e) => setIdentifier(e.target.value)}
@@ -40,7 +42,7 @@ export default function LoginPage() {
         </label>
 
         <PasswordField
-          label="Mot de passe"
+          label={t("login.password")}
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           required
@@ -49,14 +51,14 @@ export default function LoginPage() {
 
         {error ? <p className="form-error">{error}</p> : null}
         <button disabled={loading} type="submit">
-          {loading ? "Connexion..." : "Se connecter"}
+          {loading ? t("login.submitting") : t("login.submit")}
         </button>
       </form>
       <p>
-        <Link to="/forgot-password">Mot de passe oublié ?</Link>
+        <Link to="/forgot-password">{t("login.forgot")}</Link>
       </p>
       <p>
-        Pas encore de compte ? <Link to="/register">Inscription</Link>
+        {t("login.noAccount")} <Link to="/register">{t("login.register")}</Link>
       </p>
     </section>
   );

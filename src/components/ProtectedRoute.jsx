@@ -1,5 +1,6 @@
 import { Navigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import { useLanguage } from "../context/LanguageContext";
 
 export default function ProtectedRoute({
   children,
@@ -7,9 +8,10 @@ export default function ProtectedRoute({
   nonAdminOnly = false,
 }) {
   const { isLoading, isAuthenticated, isAdmin } = useAuth();
+  const { t } = useLanguage();
 
   if (isLoading) {
-    return <p className="page-status">Chargement...</p>;
+    return <p className="page-status">{t("protectedRoute.loading")}</p>;
   }
 
   if (!isAuthenticated) {

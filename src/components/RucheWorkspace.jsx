@@ -4,28 +4,58 @@ import { HTML5Backend } from "react-dnd-html5-backend";
 import CardLibrary from "./CardLibrary";
 import HiveBoard from "./HiveBoard";
 import Toolbar from "./Toolbar";
-import cardsData from "../data/cards.json";
+import cardsFr from "../data/cards.json";
+import cardsEn from "../data/cards_en.json";
+import cardsNl from "../data/cards_nl.json";
 import Footer from "./Footer";
 import CustomDragPreview from "./CustomDragPreview";
 import AddCardModal from "./ModalFree";
 import { useDeviceDetection } from "../hooks/useDeviceDetection";
 import { useAuth } from "../context/AuthContext";
+import { useLanguage } from "../context/LanguageContext";
 import UnifiedPromptModal from "./UnifiedPromptModal";
 
-function formatDateTime(value) {
+const CATEGORY_KEY_MAP = {
+  fr: {
+    visees: "visees",
+    "conditions-enseignant": "conditions-enseignant",
+    "recommandations-enseignant": "recommandations-enseignant",
+    "conditions-equipe": "conditions-equipe",
+    "recommandations-equipe": "recommandations-equipe",
+    domaine: "domaine",
+  },
+  en: {
+    aims: "visees",
+    "teacher-conditions": "conditions-enseignant",
+    "teacher-recommendations": "recommandations-enseignant",
+    "team-conditions": "conditions-equipe",
+    "team-recommendations": "recommandations-equipe",
+    domain: "domaine",
+  },
+  nl: {
+    doelen: "visees",
+    "voorwaarden-leerkracht": "conditions-enseignant",
+    "aanbevelingen-leerkracht": "recommandations-enseignant",
+    "voorwaarden-team": "conditions-equipe",
+    "aanbevelingen-team": "recommandations-equipe",
+    domein: "domaine",
+  },
+};
+
+function formatDateTime(value, locale) {
   if (!value) return "-";
 
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return "-";
 
-  return new Intl.DateTimeFormat("fr-BE", {
+  return new Intl.DateTimeFormat(locale, {
     dateStyle: "medium",
     timeStyle: "short",
   }).format(date);
 }
 
-function getUserLabel(actor) {
-  return actor?.username || actor?.email || "Utilisateur inconnu";
+function getUserLabel(actor, fallbackLabel) {
+  return actor?.username || actor?.email || fallbackLabel;
 }
 
 function getCardComment(card) {
@@ -41,7 +71,33 @@ function stripCardComment(card) {
   return rest;
 }
 
-function normalizeBoardData(data) {
+function toCanonicalCards(cards, language) {
+  const map = CATEGORY_KEY_MAP[language] || CATEGORY_KEY_MAP.fr;
+  return cards.map((card) => ({
+    ...card,
+    category: map[card.category] || card.category,
+  }));
+}
+
+function localizeBoardCards(boardCards, cardsData) {
+  const cardsById = new Map(cardsData.map((card) => [String(card.id), card]));
+
+  return boardCards.map((card) => {
+    if (card.category === "free") return card;
+
+    const localized = cardsById.get(String(card.id));
+    if (!localized) return card;
+
+    return {
+      ...card,
+      title: localized.title,
+      definition: localized.definition,
+      category: localized.category,
+    };
+  });
+}
+
+function normalizeBoardData(data, cardsData) {
   if (!data || typeof data !== "object") {
     return {
       availableCards: cardsData,
@@ -50,7 +106,8 @@ function normalizeBoardData(data) {
     };
   }
 
-  const boardCards = Array.isArray(data.boardCards) ? data.boardCards : [];
+  const rawBoardCards = Array.isArray(data.boardCards) ? data.boardCards : [];
+  const boardCards = localizeBoardCards(rawBoardCards, cardsData);
   const userCards = Array.isArray(data.userCards)
     ? data.userCards
     : boardCards.filter((card) => card.category === "free");
@@ -87,14 +144,21 @@ export default function RucheWorkspace({
   commentCount = 0,
 }) {
   const { user } = useAuth();
+  const { language, t, dateLocale } = useLanguage();
+  const localizedCardsData =
+    language === "en" ? cardsEn : language === "nl" ? cardsNl : cardsFr;
+  const cardsData = useMemo(
+    () => toCanonicalCards(localizedCardsData, language),
+    [language, localizedCardsData],
+  );
   const [availableCards, setAvailableCards] = useState(
-    () => normalizeBoardData(initialBoardData).availableCards,
+    () => normalizeBoardData(initialBoardData, cardsData).availableCards,
   );
   const [boardCards, setBoardCards] = useState(
-    () => normalizeBoardData(initialBoardData).boardCards,
+    () => normalizeBoardData(initialBoardData, cardsData).boardCards,
   );
   const [userCards, setUserCards] = useState(
-    () => normalizeBoardData(initialBoardData).userCards,
+    () => normalizeBoardData(initialBoardData, cardsData).userCards,
   );
   const [showModal, setShowModal] = useState(false);
   const [inputText, setInputText] = useState("");
@@ -109,13 +173,27 @@ export default function RucheWorkspace({
   useEffect(() => {
     if (loadKey === activeLoadKey) return;
 
-    const initial = normalizeBoardData(initialBoardData);
+    const initial = normalizeBoardData(initialBoardData, cardsData);
     setAvailableCards(initial.availableCards);
     setBoardCards(initial.boardCards);
     setUserCards(initial.userCards);
     setSelectedCardIds(new Set());
     setActiveLoadKey(loadKey);
-  }, [activeLoadKey, initialBoardData, loadKey]);
+  }, [activeLoadKey, cardsData, initialBoardData, loadKey]);
+
+  useEffect(() => {
+    const localizedBoardCards = localizeBoardCards(boardCards, cardsData);
+    setBoardCards(localizedBoardCards);
+
+    const boardCardIds = new Set(
+      localizedBoardCards
+        .filter((card) => card.category !== "free")
+        .map((card) => String(card.id)),
+    );
+    setAvailableCards(
+      cardsData.filter((card) => !boardCardIds.has(String(card.id))),
+    );
+  }, [cardsData]);
 
   useEffect(() => {
     onStateChange?.({
@@ -418,35 +496,43 @@ export default function RucheWorkspace({
           }}
         >
           <div className="modal-box comments-modal card-comment-modal">
-            <h2>Commentaire de carte</h2>
+            <h2>{t("workspace.cardCommentTitle")}</h2>
             <button
               type="button"
               className="modal-close-btn"
               onClick={handleCloseCardCommentModal}
-              aria-label="Fermer"
+              aria-label={t("common.close")}
             >
               x
             </button>
 
             <p className="card-comment-card-title">
-              Carte : {activeCommentCard.title}
+              {t("workspace.cardLabel")} : {activeCommentCard.title}
             </p>
 
             {activeComment?.message ? (
               <div className="card-comment-meta">
                 <p>
-                  Créé le {formatDateTime(activeComment.createdAt)} par{" "}
-                  {getUserLabel(activeComment.createdBy)}
+                  {t("workspace.createdBy", {
+                    date: formatDateTime(activeComment.createdAt, dateLocale),
+                    user: getUserLabel(
+                      activeComment.createdBy,
+                      t("common.unknownUser"),
+                    ),
+                  })}
                 </p>
                 <p>
-                  Dernière édition le {formatDateTime(activeComment.updatedAt)}{" "}
-                  par {getUserLabel(activeComment.updatedBy)}
+                  {t("workspace.updatedBy", {
+                    date: formatDateTime(activeComment.updatedAt, dateLocale),
+                    user: getUserLabel(
+                      activeComment.updatedBy,
+                      t("common.unknownUser"),
+                    ),
+                  })}
                 </p>
               </div>
             ) : (
-              <p className="comments-empty">
-                Aucun commentaire pour cette carte.
-              </p>
+              <p className="comments-empty">{t("workspace.noCardComment")}</p>
             )}
 
             {canComment ? (
@@ -455,7 +541,7 @@ export default function RucheWorkspace({
                   <textarea
                     value={commentDraft}
                     onChange={(event) => setCommentDraft(event.target.value)}
-                    placeholder="Ajouter un commentaire à cette carte..."
+                    placeholder={t("workspace.addCardCommentPlaceholder")}
                     rows={4}
                     maxLength={1200}
                     autoFocus
@@ -468,7 +554,7 @@ export default function RucheWorkspace({
                       className="btn card-comment-delete"
                       onClick={() => setShowDeleteCardCommentModal(true)}
                     >
-                      Supprimer
+                      {t("common.delete")}
                     </button>
                   ) : null}
                   <div className="card-comment-actions-right">
@@ -477,10 +563,12 @@ export default function RucheWorkspace({
                       className="btn secondary"
                       onClick={handleCloseCardCommentModal}
                     >
-                      Annuler
+                      {t("common.cancel")}
                     </button>
                     <button type="button" onClick={handleSaveCardComment}>
-                      {activeComment?.message ? "Enregistrer" : "Ajouter"}
+                      {activeComment?.message
+                        ? t("common.save")
+                        : t("workspace.add")}
                     </button>
                   </div>
                 </div>
@@ -491,13 +579,13 @@ export default function RucheWorkspace({
       ) : null}
       <UnifiedPromptModal
         isOpen={pendingReturnCardIds.length > 0}
-        title="Supprimer les commentaires de carte"
+        title={t("workspace.deleteCardCommentsTitle")}
         message={
           pendingReturnCardIds.length === 1
-            ? "Cette carte contient un commentaire. La remettre dans la bibliotheque supprimera ce commentaire. Continuer ?"
-            : "Certaines cartes contiennent un commentaire. Les remettre dans la bibliotheque supprimera ces commentaires. Continuer ?"
+            ? t("workspace.deleteSingleCardCommentMessage")
+            : t("workspace.deleteMultipleCardCommentMessage")
         }
-        confirmLabel="Continuer"
+        confirmLabel={t("workspace.continueDeleteCardComments")}
         confirmClassName="danger"
         onCancel={() => setPendingReturnCardIds([])}
         onConfirm={confirmPendingCardReturn}
@@ -505,9 +593,9 @@ export default function RucheWorkspace({
 
       <UnifiedPromptModal
         isOpen={showDeleteCardCommentModal}
-        title="Supprimer le commentaire de carte"
-        message="Cette action est irreversible. Voulez-vous continuer ?"
-        confirmLabel="Supprimer"
+        title={t("workspace.deleteCardCommentTitle")}
+        message={t("workspace.irreversible")}
+        confirmLabel={t("common.delete")}
         confirmClassName="danger"
         onCancel={() => setShowDeleteCardCommentModal(false)}
         onConfirm={() => {

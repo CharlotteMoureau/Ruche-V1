@@ -73,6 +73,21 @@ body {
   }
 }
 
+.language-select-wrap {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.9rem;
+}
+
+.language-select {
+  border: 1px solid #cfc7bc;
+  border-radius: 8px;
+  padding: 6px 8px;
+  background: #fff;
+  color: #333;
+}
+
 .user-pill {
   display: inline-flex;
   padding: 6px 10px;

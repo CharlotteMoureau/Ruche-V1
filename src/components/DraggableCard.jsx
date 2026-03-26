@@ -1,6 +1,7 @@
 import HexCard from "./HexCard";
 import FreeHexCard from "./FreeSpaceCard";
 import { useDraggableCard } from "../hooks/useDraggableCard";
+import { useLanguage } from "../context/LanguageContext";
 
 export default function DraggableCard({
   card,
@@ -15,6 +16,7 @@ export default function DraggableCard({
   onClearSelection,
   onOpenComment,
 }) {
+  const { t } = useLanguage();
   const { isDragging, handleMouseDown, handleTouchStart } = useDraggableCard({
     card,
     boardRef,
@@ -57,7 +59,7 @@ export default function DraggableCard({
         <button
           type="button"
           className="card-comment-indicator"
-          aria-label="Ouvrir le commentaire de la carte"
+          aria-label={t("workspace.cardCommentTitle")}
           onMouseDown={(event) => {
             event.preventDefault();
             event.stopPropagation();

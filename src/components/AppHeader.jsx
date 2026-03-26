@@ -1,8 +1,10 @@
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import { useLanguage } from "../context/LanguageContext";
 
 export default function AppHeader() {
   const { isAuthenticated, user, logout, isAdmin } = useAuth();
+  const { language, setLanguage, supportedLanguages, t } = useLanguage();
   const navigate = useNavigate();
 
   return (
@@ -14,11 +16,25 @@ export default function AppHeader() {
       </Link>
 
       <nav className="site-nav">
+        <label className="language-select-wrap">
+          <span>{t("language.label")}</span>
+          <select
+            className="language-select"
+            value={language}
+            onChange={(event) => setLanguage(event.target.value)}
+          >
+            {supportedLanguages.map((langCode) => (
+              <option key={langCode} value={langCode}>
+                {t(`language.${langCode}`)}
+              </option>
+            ))}
+          </select>
+        </label>
         {isAuthenticated ? (
           <>
             <span className="user-pill">{user?.username}</span>
-            {!isAdmin ? <Link to="/profile">Profil</Link> : null}
-            {isAdmin ? <Link to="/admin">Admin</Link> : null}
+            {!isAdmin ? <Link to="/profile">{t("header.profile")}</Link> : null}
+            {isAdmin ? <Link to="/admin">{t("header.admin")}</Link> : null}
             <button
               type="button"
               onClick={() => {
@@ -26,13 +42,13 @@ export default function AppHeader() {
                 navigate("/");
               }}
             >
-              Deconnexion
+              {t("header.logout")}
             </button>
           </>
         ) : (
           <>
-            <Link to="/login">Connexion</Link>
-            <Link to="/register">Creer un compte</Link>
+            <Link to="/login">{t("header.login")}</Link>
+            <Link to="/register">{t("header.register")}</Link>
           </>
         )}
       </nav>

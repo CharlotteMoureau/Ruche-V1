@@ -3,26 +3,11 @@ import LibraryCard from "./LibraryCard";
 import FreeHexCard from "./FreeSpaceCard";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faExclamationTriangle } from "@fortawesome/free-solid-svg-icons";
+import { useLanguage } from "../context/LanguageContext";
 
 export default function CardLibrary({ cards, onFreeSpaceClick, userCards }) {
-  const categories = [
-    { label: "Visées & effets pour les élèves", key: "visees" },
-    {
-      label: "Conditions pour l’enseignant/intervenant",
-      key: "conditions-enseignant",
-    },
-    {
-      label: "Recommandations pour l’enseignant/intervenant",
-      key: "recommandations-enseignant",
-    },
-    { label: "Conditions pour l’équipe éducative", key: "conditions-equipe" },
-    {
-      label: "Recommandation pour l’équipe éducative",
-      key: "recommandations-equipe",
-    },
-    { label: "Domaines d’expression culturelle et artistique", key: "domaine" },
-    { label: "À vous de jouer !", key: "free" },
-  ];
+  const { cardCategories, t } = useLanguage();
+  const categories = cardCategories;
 
   const [showPopup, setShowPopup] = useState(false);
 
@@ -37,7 +22,7 @@ export default function CardLibrary({ cards, onFreeSpaceClick, userCards }) {
 
   return (
     <aside className="card-library">
-      <h2>Cartes disponibles</h2>
+      <h2>{t("cardLibrary.title")}</h2>
 
       {categories.map(({ label, key }) => {
         const cardsInCategory = cards.filter((card) => card.category === key);
@@ -47,7 +32,9 @@ export default function CardLibrary({ cards, onFreeSpaceClick, userCards }) {
             <div key={key} className="card-category">
               <h3>
                 {label}{" "}
-                <span className="counter">({10 - userCards} restantes)</span>
+                <span className="counter">
+                  ({10 - userCards} {t("cardLibrary.remaining")})
+                </span>
               </h3>
               <div className="card-list">
                 <div
@@ -55,7 +42,10 @@ export default function CardLibrary({ cards, onFreeSpaceClick, userCards }) {
                   onClick={handleFreeSpaceClick}
                 >
                   <FreeHexCard
-                    card={{ title: "À vous de jouer !", category: "free" }}
+                    card={{
+                      title: t("cardLibrary.freeCardTitle"),
+                      category: "free",
+                    }}
                   />
                 </div>
               </div>
@@ -80,8 +70,8 @@ export default function CardLibrary({ cards, onFreeSpaceClick, userCards }) {
       {/* Popup warning */}
       {showPopup && (
         <div className="popup-warning">
-          <FontAwesomeIcon icon={faExclamationTriangle} /> Vous avez déjà
-          atteint le maximum de 10 cartes libres !
+          <FontAwesomeIcon icon={faExclamationTriangle} />{" "}
+          {t("cardLibrary.maxFreeCardsReached")}
         </div>
       )}
     </aside>

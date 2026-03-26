@@ -1,4 +1,5 @@
 import React, { useEffect, useRef } from "react";
+import { useLanguage } from "../context/LanguageContext";
 
 export default function AddCardModal({
   show,
@@ -9,6 +10,7 @@ export default function AddCardModal({
   userCardsCount,
   maxCards = 10,
 }) {
+  const { t } = useLanguage();
   const inputRef = useRef(null);
 
   useEffect(() => {
@@ -48,14 +50,14 @@ export default function AddCardModal({
       tabIndex={0}
     >
       <div className="modal-box">
-        <h2>À vous de jouer !</h2>
+        <h2>{t("addCardModal.title")}</h2>
 
         <input
           ref={inputRef}
           type="text"
           value={inputText}
           onChange={handleChange}
-          placeholder="Entrez votre texte (max. 50 caractères)"
+          placeholder={t("addCardModal.placeholder")}
           maxLength={50}
         />
 
@@ -63,15 +65,15 @@ export default function AddCardModal({
 
         <div className="modal-actions">
           <button className="btn" onClick={onValidate}>
-            Valider
+            {t("addCardModal.validate")}
           </button>
           <button className="btn secondary" onClick={onClose}>
-            Fermer
+            {t("addCardModal.close")}
           </button>
         </div>
 
         <p className="counter-text">
-          {userCardsCount} / {maxCards} cartes personnalisées
+          {userCardsCount} / {maxCards} {t("addCardModal.customCards")}
         </p>
       </div>
     </div>

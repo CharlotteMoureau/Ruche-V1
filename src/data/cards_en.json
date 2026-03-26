@@ -1,0 +1,302 @@
+[
+  {
+    "id": "I",
+    "title": "Immersion",
+    "definition": "Pupils are immersed and genuinely engaged in the cultural or artistic encounter, practice, or knowledge being explored. They show attentiveness and curiosity.",
+    "category": "aims"
+  },
+  {
+    "id": "II",
+    "title": "Vocabulary",
+    "definition": "Pupils acquire new terms related to the cultural and artistic fields addressed.",
+    "category": "aims"
+  },
+  {
+    "id": "III",
+    "title": "Discoveries",
+    "definition": "Pupils discover characters, works, places, events, and/or artistic or cultural movements through encounters.",
+    "category": "aims"
+  },
+  {
+    "id": "IV",
+    "title": "Multisensoriality",
+    "definition": "Pupils draw on a range of senses to appreciate and question artistic works, objects, or cultural sites.",
+    "category": "aims"
+  },
+  {
+    "id": "V",
+    "title": "Expressions",
+    "definition": "Pupils use, and sometimes combine, artistic and/or cultural tools and media to express sensations, emotions, and ideas.",
+    "category": "aims"
+  },
+  {
+    "id": "VI",
+    "title": "Experimentation",
+    "definition": "Pupils explore techniques, tools, and materials. They take initiatives and reasonable risks within a learning-by-doing approach.",
+    "category": "aims"
+  },
+  {
+    "id": "VII",
+    "title": "Inquiry",
+    "definition": "Pupils question the origins of the work and/or artistic practice, its place in history (past and present), and its relationship to traditions (local, cultural, etc.).",
+    "category": "aims"
+  },
+  {
+    "id": "VIII",
+    "title": "Distinction",
+    "definition": "Pupils use one or several criteria (sensory/emotional, technical, historical, cultural, etc.) to differentiate cultural and artistic practices or creations.",
+    "category": "aims"
+  },
+  {
+    "id": "IX",
+    "title": "Mutual listening",
+    "definition": "Pupils are attentive and receptive to one another’s experiences.",
+    "category": "aims"
+  },
+  {
+    "id": "X",
+    "title": "Collective creation",
+    "definition": "Pupils organise themselves by sharing roles and coordinating tasks within a group to produce a collective work.",
+    "category": "aims"
+  },
+  {
+    "id": "XI",
+    "title": "Memories (traces)",
+    "definition": "Pupils keep meaningful records of their cultural and artistic experiences.",
+    "category": "aims"
+  },
+  {
+    "id": "XII",
+    "title": "Meaning-making",
+    "definition": "Pupils connect past and present cultural and artistic experiences to build meaning (for instance through a narrative or explanation).",
+    "category": "aims"
+  },
+  {
+    "id": "XIII",
+    "title": "Sharing",
+    "definition": "Pupils share the processes and/or artistic creations they have contributed to with other members of the educational community.",
+    "category": "aims"
+  },
+  {
+    "id": "XIV",
+    "title": "Transfer",
+    "definition": "Pupils identify and transfer learning from the experience to other school subjects and/or transversal skills.",
+    "category": "aims"
+  },
+  {
+    "id": "1",
+    "title": "Pathway",
+    "definition": "I design my intervention in connection with pupils’ PECA pathway, ensuring diversity and progression in learning.",
+    "category": "teacher-conditions"
+  },
+  {
+    "id": "2",
+    "title": "Encounter – Knowledge – Practice",
+    "definition": "I combine at least two of the three PECA components with a view to complementarity.",
+    "category": "teacher-conditions"
+  },
+  {
+    "id": "3",
+    "title": "Objectives",
+    "definition": "I define the objectives of the intervention beforehand and present them to pupils. In partnerships, objectives are set jointly.",
+    "category": "teacher-conditions"
+  },
+  {
+    "id": "4",
+    "title": "Space",
+    "definition": "I look for a suitable space for the intervention, whether in school and/or in a cultural or artistic venue.",
+    "category": "teacher-conditions"
+  },
+  {
+    "id": "5",
+    "title": "Materials",
+    "definition": "I provide functional, good-quality materials for pupils.",
+    "category": "teacher-conditions"
+  },
+  {
+    "id": "6",
+    "title": "Budget",
+    "definition": "Together with the school management, I set a budget ensuring all pupils can participate and seek possible funding from FW-B, etc.",
+    "category": "teacher-conditions"
+  },
+  {
+    "id": "7",
+    "title": "Duration",
+    "definition": "I plan an appropriate duration for pupil engagement, both for the intervention as a whole and for individual sessions.",
+    "category": "teacher-conditions"
+  },
+  {
+    "id": "8",
+    "title": "Process",
+    "definition": "I value the process as much as the final creation (performance, exhibition, etc.).",
+    "category": "teacher-conditions"
+  },
+  {
+    "id": "9",
+    "title": "Respect & trust",
+    "definition": "I show respect and trust towards pupils and partners and value everyone’s contribution.",
+    "category": "teacher-conditions"
+  },
+  {
+    "id": "10",
+    "title": "Self-assessment",
+    "definition": "I plan moments and tools for pupils to step back, including records that foster discussion and critical thinking.",
+    "category": "teacher-conditions"
+  },
+  {
+    "id": "11",
+    "title": "Reflexivity",
+    "definition": "I evaluate the intervention in relation to the objectives set.",
+    "category": "teacher-conditions"
+  },
+  {
+    "id": "12",
+    "title": "Levels of difficulty",
+    "definition": "I design tasks with an appropriate difficulty level so each pupil can thrive.",
+    "category": "teacher-recommendations"
+  },
+  {
+    "id": "13",
+    "title": "Interdisciplinarity",
+    "definition": "I involve or connect the work with other school subjects.",
+    "category": "teacher-recommendations"
+  },
+  {
+    "id": "14",
+    "title": "Pupils' context",
+    "definition": "I create links with pupils’ (potential) interests, current events, and/or social-cultural backgrounds.",
+    "category": "teacher-recommendations"
+  },
+  {
+    "id": "15",
+    "title": "Local resources",
+    "definition": "I engage local people or resources (cultural organisations, non-profits, etc.) to set up activities inside or outside the school (visits to cultural/artistic venues, heritage sites, etc.).",
+    "category": "teacher-recommendations"
+  },
+  {
+    "id": "16",
+    "title": "Family involvement",
+    "definition": "I plan moments and tools to involve families during the process and/or at the end of the intervention.",
+    "category": "teacher-recommendations"
+  },
+  {
+    "id": "17",
+    "title": "Collaboration",
+    "definition": "In partnerships, partners consider the specificities of each context (classroom, artistic, cultural). They agree on the ‘conditions’ cells and define roles and responsibilities.",
+    "category": "teacher-recommendations"
+  },
+  {
+    "id": "18",
+    "title": "Project-based approach",
+    "definition": "I embed the intervention within a project-based pedagogy (or similar).",
+    "category": "teacher-recommendations"
+  },
+  {
+    "id": "19",
+    "title": "Communication",
+    "definition": "I explain the intervention, its stages, and/or expected outcomes to school management, colleagues, families, and/or colleagues in other schools.",
+    "category": "teacher-recommendations"
+  },
+  {
+    "id": "20",
+    "title": "Representations",
+    "definition": "I question pupils on their representations of cultural and/or artistic practice, the artist, the work, and/or heritage.",
+    "category": "teacher-recommendations"
+  },
+  {
+    "id": "21",
+    "title": "Participation",
+    "definition": "I take part in tasks carried out by pupils, adopting a learner, model, and/or co-creator stance.",
+    "category": "teacher-recommendations"
+  },
+  {
+    "id": "22",
+    "title": "Team spirit",
+    "definition": "I foster group work, collaboration, cooperation, and team spirit among pupils.",
+    "category": "teacher-recommendations"
+  },
+  {
+    "id": "23",
+    "title": "Flexibility",
+    "definition": "I show flexibility to respond to pupils’ needs and draw on their reactions.",
+    "category": "teacher-recommendations"
+  },
+  {
+    "id": "24",
+    "title": "Right to fail",
+    "definition": "I encourage risk-taking, letting go, and the right to make mistakes within the creative process.",
+    "category": "teacher-recommendations"
+  },
+  {
+    "id": "P",
+    "title": "Planning",
+    "definition": "The educational team plans, in collaboration with partners, the integration of interventions within pupils’ PECA pathway, ensuring coherence and complementarity. PECA is valued in the school’s development plan.",
+    "category": "team-conditions"
+  },
+  {
+    "id": "R",
+    "title": "PECA resource persons",
+    "definition": "The educational team draws on resource persons for PECA (relay teachers, cultural coordinators, inspectors, school advisers, cultural operators, etc.).",
+    "category": "team-conditions"
+  },
+  {
+    "id": "E",
+    "title": "Evaluation",
+    "definition": "The educational team evaluates (with partners where relevant) the integration of interventions in pupils’ pathways, their diversity, and coordination, for improvement—for example by contrasting Ruches.",
+    "category": "team-conditions"
+  },
+  {
+    "id": "VA",
+    "title": "Showcasing",
+    "definition": "The educational team regularly uses and animates ‘arts and culture’ spaces within the school (displaying pupils’ and artists’ works, information on academies, posters for local exhibitions or shows, quotes from artists, etc.).",
+    "category": "team-recommendations"
+  },
+  {
+    "id": "a.",
+    "title": "Audiovisual",
+    "definition": "Viewing, analysis, critique, scripting, production, editing...",
+    "category": "domain"
+  },
+  {
+    "id": "b.",
+    "title": "Music",
+    "definition": "Listening, choral singing, polyrhythm, sound creation, DIY instrument-making, orchestral practices...",
+    "category": "domain"
+  },
+  {
+    "id": "c.",
+    "title": "French language and literature",
+    "definition": "Reading, creative writing, slam, storytelling, narration...",
+    "category": "domain"
+  },
+  {
+    "id": "d.",
+    "title": "Visual and plastic arts",
+    "definition": "Painting, sculpture, photography, interactive installation, augmented reality, web art...",
+    "category": "domain"
+  },
+  {
+    "id": "e.",
+    "title": "Theatre",
+    "definition": "Diction, eloquence, acting, improvisation, community theatre, puppetry...",
+    "category": "domain"
+  },
+  {
+    "id": "f.",
+    "title": "Fairground, circus and street arts",
+    "definition": "Juggling, acrobatics, automaton manipulation, clowning, magic, street art...",
+    "category": "domain"
+  },
+  {
+    "id": "g.",
+    "title": "Cultural heritage",
+    "definition": "Historic sites and monuments, tales and legends, traditional songs and crafts...",
+    "category": "domain"
+  },
+  {
+    "id": "h.",
+    "title": "Dance",
+    "definition": "Choreography, interpretation, physical expression, mime...",
+    "category": "domain"
+  }
+]

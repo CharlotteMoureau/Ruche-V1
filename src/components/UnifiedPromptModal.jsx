@@ -1,4 +1,5 @@
 import { useEffect, useRef } from "react";
+import { useLanguage } from "../context/LanguageContext";
 
 export default function UnifiedPromptModal({
   isOpen,
@@ -9,8 +10,8 @@ export default function UnifiedPromptModal({
   onValueChange,
   inputLabel,
   inputPlaceholder,
-  confirmLabel = "Confirmer",
-  cancelLabel = "Annuler",
+  confirmLabel,
+  cancelLabel,
   confirmDisabled = false,
   confirmClassName = "",
   onConfirm,
@@ -19,8 +20,11 @@ export default function UnifiedPromptModal({
   onExtraAction,
   extraActionClassName = "",
 }) {
+  const { t } = useLanguage();
   const inputRef = useRef(null);
   const confirmRef = useRef(null);
+  const resolvedConfirmLabel = confirmLabel || t("common.confirm");
+  const resolvedCancelLabel = cancelLabel || t("common.cancel");
 
   useEffect(() => {
     if (!isOpen) return;
@@ -64,14 +68,17 @@ export default function UnifiedPromptModal({
       onKeyDown={handleKeyDown}
       tabIndex={0}
     >
-      <div className="modal-box unified-prompt-modal" onClick={(event) => event.stopPropagation()}>
+      <div
+        className="modal-box unified-prompt-modal"
+        onClick={(event) => event.stopPropagation()}
+      >
         <h2>{title}</h2>
         {message ? <p className="unified-prompt-message">{message}</p> : null}
 
         <form onSubmit={handleSubmit} className="form-grid unified-prompt-form">
           {mode === "prompt" ? (
             <label>
-              {inputLabel || "Valeur"}
+              {inputLabel || "Value"}
               <input
                 ref={inputRef}
                 type="text"
@@ -85,7 +92,7 @@ export default function UnifiedPromptModal({
 
           <div className="modal-actions">
             <button type="button" className="btn secondary" onClick={onCancel}>
-              {cancelLabel}
+              {resolvedCancelLabel}
             </button>
             {onExtraAction && extraActionLabel ? (
               <button
@@ -102,7 +109,7 @@ export default function UnifiedPromptModal({
               className={`btn ${confirmClassName}`.trim()}
               disabled={confirmDisabled}
             >
-              {confirmLabel}
+              {resolvedConfirmLabel}
             </button>
           </div>
         </form>

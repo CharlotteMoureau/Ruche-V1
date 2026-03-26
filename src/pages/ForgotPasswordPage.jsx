@@ -1,7 +1,9 @@
 import { useState } from "react";
 import { apiFetch } from "../lib/api";
+import { useLanguage } from "../context/LanguageContext";
 
 export default function ForgotPasswordPage() {
+  const { t } = useLanguage();
   const [email, setEmail] = useState("");
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
@@ -24,10 +26,10 @@ export default function ForgotPasswordPage() {
 
   return (
     <section className="page-shell">
-      <h2>Mot de passe oublié</h2>
+      <h2>{t("forgotPassword.title")}</h2>
       <form onSubmit={onSubmit} className="form-grid">
         <label>
-          Email
+          {t("forgotPassword.email")}
           <input
             type="email"
             value={email}
@@ -37,7 +39,7 @@ export default function ForgotPasswordPage() {
         </label>
         {error ? <p className="form-error">{error}</p> : null}
         {message ? <p className="form-info">{message}</p> : null}
-        <button type="submit">Envoyer le lien</button>
+        <button type="submit">{t("forgotPassword.submit")}</button>
       </form>
     </section>
   );

@@ -2,6 +2,7 @@ import { Fragment, useCallback, useEffect, useMemo, useState } from "react";
 import { apiFetch } from "../lib/api";
 import { useAuth } from "../context/AuthContext";
 import UnifiedPromptModal from "../components/UnifiedPromptModal";
+import { useLanguage } from "../context/LanguageContext";
 
 const ITEMS_PER_PAGE = 10;
 
@@ -9,32 +10,19 @@ function getTotalPages(count) {
   return Math.max(1, Math.ceil(count / ITEMS_PER_PAGE));
 }
 
-function formatDate(value) {
+function formatDate(value, locale) {
   if (!value) return "—";
   const d = new Date(value);
   if (Number.isNaN(d.getTime())) return "—";
-  return new Intl.DateTimeFormat("fr-BE", {
+  return new Intl.DateTimeFormat(locale, {
     dateStyle: "medium",
     timeStyle: "short",
   }).format(d);
 }
 
-const USER_ROLES = [
-  "Délégué PECA",
-  "Direction",
-  "Enseignant",
-  "Educateur",
-  "Membre d'un CPMS",
-  "Futur enseignant",
-  "Intervenant culturel",
-  "Etudiant en Ecole Superieure des Arts",
-  "Référent culturel",
-  "Référent scolaire",
-  "Autre",
-];
-
 export default function AdminPage() {
   const { token } = useAuth();
+  const { t, dateLocale, roleOptions, translateRole } = useLanguage();
   const [users, setUsers] = useState([]);
   const [hives, setHives] = useState([]);
   const [error, setError] = useState("");
@@ -245,15 +233,17 @@ export default function AdminPage() {
 
   return (
     <section className="page-shell admin-page">
-      <h2>Administration</h2>
+      <h2>{t("admin.title")}</h2>
       {error ? <p className="form-error">{error}</p> : null}
 
-      <h3>Utilisateurs ({filteredUsers.length})</h3>
+      <h3>
+        {t("admin.users")} ({filteredUsers.length})
+      </h3>
       <div className="admin-toolbar">
         <input
           type="search"
           className="admin-search"
-          placeholder="Rechercher (nom, email, rôle)…"
+          placeholder={t("admin.searchUsers")}
           value={userSearch}
           onChange={(e) => {
             setUserSearch(e.target.value);
@@ -272,7 +262,7 @@ export default function AdminPage() {
                   className="admin-sort-btn"
                   onClick={() => toggleSort("username", userSort, setUserSort)}
                 >
-                  Utilisateur
+                  {t("admin.user")}
                   {sortIndicator("username", userSortField, userSortDir)}
                 </button>
               </th>
@@ -282,7 +272,8 @@ export default function AdminPage() {
                   className="admin-sort-btn"
                   onClick={() => toggleSort("email", userSort, setUserSort)}
                 >
-                  Email{sortIndicator("email", userSortField, userSortDir)}
+                  {t("profile.email")}
+                  {sortIndicator("email", userSortField, userSortDir)}
                 </button>
               </th>
               <th>
@@ -291,7 +282,8 @@ export default function AdminPage() {
                   className="admin-sort-btn"
                   onClick={() => toggleSort("roleLabel", userSort, setUserSort)}
                 >
-                  Rôle{sortIndicator("roleLabel", userSortField, userSortDir)}
+                  {t("admin.role")}
+                  {sortIndicator("roleLabel", userSortField, userSortDir)}
                 </button>
               </th>
               <th>
@@ -302,7 +294,7 @@ export default function AdminPage() {
                     toggleSort("hivesCount", userSort, setUserSort)
                   }
                 >
-                  Ruches
+                  {t("admin.hiveCount")}
                   {sortIndicator("hivesCount", userSortField, userSortDir)}
                 </button>
               </th>
@@ -314,7 +306,7 @@ export default function AdminPage() {
                     toggleSort("collabsCount", userSort, setUserSort)
                   }
                 >
-                  Collabs
+                  {t("admin.collabs")}
                   {sortIndicator("collabsCount", userSortField, userSortDir)}
                 </button>
               </th>
@@ -324,11 +316,11 @@ export default function AdminPage() {
                   className="admin-sort-btn"
                   onClick={() => toggleSort("createdAt", userSort, setUserSort)}
                 >
-                  Créé le
+                  {t("admin.createdAt")}
                   {sortIndicator("createdAt", userSortField, userSortDir)}
                 </button>
               </th>
-              <th>Actions</th>
+              <th>{t("admin.actions")}</th>
             </tr>
           </thead>
           <tbody>
@@ -340,14 +332,16 @@ export default function AdminPage() {
                   </td>
                   <td>{u.email}</td>
                   <td>
-                    {u.roleLabel}
+                    {translateRole(u.roleLabel)}
                     {u.roleLabel === "Autre" && u.roleOtherText
                       ? ` (${u.roleOtherText})`
                       : ""}
                   </td>
                   <td className="admin-num">{u._count.hives}</td>
                   <td className="admin-num">{u._count.collaborations}</td>
-                  <td className="admin-date">{formatDate(u.createdAt)}</td>
+                  <td className="admin-date">
+                    {formatDate(u.createdAt, dateLocale)}
+                  </td>
                   <td>
                     <div className="inline-actions">
                       <button
@@ -366,13 +360,17 @@ export default function AdminPage() {
                           )
                         }
                       >
-                        {editingUser?.id === u.id ? "Annuler" : "Modifier"}
+                        {editingUser?.id === u.id
+                          ? t("admin.cancelEdit")
+                          : t("admin.edit")}
                       </button>
                       <button
                         type="button"
-                        onClick={() => setDeleteTarget({ type: "user", id: u.id })}
+                        onClick={() =>
+                          setDeleteTarget({ type: "user", id: u.id })
+                        }
                       >
-                        Supprimer
+                        {t("common.delete")}
                       </button>
                     </div>
                   </td>
@@ -382,7 +380,7 @@ export default function AdminPage() {
                     <td colSpan={7}>
                       <div className="form-grid admin-inline-form">
                         <label>
-                          {"Nom d'utilisateur"}
+                          {t("profile.username")}
                           <input
                             type="text"
                             value={editingUser.username}
@@ -396,7 +394,7 @@ export default function AdminPage() {
                           />
                         </label>
                         <label>
-                          Rôle
+                          {t("admin.role")}
                           <select
                             value={editingUser.roleLabel}
                             onChange={(e) =>
@@ -406,16 +404,16 @@ export default function AdminPage() {
                               })
                             }
                           >
-                            {USER_ROLES.map((r) => (
-                              <option key={r} value={r}>
-                                {r}
+                            {roleOptions.map((role) => (
+                              <option key={role.value} value={role.value}>
+                                {role.label}
                               </option>
                             ))}
                           </select>
                         </label>
                         {editingUser.roleLabel === "Autre" ? (
                           <label>
-                            Précisez
+                            {t("admin.specify")}
                             <input
                               type="text"
                               value={editingUser.roleOtherText || ""}
@@ -436,13 +434,13 @@ export default function AdminPage() {
                             disabled={!editingUser.username.trim()}
                             onClick={saveUser}
                           >
-                            Enregistrer
+                            {t("admin.save")}
                           </button>
                           <button
                             type="button"
                             onClick={() => setEditingUser(null)}
                           >
-                            Annuler
+                            {t("common.cancel")}
                           </button>
                         </div>
                       </div>
@@ -462,10 +460,10 @@ export default function AdminPage() {
             onClick={() => setUsersPage((p) => Math.max(1, p - 1))}
             disabled={usersPage === 1}
           >
-            Précédent
+            {t("common.previous")}
           </button>
           <span>
-            Page {usersPage}/{usersTotalPages}
+            {t("common.page")} {usersPage}/{usersTotalPages}
           </span>
           <button
             type="button"
@@ -474,17 +472,19 @@ export default function AdminPage() {
             }
             disabled={usersPage === usersTotalPages}
           >
-            Suivant
+            {t("common.next")}
           </button>
         </div>
       ) : null}
 
-      <h3>Ruches ({filteredHives.length})</h3>
+      <h3>
+        {t("admin.hives")} ({filteredHives.length})
+      </h3>
       <div className="admin-toolbar">
         <input
           type="search"
           className="admin-search"
-          placeholder="Rechercher (titre, propriétaire)…"
+          placeholder={t("admin.searchHives")}
           value={hiveSearch}
           onChange={(e) => {
             setHiveSearch(e.target.value);
@@ -503,7 +503,8 @@ export default function AdminPage() {
                   className="admin-sort-btn"
                   onClick={() => toggleSort("title", hiveSort, setHiveSort)}
                 >
-                  Titre{sortIndicator("title", hiveSortField, hiveSortDir)}
+                  {t("admin.titleLabel")}
+                  {sortIndicator("title", hiveSortField, hiveSortDir)}
                 </button>
               </th>
               <th>
@@ -512,7 +513,7 @@ export default function AdminPage() {
                   className="admin-sort-btn"
                   onClick={() => toggleSort("owner", hiveSort, setHiveSort)}
                 >
-                  Propriétaire
+                  {t("admin.owner")}
                   {sortIndicator("owner", hiveSortField, hiveSortDir)}
                 </button>
               </th>
@@ -524,7 +525,7 @@ export default function AdminPage() {
                     toggleSort("collabsCount", hiveSort, setHiveSort)
                   }
                 >
-                  Collabs
+                  {t("admin.collabs")}
                   {sortIndicator("collabsCount", hiveSortField, hiveSortDir)}
                 </button>
               </th>
@@ -536,7 +537,7 @@ export default function AdminPage() {
                     toggleSort("commentsCount", hiveSort, setHiveSort)
                   }
                 >
-                  Commentaires
+                  {t("admin.comments")}
                   {sortIndicator("commentsCount", hiveSortField, hiveSortDir)}
                 </button>
               </th>
@@ -546,7 +547,7 @@ export default function AdminPage() {
                   className="admin-sort-btn"
                   onClick={() => toggleSort("createdAt", hiveSort, setHiveSort)}
                 >
-                  Créée le
+                  {t("profile.createdAt")}
                   {sortIndicator("createdAt", hiveSortField, hiveSortDir)}
                 </button>
               </th>
@@ -556,11 +557,11 @@ export default function AdminPage() {
                   className="admin-sort-btn"
                   onClick={() => toggleSort("updatedAt", hiveSort, setHiveSort)}
                 >
-                  Dernière édition
+                  {t("profile.updatedAt")}
                   {sortIndicator("updatedAt", hiveSortField, hiveSortDir)}
                 </button>
               </th>
-              <th>Actions</th>
+              <th>{t("admin.actions")}</th>
             </tr>
           </thead>
           <tbody>
@@ -573,8 +574,12 @@ export default function AdminPage() {
                   <td>{hive.owner?.username}</td>
                   <td className="admin-num">{hive._count.collaborators}</td>
                   <td className="admin-num">{hive._count.comments}</td>
-                  <td className="admin-date">{formatDate(hive.createdAt)}</td>
-                  <td className="admin-date">{formatDate(hive.updatedAt)}</td>
+                  <td className="admin-date">
+                    {formatDate(hive.createdAt, dateLocale)}
+                  </td>
+                  <td className="admin-date">
+                    {formatDate(hive.updatedAt, dateLocale)}
+                  </td>
                   <td>
                     <div className="inline-actions">
                       <button
@@ -588,7 +593,9 @@ export default function AdminPage() {
                           )
                         }
                       >
-                        {editingHive?.id === hive.id ? "Annuler" : "Modifier"}
+                        {editingHive?.id === hive.id
+                          ? t("admin.cancelEdit")
+                          : t("admin.edit")}
                       </button>
                       <button
                         type="button"
@@ -596,7 +603,7 @@ export default function AdminPage() {
                           setDeleteTarget({ type: "hive", id: hive.id })
                         }
                       >
-                        Supprimer
+                        {t("common.delete")}
                       </button>
                     </div>
                   </td>
@@ -606,7 +613,7 @@ export default function AdminPage() {
                     <td colSpan={7}>
                       <div className="form-grid admin-inline-form">
                         <label>
-                          Titre
+                          {t("admin.titleLabel")}
                           <input
                             type="text"
                             value={editingHive.title}
@@ -626,13 +633,13 @@ export default function AdminPage() {
                             disabled={!editingHive.title.trim()}
                             onClick={saveHive}
                           >
-                            Enregistrer
+                            {t("admin.save")}
                           </button>
                           <button
                             type="button"
                             onClick={() => setEditingHive(null)}
                           >
-                            Annuler
+                            {t("common.cancel")}
                           </button>
                         </div>
                       </div>
@@ -652,10 +659,10 @@ export default function AdminPage() {
             onClick={() => setHivesPage((p) => Math.max(1, p - 1))}
             disabled={hivesPage === 1}
           >
-            Précédent
+            {t("common.previous")}
           </button>
           <span>
-            Page {hivesPage}/{hivesTotalPages}
+            {t("common.page")} {hivesPage}/{hivesTotalPages}
           </span>
           <button
             type="button"
@@ -664,7 +671,7 @@ export default function AdminPage() {
             }
             disabled={hivesPage === hivesTotalPages}
           >
-            Suivant
+            {t("common.next")}
           </button>
         </div>
       ) : null}
@@ -673,11 +680,11 @@ export default function AdminPage() {
         isOpen={Boolean(deleteTarget.type && deleteTarget.id)}
         title={
           deleteTarget.type === "user"
-            ? "Supprimer l'utilisateur"
-            : "Supprimer la ruche"
+            ? t("admin.deleteUser")
+            : t("admin.deleteHive")
         }
-        message="Cette action est irreversible. Voulez-vous continuer ?"
-        confirmLabel="Supprimer"
+        message={t("admin.irreversible")}
+        confirmLabel={t("common.delete")}
         confirmClassName="danger"
         onCancel={() => setDeleteTarget({ type: null, id: null })}
         onConfirm={confirmDeleteTarget}

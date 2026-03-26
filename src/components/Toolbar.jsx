@@ -8,6 +8,7 @@ import {
   faUserPlus,
 } from "@fortawesome/free-solid-svg-icons";
 import UnifiedPromptModal from "./UnifiedPromptModal";
+import { useLanguage } from "../context/LanguageContext";
 
 export default function Toolbar({
   onReset,
@@ -21,6 +22,7 @@ export default function Toolbar({
   onOpenComments,
   commentCount = 0,
 }) {
+  const { t } = useLanguage();
   const [showInviteModal, setShowInviteModal] = useState(false);
   const [inviteEmail, setInviteEmail] = useState("");
   const [inviteRole, setInviteRole] = useState("COMMENT");
@@ -35,11 +37,11 @@ export default function Toolbar({
   const getRoleLabel = (role) => {
     switch (role) {
       case "ADMIN":
-        return "Administrateur";
+        return t("toolbar.roleAdmin");
       case "COMMENT":
-        return "Commentaire uniquement";
+        return t("toolbar.roleComment");
       case "READ":
-        return "Lecture seule";
+        return t("toolbar.roleRead");
       default:
         return role;
     }
@@ -86,7 +88,7 @@ export default function Toolbar({
 
     const context = canvas.getContext("2d");
     if (!context) {
-      throw new Error("Impossible de generer l'image fusionnee.");
+      throw new Error(t("toolbar.screenshotMergeError"));
     }
 
     context.drawImage(frontImage, 0, 0);
@@ -124,7 +126,9 @@ export default function Toolbar({
     } catch (err) {
       console.error("Erreur lors de la capture :", err);
       setExportErrorMessage(
-        `Erreur lors de la capture : ${err?.message || "inconnue"}`,
+        t("toolbar.screenshotFailed", {
+          message: err?.message || "unknown",
+        }),
       );
     } finally {
       document.body.classList.remove("capture-mode-back");
@@ -135,21 +139,17 @@ export default function Toolbar({
   const handleInvite = async () => {
     const email = inviteEmail.trim().toLowerCase();
     if (!email) {
-      setInviteWarning(
-        "Impossible d'envoyer l'invitation: l'email est obligatoire.",
-      );
+      setInviteWarning(t("toolbar.inviteRequiredEmail"));
       return;
     }
 
     if (!isValidEmail(email)) {
-      setInviteWarning(
-        "Impossible d'envoyer l'invitation: veuillez saisir un email valide.",
-      );
+      setInviteWarning(t("toolbar.inviteInvalidEmail"));
       return;
     }
 
     if (!onInviteCollaborator) {
-      setInviteWarning("Invitation indisponible pour le moment.");
+      setInviteWarning(t("toolbar.inviteUnavailable"));
       return;
     }
 
@@ -168,15 +168,11 @@ export default function Toolbar({
         normalized.includes("aucun compte") ||
         normalized.includes("introuvable")
       ) {
-        setInviteWarning(
-          "Invitation impossible: aucun utilisateur n'existe avec cet email. Le collaborateur doit d'abord creer un compte.",
-        );
+        setInviteWarning(t("toolbar.inviteNoUser"));
       } else if (normalized.includes("invitation invalide")) {
-        setInviteWarning(
-          "Invitation invalide: verifiez l'email saisi puis reessayez.",
-        );
+        setInviteWarning(t("toolbar.inviteInvalid"));
       } else {
-        setInviteWarning(message || "Invitation impossible.");
+        setInviteWarning(message || t("toolbar.inviteFailed"));
       }
     } finally {
       setInviteLoading(false);
@@ -191,7 +187,7 @@ export default function Toolbar({
       await onChangeCollaboratorRole(collaboratorId, role);
       setInviteWarning("");
     } catch (err) {
-      setInviteWarning(err?.message || "Rôle invalide");
+      setInviteWarning(err?.message || t("toolbar.invalidRole"));
     } finally {
       setManageLoadingId(null);
     }
@@ -205,9 +201,7 @@ export default function Toolbar({
       await onRemoveCollaborator(collaboratorId);
       setInviteWarning("");
     } catch (err) {
-      setInviteWarning(
-        err?.message || "Impossible de retirer ce collaborateur",
-      );
+      setInviteWarning(err?.message || t("toolbar.removeFailed"));
     } finally {
       setManageLoadingId(null);
     }
@@ -220,7 +214,7 @@ export default function Toolbar({
     try {
       await onLeaveHive();
     } catch (err) {
-      setInviteWarning(err?.message || "Impossible de quitter cette ruche");
+      setInviteWarning(err?.message || t("toolbar.leaveFailed"));
     } finally {
       setLeaveLoading(false);
     }
@@ -230,19 +224,19 @@ export default function Toolbar({
     <>
       <div className="toolbar">
         <button onClick={onReset}>
-          <FontAwesomeIcon icon={faArrowsRotate} /> Réinitialiser
+          <FontAwesomeIcon icon={faArrowsRotate} /> {t("toolbar.reset")}
         </button>
         <button onClick={handleExport}>
-          <FontAwesomeIcon icon={faCamera} /> Capture d'écran
+          <FontAwesomeIcon icon={faCamera} /> {t("toolbar.screenshot")}
         </button>
         {(canInvite && onInviteCollaborator) || canLeaveHive ? (
           <button onClick={() => setShowInviteModal(true)}>
-            <FontAwesomeIcon icon={faUserPlus} /> Collaborateurs
+            <FontAwesomeIcon icon={faUserPlus} /> {t("toolbar.collaborators")}
           </button>
         ) : null}
         {onOpenComments && (
           <button onClick={onOpenComments} className="toolbar-comments-btn">
-            <FontAwesomeIcon icon={faComments} /> Commentaires
+            <FontAwesomeIcon icon={faComments} /> {t("toolbar.comments")}
             {commentCount > 0 && (
               <span className="toolbar-comments-badge">{commentCount}</span>
             )}
@@ -260,12 +254,12 @@ export default function Toolbar({
           }}
         >
           <div className="modal-box toolbar-invite-modal">
-            <h2>Gestion des collaborateurs</h2>
+            <h2>{t("toolbar.manageCollaborators")}</h2>
             <button
               type="button"
               className="modal-close-btn"
               onClick={() => setShowInviteModal(false)}
-              aria-label="Fermer"
+              aria-label={t("common.close")}
             >
               ×
             </button>
@@ -278,12 +272,12 @@ export default function Toolbar({
                     type="email"
                     value={inviteEmail}
                     onChange={(event) => setInviteEmail(event.target.value)}
-                    placeholder="email@exemple.com"
+                    placeholder="email@example.com"
                     autoFocus
                   />
                 </label>
                 <label>
-                  Rôle
+                  {t("admin.role")}
                   <select
                     value={inviteRole}
                     onChange={(event) => setInviteRole(event.target.value)}
@@ -298,7 +292,7 @@ export default function Toolbar({
                   onClick={handleInvite}
                   disabled={inviteLoading}
                 >
-                  {inviteLoading ? "Invitation..." : "Inviter"}
+                  {inviteLoading ? t("toolbar.inviting") : t("toolbar.invite")}
                 </button>
               </div>
             ) : null}
@@ -310,11 +304,9 @@ export default function Toolbar({
             ) : null}
 
             <div className="toolbar-collaborators-section">
-              <h3>Collaborateurs actuels</h3>
+              <h3>{t("toolbar.currentCollaborators")}</h3>
               {collaborators.length === 0 ? (
-                <p className="comments-empty">
-                  Aucun collaborateur pour le moment.
-                </p>
+                <p className="comments-empty">{t("toolbar.noCollaborators")}</p>
               ) : (
                 <ul className="list-grid toolbar-collaborators-list">
                   {collaborators.map((collaborator) => (
@@ -351,7 +343,7 @@ export default function Toolbar({
                               handleRemoveCollaborator(collaborator.id)
                             }
                           >
-                            Retirer
+                            {t("toolbar.remove")}
                           </button>
                         </div>
                       ) : null}
@@ -369,7 +361,7 @@ export default function Toolbar({
                   onClick={() => setShowLeaveConfirmModal(true)}
                   disabled={leaveLoading}
                 >
-                  {leaveLoading ? "Sortie..." : "Quitter la ruche"}
+                  {leaveLoading ? t("toolbar.leaving") : t("toolbar.leaveHive")}
                 </button>
               </div>
             ) : null}
@@ -379,9 +371,9 @@ export default function Toolbar({
 
       <UnifiedPromptModal
         isOpen={showLeaveConfirmModal}
-        title="Quitter la ruche"
-        message="Voulez-vous vraiment quitter cette ruche ?"
-        confirmLabel="Quitter"
+        title={t("toolbar.confirmLeaveTitle")}
+        message={t("toolbar.confirmLeaveMessage")}
+        confirmLabel={t("toolbar.confirmLeave")}
         confirmClassName="danger"
         onCancel={() => setShowLeaveConfirmModal(false)}
         onConfirm={async () => {
@@ -392,9 +384,9 @@ export default function Toolbar({
 
       <UnifiedPromptModal
         isOpen={Boolean(exportErrorMessage)}
-        title="Capture d'ecran"
+        title={t("toolbar.screenshotTitle")}
         message={exportErrorMessage}
-        cancelLabel="Fermer"
+        cancelLabel={t("common.close")}
         confirmLabel="OK"
         onCancel={() => setExportErrorMessage("")}
         onConfirm={() => setExportErrorMessage("")}

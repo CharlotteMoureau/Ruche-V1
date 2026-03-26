@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import PasswordField from "../components/PasswordField";
+import { useLanguage } from "../context/LanguageContext";
 
 const ROLE_OPTIONS = [
   "Délégué PECA",
@@ -19,6 +20,7 @@ const ROLE_OPTIONS = [
 
 export default function RegisterPage() {
   const { register } = useAuth();
+  const { t, roleOptions } = useLanguage();
   const navigate = useNavigate();
 
   const [form, setForm] = useState({
@@ -53,10 +55,10 @@ export default function RegisterPage() {
 
   return (
     <section className="page-shell">
-      <h2>Creer un compte</h2>
+      <h2>{t("register.title")}</h2>
       <form onSubmit={onSubmit} className="form-grid">
         <label>
-          Nom d'utilisateur (unique)
+          {t("register.username")}
           <input
             value={form.username}
             onChange={(e) => onChange("username", e.target.value)}
@@ -66,7 +68,7 @@ export default function RegisterPage() {
         </label>
 
         <label>
-          Email
+          {t("register.email")}
           <input
             type="email"
             value={form.email}
@@ -76,14 +78,14 @@ export default function RegisterPage() {
         </label>
 
         <label>
-          Role
+          {t("register.role")}
           <select
             value={form.role}
             onChange={(e) => onChange("role", e.target.value)}
           >
-            {ROLE_OPTIONS.map((role) => (
-              <option key={role} value={role}>
-                {role}
+            {roleOptions.map((role) => (
+              <option key={role.value} value={role.value}>
+                {role.label}
               </option>
             ))}
           </select>
@@ -91,7 +93,7 @@ export default function RegisterPage() {
 
         {form.role === "Autre" ? (
           <label>
-            Precisez votre role
+            {t("register.roleOther")}
             <input
               value={form.roleOtherText}
               onChange={(e) => onChange("roleOtherText", e.target.value)}
@@ -101,7 +103,7 @@ export default function RegisterPage() {
         ) : null}
 
         <PasswordField
-          label="Mot de passe"
+          label={t("register.password")}
           value={form.password}
           onChange={(e) => onChange("password", e.target.value)}
           required
@@ -110,7 +112,7 @@ export default function RegisterPage() {
         />
 
         <PasswordField
-          label="Confirmation du mot de passe"
+          label={t("register.passwordConfirm")}
           value={form.passwordConfirm}
           onChange={(e) => onChange("passwordConfirm", e.target.value)}
           required
@@ -120,7 +122,7 @@ export default function RegisterPage() {
 
         {error ? <p className="form-error">{error}</p> : null}
         <button disabled={loading} type="submit">
-          {loading ? "Creation..." : "Creer mon compte"}
+          {loading ? t("register.submitting") : t("register.submit")}
         </button>
       </form>
     </section>
