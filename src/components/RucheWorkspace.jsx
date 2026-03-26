@@ -7,7 +7,6 @@ import Toolbar from "./Toolbar";
 import cardsFr from "../data/cards.json";
 import cardsEn from "../data/cards_en.json";
 import cardsNl from "../data/cards_nl.json";
-import Footer from "./Footer";
 import CustomDragPreview from "./CustomDragPreview";
 import AddCardModal from "./ModalFree";
 import { useDeviceDetection } from "../hooks/useDeviceDetection";
@@ -615,7 +614,6 @@ export default function RucheWorkspace({
           handleDeleteCardComment();
         }}
       />
-      <Footer />
     </DndProvider>
   );
 }

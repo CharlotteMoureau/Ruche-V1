@@ -1,7 +1,16 @@
 footer {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 1400;
     height: 80px;
     display: flex !important;
     justify-content: space-between;
+    align-items: center;
+    background: #faf9f6;
+    border-top: 1px solid #ddd;
+    padding: 0 8px;
 
     img {
         height: 50px;
@@ -9,7 +18,7 @@ footer {
     }
 }
 
-.ios .footer {
+body.ios footer {
     height: 60px;
 
     img {

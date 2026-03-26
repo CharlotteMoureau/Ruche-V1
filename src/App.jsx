@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { Navigate, Route, Routes } from "react-router-dom";
 import { AuthProvider } from "./context/AuthContext";
 import AppHeader from "./components/AppHeader";
@@ -11,9 +12,38 @@ import ProfilePage from "./pages/ProfilePage";
 import RucheEditorPage from "./pages/RucheEditorPage";
 import AdminPage from "./pages/AdminPage";
 import { LanguageProvider } from "./context/LanguageContext";
+import Footer from "./components/Footer";
 import "./styles/main.scss";
 
 export default function App() {
+  useEffect(() => {
+    const updateLayoutVars = () => {
+      const header = document.querySelector(".site-header");
+      const footer = document.querySelector("footer");
+      const root = document.documentElement;
+
+      const headerHeight = header ? header.getBoundingClientRect().height : 0;
+      const footerHeight = footer ? footer.getBoundingClientRect().height : 80;
+
+      root.style.setProperty(
+        "--app-header-height",
+        `${Math.round(headerHeight)}px`,
+      );
+      root.style.setProperty(
+        "--app-footer-height",
+        `${Math.round(footerHeight)}px`,
+      );
+    };
+
+    const rafId = window.requestAnimationFrame(updateLayoutVars);
+    window.addEventListener("resize", updateLayoutVars);
+
+    return () => {
+      window.cancelAnimationFrame(rafId);
+      window.removeEventListener("resize", updateLayoutVars);
+    };
+  }, []);
+
   return (
     <LanguageProvider>
       <AuthProvider>
@@ -58,6 +88,7 @@ export default function App() {
           />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
+        <Footer />
       </AuthProvider>
     </LanguageProvider>
   );

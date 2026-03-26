@@ -16,6 +16,10 @@
 
 .editor-page {
   padding: 12px;
+  height: calc(100dvh - var(--app-header-height, 64px) - var(--app-footer-height, 80px));
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
 }
 
 .editor-topbar {
@@ -24,6 +28,7 @@
   gap: 14px;
   margin-bottom: 12px;
   flex-wrap: wrap;
+  flex-shrink: 0;
 
   input {
     margin-left: 8px;
@@ -31,4 +36,22 @@
     border-radius: 8px;
     padding: 8px;
   }
+}
+
+.editor-page .form-info,
+.editor-page .form-error,
+.editor-page .page-loader {
+  flex-shrink: 0;
+}
+
+.editor-page .editor-app {
+  flex: 1;
+  min-height: 0;
+  height: auto;
+  margin: 0;
+}
+
+.editor-page .card-library,
+.editor-page .hive-board {
+  min-height: 0;
 }
