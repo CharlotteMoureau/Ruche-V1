@@ -1,19 +1,20 @@
-@use "./variables" as *;
+@use "./base/variables" as *;
+@use "./base/reset" as *;
+@use "./base/base" as *;
 
-@use "./reset" as *;
-@use "./base" as *;
-@use "./layout" as *;
-@use "./forms" as *;
-@use "./actions" as *;
-@use "./editor" as *;
+@use "./layout/layout" as *;
+@use "./layout/editor" as *;
 
-@use "./titre" as *;
-@use "./hex" as *;
-@use "./cardlibrary" as *;
-@use "./hiveboard" as *;
-@use "./hivepreview" as *;
-@use "./modal" as *;
-@use "./freespacecard" as *;
-@use "./admin" as *;
-@use "./loader" as *;
-@use "./footer" as *;
+@use "./components/forms" as *;
+@use "./components/actions" as *;
+@use "./components/titre" as *;
+@use "./components/hex" as *;
+@use "./components/cardlibrary" as *;
+@use "./components/hiveboard" as *;
+@use "./components/hivepreview" as *;
+@use "./components/modal" as *;
+@use "./components/freespacecard" as *;
+@use "./components/loader" as *;
+@use "./components/footer" as *;
+
+@use "./pages/admin" as *;

@@ -1,5 +1,5 @@
 @use "sass:color";
-@use "./variables" as *;
+@use "../base/variables" as *;
 
 .modal-overlay {
   position: fixed;
