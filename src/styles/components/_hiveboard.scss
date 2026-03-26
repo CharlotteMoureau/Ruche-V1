@@ -9,25 +9,23 @@
 }
 
 .toolbar {
-  position: fixed;
-  top: 100px;
-  right: 20px;
   display: flex;
+  align-items: center;
+  flex-wrap: wrap;
   gap: 10px;
-  z-index: 100;
 
   button {
-    background-color: $turquoise;
+    background-color: $jaune;
     border: none;
     padding: 8px 12px;
     border-radius: 8px;
     cursor: pointer;
-    color: #fff;
+    color: #222;
     font-weight: bold;
     transition: 0.2s;
 
     &:hover {
-      background-color: color.adjust($turquoise, $lightness: -8%);
+      background-color: color.adjust($jaune, $lightness: -8%);
     }
   }
 }

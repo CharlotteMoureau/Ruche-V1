@@ -3,7 +3,6 @@ import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
 import CardLibrary from "./CardLibrary";
 import HiveBoard from "./HiveBoard";
-import Toolbar from "./Toolbar";
 import cardsFr from "../data/cards.json";
 import cardsEn from "../data/cards_en.json";
 import cardsNl from "../data/cards_nl.json";
@@ -129,18 +128,10 @@ function normalizeBoardData(data, cardsData) {
 export default function RucheWorkspace({
   initialBoardData,
   loadKey,
+  resetSignal = 0,
   onStateChange,
   canEdit = true,
   canComment = false,
-  canInvite = false,
-  canLeaveHive = false,
-  collaborators = [],
-  onInviteCollaborator,
-  onChangeCollaboratorRole,
-  onRemoveCollaborator,
-  onLeaveHive,
-  onOpenComments,
-  commentCount = 0,
 }) {
   const { user } = useAuth();
   const { language, t, dateLocale } = useLanguage();
@@ -163,6 +154,7 @@ export default function RucheWorkspace({
   const [inputText, setInputText] = useState("");
   const [selectedCardIds, setSelectedCardIds] = useState(() => new Set());
   const [activeLoadKey, setActiveLoadKey] = useState(loadKey);
+  const [activeResetSignal, setActiveResetSignal] = useState(resetSignal);
   const [commentModalCardId, setCommentModalCardId] = useState(null);
   const [commentDraft, setCommentDraft] = useState("");
   const [pendingReturnCardIds, setPendingReturnCardIds] = useState([]);
@@ -429,14 +421,17 @@ export default function RucheWorkspace({
     setInputText("");
   };
 
-  const resetHive = () => {
-    if (!canEdit) return;
-    setBoardCards([]);
-    setAvailableCards(cardsData);
-    setUserCards([]);
-    setSelectedCardIds(new Set());
-    handleCloseCardCommentModal();
-  };
+  useEffect(() => {
+    if (resetSignal === activeResetSignal) return;
+    if (canEdit) {
+      setBoardCards([]);
+      setAvailableCards(cardsData);
+      setUserCards([]);
+      setSelectedCardIds(new Set());
+      handleCloseCardCommentModal();
+    }
+    setActiveResetSignal(resetSignal);
+  }, [activeResetSignal, resetSignal, canEdit, cardsData]);
 
   const activeCommentCard = commentModalCardId
     ? boardCards.find((card) => card.id === commentModalCardId) || null
@@ -446,18 +441,6 @@ export default function RucheWorkspace({
   return (
     <DndProvider backend={HTML5Backend}>
       <div className="app editor-app">
-        <Toolbar
-          onReset={resetHive}
-          canInvite={canInvite}
-          canLeaveHive={canLeaveHive}
-          collaborators={collaborators}
-          onInviteCollaborator={onInviteCollaborator}
-          onChangeCollaboratorRole={onChangeCollaboratorRole}
-          onRemoveCollaborator={onRemoveCollaborator}
-          onLeaveHive={onLeaveHive}
-          onOpenComments={onOpenComments}
-          commentCount={commentCount}
-        />
         <CardLibrary
           cards={availableCards}
           onFreeSpaceClick={() => setShowModal(true)}

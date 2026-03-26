@@ -4,6 +4,7 @@ import domtoimage from "dom-to-image-more";
 import { apiFetch } from "../lib/api";
 import { useAuth } from "../context/AuthContext";
 import RucheWorkspace from "../components/RucheWorkspace";
+import Toolbar from "../components/Toolbar";
 import UnifiedPromptModal from "../components/UnifiedPromptModal";
 import PageLoader from "../components/PageLoader";
 import { useLanguage } from "../context/LanguageContext";
@@ -64,6 +65,7 @@ export default function RucheEditorPage() {
   const [showLeaveDirtyModal, setShowLeaveDirtyModal] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState(null);
   const [editingTarget, setEditingTarget] = useState(null);
+  const [resetSignal, setResetSignal] = useState(0);
 
   const isOwner = Boolean(
     hive?.owner?.id && user?.id && hive.owner.id === user.id,
@@ -470,38 +472,59 @@ export default function RucheEditorPage() {
   return (
     <section className="editor-page">
       <div className="editor-topbar">
-        <Link
-          to="/profile"
-          className="button-link"
-          onClick={(event) => {
-            if (!isDirty) return;
-            event.preventDefault();
-            setShowLeaveDirtyModal(true);
-          }}
-        >
-          {t("editor.backToProfile")}
-        </Link>
-
-        <label>
-          {t("editor.hiveTitleLabel")}
-          <input
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            onKeyDown={(event) => {
-              if (!canEdit || isSaving || event.nativeEvent.isComposing) return;
-              if (event.key !== "Enter") return;
+        <div className="editor-topbar-main">
+          <Link
+            to="/profile"
+            className="button-link"
+            onClick={(event) => {
+              if (!isDirty) return;
               event.preventDefault();
-              saveHive();
+              setShowLeaveDirtyModal(true);
             }}
-            maxLength={100}
-            disabled={!canEdit}
+          >
+            {t("editor.backToProfile")}
+          </Link>
+
+          <label>
+            {t("editor.hiveTitleLabel")}
+            <input
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              onKeyDown={(event) => {
+                if (!canEdit || isSaving || event.nativeEvent.isComposing) return;
+                if (event.key !== "Enter") return;
+                event.preventDefault();
+                saveHive();
+              }}
+              maxLength={100}
+              disabled={!canEdit}
+            />
+          </label>
+          {canEdit ? (
+            <button type="button" onClick={saveHive} disabled={isSaving}>
+              {isSaving ? t("editor.saving") : t("editor.saveHive")}
+            </button>
+          ) : null}
+        </div>
+
+        <div className="editor-topbar-actions">
+          <Toolbar
+            onReset={() => setResetSignal((prev) => prev + 1)}
+            canInvite={
+              !isNew && Boolean(hive) && (hive.owner?.id === user?.id || isAdmin)
+            }
+            canLeaveHive={!isNew && Boolean(hive) && isCollaborator}
+            collaborators={hive?.collaborators || []}
+            onInviteCollaborator={!isNew && hive ? inviteCollaborator : undefined}
+            onChangeCollaboratorRole={
+              !isNew && hive ? changeCollaboratorRole : undefined
+            }
+            onRemoveCollaborator={!isNew && hive ? removeCollaborator : undefined}
+            onLeaveHive={!isNew && hive && isCollaborator ? leaveHive : undefined}
+            onOpenComments={!isNew ? () => setShowCommentsModal(true) : undefined}
+            commentCount={commentCount}
           />
-        </label>
-        {canEdit ? (
-          <button type="button" onClick={saveHive} disabled={isSaving}>
-            {isSaving ? t("editor.saving") : t("editor.saveHive")}
-          </button>
-        ) : null}
+        </div>
       </div>
 
       {isDuplicateFlow ? (
@@ -533,22 +556,10 @@ export default function RucheEditorPage() {
         <RucheWorkspace
           initialBoardData={boardData}
           loadKey={workspaceLoadKey}
+          resetSignal={resetSignal}
           canEdit={canEdit}
           canComment={canComment}
-          canInvite={
-            !isNew && Boolean(hive) && (hive.owner?.id === user?.id || isAdmin)
-          }
-          canLeaveHive={!isNew && Boolean(hive) && isCollaborator}
-          collaborators={hive?.collaborators || []}
-          onInviteCollaborator={!isNew && hive ? inviteCollaborator : undefined}
-          onChangeCollaboratorRole={
-            !isNew && hive ? changeCollaboratorRole : undefined
-          }
-          onRemoveCollaborator={!isNew && hive ? removeCollaborator : undefined}
-          onLeaveHive={!isNew && hive && isCollaborator ? leaveHive : undefined}
           onStateChange={setBoardData}
-          onOpenComments={!isNew ? () => setShowCommentsModal(true) : undefined}
-          commentCount={commentCount}
         />
       )}
 

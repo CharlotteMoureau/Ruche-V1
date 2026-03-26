@@ -46,8 +46,8 @@
   align-items: center;
   justify-content: center;
   text-decoration: none;
-  color: #fff;
-  background: $turquoise;
+  color: #222;
+  background: $jaune;
   border-radius: 8px;
   padding: 8px 12px;
 }
@@ -131,23 +131,24 @@
   border-radius: 8px;
   padding: 8px 12px;
   cursor: pointer;
-  background: $turquoise;
-  color: #fff;
+  background: $jaune;
+  color: #222;
 }
 
 a.button-link-open,
 button.button-link-open {
-  background: $turquoise;
+  background: $jaune;
 }
 
 a.button-link-duplicate,
 button.button-link-duplicate {
-  background: $turquoise;
+  background: $jaune;
 }
 
 a.button-link-delete,
 button.button-link-delete {
   background: $rose;
+  color: #fff;
 }
 
 button.danger-btn,
@@ -165,5 +166,5 @@ a.danger-btn {
 
 a.button-link-download,
 button.button-link-download {
-  background: $turquoise;
+  background: $jaune;
 }
