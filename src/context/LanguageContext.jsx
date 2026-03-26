@@ -244,6 +244,7 @@ const messages = {
       duplicateNeedTitle: "Veuillez renseigner un titre pour la copie.",
       duplicateRenameRequired: "Renommez la copie avec un titre different.",
       copySuffix: "copie",
+      emptyHive: "ruche vide",
     },
     admin: {
       title: "Administration",
@@ -485,6 +486,7 @@ const messages = {
       duplicateNeedTitle: "Please provide a title for the copy.",
       duplicateRenameRequired: "Rename the copy with a different title.",
       copySuffix: "copy",
+      emptyHive: "empty hive",
     },
     admin: {
       title: "Administration",
@@ -719,6 +721,7 @@ const messages = {
       duplicateNeedTitle: "Geef een titel voor de kopie op.",
       duplicateRenameRequired: "Hernoem de kopie met een andere titel.",
       copySuffix: "kopie",
+      emptyHive: "lege bijenkorf",
     },
     admin: {
       title: "Beheer",

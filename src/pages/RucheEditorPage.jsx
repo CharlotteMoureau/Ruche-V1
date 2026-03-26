@@ -1,11 +1,18 @@
 ﻿import { useEffect, useMemo, useRef, useState } from "react";
 import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
+import domtoimage from "dom-to-image-more";
 import { apiFetch } from "../lib/api";
 import { useAuth } from "../context/AuthContext";
 import RucheWorkspace from "../components/RucheWorkspace";
 import UnifiedPromptModal from "../components/UnifiedPromptModal";
 import PageLoader from "../components/PageLoader";
 import { useLanguage } from "../context/LanguageContext";
+
+function waitForCaptureFrame() {
+  return new Promise((resolve) => {
+    window.setTimeout(resolve, 300);
+  });
+}
 
 function formatDateTime(value, locale) {
   if (!value) return "-";
@@ -184,11 +191,33 @@ export default function RucheEditorPage() {
 
     setIsSaving(true);
     try {
+      const hasBoardCards = Array.isArray(boardData?.boardCards)
+        ? boardData.boardCards.length > 0
+        : false;
+      let boardPreviewImage = null;
+
+      if (hasBoardCards) {
+        const board = document.querySelector(".hive-board");
+        if (board) {
+          document.body.classList.add("capture-mode");
+          try {
+            await waitForCaptureFrame();
+            boardPreviewImage = await domtoimage.toPng(board, {
+              cacheBust: true,
+            });
+          } catch {
+            boardPreviewImage = null;
+          } finally {
+            document.body.classList.remove("capture-mode");
+          }
+        }
+      }
+
       if (isNew) {
         const created = await apiFetch("/hives", {
           method: "POST",
           token,
-          body: { title: trimmedTitle, boardData },
+          body: { title: trimmedTitle, boardData, boardPreviewImage },
         });
         navigate(`/hives/${created.id}`, { replace: true });
         return true;
@@ -197,7 +226,7 @@ export default function RucheEditorPage() {
       await apiFetch(`/hives/${id}`, {
         method: "PUT",
         token,
-        body: { title: trimmedTitle, boardData },
+        body: { title: trimmedTitle, boardData, boardPreviewImage },
       });
       const snapshot = JSON.stringify({ title: trimmedTitle, boardData });
       setSavedSnapshot(snapshot);

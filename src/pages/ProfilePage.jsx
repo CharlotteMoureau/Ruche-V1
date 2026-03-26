@@ -4,6 +4,7 @@ import { useAuth } from "../context/AuthContext";
 import { apiFetch } from "../lib/api";
 import UnifiedPromptModal from "../components/UnifiedPromptModal";
 import PageLoader from "../components/PageLoader";
+import HivePreview from "../components/HivePreview";
 import { useLanguage } from "../context/LanguageContext";
 
 const HIVES_PER_PAGE = 10;
@@ -125,6 +126,7 @@ export default function ProfilePage() {
         body: {
           title: trimmedTitle,
           boardData: sourceHive.boardData,
+          boardPreviewImage: sourceHive.boardPreviewImage || null,
         },
       });
       const data = await refreshMe();
@@ -266,7 +268,7 @@ export default function ProfilePage() {
               <ul className="list-grid">
                 {pagedOwnedHives.map((hive) => (
                   <li key={hive.id}>
-                    <span>
+                    <div className="hive-details">
                       <strong>{hive.title}</strong>
                       <br />
                       {t("profile.createdAt")} :{" "}
@@ -274,7 +276,14 @@ export default function ProfilePage() {
                       <br />
                       {t("profile.updatedAt")} :{" "}
                       {formatDateTime(hive.updatedAt, dateLocale)}
-                    </span>
+                      <div className="hive-preview">
+                        <HivePreview
+                          previewImage={hive.boardPreviewImage}
+                          snapshot={hive.boardSnapshot}
+                          emptyLabel={t("profile.emptyHive")}
+                        />
+                      </div>
+                    </div>
                     <div className="inline-actions">
                       <Link className="button-link" to={`/hives/${hive.id}`}>
                         {t("profile.open")}
@@ -335,7 +344,7 @@ export default function ProfilePage() {
               <ul className="list-grid">
                 {pagedSharedHives.map((hive) => (
                   <li key={hive.id}>
-                    <span>
+                    <div className="hive-details">
                       <strong>
                         {hive.title} ({hive.collaboratorRole})
                       </strong>
@@ -345,7 +354,14 @@ export default function ProfilePage() {
                       <br />
                       {t("profile.updatedAt")} :{" "}
                       {formatDateTime(hive.updatedAt, dateLocale)}
-                    </span>
+                      <div className="hive-preview">
+                        <HivePreview
+                          previewImage={hive.boardPreviewImage}
+                          snapshot={hive.boardSnapshot}
+                          emptyLabel={t("profile.emptyHive")}
+                        />
+                      </div>
+                    </div>
                     <Link className="button-link" to={`/hives/${hive.id}`}>
                       {t("profile.open")}
                     </Link>

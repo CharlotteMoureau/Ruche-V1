@@ -111,6 +111,8 @@ authRouter.get("/me", requireAuth, async (req, res) => {
         select: {
           id: true,
           title: true,
+          boardSnapshot: true,
+          boardPreviewImage: true,
           updatedAt: true,
           createdAt: true,
         },
@@ -123,6 +125,8 @@ authRouter.get("/me", requireAuth, async (req, res) => {
             select: {
               id: true,
               title: true,
+              boardSnapshot: true,
+              boardPreviewImage: true,
               createdAt: true,
               updatedAt: true,
               owner: { select: { username: true, email: true } },
@@ -140,6 +144,8 @@ authRouter.get("/me", requireAuth, async (req, res) => {
     sharedHives: user.collaborations.map((c) => ({
       id: c.hive.id,
       title: c.hive.title,
+      boardSnapshot: c.hive.boardSnapshot,
+      boardPreviewImage: c.hive.boardPreviewImage,
       createdAt: c.hive.createdAt,
       updatedAt: c.hive.updatedAt,
       owner: c.hive.owner,

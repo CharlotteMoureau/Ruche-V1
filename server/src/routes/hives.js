@@ -11,9 +11,31 @@ hivesRouter.use(requireAuth);
 const hiveInputSchema = z.object({
   title: z.string().trim().min(1).max(100),
   boardData: z.any(),
+  boardPreviewImage: z.string().max(5_000_000).nullable().optional(),
 });
 
 const collaboratorRoleSchema = z.nativeEnum(CollaboratorRole);
+
+function toFiniteNumber(value, fallback = 0) {
+  const number = Number(value);
+  return Number.isFinite(number) ? number : fallback;
+}
+
+function buildBoardSnapshot(boardData) {
+  const boardCards = Array.isArray(boardData?.boardCards)
+    ? boardData.boardCards
+    : [];
+
+  return boardCards
+    .filter((card) => card && typeof card === "object")
+    .map((card, index) => ({
+      id: String(card.id ?? `card-${index}`),
+      title: typeof card.title === "string" ? card.title : "",
+      category: typeof card.category === "string" ? card.category : null,
+      x: toFiniteNumber(card.position?.x),
+      y: toFiniteNumber(card.position?.y),
+    }));
+}
 
 async function getHiveOr404(id) {
   return prisma.hive.findUnique({
@@ -91,6 +113,8 @@ hivesRouter.post("/", async (req, res) => {
     data: {
       title: parsed.data.title,
       boardData: parsed.data.boardData,
+      boardSnapshot: buildBoardSnapshot(parsed.data.boardData),
+      boardPreviewImage: parsed.data.boardPreviewImage || null,
       ownerId: req.user.id,
     },
   });
@@ -126,6 +150,7 @@ hivesRouter.get("/:id", async (req, res) => {
     id: hive.id,
     title: hive.title,
     boardData: hive.boardData,
+    boardPreviewImage: hive.boardPreviewImage,
     owner: hive.owner,
     createdAt: hive.createdAt,
     updatedAt: hive.updatedAt,
@@ -175,6 +200,8 @@ hivesRouter.put("/:id", async (req, res) => {
     data: {
       title: parsed.data.title,
       boardData: parsed.data.boardData,
+      boardSnapshot: buildBoardSnapshot(parsed.data.boardData),
+      boardPreviewImage: parsed.data.boardPreviewImage || null,
     },
   });
 

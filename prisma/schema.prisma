@@ -32,6 +32,8 @@ model Hive {
   id            String             @id @default(cuid())
   title         String
   boardData     Json
+  boardSnapshot Json?
+  boardPreviewImage String?
   ownerId       String
   owner         User               @relation("HiveOwner", fields: [ownerId], references: [id], onDelete: Cascade)
   collaborators HiveCollaborator[]
