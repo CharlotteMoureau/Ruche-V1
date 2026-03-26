@@ -421,6 +421,19 @@ export default function RucheEditorPage() {
     setReplyText("");
   };
 
+  const handleEnterSubmit = (event, submitAction) => {
+    if (
+      event.key !== "Enter" ||
+      event.shiftKey ||
+      event.nativeEvent.isComposing
+    ) {
+      return;
+    }
+
+    event.preventDefault();
+    submitAction();
+  };
+
   const comments = hive?.comments || [];
   const commentCount = totalCommentCount(comments);
   const isHiveLoading = !isNew && !hive && !error;
@@ -445,6 +458,12 @@ export default function RucheEditorPage() {
           <input
             value={title}
             onChange={(e) => setTitle(e.target.value)}
+            onKeyDown={(event) => {
+              if (!canEdit || isSaving || event.nativeEvent.isComposing) return;
+              if (event.key !== "Enter") return;
+              event.preventDefault();
+              saveHive();
+            }}
             maxLength={100}
             disabled={!canEdit}
           />
@@ -627,6 +646,11 @@ export default function RucheEditorPage() {
                       <textarea
                         value={replyText}
                         onChange={(e) => setReplyText(e.target.value)}
+                        onKeyDown={(event) =>
+                          handleEnterSubmit(event, () =>
+                            submitReply(comment.id),
+                          )
+                        }
                         placeholder={t("editor.replyPlaceholder")}
                         rows={2}
                         autoFocus
@@ -661,6 +685,7 @@ export default function RucheEditorPage() {
                 <textarea
                   value={commentText}
                   onChange={(e) => setCommentText(e.target.value)}
+                  onKeyDown={(event) => handleEnterSubmit(event, submitComment)}
                   placeholder={t("editor.addCommentPlaceholder")}
                   rows={2}
                 />

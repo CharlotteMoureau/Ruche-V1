@@ -541,6 +541,18 @@ export default function RucheWorkspace({
                   <textarea
                     value={commentDraft}
                     onChange={(event) => setCommentDraft(event.target.value)}
+                    onKeyDown={(event) => {
+                      if (
+                        event.key !== "Enter" ||
+                        event.shiftKey ||
+                        event.nativeEvent.isComposing
+                      ) {
+                        return;
+                      }
+
+                      event.preventDefault();
+                      handleSaveCardComment();
+                    }}
                     placeholder={t("workspace.addCardCommentPlaceholder")}
                     rows={4}
                     maxLength={1200}

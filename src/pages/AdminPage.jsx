@@ -378,7 +378,14 @@ export default function AdminPage() {
                 {editingUser?.id === u.id ? (
                   <tr className="admin-edit-row">
                     <td colSpan={7}>
-                      <div className="form-grid admin-inline-form">
+                      <form
+                        className="form-grid admin-inline-form"
+                        onSubmit={(event) => {
+                          event.preventDefault();
+                          if (!editingUser.username.trim()) return;
+                          saveUser();
+                        }}
+                      >
                         <label>
                           {t("profile.username")}
                           <input
@@ -429,10 +436,9 @@ export default function AdminPage() {
                         ) : null}
                         <div className="inline-actions">
                           <button
-                            type="button"
+                            type="submit"
                             className="button-link"
                             disabled={!editingUser.username.trim()}
-                            onClick={saveUser}
                           >
                             {t("admin.save")}
                           </button>
@@ -443,7 +449,7 @@ export default function AdminPage() {
                             {t("common.cancel")}
                           </button>
                         </div>
-                      </div>
+                      </form>
                     </td>
                   </tr>
                 ) : null}
@@ -611,7 +617,14 @@ export default function AdminPage() {
                 {editingHive?.id === hive.id ? (
                   <tr className="admin-edit-row">
                     <td colSpan={7}>
-                      <div className="form-grid admin-inline-form">
+                      <form
+                        className="form-grid admin-inline-form"
+                        onSubmit={(event) => {
+                          event.preventDefault();
+                          if (!editingHive.title.trim()) return;
+                          saveHive();
+                        }}
+                      >
                         <label>
                           {t("admin.titleLabel")}
                           <input
@@ -628,10 +641,9 @@ export default function AdminPage() {
                         </label>
                         <div className="inline-actions">
                           <button
-                            type="button"
+                            type="submit"
                             className="button-link"
                             disabled={!editingHive.title.trim()}
-                            onClick={saveHive}
                           >
                             {t("admin.save")}
                           </button>
@@ -642,7 +654,7 @@ export default function AdminPage() {
                             {t("common.cancel")}
                           </button>
                         </div>
-                      </div>
+                      </form>
                     </td>
                   </tr>
                 ) : null}

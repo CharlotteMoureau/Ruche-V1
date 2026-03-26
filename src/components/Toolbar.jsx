@@ -272,6 +272,15 @@ export default function Toolbar({
                     type="email"
                     value={inviteEmail}
                     onChange={(event) => setInviteEmail(event.target.value)}
+                    onKeyDown={(event) => {
+                      if (
+                        event.key !== "Enter" ||
+                        event.nativeEvent.isComposing
+                      )
+                        return;
+                      event.preventDefault();
+                      handleInvite();
+                    }}
                     placeholder="email@example.com"
                     autoFocus
                   />
