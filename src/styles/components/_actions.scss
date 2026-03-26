@@ -75,6 +75,30 @@
     box-shadow 180ms ease,
     filter 180ms ease;
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.12);
+  font-family: "Roboto", sans-serif;
+  font-size: 1rem;
+  font-weight: 500;
+  line-height: 1.2;
+}
+
+:where(
+    .site-nav button,
+    .form-grid > button,
+    .button-link,
+    .inline-actions button,
+    .list-grid button,
+    .editor-topbar button,
+    .toolbar button,
+    .modal-box .btn,
+    .comment-reply-actions button,
+    .comments-new button,
+    .card-comment-actions button,
+    .danger-btn,
+    .toolbar-leave-btn,
+    .toolbar-collaborator-remove
+  ):focus-visible {
+  outline: 3px solid $bleu-fonce;
+  outline-offset: 2px;
 }
 
 :where(
@@ -133,6 +157,50 @@
   cursor: pointer;
   background: $jaune;
   color: #222;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :where(
+      .site-nav button,
+      .form-grid > button,
+      .button-link,
+      .inline-actions button,
+      .list-grid button,
+      .editor-topbar button,
+      .toolbar button,
+      .modal-box .btn,
+      .comment-reply-actions button,
+      .comments-new button,
+      .card-comment-actions button,
+      .danger-btn,
+      .toolbar-leave-btn,
+      .toolbar-collaborator-remove
+    ) {
+    transition: none;
+  }
+
+  :where(
+      .site-nav button,
+      .form-grid > button,
+      .inline-actions button,
+      .list-grid button,
+      .editor-topbar button,
+      .toolbar button,
+      .modal-box .btn,
+      .comment-reply-actions button,
+      .comments-new button,
+      .card-comment-actions button,
+      .danger-btn,
+      .toolbar-leave-btn,
+      .toolbar-collaborator-remove
+    ):not(:disabled):hover,
+  :where(
+      .button-link,
+      .danger-btn
+    ):hover {
+    transform: none;
+    filter: none;
+  }
 }
 
 a.button-link-open,

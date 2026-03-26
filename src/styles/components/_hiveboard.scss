@@ -1,4 +1,3 @@
-@use "sass:color";
 @use "../base/variables" as *;
 
 .hive-board {
@@ -13,21 +12,6 @@
   align-items: center;
   flex-wrap: wrap;
   gap: 10px;
-
-  button {
-    background-color: $jaune;
-    border: none;
-    padding: 8px 12px;
-    border-radius: 8px;
-    cursor: pointer;
-    color: #222;
-    font-weight: bold;
-    transition: 0.2s;
-
-    &:hover {
-      background-color: color.adjust($jaune, $lightness: -8%);
-    }
-  }
 }
 
 .draggable-card {

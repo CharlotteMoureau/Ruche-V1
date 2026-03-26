@@ -491,7 +491,8 @@ export default function RucheEditorPage() {
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               onKeyDown={(event) => {
-                if (!canEdit || isSaving || event.nativeEvent.isComposing) return;
+                if (!canEdit || isSaving || event.nativeEvent.isComposing)
+                  return;
                 if (event.key !== "Enter") return;
                 event.preventDefault();
                 saveHive();
@@ -511,17 +512,27 @@ export default function RucheEditorPage() {
           <Toolbar
             onReset={() => setResetSignal((prev) => prev + 1)}
             canInvite={
-              !isNew && Boolean(hive) && (hive.owner?.id === user?.id || isAdmin)
+              !isNew &&
+              Boolean(hive) &&
+              (hive.owner?.id === user?.id || isAdmin)
             }
             canLeaveHive={!isNew && Boolean(hive) && isCollaborator}
             collaborators={hive?.collaborators || []}
-            onInviteCollaborator={!isNew && hive ? inviteCollaborator : undefined}
+            onInviteCollaborator={
+              !isNew && hive ? inviteCollaborator : undefined
+            }
             onChangeCollaboratorRole={
               !isNew && hive ? changeCollaboratorRole : undefined
             }
-            onRemoveCollaborator={!isNew && hive ? removeCollaborator : undefined}
-            onLeaveHive={!isNew && hive && isCollaborator ? leaveHive : undefined}
-            onOpenComments={!isNew ? () => setShowCommentsModal(true) : undefined}
+            onRemoveCollaborator={
+              !isNew && hive ? removeCollaborator : undefined
+            }
+            onLeaveHive={
+              !isNew && hive && isCollaborator ? leaveHive : undefined
+            }
+            onOpenComments={
+              !isNew ? () => setShowCommentsModal(true) : undefined
+            }
             commentCount={commentCount}
           />
         </div>
