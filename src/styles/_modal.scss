@@ -1,4 +1,5 @@
 @use "./variables" as *;
+@use "sass:color";
 
 .modal-overlay {
   position: fixed;
@@ -80,7 +81,7 @@
 }
 
 .modal-box .btn.danger:hover {
-  background-color: darken($rose, 10%);
+  background-color: color.adjust($rose, $lightness: -10%);
 }
 
 .counter-text {
@@ -242,7 +243,7 @@
 
   &--danger {
     color: $rose;
-    &:hover { color: darken($rose, 10%); }
+    &:hover { color: color.adjust($rose, $lightness: -10%); }
   }
 }
 
