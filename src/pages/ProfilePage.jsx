@@ -86,7 +86,10 @@ function ProfileCaptureBoard({ boardData }) {
 
         return (
           <div
-            key={card?.id || `${card?.category || "card"}-${position.x}-${position.y}`}
+            key={
+              card?.id ||
+              `${card?.category || "card"}-${position.x}-${position.y}`
+            }
             className="draggable-card"
             style={{
               position: "absolute",
@@ -304,7 +307,9 @@ export default function ProfilePage() {
         t("toolbar.screenshotMergeError"),
       );
 
-      const safeTitle = sanitizeSnapshotFileName(hiveData.title || fallbackTitle);
+      const safeTitle = sanitizeSnapshotFileName(
+        hiveData.title || fallbackTitle,
+      );
       triggerDownload(dataUrl, `${safeTitle}.png`);
     } catch (err) {
       setError(
@@ -424,7 +429,9 @@ export default function ProfilePage() {
                       <button
                         type="button"
                         className="button-link button-link-download"
-                        onClick={() => downloadHiveSnapshot(hive.id, hive.title)}
+                        onClick={() =>
+                          downloadHiveSnapshot(hive.id, hive.title)
+                        }
                         disabled={downloadingHiveId === hive.id}
                       >
                         {downloadingHiveId === hive.id
@@ -506,7 +513,9 @@ export default function ProfilePage() {
                       <button
                         type="button"
                         className="button-link button-link-download"
-                        onClick={() => downloadHiveSnapshot(hive.id, hive.title)}
+                        onClick={() =>
+                          downloadHiveSnapshot(hive.id, hive.title)
+                        }
                         disabled={downloadingHiveId === hive.id}
                       >
                         {downloadingHiveId === hive.id

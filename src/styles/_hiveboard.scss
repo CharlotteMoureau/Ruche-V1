@@ -1,3 +1,4 @@
+@use "sass:color";
 @use "./variables" as *;
 
 .hive-board {
@@ -16,16 +17,17 @@
   z-index: 100;
 
   button {
-    background-color: #ffd84d;
+    background-color: $turquoise;
     border: none;
     padding: 8px 12px;
     border-radius: 8px;
     cursor: pointer;
+    color: #fff;
     font-weight: bold;
     transition: 0.2s;
 
     &:hover {
-      background-color: #ffca3a;
+      background-color: color.adjust($turquoise, $lightness: -8%);
     }
   }
 }

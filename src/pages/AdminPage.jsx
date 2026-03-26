@@ -366,6 +366,7 @@ export default function AdminPage() {
                       </button>
                       <button
                         type="button"
+                        className="button-link button-link-delete"
                         onClick={() =>
                           setDeleteTarget({ type: "user", id: u.id })
                         }
@@ -605,6 +606,7 @@ export default function AdminPage() {
                       </button>
                       <button
                         type="button"
+                        className="button-link button-link-delete"
                         onClick={() =>
                           setDeleteTarget({ type: "hive", id: hive.id })
                         }

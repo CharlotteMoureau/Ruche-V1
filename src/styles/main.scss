@@ -67,7 +67,7 @@ body {
     border: 0;
     padding: 8px 12px;
     border-radius: 8px;
-    background: #222;
+    background: $turquoise;
     color: #fff;
     cursor: pointer;
   }
@@ -139,7 +139,7 @@ body {
   > button {
     width: fit-content;
     border: 0;
-    background: #222;
+    background: $turquoise;
     color: #fff;
     border-radius: 8px;
     padding: 10px 14px;
@@ -338,11 +338,85 @@ body {
 
 .button-link {
   display: inline-flex;
+  align-items: center;
+  justify-content: center;
   text-decoration: none;
   color: #fff;
-  background: #222;
+  background: $turquoise;
   border-radius: 8px;
   padding: 8px 12px;
+}
+
+/* Unified interaction style for all filled action buttons */
+:where(
+    .site-nav button,
+    .form-grid > button,
+    .button-link,
+    .inline-actions button,
+    .list-grid button,
+    .editor-topbar button,
+    .toolbar button,
+    .modal-box .btn,
+    .comment-reply-actions button,
+    .comments-new button,
+    .card-comment-actions button,
+    .danger-btn,
+    .toolbar-leave-btn,
+    .toolbar-collaborator-remove
+  ) {
+  transition:
+    background-color 180ms ease,
+    transform 180ms ease,
+    box-shadow 180ms ease,
+    filter 180ms ease;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.12);
+}
+
+:where(
+    .site-nav button,
+    .form-grid > button,
+    .inline-actions button,
+    .list-grid button,
+    .editor-topbar button,
+    .toolbar button,
+    .modal-box .btn,
+    .comment-reply-actions button,
+    .comments-new button,
+    .card-comment-actions button,
+    .danger-btn,
+    .toolbar-leave-btn,
+    .toolbar-collaborator-remove
+  ):not(:disabled):hover,
+:where(
+    .button-link,
+    .danger-btn
+  ):hover {
+  transform: translateY(-1px);
+  filter: brightness(0.95);
+  box-shadow: 0 8px 14px rgba(0, 0, 0, 0.16);
+}
+
+:where(
+    .site-nav button,
+    .form-grid > button,
+    .inline-actions button,
+    .list-grid button,
+    .editor-topbar button,
+    .toolbar button,
+    .modal-box .btn,
+    .comment-reply-actions button,
+    .comments-new button,
+    .card-comment-actions button,
+    .danger-btn,
+    .toolbar-leave-btn,
+    .toolbar-collaborator-remove
+  ):not(:disabled):active,
+:where(
+    .button-link,
+    .danger-btn
+  ):active {
+  transform: translateY(0);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.14);
 }
 
 .inline-actions button,
@@ -352,7 +426,7 @@ body {
   border-radius: 8px;
   padding: 8px 12px;
   cursor: pointer;
-  background: $rose;
+  background: $turquoise;
   color: #fff;
 }
 
@@ -369,6 +443,19 @@ button.button-link-duplicate {
 a.button-link-delete,
 button.button-link-delete {
   background: $rose;
+}
+
+button.danger-btn,
+a.danger-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 0;
+  border-radius: 8px;
+  padding: 8px 12px;
+  cursor: pointer;
+  background: $rose;
+  color: #fff;
 }
 
 a.button-link-download,

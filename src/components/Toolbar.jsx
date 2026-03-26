@@ -8,10 +8,7 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import UnifiedPromptModal from "./UnifiedPromptModal";
 import { useLanguage } from "../context/LanguageContext";
-import {
-  captureBoardFrontAndBack,
-  triggerDownload,
-} from "../lib/snapshot";
+import { captureBoardFrontAndBack, triggerDownload } from "../lib/snapshot";
 
 export default function Toolbar({
   onReset,

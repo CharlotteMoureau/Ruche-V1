@@ -58,21 +58,22 @@
   border-radius: 6px;
   cursor: pointer;
   font-weight: 600;
-  background-color: #ffd633;
-  color: #333;
+  background-color: $turquoise;
+  color: #fff;
   transition: background 0.2s;
 }
 
 .modal-box .btn:hover {
-  background-color: $jaune;
+  background-color: color.adjust($turquoise, $lightness: -10%);
 }
 
 .modal-box .btn.secondary {
-  background-color: #ddd;
+  background-color: $turquoise;
+  color: #fff;
 }
 
 .modal-box .btn.secondary:hover {
-  background-color: #ccc;
+  background-color: color.adjust($turquoise, $lightness: -10%);
 }
 
 .modal-box .btn.danger {
@@ -277,10 +278,13 @@
     cursor: pointer;
     font-size: 0.85rem;
     font-weight: 600;
-    background: $jaune;
-    color: #333;
+    background: $turquoise;
+    color: #fff;
 
-    &.secondary { background: #ddd; }
+    &.secondary {
+      background: $turquoise;
+      color: #fff;
+    }
   }
 }
 
@@ -308,8 +312,8 @@
     padding: 0.45rem 1rem;
     border: none;
     border-radius: 6px;
-    background: $jaune;
-    color: #333;
+    background: $turquoise;
+    color: #fff;
     font-weight: 600;
     cursor: pointer;
     white-space: nowrap;
@@ -461,14 +465,15 @@
       flex: 0 0 112px;
       border: none;
       border-radius: 6px;
-      background: $jaune;
-      color: #333;
+      background: $turquoise;
+      color: #fff;
       font-weight: 600;
       cursor: pointer;
     }
 
     .secondary {
-      background: #ddd;
+      background: $turquoise;
+      color: #fff;
     }
 
     .card-comment-delete {
