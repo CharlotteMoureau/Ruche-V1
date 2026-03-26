@@ -245,6 +245,9 @@ const messages = {
       duplicateRenameRequired: "Renommez la copie avec un titre different.",
       copySuffix: "copie",
       emptyHive: "ruche vide",
+      download: "Télécharger",
+      downloading: "Téléchargement...",
+      downloadFailed: "Erreur lors du téléchargement : {message}",
     },
     admin: {
       title: "Administration",
@@ -487,6 +490,9 @@ const messages = {
       duplicateRenameRequired: "Rename the copy with a different title.",
       copySuffix: "copy",
       emptyHive: "empty hive",
+      download: "Download",
+      downloading: "Downloading...",
+      downloadFailed: "Download failed: {message}",
     },
     admin: {
       title: "Administration",
@@ -722,6 +728,9 @@ const messages = {
       duplicateRenameRequired: "Hernoem de kopie met een andere titel.",
       copySuffix: "kopie",
       emptyHive: "lege bijenkorf",
+      download: "Downloaden",
+      downloading: "Downloaden...",
+      downloadFailed: "Download mislukt: {message}",
     },
     admin: {
       title: "Beheer",

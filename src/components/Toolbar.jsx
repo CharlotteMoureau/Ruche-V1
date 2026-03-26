@@ -1,4 +1,3 @@
-import domtoimage from "dom-to-image-more";
 import { useEffect, useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
@@ -9,6 +8,10 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import UnifiedPromptModal from "./UnifiedPromptModal";
 import { useLanguage } from "../context/LanguageContext";
+import {
+  captureBoardFrontAndBack,
+  triggerDownload,
+} from "../lib/snapshot";
 
 export default function Toolbar({
   onReset,
@@ -62,67 +65,16 @@ export default function Toolbar({
     return () => window.clearTimeout(timeoutId);
   }, [inviteWarning]);
 
-  const waitForCaptureFrame = () =>
-    new Promise((resolve) => {
-      window.setTimeout(resolve, 300);
-    });
-
-  const loadImage = (dataUrl) =>
-    new Promise((resolve, reject) => {
-      const image = new Image();
-      image.onload = () => resolve(image);
-      image.onerror = reject;
-      image.src = dataUrl;
-    });
-
-  const mergeFrontAndBackCapture = async (frontDataUrl, backDataUrl) => {
-    const [frontImage, backImage] = await Promise.all([
-      loadImage(frontDataUrl),
-      loadImage(backDataUrl),
-    ]);
-
-    const spacing = 24;
-    const canvas = document.createElement("canvas");
-    canvas.width = Math.max(frontImage.width, backImage.width);
-    canvas.height = frontImage.height + backImage.height + spacing;
-
-    const context = canvas.getContext("2d");
-    if (!context) {
-      throw new Error(t("toolbar.screenshotMergeError"));
-    }
-
-    context.drawImage(frontImage, 0, 0);
-    context.drawImage(backImage, 0, frontImage.height + spacing);
-
-    return canvas.toDataURL("image/png");
-  };
-
   const handleExport = async () => {
     const board = document.querySelector(".hive-board");
     if (!board) return;
 
-    document.body.classList.add("capture-mode");
-
     try {
-      await waitForCaptureFrame();
-
-      const frontDataUrl = await domtoimage.toPng(board, {
-        cacheBust: true,
-      });
-
-      document.body.classList.add("capture-mode-back");
-      await waitForCaptureFrame();
-
-      const backDataUrl = await domtoimage.toPng(board, {
-        cacheBust: true,
-      });
-
-      const dataUrl = await mergeFrontAndBackCapture(frontDataUrl, backDataUrl);
-
-      const link = document.createElement("a");
-      link.download = "ruche.png";
-      link.href = dataUrl;
-      link.click();
+      const dataUrl = await captureBoardFrontAndBack(
+        board,
+        t("toolbar.screenshotMergeError"),
+      );
+      triggerDownload(dataUrl, "ruche.png");
     } catch (err) {
       console.error("Erreur lors de la capture :", err);
       setExportErrorMessage(
@@ -130,9 +82,6 @@ export default function Toolbar({
           message: err?.message || "unknown",
         }),
       );
-    } finally {
-      document.body.classList.remove("capture-mode-back");
-      document.body.classList.remove("capture-mode");
     }
   };
 

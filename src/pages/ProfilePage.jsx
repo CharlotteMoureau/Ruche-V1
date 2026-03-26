@@ -1,13 +1,24 @@
 import { useEffect, useState } from "react";
+import { createRoot } from "react-dom/client";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { apiFetch } from "../lib/api";
 import UnifiedPromptModal from "../components/UnifiedPromptModal";
 import PageLoader from "../components/PageLoader";
 import HivePreview from "../components/HivePreview";
+import HexCard from "../components/HexCard";
+import FreeHexCard from "../components/FreeSpaceCard";
 import { useLanguage } from "../context/LanguageContext";
+import {
+  captureBoardFrontAndBack,
+  sanitizeSnapshotFileName,
+  triggerDownload,
+  waitForCaptureFrame,
+} from "../lib/snapshot";
 
 const HIVES_PER_PAGE = 10;
+const CARD_SIZE = 200;
+const BOARD_PADDING = 60;
 
 function getTotalPages(count) {
   return Math.max(1, Math.ceil(count / HIVES_PER_PAGE));
@@ -29,6 +40,75 @@ function formatDateTime(value, locale) {
   }).format(date);
 }
 
+function getBoardCards(boardData) {
+  return Array.isArray(boardData?.boardCards) ? boardData.boardCards : [];
+}
+
+function getCaptureBoardSize(boardCards) {
+  if (boardCards.length === 0) {
+    return { width: 1200, height: 760 };
+  }
+
+  let maxX = 0;
+  let maxY = 0;
+
+  boardCards.forEach((card) => {
+    const x = Number(card?.position?.x) || 0;
+    const y = Number(card?.position?.y) || 0;
+    maxX = Math.max(maxX, x + CARD_SIZE);
+    maxY = Math.max(maxY, y + CARD_SIZE);
+  });
+
+  return {
+    width: Math.max(1200, Math.round(maxX + BOARD_PADDING)),
+    height: Math.max(760, Math.round(maxY + BOARD_PADDING)),
+  };
+}
+
+function ProfileCaptureBoard({ boardData }) {
+  const boardCards = getBoardCards(boardData);
+  const boardSize = getCaptureBoardSize(boardCards);
+
+  return (
+    <main
+      className="hive-board profile-capture-board"
+      style={{
+        position: "relative",
+        width: `${boardSize.width}px`,
+        height: `${boardSize.height}px`,
+      }}
+    >
+      {boardCards.map((card) => {
+        const position = {
+          x: Number(card?.position?.x) || 0,
+          y: Number(card?.position?.y) || 0,
+        };
+
+        return (
+          <div
+            key={card?.id || `${card?.category || "card"}-${position.x}-${position.y}`}
+            className="draggable-card"
+            style={{
+              position: "absolute",
+              left: position.x,
+              top: position.y,
+              zIndex: 1000,
+              width: `${CARD_SIZE}px`,
+              height: `${CARD_SIZE}px`,
+            }}
+          >
+            {card?.category === "free" ? (
+              <FreeHexCard card={card} />
+            ) : (
+              <HexCard card={card} />
+            )}
+          </div>
+        );
+      })}
+    </main>
+  );
+}
+
 export default function ProfilePage() {
   const { token, refreshMe, logout } = useAuth();
   const { t, dateLocale, translateRole } = useLanguage();
@@ -46,6 +126,7 @@ export default function ProfilePage() {
   const [creatingHive, setCreatingHive] = useState(false);
   const [newHiveTitle, setNewHiveTitle] = useState("");
   const [duplicatingHiveId, setDuplicatingHiveId] = useState(null);
+  const [downloadingHiveId, setDownloadingHiveId] = useState(null);
   const [confirmDeleteHiveId, setConfirmDeleteHiveId] = useState(null);
   const [duplicateDraft, setDuplicateDraft] = useState({
     hiveId: null,
@@ -199,6 +280,45 @@ export default function ProfilePage() {
     setNewHiveTitle("");
   };
 
+  const downloadHiveSnapshot = async (hiveId, fallbackTitle) => {
+    if (!hiveId || downloadingHiveId) return;
+
+    setError("");
+    setDownloadingHiveId(hiveId);
+
+    const stage = document.createElement("div");
+    stage.className = "profile-capture-stage";
+    document.body.appendChild(stage);
+
+    const root = createRoot(stage);
+
+    try {
+      const hiveData = await apiFetch(`/hives/${hiveId}`, { token });
+      root.render(<ProfileCaptureBoard boardData={hiveData.boardData} />);
+      await waitForCaptureFrame();
+      await waitForCaptureFrame();
+
+      const board = stage.querySelector(".hive-board");
+      const dataUrl = await captureBoardFrontAndBack(
+        board,
+        t("toolbar.screenshotMergeError"),
+      );
+
+      const safeTitle = sanitizeSnapshotFileName(hiveData.title || fallbackTitle);
+      triggerDownload(dataUrl, `${safeTitle}.png`);
+    } catch (err) {
+      setError(
+        t("profile.downloadFailed", {
+          message: err?.message || "unknown",
+        }),
+      );
+    } finally {
+      root.unmount();
+      stage.remove();
+      setDownloadingHiveId(null);
+    }
+  };
+
   const confirmCreateHive = () => {
     const trimmedTitle = newHiveTitle.trim();
     if (!trimmedTitle) return;
@@ -285,12 +405,15 @@ export default function ProfilePage() {
                       </div>
                     </div>
                     <div className="inline-actions">
-                      <Link className="button-link" to={`/hives/${hive.id}`}>
+                      <Link
+                        className="button-link button-link-open"
+                        to={`/hives/${hive.id}`}
+                      >
                         {t("profile.open")}
                       </Link>
                       <button
                         type="button"
-                        className="button-link"
+                        className="button-link button-link-duplicate"
                         onClick={() => openDuplicateHiveModal(hive.id)}
                         disabled={duplicatingHiveId === hive.id}
                       >
@@ -300,6 +423,17 @@ export default function ProfilePage() {
                       </button>
                       <button
                         type="button"
+                        className="button-link button-link-download"
+                        onClick={() => downloadHiveSnapshot(hive.id, hive.title)}
+                        disabled={downloadingHiveId === hive.id}
+                      >
+                        {downloadingHiveId === hive.id
+                          ? t("profile.downloading")
+                          : t("profile.download")}
+                      </button>
+                      <button
+                        type="button"
+                        className="button-link button-link-delete"
                         onClick={() => setConfirmDeleteHiveId(hive.id)}
                       >
                         {t("common.delete")}
@@ -362,9 +496,24 @@ export default function ProfilePage() {
                         />
                       </div>
                     </div>
-                    <Link className="button-link" to={`/hives/${hive.id}`}>
-                      {t("profile.open")}
-                    </Link>
+                    <div className="inline-actions">
+                      <Link
+                        className="button-link button-link-open"
+                        to={`/hives/${hive.id}`}
+                      >
+                        {t("profile.open")}
+                      </Link>
+                      <button
+                        type="button"
+                        className="button-link button-link-download"
+                        onClick={() => downloadHiveSnapshot(hive.id, hive.title)}
+                        disabled={downloadingHiveId === hive.id}
+                      >
+                        {downloadingHiveId === hive.id
+                          ? t("profile.downloading")
+                          : t("profile.download")}
+                      </button>
+                    </div>
                   </li>
                 ))}
               </ul>
