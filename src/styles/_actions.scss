@@ -1,0 +1,169 @@
+@use "./variables" as *;
+
+.cta-grid,
+.meta-grid {
+  display: grid;
+  gap: 16px;
+}
+
+.cta-card {
+  display: block;
+  padding: 20px;
+  border: 1px solid #ddd;
+  border-radius: 12px;
+  text-decoration: none;
+  font-weight: 700;
+  color: #111;
+  background: #fffaf2;
+}
+
+.list-grid {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 8px;
+
+  li {
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+  }
+}
+
+.inline-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.button-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  color: #fff;
+  background: $turquoise;
+  border-radius: 8px;
+  padding: 8px 12px;
+}
+
+/* Unified interaction style for all filled action buttons */
+:where(
+    .site-nav button,
+    .form-grid > button,
+    .button-link,
+    .inline-actions button,
+    .list-grid button,
+    .editor-topbar button,
+    .toolbar button,
+    .modal-box .btn,
+    .comment-reply-actions button,
+    .comments-new button,
+    .card-comment-actions button,
+    .danger-btn,
+    .toolbar-leave-btn,
+    .toolbar-collaborator-remove
+  ) {
+  transition:
+    background-color 180ms ease,
+    transform 180ms ease,
+    box-shadow 180ms ease,
+    filter 180ms ease;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.12);
+}
+
+:where(
+    .site-nav button,
+    .form-grid > button,
+    .inline-actions button,
+    .list-grid button,
+    .editor-topbar button,
+    .toolbar button,
+    .modal-box .btn,
+    .comment-reply-actions button,
+    .comments-new button,
+    .card-comment-actions button,
+    .danger-btn,
+    .toolbar-leave-btn,
+    .toolbar-collaborator-remove
+  ):not(:disabled):hover,
+:where(
+    .button-link,
+    .danger-btn
+  ):hover {
+  transform: translateY(-1px);
+  filter: brightness(0.95);
+  box-shadow: 0 8px 14px rgba(0, 0, 0, 0.16);
+}
+
+:where(
+    .site-nav button,
+    .form-grid > button,
+    .inline-actions button,
+    .list-grid button,
+    .editor-topbar button,
+    .toolbar button,
+    .modal-box .btn,
+    .comment-reply-actions button,
+    .comments-new button,
+    .card-comment-actions button,
+    .danger-btn,
+    .toolbar-leave-btn,
+    .toolbar-collaborator-remove
+  ):not(:disabled):active,
+:where(
+    .button-link,
+    .danger-btn
+  ):active {
+  transform: translateY(0);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.14);
+}
+
+.inline-actions button,
+.list-grid button,
+.editor-topbar button {
+  border: 0;
+  border-radius: 8px;
+  padding: 8px 12px;
+  cursor: pointer;
+  background: $turquoise;
+  color: #fff;
+}
+
+a.button-link-open,
+button.button-link-open {
+  background: $turquoise;
+}
+
+a.button-link-duplicate,
+button.button-link-duplicate {
+  background: $turquoise;
+}
+
+a.button-link-delete,
+button.button-link-delete {
+  background: $rose;
+}
+
+button.danger-btn,
+a.danger-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 0;
+  border-radius: 8px;
+  padding: 8px 12px;
+  cursor: pointer;
+  background: $rose;
+  color: #fff;
+}
+
+a.button-link-download,
+button.button-link-download {
+  background: $turquoise;
+}

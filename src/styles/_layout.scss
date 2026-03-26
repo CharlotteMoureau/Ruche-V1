@@ -1,0 +1,118 @@
+@use "./variables" as *;
+
+.site-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 12px 20px;
+  border-bottom: 1px solid #ddd;
+  background: #fff;
+  position: sticky;
+  top: 0;
+  z-index: 1500;
+}
+
+.brand-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  text-decoration: none;
+  color: inherit;
+
+  img {
+    width: 30px;
+    height: 30px;
+  }
+
+  h1 {
+    margin: 0;
+    font-size: 1.4rem;
+  }
+}
+
+.site-nav {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+
+  a {
+    text-decoration: none;
+    color: #333;
+    font-weight: 600;
+  }
+
+  button {
+    border: 0;
+    padding: 8px 12px;
+    border-radius: 8px;
+    background: $turquoise;
+    color: #fff;
+    cursor: pointer;
+  }
+}
+
+.language-select-wrap {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.9rem;
+}
+
+.language-select {
+  border: 1px solid #cfc7bc;
+  border-radius: 8px;
+  padding: 6px 8px;
+  background: #fff;
+  color: #333;
+}
+
+.user-pill {
+  display: inline-flex;
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: #f2ece0;
+  font-size: 0.9rem;
+}
+
+.app {
+  display: flex;
+  flex-direction: row;
+  height: calc(100vh - 180px);
+  margin-top: 10px;
+  margin-bottom: 10px;
+
+  @media (max-width: 768px) {
+    flex-direction: column;
+  }
+}
+
+.page-shell {
+  max-width: 980px;
+  margin: 24px auto;
+  padding: 20px;
+  background: #fff;
+  border-radius: 14px;
+  border: 1px solid #e2ded8;
+}
+
+@media (max-width: 900px) {
+  .site-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .app {
+    height: auto;
+    min-height: 70vh;
+  }
+}
+
+body.ios {
+  overflow: hidden;
+  -webkit-overflow-scrolling: none;
+
+  .app {
+    height: calc(100dvh - 160px);
+  }
+}
