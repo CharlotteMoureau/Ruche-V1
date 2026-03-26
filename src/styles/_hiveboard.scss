@@ -43,7 +43,7 @@
   border: none;
   padding: 0;
   border-radius: 999px;
-  background: #cc1f2f;
+  background: #b0b4bc;
   color: #fff;
   display: inline-flex;
   align-items: center;
@@ -62,4 +62,12 @@
     outline: 2px solid #fff;
     outline-offset: 2px;
   }
+}
+
+.card-comment-indicator.has-comment {
+  background: #cc1f2f;
+}
+
+.capture-mode .card-comment-indicator {
+  display: none !important;
 }
