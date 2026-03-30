@@ -45,6 +45,42 @@ function getBoardCards(boardData) {
   return Array.isArray(boardData?.boardCards) ? boardData.boardCards : [];
 }
 
+function getHiveDateValue(hive) {
+  const updatedAt = hive?.updatedAt ? new Date(hive.updatedAt).getTime() : 0;
+  if (Number.isFinite(updatedAt) && updatedAt > 0) {
+    return updatedAt;
+  }
+
+  const createdAt = hive?.createdAt ? new Date(hive.createdAt).getTime() : 0;
+  return Number.isFinite(createdAt) && createdAt > 0 ? createdAt : 0;
+}
+
+function sortHives(hives, sortMode, locale) {
+  const collator = new Intl.Collator(locale, { sensitivity: "base" });
+  const sorted = [...hives];
+
+  sorted.sort((a, b) => {
+    if (sortMode === "name-asc") {
+      return collator.compare(a?.title || "", b?.title || "");
+    }
+
+    if (sortMode === "name-desc") {
+      return collator.compare(b?.title || "", a?.title || "");
+    }
+
+    const dateA = getHiveDateValue(a);
+    const dateB = getHiveDateValue(b);
+
+    if (sortMode === "date-asc") {
+      return dateA - dateB;
+    }
+
+    return dateB - dateA;
+  });
+
+  return sorted;
+}
+
 function getCaptureBoardSize(boardCards) {
   if (boardCards.length === 0) {
     return { width: 1200, height: 760 };
@@ -119,7 +155,8 @@ export default function ProfilePage() {
   const navigate = useNavigate();
   const [profile, setProfile] = useState(null);
   const [error, setError] = useState("");
-  const [profileMessage, setProfileMessage] = useState("");
+  const [roleSuccessMessage, setRoleSuccessMessage] = useState("");
+  const [passwordSuccessMessage, setPasswordSuccessMessage] = useState("");
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [deletePassword, setDeletePassword] = useState("");
   const [deletePasswordConfirm, setDeletePasswordConfirm] = useState("");
@@ -145,6 +182,10 @@ export default function ProfilePage() {
   });
   const [isUpdatingRole, setIsUpdatingRole] = useState(false);
   const [isUpdatingPassword, setIsUpdatingPassword] = useState(false);
+  const [ownedSearchQuery, setOwnedSearchQuery] = useState("");
+  const [sharedSearchQuery, setSharedSearchQuery] = useState("");
+  const [ownedSortMode, setOwnedSortMode] = useState("date-desc");
+  const [sharedSortMode, setSharedSortMode] = useState("date-desc");
 
   useEffect(() => {
     let mounted = true;
@@ -193,7 +234,7 @@ export default function ProfilePage() {
 
     try {
       setError("");
-      setProfileMessage("");
+      setRoleSuccessMessage("");
       setIsUpdatingRole(true);
 
       await apiFetch("/users/me", {
@@ -207,7 +248,8 @@ export default function ProfilePage() {
 
       const data = await refreshMe();
       setProfile(data);
-      setProfileMessage(t("profile.updateSuccess"));
+      setRoleSuccessMessage(t("profile.updateSuccess"));
+      setPasswordSuccessMessage("");
     } catch (err) {
       setError(err.message);
     } finally {
@@ -239,7 +281,7 @@ export default function ProfilePage() {
 
     try {
       setError("");
-      setProfileMessage("");
+      setPasswordSuccessMessage("");
       setIsUpdatingPassword(true);
 
       await apiFetch("/users/me", {
@@ -257,7 +299,8 @@ export default function ProfilePage() {
         newPassword: "",
         newPasswordConfirm: "",
       });
-      setProfileMessage(t("profile.passwordUpdateSuccess"));
+      setPasswordSuccessMessage(t("profile.passwordUpdateSuccess"));
+      setRoleSuccessMessage("");
     } catch (err) {
       setError(err.message);
     } finally {
@@ -435,34 +478,61 @@ export default function ProfilePage() {
     closeCreateHiveModal();
   };
 
-  const ownedTotalPages = profile
-    ? getTotalPages(profile.ownedHives.length)
-    : 1;
+  const ownedBaseHives = profile ? profile.ownedHives : [];
+  const sharedBaseHives = profile ? profile.sharedHives : [];
+
+  const ownedNormalizedSearch = ownedSearchQuery.trim().toLowerCase();
+  const sharedNormalizedSearch = sharedSearchQuery.trim().toLowerCase();
+
+  const filteredOwnedHives = ownedBaseHives.filter((hive) =>
+    (hive?.title || "").toLowerCase().includes(ownedNormalizedSearch),
+  );
+  const filteredSharedHives = sharedBaseHives.filter((hive) =>
+    (hive?.title || "").toLowerCase().includes(sharedNormalizedSearch),
+  );
+
+  const sortedOwnedHives = sortHives(
+    filteredOwnedHives,
+    ownedSortMode,
+    dateLocale,
+  );
+  const sortedSharedHives = sortHives(
+    filteredSharedHives,
+    sharedSortMode,
+    dateLocale,
+  );
+
+  useEffect(() => {
+    setOwnedPage((current) => clampPage(current, sortedOwnedHives.length));
+  }, [sortedOwnedHives.length]);
+
+  useEffect(() => {
+    setSharedPage((current) => clampPage(current, sortedSharedHives.length));
+  }, [sortedSharedHives.length]);
+
+  const ownedTotalPages = profile ? getTotalPages(sortedOwnedHives.length) : 1;
   const sharedTotalPages = profile
-    ? getTotalPages(profile.sharedHives.length)
+    ? getTotalPages(sortedSharedHives.length)
     : 1;
-  const ownedCount = profile ? profile.ownedHives.length : 0;
-  const sharedCount = profile ? profile.sharedHives.length : 0;
+  const ownedCount = ownedBaseHives.length;
+  const sharedCount = sharedBaseHives.length;
+  const ownedVisibleCount = sortedOwnedHives.length;
+  const sharedVisibleCount = sortedSharedHives.length;
 
-  const pagedOwnedHives = profile
-    ? profile.ownedHives.slice(
-        (ownedPage - 1) * HIVES_PER_PAGE,
-        ownedPage * HIVES_PER_PAGE,
-      )
-    : [];
+  const pagedOwnedHives = sortedOwnedHives.slice(
+    (ownedPage - 1) * HIVES_PER_PAGE,
+    ownedPage * HIVES_PER_PAGE,
+  );
 
-  const pagedSharedHives = profile
-    ? profile.sharedHives.slice(
-        (sharedPage - 1) * HIVES_PER_PAGE,
-        sharedPage * HIVES_PER_PAGE,
-      )
-    : [];
+  const pagedSharedHives = sortedSharedHives.slice(
+    (sharedPage - 1) * HIVES_PER_PAGE,
+    sharedPage * HIVES_PER_PAGE,
+  );
 
   return (
     <section className="page-shell profile-page">
       <h2>{t("profile.title")}</h2>
       {error ? <p className="form-error">{error}</p> : null}
-      {profileMessage ? <p className="form-success">{profileMessage}</p> : null}
       {profile ? (
         <>
           <p>
@@ -492,66 +562,115 @@ export default function ProfilePage() {
           {ownedCount > 0 ? (
             <>
               <h3>{t("profile.myHives")}</h3>
-              <ul className="list-grid">
-                {pagedOwnedHives.map((hive) => (
-                  <li key={hive.id}>
-                    <div className="hive-details">
-                      <strong>{hive.title}</strong>
-                      <br />
-                      {t("profile.createdAt")} :{" "}
-                      {formatDateTime(hive.createdAt, dateLocale)}
-                      <br />
-                      {t("profile.updatedAt")} :{" "}
-                      {formatDateTime(hive.updatedAt, dateLocale)}
-                      <div className="hive-preview">
-                        <HivePreview
-                          previewImage={hive.boardPreviewImage}
-                          snapshot={hive.boardSnapshot}
-                          emptyLabel={t("profile.emptyHive")}
-                        />
+              <div className="hive-list-controls">
+                <label>
+                  {t("profile.searchLabel")}
+                  <input
+                    type="search"
+                    value={ownedSearchQuery}
+                    onChange={(event) => {
+                      setOwnedSearchQuery(event.target.value);
+                      setOwnedPage(1);
+                    }}
+                    placeholder={t("profile.searchPlaceholder")}
+                  />
+                </label>
+                {ownedSearchQuery.trim() ? (
+                  <button
+                    type="button"
+                    className="button-link hive-search-clear"
+                    onClick={() => {
+                      setOwnedSearchQuery("");
+                      setOwnedPage(1);
+                    }}
+                  >
+                    {t("profile.clearSearch")}
+                  </button>
+                ) : null}
+                <label>
+                  {t("profile.sortLabel")}
+                  <select
+                    value={ownedSortMode}
+                    onChange={(event) => {
+                      setOwnedSortMode(event.target.value);
+                      setOwnedPage(1);
+                    }}
+                  >
+                    <option value="date-desc">
+                      {t("profile.sortDateDesc")}
+                    </option>
+                    <option value="date-asc">{t("profile.sortDateAsc")}</option>
+                    <option value="name-asc">{t("profile.sortNameAsc")}</option>
+                    <option value="name-desc">
+                      {t("profile.sortNameDesc")}
+                    </option>
+                  </select>
+                </label>
+              </div>
+              {ownedVisibleCount > 0 ? (
+                <ul className="list-grid">
+                  {pagedOwnedHives.map((hive) => (
+                    <li key={hive.id}>
+                      <div className="hive-details">
+                        <strong>{hive.title}</strong>
+                        <br />
+                        {t("profile.createdAt")} :{" "}
+                        {formatDateTime(hive.createdAt, dateLocale)}
+                        <br />
+                        {t("profile.updatedAt")} :{" "}
+                        {formatDateTime(hive.updatedAt, dateLocale)}
+                        <div className="hive-preview">
+                          <HivePreview
+                            previewImage={hive.boardPreviewImage}
+                            snapshot={hive.boardSnapshot}
+                            emptyLabel={t("profile.emptyHive")}
+                          />
+                        </div>
                       </div>
-                    </div>
-                    <div className="inline-actions">
-                      <Link
-                        className="button-link button-link-open"
-                        to={`/hives/${hive.id}`}
-                      >
-                        {t("profile.open")}
-                      </Link>
-                      <button
-                        type="button"
-                        className="button-link button-link-duplicate"
-                        onClick={() => openDuplicateHiveModal(hive.id)}
-                        disabled={duplicatingHiveId === hive.id}
-                      >
-                        {duplicatingHiveId === hive.id
-                          ? t("profile.duplicating")
-                          : t("profile.duplicate")}
-                      </button>
-                      <button
-                        type="button"
-                        className="button-link button-link-download"
-                        onClick={() =>
-                          downloadHiveSnapshot(hive.id, hive.title)
-                        }
-                        disabled={downloadingHiveId === hive.id}
-                      >
-                        {downloadingHiveId === hive.id
-                          ? t("profile.downloading")
-                          : t("profile.download")}
-                      </button>
-                      <button
-                        type="button"
-                        className="button-link button-link-delete"
-                        onClick={() => setConfirmDeleteHiveId(hive.id)}
-                      >
-                        {t("common.delete")}
-                      </button>
-                    </div>
-                  </li>
-                ))}
-              </ul>
-              {ownedCount > HIVES_PER_PAGE ? (
+                      <div className="inline-actions">
+                        <Link
+                          className="button-link button-link-open"
+                          to={`/hives/${hive.id}`}
+                        >
+                          {t("profile.open")}
+                        </Link>
+                        <button
+                          type="button"
+                          className="button-link button-link-duplicate"
+                          onClick={() => openDuplicateHiveModal(hive.id)}
+                          disabled={duplicatingHiveId === hive.id}
+                        >
+                          {duplicatingHiveId === hive.id
+                            ? t("profile.duplicating")
+                            : t("profile.duplicate")}
+                        </button>
+                        <button
+                          type="button"
+                          className="button-link button-link-download"
+                          onClick={() =>
+                            downloadHiveSnapshot(hive.id, hive.title)
+                          }
+                          disabled={downloadingHiveId === hive.id}
+                        >
+                          {downloadingHiveId === hive.id
+                            ? t("profile.downloading")
+                            : t("profile.download")}
+                        </button>
+                        <button
+                          type="button"
+                          className="button-link button-link-delete"
+                          onClick={() => setConfirmDeleteHiveId(hive.id)}
+                        >
+                          {t("common.delete")}
+                        </button>
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <p>{t("profile.noSearchResults")}</p>
+              )}
+              {ownedVisibleCount > HIVES_PER_PAGE ? (
                 <div className="inline-actions">
                   <button
                     type="button"
@@ -584,51 +703,100 @@ export default function ProfilePage() {
           {sharedCount > 0 ? (
             <>
               <h3>{t("profile.sharedHives")}</h3>
-              <ul className="list-grid">
-                {pagedSharedHives.map((hive) => (
-                  <li key={hive.id}>
-                    <div className="hive-details">
-                      <strong>
-                        {hive.title} ({hive.collaboratorRole})
-                      </strong>
-                      <br />
-                      {t("profile.createdAt")} :{" "}
-                      {formatDateTime(hive.createdAt, dateLocale)}
-                      <br />
-                      {t("profile.updatedAt")} :{" "}
-                      {formatDateTime(hive.updatedAt, dateLocale)}
-                      <div className="hive-preview">
-                        <HivePreview
-                          previewImage={hive.boardPreviewImage}
-                          snapshot={hive.boardSnapshot}
-                          emptyLabel={t("profile.emptyHive")}
-                        />
+              <div className="hive-list-controls">
+                <label>
+                  {t("profile.searchLabel")}
+                  <input
+                    type="search"
+                    value={sharedSearchQuery}
+                    onChange={(event) => {
+                      setSharedSearchQuery(event.target.value);
+                      setSharedPage(1);
+                    }}
+                    placeholder={t("profile.searchPlaceholder")}
+                  />
+                </label>
+                {sharedSearchQuery.trim() ? (
+                  <button
+                    type="button"
+                    className="button-link hive-search-clear"
+                    onClick={() => {
+                      setSharedSearchQuery("");
+                      setSharedPage(1);
+                    }}
+                  >
+                    {t("profile.clearSearch")}
+                  </button>
+                ) : null}
+                <label>
+                  {t("profile.sortLabel")}
+                  <select
+                    value={sharedSortMode}
+                    onChange={(event) => {
+                      setSharedSortMode(event.target.value);
+                      setSharedPage(1);
+                    }}
+                  >
+                    <option value="date-desc">
+                      {t("profile.sortDateDesc")}
+                    </option>
+                    <option value="date-asc">{t("profile.sortDateAsc")}</option>
+                    <option value="name-asc">{t("profile.sortNameAsc")}</option>
+                    <option value="name-desc">
+                      {t("profile.sortNameDesc")}
+                    </option>
+                  </select>
+                </label>
+              </div>
+              {sharedVisibleCount > 0 ? (
+                <ul className="list-grid">
+                  {pagedSharedHives.map((hive) => (
+                    <li key={hive.id}>
+                      <div className="hive-details">
+                        <strong>
+                          {hive.title} ({hive.collaboratorRole})
+                        </strong>
+                        <br />
+                        {t("profile.createdAt")} :{" "}
+                        {formatDateTime(hive.createdAt, dateLocale)}
+                        <br />
+                        {t("profile.updatedAt")} :{" "}
+                        {formatDateTime(hive.updatedAt, dateLocale)}
+                        <div className="hive-preview">
+                          <HivePreview
+                            previewImage={hive.boardPreviewImage}
+                            snapshot={hive.boardSnapshot}
+                            emptyLabel={t("profile.emptyHive")}
+                          />
+                        </div>
                       </div>
-                    </div>
-                    <div className="inline-actions">
-                      <Link
-                        className="button-link button-link-open"
-                        to={`/hives/${hive.id}`}
-                      >
-                        {t("profile.open")}
-                      </Link>
-                      <button
-                        type="button"
-                        className="button-link button-link-download"
-                        onClick={() =>
-                          downloadHiveSnapshot(hive.id, hive.title)
-                        }
-                        disabled={downloadingHiveId === hive.id}
-                      >
-                        {downloadingHiveId === hive.id
-                          ? t("profile.downloading")
-                          : t("profile.download")}
-                      </button>
-                    </div>
-                  </li>
-                ))}
-              </ul>
-              {sharedCount > HIVES_PER_PAGE ? (
+                      <div className="inline-actions">
+                        <Link
+                          className="button-link button-link-open"
+                          to={`/hives/${hive.id}`}
+                        >
+                          {t("profile.open")}
+                        </Link>
+                        <button
+                          type="button"
+                          className="button-link button-link-download"
+                          onClick={() =>
+                            downloadHiveSnapshot(hive.id, hive.title)
+                          }
+                          disabled={downloadingHiveId === hive.id}
+                        >
+                          {downloadingHiveId === hive.id
+                            ? t("profile.downloading")
+                            : t("profile.download")}
+                        </button>
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <p>{t("profile.noSearchResults")}</p>
+              )}
+              {sharedVisibleCount > HIVES_PER_PAGE ? (
                 <div className="inline-actions">
                   <button
                     type="button"
@@ -701,6 +869,16 @@ export default function ProfilePage() {
                 </label>
               ) : null}
 
+              {roleSuccessMessage ? (
+                <p
+                  className="form-success profile-inline-feedback"
+                  role="status"
+                  aria-live="polite"
+                >
+                  {roleSuccessMessage}
+                </p>
+              ) : null}
+
               <div className="inline-actions">
                 <button type="submit" disabled={isUpdatingRole}>
                   {isUpdatingRole
@@ -753,6 +931,16 @@ export default function ProfilePage() {
                 minLength={8}
                 autoComplete="new-password"
               />
+
+              {passwordSuccessMessage ? (
+                <p
+                  className="form-success profile-inline-feedback"
+                  role="status"
+                  aria-live="polite"
+                >
+                  {passwordSuccessMessage}
+                </p>
+              ) : null}
 
               <div className="inline-actions">
                 <button type="submit" disabled={isUpdatingPassword}>

@@ -68,6 +68,36 @@
     margin-bottom: 10px;
   }
 
+  .hive-list-controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    align-items: flex-end;
+    margin: 4px 0 12px;
+
+    label {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      min-width: 220px;
+      color: #2f2f2f;
+      font-size: 0.92rem;
+      font-weight: 700;
+    }
+
+    input,
+    select {
+      min-height: 40px;
+    }
+
+    .hive-search-clear {
+      margin-top: auto;
+      border: 0;
+      cursor: pointer;
+      color: #222;
+    }
+  }
+
   .button-link,
   .inline-actions button,
   .danger-btn {
@@ -79,6 +109,10 @@
     margin: 0 0 10px;
     color: #1f6a46;
     font-weight: 700;
+  }
+
+  .profile-inline-feedback {
+    margin: 2px 0 0;
   }
 
   .profile-modify-section {
@@ -164,6 +198,12 @@
 
     .inline-actions {
       width: 100%;
+    }
+
+    .hive-list-controls {
+      label {
+        width: 100%;
+      }
     }
   }
 }
