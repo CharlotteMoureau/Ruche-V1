@@ -64,7 +64,7 @@ export default function LandingPage() {
       <section className="page-shell">
         <h2>{t("landing.title")}</h2>
         <p>{isAuthenticated ? t("landing.connected") : t("landing.guest")}</p>
-        <div className="cta-grid">
+        <div className="cta-grid landing-cta-grid">
           {isAuthenticated ? (
             <>
               <Link to="/profile" className="cta-card">
@@ -80,7 +80,7 @@ export default function LandingPage() {
                 onClick={handleCreateHiveClick}
                 role="button"
                 tabIndex={0}
-                className="cta-card"
+                className="cta-card cta-card-interactive"
                 onKeyDown={(e) => {
                   if (e.key === "Enter" || e.key === " ") {
                     handleCreateHiveClick();
@@ -114,20 +114,39 @@ export default function LandingPage() {
             </>
           ) : (
             <>
-              <Link to="/login" className="cta-card">
-                {t("landing.signIn")}
+              <Link
+                to="/login"
+                className="cta-card cta-card-auth cta-card-auth-signin"
+              >
+                <div className="cta-card-content cta-card-auth-content">
+                  <h3>{t("landing.signIn")}</h3>
+                  <p>{t("landing.connected")}</p>
+                </div>
               </Link>
-              <Link to="/register" className="cta-card">
-                {t("landing.createAccount")}
+              <Link
+                to="/register"
+                className="cta-card cta-card-auth cta-card-auth-register"
+              >
+                <div className="cta-card-content cta-card-auth-content">
+                  <h3>{t("landing.createAccount")}</h3>
+                  <p>{t("landing.guest")}</p>
+                </div>
               </Link>
             </>
           )}
         </div>
 
-        <section className="landing-tutorial">
-          <h3>{t("landing.tutorial")}</h3>
-          <p>{t("landing.tutorialPlaceholder")}</p>
-        </section>
+        <a
+          href=""
+          target="_blank"
+          rel="noopener noreferrer"
+          className="landing-tutorial cta-card"
+        >
+          <div className="cta-card-content landing-tutorial-content">
+            <h3>{t("landing.tutorial")}</h3>
+            <p>{t("landing.tutorialPlaceholder")}</p>
+          </div>
+        </a>
       </section>
 
       <section className="page-shell">

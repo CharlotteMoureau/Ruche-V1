@@ -153,20 +153,26 @@
 
 .landing-tutorial {
   margin-top: 48px;
-  padding: 24px;
-  background: #f9f7f2;
-  border-radius: 10px;
-  border-left: 4px solid $turquoise;
+  border-left: 5px solid rgba($turquoise, 0.65);
+
+  .landing-tutorial-content {
+    align-items: flex-start;
+    justify-content: center;
+    text-align: left;
+    flex-direction: column;
+    gap: 10px;
+    min-height: 110px;
+  }
 
   h3 {
-    font-size: 1.5rem;
+    margin: 0;
+    font-size: 1.15rem;
     color: $bleu-fonce;
-    margin: 0 0 12px 0;
   }
 
   p {
     margin: 0;
-    color: #666;
+    color: $gris;
     line-height: 1.6;
   }
 }

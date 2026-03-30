@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { createRoot } from "react-dom/client";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
@@ -282,6 +282,7 @@ export default function ProfilePage() {
   const [ownedSortMode, setOwnedSortMode] = useState("date-desc");
   const [sharedSortMode, setSharedSortMode] = useState("date-desc");
   const [activeProfileTab, setActiveProfileTab] = useState(PROFILE_TAB_HIVES);
+  const hydratedRoleFormUserIdRef = useRef(null);
   const defaultHiveKind = resolveDefaultHiveKind(profile?.user?.roleLabel);
   const isDcoProfile = defaultHiveKind === HIVE_KINDS.DCO;
   const localizedOtherRoleLabel = translateRole("Autre");
@@ -309,9 +310,29 @@ export default function ProfilePage() {
 
     setOwnedPage((current) => clampPage(current, profile.ownedHives.length));
     setSharedPage((current) => clampPage(current, profile.sharedHives.length));
-    setRoleForm({
-      role: resolveRoleFormValue(profile.user.roleLabel, roleOptions),
-      roleOtherText: profile.user.roleOtherText || "",
+
+    const canonicalRole = resolveRoleFormValue(profile.user.roleLabel, roleOptions);
+    const roleOtherText = profile.user.roleOtherText || "";
+    const profileUserId = profile.user?.id || "profile-user";
+
+    if (hydratedRoleFormUserIdRef.current === profileUserId) {
+      return;
+    }
+
+    hydratedRoleFormUserIdRef.current = profileUserId;
+
+    setRoleForm((current) => {
+      if (
+        current.role === canonicalRole &&
+        current.roleOtherText === roleOtherText
+      ) {
+        return current;
+      }
+
+      return {
+        role: canonicalRole,
+        roleOtherText,
+      };
     });
   }, [profile, roleOptions]);
 
@@ -351,6 +372,10 @@ export default function ProfilePage() {
 
       const data = await refreshMe();
       setProfile(data);
+      setRoleForm({
+        role: resolveRoleFormValue(data?.user?.roleLabel, roleOptions),
+        roleOtherText: data?.user?.roleOtherText || "",
+      });
       setRoleSuccessMessage(t("profile.updateSuccess"));
       setPasswordSuccessMessage("");
     } catch (err) {
