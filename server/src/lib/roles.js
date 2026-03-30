@@ -1,5 +1,6 @@
 export const USER_ROLES = [
   "Délégué PECA",
+  "Délégué au Contrat d'Objectifs",
   "Direction",
   "Enseignant",
   "Educateur",

@@ -1,10 +1,54 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { useState } from "react";
 import { useAuth } from "../context/AuthContext";
 import { useLanguage } from "../context/LanguageContext";
+import { HIVE_KINDS, isDcoRole } from "../lib/hives";
+import UnifiedPromptModal from "../components/UnifiedPromptModal";
 
 export default function LandingPage() {
-  const { isAuthenticated, isLoading } = useAuth();
+  const { isAuthenticated, isLoading, user } = useAuth();
   const { t } = useLanguage();
+  const navigate = useNavigate();
+  const [selectingHiveType, setSelectingHiveType] = useState(false);
+  const [selectedHiveKind, setSelectedHiveKind] = useState(null);
+  const [creatingHive, setCreatingHive] = useState(false);
+  const [newHiveTitle, setNewHiveTitle] = useState("");
+
+  const isDcoUser = isDcoRole(user?.roleLabel);
+
+  const handleCreateHiveClick = () => {
+    if (isDcoUser) {
+      setSelectingHiveType(true);
+    } else {
+      setCreatingHive(true);
+    }
+  };
+
+  const confirmHiveType = (kind) => {
+    setSelectedHiveKind(kind);
+    setSelectingHiveType(false);
+    setCreatingHive(true);
+  };
+
+  const closeCreateHiveModal = () => {
+    setCreatingHive(false);
+    setNewHiveTitle("");
+    setSelectedHiveKind(null);
+  };
+
+  const confirmCreateHive = () => {
+    const trimmedTitle = newHiveTitle.trim();
+    if (!trimmedTitle) return;
+
+    const hiveKind = isDcoUser
+      ? selectedHiveKind || HIVE_KINDS.STANDARD
+      : HIVE_KINDS.STANDARD;
+
+    navigate("/hives/new", {
+      state: { title: trimmedTitle, hiveKind },
+    });
+    closeCreateHiveModal();
+  };
 
   if (isLoading) {
     return (
@@ -32,7 +76,17 @@ export default function LandingPage() {
                 </div>
                 <div className="cta-card-content">{t("landing.goProfile")}</div>
               </Link>
-              <Link to="/hives/new" className="cta-card">
+              <div
+                onClick={handleCreateHiveClick}
+                role="button"
+                tabIndex={0}
+                className="cta-card"
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" || e.key === " ") {
+                    handleCreateHiveClick();
+                  }
+                }}
+              >
                 <div className="cta-card-image">
                   <img
                     src="https://via.placeholder.com/400x200?text=Create+a+Hive"
@@ -42,7 +96,7 @@ export default function LandingPage() {
                 <div className="cta-card-content">
                   {t("landing.createHive")}
                 </div>
-              </Link>
+              </div>
               <a
                 href="https://www.peca.be/ressources/boite-a-outils/la-ruche"
                 target="_blank"
@@ -88,6 +142,33 @@ export default function LandingPage() {
           </div>
         </section>
       </section>
+
+      <UnifiedPromptModal
+        isOpen={selectingHiveType}
+        mode="confirm"
+        title={t("profile.modalselectHiveTypeTitle")}
+        message={t("profile.selectHiveTypeMessage")}
+        confirmLabel={t("profile.selectStandardHive")}
+        extraActionLabel={t("profile.selectDcoHive")}
+        onConfirm={() => confirmHiveType(HIVE_KINDS.STANDARD)}
+        onExtraAction={() => confirmHiveType(HIVE_KINDS.DCO)}
+        onCancel={() => setSelectingHiveType(false)}
+      />
+
+      <UnifiedPromptModal
+        isOpen={creatingHive}
+        mode="prompt"
+        title={t("profile.modalCreateTitle")}
+        message={t("profile.modalCreateMessage")}
+        inputLabel={t("profile.modalCreateInput")}
+        inputPlaceholder={t("profile.modalCreatePlaceholder")}
+        value={newHiveTitle}
+        onValueChange={setNewHiveTitle}
+        confirmLabel={t("common.confirm")}
+        confirmDisabled={!newHiveTitle.trim()}
+        onCancel={closeCreateHiveModal}
+        onConfirm={confirmCreateHive}
+      />
     </>
   );
 }

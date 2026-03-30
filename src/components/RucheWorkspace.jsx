@@ -12,6 +12,7 @@ import { useDeviceDetection } from "../hooks/useDeviceDetection";
 import { useAuth } from "../context/AuthContext";
 import { useLanguage } from "../context/LanguageContext";
 import UnifiedPromptModal from "./UnifiedPromptModal";
+import { filterCardsForHiveKind } from "../lib/hives";
 
 const COMPACT_EDITOR_MEDIA_QUERY = "(max-width: 1200px)";
 const HISTORY_LIMIT = 3;
@@ -139,6 +140,7 @@ function cloneBoardState(state) {
 export default function RucheWorkspace({
   initialBoardData,
   loadKey,
+  hiveKind,
   resetSignal = 0,
   onStateChange,
   canEdit = true,
@@ -153,8 +155,12 @@ export default function RucheWorkspace({
   const localizedCardsData =
     language === "en" ? cardsEn : language === "nl" ? cardsNl : cardsFr;
   const cardsData = useMemo(
-    () => toCanonicalCards(localizedCardsData, language),
-    [language, localizedCardsData],
+    () =>
+      filterCardsForHiveKind(
+        toCanonicalCards(localizedCardsData, language),
+        hiveKind,
+      ),
+    [hiveKind, language, localizedCardsData],
   );
   const [availableCards, setAvailableCards] = useState(
     () => normalizeBoardData(initialBoardData, cardsData).availableCards,

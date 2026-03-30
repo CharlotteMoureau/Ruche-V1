@@ -1,22 +1,8 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import PasswordField from "../components/PasswordField";
 import { useLanguage } from "../context/LanguageContext";
-
-const ROLE_OPTIONS = [
-  "Délégué PECA",
-  "Direction",
-  "Enseignant",
-  "Educateur",
-  "Membre d'un CPMS",
-  "Futur enseignant",
-  "Intervenant culturel",
-  "Etudiant en Ecole Superieure des Arts",
-  "Référent culturel",
-  "Référent scolaire",
-  "Autre",
-];
 
 export default function RegisterPage() {
   const { register } = useAuth();
@@ -30,11 +16,20 @@ export default function RegisterPage() {
     lastName: "",
     password: "",
     passwordConfirm: "",
-    role: ROLE_OPTIONS[0],
+    role: "",
     roleOtherText: "",
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+
+  useEffect(() => {
+    if (form.role || !roleOptions.length) return;
+
+    setForm((prev) => ({
+      ...prev,
+      role: roleOptions[0].value,
+    }));
+  }, [form.role, roleOptions]);
 
   const onChange = (key, value) => {
     setForm((prev) => ({ ...prev, [key]: value }));

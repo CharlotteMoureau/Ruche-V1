@@ -1,6 +1,7 @@
 import { randomUUID } from "node:crypto";
 import { Router } from "express";
 import { z } from "zod";
+import { HIVE_KINDS, normalizeHiveKind } from "../lib/hives.js";
 import { prisma } from "../lib/prisma.js";
 import { requireAuth } from "../middleware/auth.js";
 
@@ -12,6 +13,7 @@ const hiveInputSchema = z.object({
   title: z.string().trim().min(1).max(100),
   boardData: z.any(),
   boardPreviewImage: z.string().max(5_000_000).nullable().optional(),
+  kind: z.string().trim().optional(),
 });
 
 const COLLABORATOR_ROLES = ["ADMIN", "EDITOR", "COMMENT", "READ", "EDIT"];
@@ -171,6 +173,7 @@ hivesRouter.get("/", async (req, res) => {
     hives.map((hive) => ({
       id: hive.id,
       title: hive.title,
+      kind: hive.kind,
       owner: hive.owner,
       createdAt: hive.createdAt,
       updatedAt: hive.updatedAt,
@@ -310,9 +313,25 @@ hivesRouter.post("/", async (req, res) => {
     return res.status(400).json({ error: "Données de ruche invalides" });
   }
 
+  const isDcoUser = req.user.roleLabel === "Délégué au Contrat d'Objectifs";
+  const requestedKind = normalizeHiveKind(parsed.data.kind);
+  const isTryingToDcoHive = requestedKind === HIVE_KINDS.DCO;
+
+  // Only DCO delegates can create DCO hives
+  if (isTryingToDcoHive && !isDcoUser) {
+    return res.status(403).json({
+      error: "Seuls les délégués au contrat d'objectifs peuvent créer des ruches DCO",
+    });
+  }
+
+  const finalKind = isTryingToDcoHive
+    ? HIVE_KINDS.DCO
+    : HIVE_KINDS.STANDARD;
+
   const hive = await prisma.hive.create({
     data: {
       title: parsed.data.title,
+      kind: finalKind,
       boardData: parsed.data.boardData,
       boardSnapshot: buildBoardSnapshot(parsed.data.boardData),
       boardPreviewImage: parsed.data.boardPreviewImage || null,
@@ -350,6 +369,7 @@ hivesRouter.get("/:id", async (req, res) => {
   return res.json({
     id: hive.id,
     title: hive.title,
+    kind: hive.kind,
     boardData: hive.boardData,
     boardPreviewImage: hive.boardPreviewImage,
     owner: hive.owner,
@@ -452,6 +472,7 @@ hivesRouter.put("/:id", async (req, res) => {
     where: { id: hive.id },
     data: {
       title: parsed.data.title,
+      kind: normalizeHiveKind(parsed.data.kind || hive.kind),
       boardData: parsed.data.boardData,
       boardSnapshot: buildBoardSnapshot(parsed.data.boardData),
       boardPreviewImage: parsed.data.boardPreviewImage || null,

@@ -14,6 +14,7 @@ const DATE_LOCALES = {
 
 const USER_ROLES = [
   "Délégué PECA",
+  "Délégué au Contrat d'Objectifs",
   "Direction",
   "Enseignant",
   "Educateur",
@@ -29,6 +30,7 @@ const USER_ROLES = [
 const ROLE_LABELS = {
   fr: {
     "Délégué PECA": "Délégué PECA",
+    "Délégué au Contrat d'Objectifs": "Délégué au Contrat d'Objectifs",
     Direction: "Direction",
     Enseignant: "Enseignant",
     Educateur: "Educateur",
@@ -43,6 +45,7 @@ const ROLE_LABELS = {
   },
   en: {
     "Délégué PECA": "PECA representative",
+    "Délégué au Contrat d'Objectifs": "Objectives Contract delegate",
     Direction: "School leadership",
     Enseignant: "Teacher",
     Educateur: "Educator",
@@ -56,6 +59,8 @@ const ROLE_LABELS = {
   },
   nl: {
     "Délégué PECA": "PECA-afgevaardigde",
+    "Délégué au Contrat d'Objectifs":
+      "Afgevaardigde van het doelstellingencontract",
     Direction: "Directie",
     Enseignant: "Leerkracht",
     Educateur: "Opvoeder",
@@ -220,6 +225,10 @@ const messages = {
       email: "Email",
       role: "Rôle",
       createNewHive: "Créer une nouvelle Ruche",
+      modalselectHiveTypeTitle: "Type de ruche",
+      selectHiveTypeMessage: "Quel type de ruche voulez-vous créer ?",
+      selectStandardHive: "Ruche standard",
+      selectDcoHive: "Ruche DCO",
       myHives: "Mes Ruches",
       sharedHives: "Ruches partagées",
       createdAt: "Créée le",
@@ -332,6 +341,7 @@ const messages = {
     },
     editor: {
       newHiveTitle: "Nouvelle Ruche",
+      newDcoHiveTitle: "Nouvelle Ruche DCO",
       backToProfile: "Retour au profil",
       hiveTitleLabel: "Titre de la Ruche",
       saveHive: "Enregistrer la ruche",
@@ -577,6 +587,10 @@ const messages = {
       email: "Email",
       role: "Role",
       createNewHive: "Create a new Hive",
+      modalselectHiveTypeTitle: "Hive type",
+      selectHiveTypeMessage: "What type of hive do you want to create?",
+      selectStandardHive: "Standard hive",
+      selectDcoHive: "DCO hive",
       myHives: "My Hives",
       sharedHives: "Shared Hives",
       createdAt: "Created on",
@@ -685,6 +699,7 @@ const messages = {
     },
     editor: {
       newHiveTitle: "New Hive",
+      newDcoHiveTitle: "New DCO Hive",
       backToProfile: "Back to profile",
       hiveTitleLabel: "Hive title",
       saveHive: "Save hive",
@@ -922,6 +937,10 @@ const messages = {
       email: "E-mail",
       role: "Rol",
       createNewHive: "Nieuwe Ruche maken",
+      modalselectHiveTypeTitle: "Type bijenkorf",
+      selectHiveTypeMessage: "Welk type bijenkorf wil je maken?",
+      selectStandardHive: "Standaard bijenkorf",
+      selectDcoHive: "DCO-bijenkorf",
       myHives: "Mijn Bijenkorfen",
       sharedHives: "Gedeelde Bijenkorfen",
       createdAt: "Gemaakt op",
@@ -1031,6 +1050,7 @@ const messages = {
     },
     editor: {
       newHiveTitle: "Nieuwe Bijenkorf",
+      newDcoHiveTitle: "Nieuwe DCO-bijenkorf",
       backToProfile: "Terug naar profiel",
       hiveTitleLabel: "Titel van de Bijenkorf",
       saveHive: "Bijenkorf opslaan",

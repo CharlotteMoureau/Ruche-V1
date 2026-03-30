@@ -8,6 +8,11 @@ import Toolbar from "../components/Toolbar";
 import UnifiedPromptModal from "../components/UnifiedPromptModal";
 import PageLoader from "../components/PageLoader";
 import { useLanguage } from "../context/LanguageContext";
+import {
+  HIVE_KINDS,
+  normalizeHiveKind,
+  resolveDefaultHiveKind,
+} from "../lib/hives";
 
 function waitForCaptureFrame() {
   return new Promise((resolve) => {
@@ -40,15 +45,24 @@ export default function RucheEditorPage() {
 
   const isNew = !id;
   const duplicateSource = location.state?.duplicateSource || null;
+  const requestedHiveKind = normalizeHiveKind(
+    location.state?.hiveKind ||
+      duplicateSource?.kind ||
+      resolveDefaultHiveKind(user?.roleLabel),
+  );
+  const initialHiveKind = isNew ? requestedHiveKind : HIVE_KINDS.STANDARD;
   const initialNewTitle =
     isNew && location.state?.title
       ? location.state.title
       : isNew && duplicateSource?.title
         ? duplicateSource.title
-        : t("editor.newHiveTitle");
+        : initialHiveKind === HIVE_KINDS.DCO
+          ? t("editor.newDcoHiveTitle")
+          : t("editor.newHiveTitle");
 
   const [hive, setHive] = useState(null);
   const [title, setTitle] = useState(() => initialNewTitle);
+  const [hiveKind, setHiveKind] = useState(initialHiveKind);
   const [boardData, setBoardData] = useState(() =>
     isNew && duplicateSource?.boardData ? duplicateSource.boardData : null,
   );
@@ -115,15 +129,21 @@ export default function RucheEditorPage() {
   const requiresSavedHivePrompt = isNew;
 
   const currentSnapshot = useMemo(
-    () => JSON.stringify({ title, boardData }),
-    [title, boardData],
+    () => JSON.stringify({ title, hiveKind, boardData }),
+    [title, hiveKind, boardData],
   );
   const isDirty = Boolean(savedSnapshot) && currentSnapshot !== savedSnapshot;
 
   useEffect(() => {
     if (!isNew || savedSnapshot || boardData === null) return;
-    setSavedSnapshot(JSON.stringify({ title: initialNewTitle, boardData }));
-  }, [isNew, savedSnapshot, boardData, initialNewTitle]);
+    setSavedSnapshot(
+      JSON.stringify({
+        title: initialNewTitle,
+        hiveKind: initialHiveKind,
+        boardData,
+      }),
+    );
+  }, [isNew, savedSnapshot, boardData, initialHiveKind, initialNewTitle]);
 
   useEffect(() => {
     if (isNew || canEdit) return;
@@ -135,9 +155,14 @@ export default function RucheEditorPage() {
         if (!mounted) return;
         setHive(data);
         setTitle(data.title);
+        setHiveKind(normalizeHiveKind(data.kind));
         setBoardData(data.boardData);
         setSavedSnapshot(
-          JSON.stringify({ title: data.title, boardData: data.boardData }),
+          JSON.stringify({
+            title: data.title,
+            hiveKind: normalizeHiveKind(data.kind),
+            boardData: data.boardData,
+          }),
         );
       } catch (err) {
         if (mounted) setError(err.message);
@@ -160,11 +185,13 @@ export default function RucheEditorPage() {
         setHive(data);
         const nextSnapshot = JSON.stringify({
           title: data.title,
+          hiveKind: normalizeHiveKind(data.kind),
           boardData: data.boardData,
         });
 
         if (!isDirty) {
           setTitle(data.title);
+          setHiveKind(normalizeHiveKind(data.kind));
           setBoardData(data.boardData);
           setSavedSnapshot(nextSnapshot);
         }
@@ -308,11 +335,24 @@ export default function RucheEditorPage() {
         const created = await apiFetch("/hives", {
           method: "POST",
           token,
-          body: { title: titleToSave, boardData, boardPreviewImage },
+          body: {
+            title: titleToSave,
+            kind: hiveKind,
+            boardData,
+            boardPreviewImage,
+          },
         });
-        const snapshot = JSON.stringify({ title: titleToSave, boardData });
+        const normalizedCreatedKind = normalizeHiveKind(
+          created.kind || hiveKind,
+        );
+        const snapshot = JSON.stringify({
+          title: titleToSave,
+          hiveKind: normalizedCreatedKind,
+          boardData,
+        });
         setSavedSnapshot(snapshot);
         setTitle(titleToSave);
+        setHiveKind(normalizedCreatedKind);
         setHive({
           ...created,
           owner: {
@@ -334,9 +374,18 @@ export default function RucheEditorPage() {
       await apiFetch(`/hives/${id}`, {
         method: "PUT",
         token,
-        body: { title: titleToSave, boardData, boardPreviewImage },
+        body: {
+          title: titleToSave,
+          kind: hiveKind,
+          boardData,
+          boardPreviewImage,
+        },
       });
-      const snapshot = JSON.stringify({ title: titleToSave, boardData });
+      const snapshot = JSON.stringify({
+        title: titleToSave,
+        hiveKind,
+        boardData,
+      });
       setSavedSnapshot(snapshot);
       setTitle(titleToSave);
 
@@ -345,6 +394,7 @@ export default function RucheEditorPage() {
           ? {
               ...prev,
               title: titleToSave,
+              kind: hiveKind,
               boardData,
             }
           : prev,
@@ -401,6 +451,7 @@ export default function RucheEditorPage() {
         token,
         body: {
           title: pendingNewTitle.trim(),
+          kind: hiveKind,
           boardData,
           boardPreviewImage,
         },
@@ -860,6 +911,7 @@ export default function RucheEditorPage() {
         <RucheWorkspace
           initialBoardData={boardData}
           loadKey={workspaceLoadKey}
+          hiveKind={hiveKind}
           resetSignal={resetSignal}
           canEdit={canEdit}
           canNote={canComment}

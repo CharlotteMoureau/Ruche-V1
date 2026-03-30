@@ -18,6 +18,7 @@ import {
   triggerDownload,
   waitForCaptureFrame,
 } from "../lib/snapshot";
+import { HIVE_KINDS, resolveDefaultHiveKind } from "../lib/hives";
 
 const HIVES_PER_PAGE = 3;
 const CARD_SIZE = 200;
@@ -221,6 +222,8 @@ export default function ProfilePage() {
   const [isDeleting, setIsDeleting] = useState(false);
   const [ownedPage, setOwnedPage] = useState(1);
   const [sharedPage, setSharedPage] = useState(1);
+  const [selectingHiveType, setSelectingHiveType] = useState(false);
+  const [selectedHiveKind, setSelectedHiveKind] = useState(null);
   const [creatingHive, setCreatingHive] = useState(false);
   const [newHiveTitle, setNewHiveTitle] = useState("");
   const [duplicatingHiveId, setDuplicatingHiveId] = useState(null);
@@ -244,6 +247,8 @@ export default function ProfilePage() {
   const [ownedSortMode, setOwnedSortMode] = useState("date-desc");
   const [sharedSortMode, setSharedSortMode] = useState("date-desc");
   const [activeProfileTab, setActiveProfileTab] = useState(PROFILE_TAB_HIVES);
+  const defaultHiveKind = resolveDefaultHiveKind(profile?.user?.roleLabel);
+  const isDcoProfile = defaultHiveKind === HIVE_KINDS.DCO;
 
   useEffect(() => {
     let mounted = true;
@@ -413,6 +418,7 @@ export default function ProfilePage() {
         token,
         body: {
           title: trimmedTitle,
+          kind: sourceHive.kind,
           boardData: sourceHive.boardData,
           boardPreviewImage: sourceHive.boardPreviewImage || null,
         },
@@ -483,6 +489,21 @@ export default function ProfilePage() {
   const closeCreateHiveModal = () => {
     setCreatingHive(false);
     setNewHiveTitle("");
+    setSelectedHiveKind(null);
+  };
+
+  const handleCreateHiveClick = () => {
+    if (isDcoProfile) {
+      setSelectingHiveType(true);
+    } else {
+      setCreatingHive(true);
+    }
+  };
+
+  const confirmHiveType = (kind) => {
+    setSelectedHiveKind(kind);
+    setSelectingHiveType(false);
+    setCreatingHive(true);
   };
 
   const downloadHiveSnapshot = async (hiveId, fallbackTitle) => {
@@ -562,8 +583,12 @@ export default function ProfilePage() {
     const trimmedTitle = newHiveTitle.trim();
     if (!trimmedTitle) return;
 
+    const hiveKind = isDcoProfile
+      ? selectedHiveKind || HIVE_KINDS.STANDARD
+      : defaultHiveKind;
+
     navigate("/hives/new", {
-      state: { title: trimmedTitle },
+      state: { title: trimmedTitle, hiveKind },
     });
     closeCreateHiveModal();
   };
@@ -683,7 +708,7 @@ export default function ProfilePage() {
                 <button
                   type="button"
                   className="button-link"
-                  onClick={() => setCreatingHive(true)}
+                  onClick={handleCreateHiveClick}
                 >
                   {t("profile.createNewHive")}
                 </button>
@@ -1230,6 +1255,18 @@ export default function ProfilePage() {
           setDuplicateDraft({ hiveId: null, sourceTitle: "", nextTitle: "" })
         }
         onConfirm={duplicateHiveFromProfile}
+      />
+
+      <UnifiedPromptModal
+        isOpen={selectingHiveType}
+        mode="confirm"
+        title={t("profile.modalselectHiveTypeTitle")}
+        message={t("profile.selectHiveTypeMessage")}
+        confirmLabel={t("profile.selectStandardHive")}
+        extraActionLabel={t("profile.selectDcoHive")}
+        onConfirm={() => confirmHiveType(HIVE_KINDS.STANDARD)}
+        onExtraAction={() => confirmHiveType(HIVE_KINDS.DCO)}
+        onCancel={() => setSelectingHiveType(false)}
       />
 
       <UnifiedPromptModal

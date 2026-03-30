@@ -87,19 +87,22 @@
     "id": "1",
     "title": "Parcours",
     "definition": "Je construis mon intervention en lien avec le PECA des élèves en respectant les principes de diversité et de progressivité des apprentissages.",
-    "category": "conditions-enseignant"
+    "category": "conditions-enseignant",
+    "DCO": "yes"
   },
   {
     "id": "2",
     "title": "Rencontrer Connaître Pratiquer",
     "definition": " Je combine au moins deux des trois composantes du PECA dans une optique de complémentarité.",
-    "category": "conditions-enseignant"
+    "category": "conditions-enseignant",
+    "DCO": "yes"
   },
   {
     "id": "3",
     "title": "Objectifs",
     "definition": "Je définis préalablement les objectifs de l'intervention et les présente aux élèves. En cas de partenariat, ces objectifs sont définis conjointement.",
-    "category": "conditions-enseignant"
+    "category": "conditions-enseignant",
+    "DCO": "yes"
   },
   {
     "id": "4",
@@ -141,13 +144,15 @@
     "id": "10",
     "title": "Auto-évaluation",
     "definition": "Je prévois des moments et des outils pour que les élèves prennent du recul, notamment à travers des traces qui suscitent la discussion et l'esprit critique.",
-    "category": "conditions-enseignant"
+    "category": "conditions-enseignant",
+    "DCO": "yes"
   },
   {
     "id": "11",
     "title": "Réflexivité",
     "definition": "Je dresse le bilan de l'intervention accomplie par rapport aux objectifs fixés.",
-    "category": "conditions-enseignant"
+    "category": "conditions-enseignant",
+    "DCO": "yes"
   },
   {
     "id": "12",
@@ -159,7 +164,8 @@
     "id": "13",
     "title": "Interdisciplinarité",
     "definition": "Je fais intervenir ou j’établis un lien avec d'autres disciplines scolaires.",
-    "category": "recommandations-enseignant"
+    "category": "recommandations-enseignant",
+    "DCO": "yes"
   },
   {
     "id": "14",
@@ -177,13 +183,15 @@
     "id": "16",
     "title": "Implication des familles",
     "definition": "Je prévois des moments et des outils pour impliquer les familles au cours du processus et/ou en fin d’intervention.",
-    "category": "recommandations-enseignant"
+    "category": "recommandations-enseignant",
+    "DCO": "yes"
   },
   {
     "id": "17",
     "title": "Collaboration",
     "definition": "En cas de partenariat, les partenaires prennent en compte les particularités des différents contextes (de classe, artistiques et culturels). Ils s’accordent sur les alvéoles « conditions » et définissent les rôles et responsabilités de chacun.",
-    "category": "recommandations-enseignant"
+    "category": "recommandations-enseignant",
+    "DCO": "yes"
   },
   {
     "id": "18",
@@ -231,13 +239,15 @@
     "id": "P",
     "title": "Planification",
     "definition": "L’équipe éducative planifie, en collaboration avec les partenaires, l'intégration des différentes interventions dans le PECA des élèves, la mise en place et la coordination des différentes interventions dans une optique complémentaire. Nous valorisons le PECA dans le plan de pilotage de l'établissement.",
-    "category": "conditions-equipe"
+    "category": "conditions-equipe",
+    "DCO": "yes"
   },
   {
     "id": "R",
     "title": "Personnes-ressources PECA",
     "definition": "L’équipe éducative sollicite les personnes ressources pour le PECA (les enseignants relais, les référents culturels, les inspecteurs, les référents scolaires, les opérateurs culturels, etc.).",
-    "category": "conditions-equipe"
+    "category": "conditions-equipe",
+    "DCO": "yes"
   },
   {
     "id": "E",
@@ -249,7 +259,8 @@
     "id": "VA",
     "title": "Valorisation",
     "definition": "L’équipe éducative utilise et anime régulièrement un ou des espace(s) « arts et culture » au sein de l'établissement (œuvres d'élèves et d'artistes affichées, informations sur les académies, affiches des expositions ou spectacles locaux, citations d'artistes affichées...).",
-    "category": "recommandations-equipe"
+    "category": "recommandations-equipe",
+    "DCO": "yes"
   },
   {
     "id": "a.",
