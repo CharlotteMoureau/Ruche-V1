@@ -136,7 +136,7 @@ const messages = {
       delete: "Supprimer",
       confirm: "Confirmer",
       page: "Page",
-      previous: "Precedent",
+      previous: "Précédent",
       next: "Suivant",
       unknownUser: "Utilisateur inconnu",
       yes: "Oui",
@@ -144,16 +144,16 @@ const messages = {
     },
     language: {
       label: "Langue",
-      fr: "Francais",
+      fr: "Français",
       en: "English",
       nl: "Nederlands",
     },
     header: {
       profile: "Profil",
       admin: "Admin",
-      logout: "Deconnexion",
+      logout: "Déconnexion",
       login: "Connexion",
-      register: "Creer un compte",
+      register: "Créer un compte",
     },
     landing: {
       title: "Bienvenue dans La Ruche",
@@ -176,12 +176,12 @@ const messages = {
       register: "Inscription",
     },
     register: {
-      title: "Creer un compte",
+      title: "Créer un compte",
       username: "Nom d'utilisateur (unique)",
       email: "Email",
       firstName: "Prénom",
       lastName: "Nom",
-      role: "ôle",
+      role: "Rôle",
       roleOther: "Précisez votre rôle",
       password: "Mot de passe",
       passwordConfirm: "Confirmation du mot de passe",
@@ -310,6 +310,13 @@ const messages = {
       deleteCommentTitle: "Supprimer le commentaire",
       saveTitleError: "Veuillez renseigner un titre avant d'enregistrer.",
       duplicateRenameError: "Renommez la copie avant de l'enregistrer.",
+      renameOrDuplicateTitle: "Renommer ou créer une copie ?",
+      renameOrDuplicateMessage:
+        "Voulez-vous renommer la ruche existante '{oldTitle}' en '{newTitle}' ou créer une copie avec ce nouveau titre ?",
+      renameOnly: "Renommer",
+      createCopy: "Créer une copie",
+      duplicateSuccess:
+        "Copie créée avec succès ! La ruche '{newTitle}' a été créée et vous pouvez la retrouver dans votre profil.",
     },
     workspace: {
       cardCommentTitle: "Commentaire de carte",
@@ -322,11 +329,11 @@ const messages = {
       continueDeleteCardComments: "Continuer",
       deleteCardCommentsTitle: "Supprimer les commentaires de carte",
       deleteSingleCardCommentMessage:
-        "Cette carte contient un commentaire. La remettre dans la bibliotheque supprimera ce commentaire. Continuer ?",
+        "Cette carte contient un commentaire. La remettre dans la bibliothèque supprimera ce commentaire. Continuer ?",
       deleteMultipleCardCommentMessage:
-        "Certaines cartes contiennent un commentaire. Les remettre dans la bibliotheque supprimera ces commentaires. Continuer ?",
+        "Certaines cartes contiennent un commentaire. Les remettre dans la bibliothèque supprimera ces commentaires. Continuer ?",
       deleteCardCommentTitle: "Supprimer le commentaire de carte",
-      irreversible: "Cette action est irreversible. Voulez-vous continuer ?",
+      irreversible: "Cette action est irréversible. Voulez-vous continuer ?",
     },
     toolbar: {
       reset: "Réinitialiser",
@@ -354,15 +361,15 @@ const messages = {
         "Impossible d'envoyer l'invitation: veuillez saisir un email valide.",
       inviteUnavailable: "Invitation indisponible pour le moment.",
       inviteNoUser:
-        "Invitation impossible: aucun utilisateur n'existe avec cet email. Le collaborateur doit d'abord creer un compte.",
+        "Invitation impossible: aucun utilisateur n'existe avec cet email. Le collaborateur doit d'abord créer un compte.",
       inviteInvalid:
-        "Invitation invalide: verifiez l'email saisi puis reessayez.",
+        "Invitation invalide: vérifiez l'email saisi puis réessayez.",
       inviteFailed: "Invitation impossible.",
       invalidRole: "Rôle invalide",
       removeFailed: "Impossible de retirer ce collaborateur",
       leaveFailed: "Impossible de quitter cette ruche",
       screenshotFailed: "Erreur lors de la capture : {message}",
-      screenshotMergeError: "Impossible de generer l'image fusionnee.",
+      screenshotMergeError: "Impossible de générer l'image fusionnée.",
     },
     cardLibrary: {
       title: "Cartes disponibles",
@@ -557,6 +564,13 @@ const messages = {
       deleteCommentTitle: "Delete comment",
       saveTitleError: "Please provide a title before saving.",
       duplicateRenameError: "Rename the copy before saving.",
+      renameOrDuplicateTitle: "Rename or create a copy?",
+      renameOrDuplicateMessage:
+        "Do you want to rename the existing hive '{oldTitle}' to '{newTitle}' or create a copy with this new title?",
+      renameOnly: "Rename",
+      createCopy: "Create a copy",
+      duplicateSuccess:
+        "Copy created successfully! The hive '{newTitle}' has been created and you can find it in your profile.",
     },
     workspace: {
       cardCommentTitle: "Card comment",
@@ -801,6 +815,13 @@ const messages = {
       deleteCommentTitle: "Reactie verwijderen",
       saveTitleError: "Vul een titel in voor je opslaat.",
       duplicateRenameError: "Hernoem de kopie voor je opslaat.",
+      renameOrDuplicateTitle: "Hernoemen of kopie maken?",
+      renameOrDuplicateMessage:
+        "Wil je de bestaande bijenkorf '{oldTitle}' hernoemen naar '{newTitle}' of een kopie maken met deze nieuwe titel?",
+      renameOnly: "Hernoemen",
+      createCopy: "Kopie maken",
+      duplicateSuccess:
+        "Kopie met succes aangemaakt! De bijenkorf '{newTitle}' is aangemaakt en je kunt deze in je profiel vinden.",
     },
     workspace: {
       cardCommentTitle: "Kaartreactie",

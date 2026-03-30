@@ -69,6 +69,8 @@ export default function RucheEditorPage() {
   const [saveRequiredAction, setSaveRequiredAction] = useState(null);
   const [openCollaboratorsSignal, setOpenCollaboratorsSignal] = useState(0);
   const [requestedCommentCardId, setRequestedCommentCardId] = useState(null);
+  const [renameOrDuplicateAction, setRenameOrDuplicateAction] = useState(null);
+  const [pendingNewTitle, setPendingNewTitle] = useState("");
 
   const isOwner = Boolean(
     hive?.owner?.id && user?.id && hive.owner.id === user.id,
@@ -195,6 +197,17 @@ export default function RucheEditorPage() {
       return;
     }
 
+    // If existing hive and title changed, ask user whether to rename or duplicate
+    if (!isNew && hive && trimmedTitle !== hive.title.trim()) {
+      setPendingNewTitle(trimmedTitle);
+      setRenameOrDuplicateAction("pending");
+      return;
+    }
+
+    return performSaveHive(trimmedTitle);
+  };
+
+  const performSaveHive = async (titleToSave) => {
     setIsSaving(true);
     try {
       const hasBoardCards = Array.isArray(boardData?.boardCards)
@@ -223,11 +236,11 @@ export default function RucheEditorPage() {
         const created = await apiFetch("/hives", {
           method: "POST",
           token,
-          body: { title: trimmedTitle, boardData, boardPreviewImage },
+          body: { title: titleToSave, boardData, boardPreviewImage },
         });
-        const snapshot = JSON.stringify({ title: trimmedTitle, boardData });
+        const snapshot = JSON.stringify({ title: titleToSave, boardData });
         setSavedSnapshot(snapshot);
-        setTitle(trimmedTitle);
+        setTitle(titleToSave);
         setHive({
           ...created,
           owner: {
@@ -247,17 +260,17 @@ export default function RucheEditorPage() {
       await apiFetch(`/hives/${id}`, {
         method: "PUT",
         token,
-        body: { title: trimmedTitle, boardData, boardPreviewImage },
+        body: { title: titleToSave, boardData, boardPreviewImage },
       });
-      const snapshot = JSON.stringify({ title: trimmedTitle, boardData });
+      const snapshot = JSON.stringify({ title: titleToSave, boardData });
       setSavedSnapshot(snapshot);
-      setTitle(trimmedTitle);
+      setTitle(titleToSave);
 
       setHive((prev) =>
         prev
           ? {
               ...prev,
-              title: trimmedTitle,
+              title: titleToSave,
               boardData,
             }
           : prev,
@@ -266,6 +279,66 @@ export default function RucheEditorPage() {
     } catch (err) {
       setError(err.message);
       return false;
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const handleRenameExistingHive = async () => {
+    setRenameOrDuplicateAction(null);
+    setPendingNewTitle("");
+    if (pendingNewTitle.trim()) {
+      await performSaveHive(pendingNewTitle.trim());
+    }
+  };
+
+  const handleDuplicateWithNewTitle = async () => {
+    if (!pendingNewTitle.trim() || !hive) return;
+
+    setRenameOrDuplicateAction(null);
+    setIsSaving(true);
+
+    try {
+      const hasBoardCards = Array.isArray(boardData?.boardCards)
+        ? boardData.boardCards.length > 0
+        : false;
+      let boardPreviewImage = null;
+
+      if (hasBoardCards) {
+        const board = document.querySelector(".hive-board");
+        if (board) {
+          document.body.classList.add("capture-mode");
+          try {
+            await waitForCaptureFrame();
+            boardPreviewImage = await domtoimage.toPng(board, {
+              cacheBust: true,
+            });
+          } catch {
+            boardPreviewImage = null;
+          } finally {
+            document.body.classList.remove("capture-mode");
+          }
+        }
+      }
+
+      // Create duplicate with new title
+      const newHive = await apiFetch("/hives", {
+        method: "POST",
+        token,
+        body: {
+          title: pendingNewTitle.trim(),
+          boardData,
+          boardPreviewImage,
+        },
+      });
+
+      setPendingNewTitle("");
+
+      // Navigate to the newly created hive
+      navigate(`/hives/${newHive.id}`, { replace: true });
+    } catch (err) {
+      setError(err.message);
+      setPendingNewTitle("");
     } finally {
       setIsSaving(false);
     }
@@ -882,6 +955,25 @@ export default function RucheEditorPage() {
         confirmClassName="danger"
         onCancel={() => setDeleteTarget(null)}
         onConfirm={deleteComment}
+      />
+
+      <UnifiedPromptModal
+        isOpen={renameOrDuplicateAction === "pending"}
+        mode="renameOrDuplicate"
+        title={t("editor.renameOrDuplicateTitle")}
+        message={t("editor.renameOrDuplicateMessage", {
+          oldTitle: hive?.title || "",
+          newTitle: pendingNewTitle,
+        })}
+        confirmLabel={t("editor.renameOnly")}
+        extraActionLabel={t("editor.createCopy")}
+        confirmDisabled={isSaving}
+        onCancel={() => {
+          setRenameOrDuplicateAction(null);
+          setPendingNewTitle("");
+        }}
+        onConfirm={handleRenameExistingHive}
+        onExtraAction={handleDuplicateWithNewTitle}
       />
     </section>
   );

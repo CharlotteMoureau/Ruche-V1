@@ -16,7 +16,7 @@ import {
   waitForCaptureFrame,
 } from "../lib/snapshot";
 
-const HIVES_PER_PAGE = 10;
+const HIVES_PER_PAGE = 3;
 const CARD_SIZE = 200;
 const BOARD_PADDING = 60;
 
