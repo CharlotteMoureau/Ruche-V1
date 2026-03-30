@@ -22,6 +22,8 @@ import {
 const HIVES_PER_PAGE = 3;
 const CARD_SIZE = 200;
 const BOARD_PADDING = 60;
+const PROFILE_TAB_HIVES = "hives";
+const PROFILE_TAB_SETTINGS = "settings";
 
 const CATEGORY_KEY_MAP = {
   fr: {
@@ -241,6 +243,7 @@ export default function ProfilePage() {
   const [sharedSearchQuery, setSharedSearchQuery] = useState("");
   const [ownedSortMode, setOwnedSortMode] = useState("date-desc");
   const [sharedSortMode, setSharedSortMode] = useState("date-desc");
+  const [activeProfileTab, setActiveProfileTab] = useState(PROFILE_TAB_HIVES);
 
   useEffect(() => {
     let mounted = true;
@@ -636,429 +639,488 @@ export default function ProfilePage() {
               : ""}
           </p>
 
-          <div className="inline-actions">
+          <div
+            className="profile-tabs"
+            role="tablist"
+            aria-label={t("profile.title")}
+          >
             <button
+              id="profile-tab-hives"
               type="button"
-              className="button-link"
-              onClick={() => setCreatingHive(true)}
+              role="tab"
+              className={`profile-tab ${
+                activeProfileTab === PROFILE_TAB_HIVES ? "is-active" : ""
+              }`}
+              aria-selected={activeProfileTab === PROFILE_TAB_HIVES}
+              aria-controls="profile-panel-hives"
+              onClick={() => setActiveProfileTab(PROFILE_TAB_HIVES)}
             >
-              {t("profile.createNewHive")}
+              {t("profile.hivesTab")}
+            </button>
+            <button
+              id="profile-tab-settings"
+              type="button"
+              role="tab"
+              className={`profile-tab ${
+                activeProfileTab === PROFILE_TAB_SETTINGS ? "is-active" : ""
+              }`}
+              aria-selected={activeProfileTab === PROFILE_TAB_SETTINGS}
+              aria-controls="profile-panel-settings"
+              onClick={() => setActiveProfileTab(PROFILE_TAB_SETTINGS)}
+            >
+              {t("profile.settingsTab")}
             </button>
           </div>
 
-          {ownedCount > 0 ? (
-            <>
-              <h3>{t("profile.myHives")}</h3>
-              <div className="hive-list-controls">
-                <label>
-                  {t("profile.searchLabel")}
-                  <input
-                    type="search"
-                    value={ownedSearchQuery}
-                    onChange={(event) => {
-                      setOwnedSearchQuery(event.target.value);
-                      setOwnedPage(1);
-                    }}
-                    placeholder={t("profile.searchPlaceholder")}
-                  />
-                </label>
-                {ownedSearchQuery.trim() ? (
-                  <button
-                    type="button"
-                    className="button-link hive-search-clear"
-                    onClick={() => {
-                      setOwnedSearchQuery("");
-                      setOwnedPage(1);
-                    }}
-                  >
-                    {t("profile.clearSearch")}
-                  </button>
-                ) : null}
-                <label>
-                  {t("profile.sortLabel")}
-                  <select
-                    value={ownedSortMode}
-                    onChange={(event) => {
-                      setOwnedSortMode(event.target.value);
-                      setOwnedPage(1);
-                    }}
-                  >
-                    <option value="date-desc">
-                      {t("profile.sortDateDesc")}
-                    </option>
-                    <option value="date-asc">{t("profile.sortDateAsc")}</option>
-                    <option value="name-asc">{t("profile.sortNameAsc")}</option>
-                    <option value="name-desc">
-                      {t("profile.sortNameDesc")}
-                    </option>
-                  </select>
-                </label>
-              </div>
-              {ownedVisibleCount > 0 ? (
-                <ul className="list-grid">
-                  {pagedOwnedHives.map((hive) => (
-                    <li key={hive.id}>
-                      <div className="hive-details">
-                        <strong>{hive.title}</strong>
-                        <br />
-                        {t("profile.createdAt")} :{" "}
-                        {formatDateTime(hive.createdAt, dateLocale)}
-                        <br />
-                        {t("profile.updatedAt")} :{" "}
-                        {formatDateTime(hive.updatedAt, dateLocale)}
-                        <div className="hive-preview">
-                          <HivePreview
-                            previewImage={hive.boardPreviewImage}
-                            snapshot={hive.boardSnapshot}
-                            emptyLabel={t("profile.emptyHive")}
-                          />
-                        </div>
-                      </div>
-                      <div className="inline-actions">
-                        <Link
-                          className="button-link button-link-open"
-                          to={`/hives/${hive.id}`}
-                        >
-                          {t("profile.open")}
-                        </Link>
-                        <button
-                          type="button"
-                          className="button-link button-link-duplicate"
-                          onClick={() => openDuplicateHiveModal(hive.id)}
-                          disabled={duplicatingHiveId === hive.id}
-                        >
-                          {duplicatingHiveId === hive.id
-                            ? t("profile.duplicating")
-                            : t("profile.duplicate")}
-                        </button>
-                        <button
-                          type="button"
-                          className="button-link button-link-download"
-                          onClick={() =>
-                            downloadHiveSnapshot(hive.id, hive.title)
-                          }
-                          disabled={downloadingHiveId === hive.id}
-                        >
-                          {downloadingHiveId === hive.id
-                            ? t("profile.downloading")
-                            : t("profile.download")}
-                        </button>
-                        <button
-                          type="button"
-                          className="button-link button-link-delete"
-                          onClick={() => setConfirmDeleteHiveId(hive.id)}
-                        >
-                          {t("common.delete")}
-                        </button>
-                      </div>
-                    </li>
-                  ))}
-                </ul>
-              ) : (
-                <p>{t("profile.noSearchResults")}</p>
-              )}
-              {ownedVisibleCount > HIVES_PER_PAGE ? (
-                <div className="inline-actions">
-                  <button
-                    type="button"
-                    onClick={() =>
-                      setOwnedPage((current) => Math.max(1, current - 1))
-                    }
-                    disabled={ownedPage === 1}
-                  >
-                    {t("common.previous")}
-                  </button>
-                  <span>
-                    {t("common.page")} {ownedPage}/{ownedTotalPages}
-                  </span>
-                  <button
-                    type="button"
-                    onClick={() =>
-                      setOwnedPage((current) =>
-                        Math.min(ownedTotalPages, current + 1),
-                      )
-                    }
-                    disabled={ownedPage === ownedTotalPages}
-                  >
-                    {t("common.next")}
-                  </button>
-                </div>
-              ) : null}
-            </>
-          ) : null}
-
-          {sharedCount > 0 ? (
-            <>
-              <h3>{t("profile.sharedHives")}</h3>
-              <div className="hive-list-controls">
-                <label>
-                  {t("profile.searchLabel")}
-                  <input
-                    type="search"
-                    value={sharedSearchQuery}
-                    onChange={(event) => {
-                      setSharedSearchQuery(event.target.value);
-                      setSharedPage(1);
-                    }}
-                    placeholder={t("profile.searchPlaceholder")}
-                  />
-                </label>
-                {sharedSearchQuery.trim() ? (
-                  <button
-                    type="button"
-                    className="button-link hive-search-clear"
-                    onClick={() => {
-                      setSharedSearchQuery("");
-                      setSharedPage(1);
-                    }}
-                  >
-                    {t("profile.clearSearch")}
-                  </button>
-                ) : null}
-                <label>
-                  {t("profile.sortLabel")}
-                  <select
-                    value={sharedSortMode}
-                    onChange={(event) => {
-                      setSharedSortMode(event.target.value);
-                      setSharedPage(1);
-                    }}
-                  >
-                    <option value="date-desc">
-                      {t("profile.sortDateDesc")}
-                    </option>
-                    <option value="date-asc">{t("profile.sortDateAsc")}</option>
-                    <option value="name-asc">{t("profile.sortNameAsc")}</option>
-                    <option value="name-desc">
-                      {t("profile.sortNameDesc")}
-                    </option>
-                  </select>
-                </label>
-              </div>
-              {sharedVisibleCount > 0 ? (
-                <ul className="list-grid">
-                  {pagedSharedHives.map((hive) => (
-                    <li key={hive.id}>
-                      <div className="hive-details">
-                        <strong>
-                          {hive.title} ({hive.collaboratorRole})
-                        </strong>
-                        <br />
-                        {t("profile.createdAt")} :{" "}
-                        {formatDateTime(hive.createdAt, dateLocale)}
-                        <br />
-                        {t("profile.updatedAt")} :{" "}
-                        {formatDateTime(hive.updatedAt, dateLocale)}
-                        <div className="hive-preview">
-                          <HivePreview
-                            previewImage={hive.boardPreviewImage}
-                            snapshot={hive.boardSnapshot}
-                            emptyLabel={t("profile.emptyHive")}
-                          />
-                        </div>
-                      </div>
-                      <div className="inline-actions">
-                        <Link
-                          className="button-link button-link-open"
-                          to={`/hives/${hive.id}`}
-                        >
-                          {t("profile.open")}
-                        </Link>
-                        <button
-                          type="button"
-                          className="button-link button-link-download"
-                          onClick={() =>
-                            downloadHiveSnapshot(hive.id, hive.title)
-                          }
-                          disabled={downloadingHiveId === hive.id}
-                        >
-                          {downloadingHiveId === hive.id
-                            ? t("profile.downloading")
-                            : t("profile.download")}
-                        </button>
-                        {hive.collaboratorRole === "ADMIN" ? (
-                          <button
-                            type="button"
-                            className="button-link button-link-delete"
-                            onClick={() => setConfirmDeleteHiveId(hive.id)}
-                          >
-                            {t("common.delete")}
-                          </button>
-                        ) : null}
-                      </div>
-                    </li>
-                  ))}
-                </ul>
-              ) : (
-                <p>{t("profile.noSearchResults")}</p>
-              )}
-              {sharedVisibleCount > HIVES_PER_PAGE ? (
-                <div className="inline-actions">
-                  <button
-                    type="button"
-                    onClick={() =>
-                      setSharedPage((current) => Math.max(1, current - 1))
-                    }
-                    disabled={sharedPage === 1}
-                  >
-                    {t("common.previous")}
-                  </button>
-                  <span>
-                    {t("common.page")} {sharedPage}/{sharedTotalPages}
-                  </span>
-                  <button
-                    type="button"
-                    onClick={() =>
-                      setSharedPage((current) =>
-                        Math.min(sharedTotalPages, current + 1),
-                      )
-                    }
-                    disabled={sharedPage === sharedTotalPages}
-                  >
-                    {t("common.next")}
-                  </button>
-                </div>
-              ) : null}
-            </>
-          ) : null}
-
-          <section className="profile-modify-section">
-            <h3>{t("profile.modifyProfileTitle")}</h3>
-            <p>{t("profile.modifyProfileDesc")}</p>
-
-            <h4>{t("profile.changeRole")}</h4>
-            <form onSubmit={updateRole} className="form-grid">
-              <label>
-                {t("register.role")}
-                <select
-                  value={roleForm.role}
-                  onChange={(event) =>
-                    setRoleForm((prev) => ({
-                      ...prev,
-                      role: event.target.value,
-                    }))
-                  }
-                  disabled={isUpdatingRole}
+          {activeProfileTab === PROFILE_TAB_HIVES ? (
+            <section
+              id="profile-panel-hives"
+              role="tabpanel"
+              aria-labelledby="profile-tab-hives"
+              className="profile-tab-panel"
+            >
+              <div className="inline-actions">
+                <button
+                  type="button"
+                  className="button-link"
+                  onClick={() => setCreatingHive(true)}
                 >
-                  {roleOptions.map((role) => (
-                    <option key={role.value} value={role.value}>
-                      {role.label}
-                    </option>
-                  ))}
-                </select>
-              </label>
+                  {t("profile.createNewHive")}
+                </button>
+              </div>
 
-              {roleForm.role === "Autre" ? (
-                <label>
-                  {t("register.roleOther")}
-                  <input
-                    value={roleForm.roleOtherText}
+              {ownedCount > 0 ? (
+                <>
+                  <h3>{t("profile.myHives")}</h3>
+                  <div className="hive-list-controls">
+                    <label>
+                      {t("profile.searchLabel")}
+                      <input
+                        type="search"
+                        value={ownedSearchQuery}
+                        onChange={(event) => {
+                          setOwnedSearchQuery(event.target.value);
+                          setOwnedPage(1);
+                        }}
+                        placeholder={t("profile.searchPlaceholder")}
+                      />
+                    </label>
+                    {ownedSearchQuery.trim() ? (
+                      <button
+                        type="button"
+                        className="button-link hive-search-clear"
+                        onClick={() => {
+                          setOwnedSearchQuery("");
+                          setOwnedPage(1);
+                        }}
+                      >
+                        {t("profile.clearSearch")}
+                      </button>
+                    ) : null}
+                    <label>
+                      {t("profile.sortLabel")}
+                      <select
+                        value={ownedSortMode}
+                        onChange={(event) => {
+                          setOwnedSortMode(event.target.value);
+                          setOwnedPage(1);
+                        }}
+                      >
+                        <option value="date-desc">
+                          {t("profile.sortDateDesc")}
+                        </option>
+                        <option value="date-asc">
+                          {t("profile.sortDateAsc")}
+                        </option>
+                        <option value="name-asc">
+                          {t("profile.sortNameAsc")}
+                        </option>
+                        <option value="name-desc">
+                          {t("profile.sortNameDesc")}
+                        </option>
+                      </select>
+                    </label>
+                  </div>
+                  {ownedVisibleCount > 0 ? (
+                    <ul className="list-grid">
+                      {pagedOwnedHives.map((hive) => (
+                        <li key={hive.id}>
+                          <div className="hive-details">
+                            <strong>{hive.title}</strong>
+                            <br />
+                            {t("profile.createdAt")} :{" "}
+                            {formatDateTime(hive.createdAt, dateLocale)}
+                            <br />
+                            {t("profile.updatedAt")} :{" "}
+                            {formatDateTime(hive.updatedAt, dateLocale)}
+                            <div className="hive-preview">
+                              <HivePreview
+                                previewImage={hive.boardPreviewImage}
+                                snapshot={hive.boardSnapshot}
+                                emptyLabel={t("profile.emptyHive")}
+                              />
+                            </div>
+                          </div>
+                          <div className="inline-actions">
+                            <Link
+                              className="button-link button-link-open"
+                              to={`/hives/${hive.id}`}
+                            >
+                              {t("profile.open")}
+                            </Link>
+                            <button
+                              type="button"
+                              className="button-link button-link-duplicate"
+                              onClick={() => openDuplicateHiveModal(hive.id)}
+                              disabled={duplicatingHiveId === hive.id}
+                            >
+                              {duplicatingHiveId === hive.id
+                                ? t("profile.duplicating")
+                                : t("profile.duplicate")}
+                            </button>
+                            <button
+                              type="button"
+                              className="button-link button-link-download"
+                              onClick={() =>
+                                downloadHiveSnapshot(hive.id, hive.title)
+                              }
+                              disabled={downloadingHiveId === hive.id}
+                            >
+                              {downloadingHiveId === hive.id
+                                ? t("profile.downloading")
+                                : t("profile.download")}
+                            </button>
+                            <button
+                              type="button"
+                              className="button-link button-link-delete"
+                              onClick={() => setConfirmDeleteHiveId(hive.id)}
+                            >
+                              {t("common.delete")}
+                            </button>
+                          </div>
+                        </li>
+                      ))}
+                    </ul>
+                  ) : (
+                    <p>{t("profile.noSearchResults")}</p>
+                  )}
+                  {ownedVisibleCount > HIVES_PER_PAGE ? (
+                    <div className="inline-actions">
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setOwnedPage((current) => Math.max(1, current - 1))
+                        }
+                        disabled={ownedPage === 1}
+                      >
+                        {t("common.previous")}
+                      </button>
+                      <span>
+                        {t("common.page")} {ownedPage}/{ownedTotalPages}
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setOwnedPage((current) =>
+                            Math.min(ownedTotalPages, current + 1),
+                          )
+                        }
+                        disabled={ownedPage === ownedTotalPages}
+                      >
+                        {t("common.next")}
+                      </button>
+                    </div>
+                  ) : null}
+                </>
+              ) : null}
+
+              {sharedCount > 0 ? (
+                <>
+                  <h3>{t("profile.sharedHives")}</h3>
+                  <div className="hive-list-controls">
+                    <label>
+                      {t("profile.searchLabel")}
+                      <input
+                        type="search"
+                        value={sharedSearchQuery}
+                        onChange={(event) => {
+                          setSharedSearchQuery(event.target.value);
+                          setSharedPage(1);
+                        }}
+                        placeholder={t("profile.searchPlaceholder")}
+                      />
+                    </label>
+                    {sharedSearchQuery.trim() ? (
+                      <button
+                        type="button"
+                        className="button-link hive-search-clear"
+                        onClick={() => {
+                          setSharedSearchQuery("");
+                          setSharedPage(1);
+                        }}
+                      >
+                        {t("profile.clearSearch")}
+                      </button>
+                    ) : null}
+                    <label>
+                      {t("profile.sortLabel")}
+                      <select
+                        value={sharedSortMode}
+                        onChange={(event) => {
+                          setSharedSortMode(event.target.value);
+                          setSharedPage(1);
+                        }}
+                      >
+                        <option value="date-desc">
+                          {t("profile.sortDateDesc")}
+                        </option>
+                        <option value="date-asc">
+                          {t("profile.sortDateAsc")}
+                        </option>
+                        <option value="name-asc">
+                          {t("profile.sortNameAsc")}
+                        </option>
+                        <option value="name-desc">
+                          {t("profile.sortNameDesc")}
+                        </option>
+                      </select>
+                    </label>
+                  </div>
+                  {sharedVisibleCount > 0 ? (
+                    <ul className="list-grid">
+                      {pagedSharedHives.map((hive) => (
+                        <li key={hive.id}>
+                          <div className="hive-details">
+                            <strong>
+                              {hive.title} ({hive.collaboratorRole})
+                            </strong>
+                            <br />
+                            {t("profile.createdAt")} :{" "}
+                            {formatDateTime(hive.createdAt, dateLocale)}
+                            <br />
+                            {t("profile.updatedAt")} :{" "}
+                            {formatDateTime(hive.updatedAt, dateLocale)}
+                            <div className="hive-preview">
+                              <HivePreview
+                                previewImage={hive.boardPreviewImage}
+                                snapshot={hive.boardSnapshot}
+                                emptyLabel={t("profile.emptyHive")}
+                              />
+                            </div>
+                          </div>
+                          <div className="inline-actions">
+                            <Link
+                              className="button-link button-link-open"
+                              to={`/hives/${hive.id}`}
+                            >
+                              {t("profile.open")}
+                            </Link>
+                            <button
+                              type="button"
+                              className="button-link button-link-download"
+                              onClick={() =>
+                                downloadHiveSnapshot(hive.id, hive.title)
+                              }
+                              disabled={downloadingHiveId === hive.id}
+                            >
+                              {downloadingHiveId === hive.id
+                                ? t("profile.downloading")
+                                : t("profile.download")}
+                            </button>
+                            {hive.collaboratorRole === "ADMIN" ? (
+                              <button
+                                type="button"
+                                className="button-link button-link-delete"
+                                onClick={() => setConfirmDeleteHiveId(hive.id)}
+                              >
+                                {t("common.delete")}
+                              </button>
+                            ) : null}
+                          </div>
+                        </li>
+                      ))}
+                    </ul>
+                  ) : (
+                    <p>{t("profile.noSearchResults")}</p>
+                  )}
+                  {sharedVisibleCount > HIVES_PER_PAGE ? (
+                    <div className="inline-actions">
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setSharedPage((current) => Math.max(1, current - 1))
+                        }
+                        disabled={sharedPage === 1}
+                      >
+                        {t("common.previous")}
+                      </button>
+                      <span>
+                        {t("common.page")} {sharedPage}/{sharedTotalPages}
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setSharedPage((current) =>
+                            Math.min(sharedTotalPages, current + 1),
+                          )
+                        }
+                        disabled={sharedPage === sharedTotalPages}
+                      >
+                        {t("common.next")}
+                      </button>
+                    </div>
+                  ) : null}
+                </>
+              ) : null}
+            </section>
+          ) : null}
+
+          {activeProfileTab === PROFILE_TAB_SETTINGS ? (
+            <section
+              id="profile-panel-settings"
+              role="tabpanel"
+              aria-labelledby="profile-tab-settings"
+              className="profile-tab-panel"
+            >
+              <section className="profile-modify-section">
+                <h3>{t("profile.modifyProfileTitle")}</h3>
+                <p>{t("profile.modifyProfileDesc")}</p>
+
+                <h4>{t("profile.changeRole")}</h4>
+                <form onSubmit={updateRole} className="form-grid">
+                  <label>
+                    {t("register.role")}
+                    <select
+                      value={roleForm.role}
+                      onChange={(event) =>
+                        setRoleForm((prev) => ({
+                          ...prev,
+                          role: event.target.value,
+                        }))
+                      }
+                      disabled={isUpdatingRole}
+                    >
+                      {roleOptions.map((role) => (
+                        <option key={role.value} value={role.value}>
+                          {role.label}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+
+                  {roleForm.role === "Autre" ? (
+                    <label>
+                      {t("register.roleOther")}
+                      <input
+                        value={roleForm.roleOtherText}
+                        onChange={(event) =>
+                          setRoleForm((prev) => ({
+                            ...prev,
+                            roleOtherText: event.target.value,
+                          }))
+                        }
+                        disabled={isUpdatingRole}
+                        required
+                      />
+                    </label>
+                  ) : null}
+
+                  {roleSuccessMessage ? (
+                    <p
+                      className="form-success profile-inline-feedback"
+                      role="status"
+                      aria-live="polite"
+                    >
+                      {roleSuccessMessage}
+                    </p>
+                  ) : null}
+
+                  <div className="inline-actions">
+                    <button type="submit" disabled={isUpdatingRole}>
+                      {isUpdatingRole
+                        ? t("profile.updatingRole")
+                        : t("profile.updateRole")}
+                    </button>
+                  </div>
+                </form>
+
+                <h4>{t("profile.changePassword")}</h4>
+                <form onSubmit={updatePassword} className="form-grid">
+                  <PasswordField
+                    label={t("profile.currentPassword")}
+                    value={passwordForm.currentPassword}
                     onChange={(event) =>
-                      setRoleForm((prev) => ({
+                      setPasswordForm((prev) => ({
                         ...prev,
-                        roleOtherText: event.target.value,
+                        currentPassword: event.target.value,
                       }))
                     }
-                    disabled={isUpdatingRole}
                     required
+                    minLength={1}
+                    autoComplete="current-password"
                   />
-                </label>
-              ) : null}
 
-              {roleSuccessMessage ? (
-                <p
-                  className="form-success profile-inline-feedback"
-                  role="status"
-                  aria-live="polite"
+                  <PasswordField
+                    label={t("profile.newPassword")}
+                    value={passwordForm.newPassword}
+                    onChange={(event) =>
+                      setPasswordForm((prev) => ({
+                        ...prev,
+                        newPassword: event.target.value,
+                      }))
+                    }
+                    required
+                    minLength={8}
+                    autoComplete="new-password"
+                  />
+
+                  <PasswordField
+                    label={t("profile.newPasswordConfirm")}
+                    value={passwordForm.newPasswordConfirm}
+                    onChange={(event) =>
+                      setPasswordForm((prev) => ({
+                        ...prev,
+                        newPasswordConfirm: event.target.value,
+                      }))
+                    }
+                    required
+                    minLength={8}
+                    autoComplete="new-password"
+                  />
+
+                  {passwordSuccessMessage ? (
+                    <p
+                      className="form-success profile-inline-feedback"
+                      role="status"
+                      aria-live="polite"
+                    >
+                      {passwordSuccessMessage}
+                    </p>
+                  ) : null}
+
+                  <div className="inline-actions">
+                    <button type="submit" disabled={isUpdatingPassword}>
+                      {isUpdatingPassword
+                        ? t("profile.updatingPassword")
+                        : t("profile.updatePassword")}
+                    </button>
+                  </div>
+                </form>
+              </section>
+
+              <section className="profile-danger-zone">
+                <h3>{t("profile.deleteProfileTitle")}</h3>
+                <p>{t("profile.deleteProfileDesc")}</p>
+                <button
+                  type="button"
+                  className="danger-btn"
+                  onClick={openDeleteModal}
                 >
-                  {roleSuccessMessage}
-                </p>
-              ) : null}
-
-              <div className="inline-actions">
-                <button type="submit" disabled={isUpdatingRole}>
-                  {isUpdatingRole
-                    ? t("profile.updatingRole")
-                    : t("profile.updateRole")}
+                  {t("profile.deleteProfileTitle")}
                 </button>
-              </div>
-            </form>
-
-            <h4>{t("profile.changePassword")}</h4>
-            <form onSubmit={updatePassword} className="form-grid">
-              <PasswordField
-                label={t("profile.currentPassword")}
-                value={passwordForm.currentPassword}
-                onChange={(event) =>
-                  setPasswordForm((prev) => ({
-                    ...prev,
-                    currentPassword: event.target.value,
-                  }))
-                }
-                required
-                minLength={1}
-                autoComplete="current-password"
-              />
-
-              <PasswordField
-                label={t("profile.newPassword")}
-                value={passwordForm.newPassword}
-                onChange={(event) =>
-                  setPasswordForm((prev) => ({
-                    ...prev,
-                    newPassword: event.target.value,
-                  }))
-                }
-                required
-                minLength={8}
-                autoComplete="new-password"
-              />
-
-              <PasswordField
-                label={t("profile.newPasswordConfirm")}
-                value={passwordForm.newPasswordConfirm}
-                onChange={(event) =>
-                  setPasswordForm((prev) => ({
-                    ...prev,
-                    newPasswordConfirm: event.target.value,
-                  }))
-                }
-                required
-                minLength={8}
-                autoComplete="new-password"
-              />
-
-              {passwordSuccessMessage ? (
-                <p
-                  className="form-success profile-inline-feedback"
-                  role="status"
-                  aria-live="polite"
-                >
-                  {passwordSuccessMessage}
-                </p>
-              ) : null}
-
-              <div className="inline-actions">
-                <button type="submit" disabled={isUpdatingPassword}>
-                  {isUpdatingPassword
-                    ? t("profile.updatingPassword")
-                    : t("profile.updatePassword")}
-                </button>
-              </div>
-            </form>
-          </section>
-
-          <section className="profile-danger-zone">
-            <h3>{t("profile.deleteProfileTitle")}</h3>
-            <p>{t("profile.deleteProfileDesc")}</p>
-            <button
-              type="button"
-              className="danger-btn"
-              onClick={openDeleteModal}
-            >
-              {t("profile.deleteProfileTitle")}
-            </button>
-          </section>
+              </section>
+            </section>
+          ) : null}
 
           {isDeleteModalOpen ? (
             <div

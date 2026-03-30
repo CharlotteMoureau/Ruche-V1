@@ -21,6 +21,48 @@
     color: #1f1f1f;
   }
 
+  .profile-tabs {
+    display: flex;
+    gap: 10px;
+    margin: 18px 0 14px;
+    padding: 8px;
+    border: 1px solid rgba(49, 39, 131, 0.2);
+    border-radius: 12px;
+    background: linear-gradient(90deg, rgba(49, 39, 131, 0.08) 0%, #fff 70%);
+  }
+
+  .profile-tab {
+    appearance: none;
+    border: 1px solid rgba(49, 39, 131, 0.25);
+    border-radius: 999px;
+    background: #fff;
+    color: $bleu-fonce;
+    font-size: 0.95rem;
+    font-weight: 800;
+    line-height: 1.2;
+    padding: 9px 14px;
+    cursor: pointer;
+    transition: background-color 120ms ease, border-color 120ms ease,
+      color 120ms ease;
+  }
+
+  .profile-tab:hover {
+    border-color: rgba(49, 39, 131, 0.45);
+    background: rgba(49, 39, 131, 0.06);
+  }
+
+  .profile-tab.is-active {
+    border-color: $bleu-fonce;
+    background: $bleu-fonce;
+    color: #fff;
+    box-shadow: 0 3px 14px rgba(49, 39, 131, 0.2);
+  }
+
+  .profile-tab-panel {
+    padding: 4px 0 0;
+    border-top: 2px solid rgba(49, 39, 131, 0.14);
+  }
+
   h3 {
     margin: 24px 0 12px;
     display: flex;
@@ -192,6 +234,17 @@
 
 @media (max-width: 720px) {
   .profile-page {
+    .profile-tabs {
+      flex-direction: column;
+      align-items: stretch;
+      gap: 8px;
+    }
+
+    .profile-tab {
+      width: 100%;
+      text-align: center;
+    }
+
     .list-grid li {
       flex-direction: column;
     }

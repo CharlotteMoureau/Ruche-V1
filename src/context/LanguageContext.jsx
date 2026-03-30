@@ -214,6 +214,8 @@ const messages = {
     },
     profile: {
       title: "Mon profil",
+      hivesTab: "Mes ruches",
+      settingsTab: "Modifier mon profil",
       username: "Nom d'utilisateur",
       email: "Email",
       role: "Rôle",
@@ -569,6 +571,8 @@ const messages = {
     protectedRoute: { loading: "Loading..." },
     profile: {
       title: "My profile",
+      hivesTab: "My hives",
+      settingsTab: "Edit profile",
       username: "Username",
       email: "Email",
       role: "Role",
@@ -912,6 +916,8 @@ const messages = {
     protectedRoute: { loading: "Laden..." },
     profile: {
       title: "Mijn profiel",
+      hivesTab: "Mijn bijenkorfen",
+      settingsTab: "Profiel wijzigen",
       username: "Gebruikersnaam",
       email: "E-mail",
       role: "Rol",
