@@ -299,6 +299,9 @@ const messages = {
       unsavedTitle: "Modifications non enregistrées",
       unsavedMessage:
         "Votre ruche contient des modifications non enregistrées. Quitter sans sauvegarder ?",
+      saveFirstTitle: "Enregistrez d'abord la ruche",
+      saveFirstMessage:
+        "Enregistrez votre ruche avant d'utiliser cette fonctionnalité.",
       stay: "Rester",
       saveAndLeave: "Enregistrer et quitter",
       leaveWithoutSaving: "Quitter sans enregistrer",
@@ -544,6 +547,8 @@ const messages = {
       addCommentPlaceholder: "Add a comment...",
       unsavedTitle: "Unsaved changes",
       unsavedMessage: "Your hive has unsaved changes. Leave without saving?",
+      saveFirstTitle: "Save the hive first",
+      saveFirstMessage: "Save your hive to access {feature}.",
       stay: "Stay",
       saveAndLeave: "Save and leave",
       leaveWithoutSaving: "Leave without saving",
@@ -785,6 +790,9 @@ const messages = {
       unsavedTitle: "Niet-opgeslagen wijzigingen",
       unsavedMessage:
         "Je bijenkorf bevat niet-opgeslagen wijzigingen. Verlaten zonder op te slaan?",
+      saveFirstTitle: "Sla eerst de bijenkorf op",
+      saveFirstMessage:
+        "Sla je bijenkorf op om toegang te krijgen tot {feature}.",
       stay: "Blijven",
       saveAndLeave: "Opslaan en verlaten",
       leaveWithoutSaving: "Verlaten zonder opslaan",

@@ -12,15 +12,20 @@ import { captureBoardFrontAndBack, triggerDownload } from "../lib/snapshot";
 
 export default function Toolbar({
   onReset,
+  showCollaboratorsButton = false,
+  isCollaboratorsLocked = false,
   canInvite = false,
   canLeaveHive = false,
   collaborators = [],
+  onOpenCollaborators,
   onInviteCollaborator,
   onChangeCollaboratorRole,
   onRemoveCollaborator,
   onLeaveHive,
+  isCommentsLocked = false,
   onOpenComments,
   commentCount = 0,
+  openCollaboratorsSignal = 0,
 }) {
   const { t } = useLanguage();
   const [showInviteModal, setShowInviteModal] = useState(false);
@@ -61,6 +66,11 @@ export default function Toolbar({
 
     return () => window.clearTimeout(timeoutId);
   }, [inviteWarning]);
+
+  useEffect(() => {
+    if (!openCollaboratorsSignal) return;
+    setShowInviteModal(true);
+  }, [openCollaboratorsSignal]);
 
   const handleExport = async () => {
     const board = document.querySelector(".hive-board");
@@ -166,6 +176,20 @@ export default function Toolbar({
     }
   };
 
+  const shouldShowCollaboratorsButton =
+    showCollaboratorsButton ||
+    (canInvite && onInviteCollaborator) ||
+    canLeaveHive;
+
+  const handleOpenCollaborators = () => {
+    if (onOpenCollaborators) {
+      onOpenCollaborators();
+      return;
+    }
+
+    setShowInviteModal(true);
+  };
+
   return (
     <>
       <div className="toolbar">
@@ -175,13 +199,27 @@ export default function Toolbar({
         <button onClick={handleExport}>
           <FontAwesomeIcon icon={faCamera} /> {t("toolbar.screenshot")}
         </button>
-        {(canInvite && onInviteCollaborator) || canLeaveHive ? (
-          <button onClick={() => setShowInviteModal(true)}>
+        {shouldShowCollaboratorsButton ? (
+          <button
+            type="button"
+            className={
+              isCollaboratorsLocked
+                ? "toolbar-action-btn is-locked"
+                : "toolbar-action-btn"
+            }
+            aria-disabled={isCollaboratorsLocked}
+            onClick={handleOpenCollaborators}
+          >
             <FontAwesomeIcon icon={faUserPlus} /> {t("toolbar.collaborators")}
           </button>
         ) : null}
         {onOpenComments && (
-          <button onClick={onOpenComments} className="toolbar-comments-btn">
+          <button
+            type="button"
+            onClick={onOpenComments}
+            className={`toolbar-comments-btn ${isCommentsLocked ? "is-locked" : ""}`.trim()}
+            aria-disabled={isCommentsLocked}
+          >
             <FontAwesomeIcon icon={faComments} /> {t("toolbar.comments")}
             {commentCount > 0 && (
               <span className="toolbar-comments-badge">{commentCount}</span>

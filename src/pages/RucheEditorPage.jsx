@@ -66,6 +66,9 @@ export default function RucheEditorPage() {
   const [deleteTarget, setDeleteTarget] = useState(null);
   const [editingTarget, setEditingTarget] = useState(null);
   const [resetSignal, setResetSignal] = useState(0);
+  const [saveRequiredAction, setSaveRequiredAction] = useState(null);
+  const [openCollaboratorsSignal, setOpenCollaboratorsSignal] = useState(0);
+  const [requestedCommentCardId, setRequestedCommentCardId] = useState(null);
 
   const isOwner = Boolean(
     hive?.owner?.id && user?.id && hive.owner.id === user.id,
@@ -94,6 +97,7 @@ export default function RucheEditorPage() {
   const isDuplicateFlow = isNew && Boolean(duplicateSource?.title);
   const hasRenamedDuplicate =
     !isDuplicateFlow || title.trim() !== duplicateSource.title.trim();
+  const requiresSavedHivePrompt = isNew;
 
   const currentSnapshot = useMemo(
     () => JSON.stringify({ title, boardData }),
@@ -221,6 +225,21 @@ export default function RucheEditorPage() {
           token,
           body: { title: trimmedTitle, boardData, boardPreviewImage },
         });
+        const snapshot = JSON.stringify({ title: trimmedTitle, boardData });
+        setSavedSnapshot(snapshot);
+        setTitle(trimmedTitle);
+        setHive({
+          ...created,
+          owner: {
+            id: user?.id || null,
+            username: user?.username || null,
+            email: user?.email || null,
+          },
+          collaborators: [],
+          comments: [],
+          canEdit: true,
+          canComment: true,
+        });
         navigate(`/hives/${created.id}`, { replace: true });
         return true;
       }
@@ -258,6 +277,56 @@ export default function RucheEditorPage() {
     if (success && !isNew) {
       navigate("/profile");
     }
+  };
+
+  const runSavedHiveAction = (action) => {
+    if (!action) return;
+
+    if (action.type === "comments") {
+      setShowCommentsModal(true);
+      return;
+    }
+
+    if (action.type === "collaborators") {
+      setOpenCollaboratorsSignal((prev) => prev + 1);
+      return;
+    }
+
+    if (action.type === "card-comment" && action.cardId) {
+      setRequestedCommentCardId(action.cardId);
+    }
+  };
+
+  const promptSaveForAction = (action) => {
+    setSaveRequiredAction(action);
+  };
+
+  const handleSaveRequiredConfirm = async () => {
+    const action = saveRequiredAction;
+    setSaveRequiredAction(null);
+    const success = await saveHive();
+    if (success) {
+      runSavedHiveAction(action);
+    }
+  };
+
+  const handleOpenComments = () => {
+    if (requiresSavedHivePrompt) {
+      promptSaveForAction({ type: "comments" });
+      return;
+    }
+
+    setShowCommentsModal(true);
+  };
+
+  const handleOpenCollaborators = () => {
+    if (requiresSavedHivePrompt) {
+      promptSaveForAction({ type: "collaborators" });
+    }
+  };
+
+  const handleRequireSaveBeforeCardComment = (cardId) => {
+    promptSaveForAction({ type: "card-comment", cardId });
   };
 
   const inviteCollaborator = async (email, role) => {
@@ -511,6 +580,8 @@ export default function RucheEditorPage() {
         <div className="editor-topbar-actions">
           <Toolbar
             onReset={() => setResetSignal((prev) => prev + 1)}
+            showCollaboratorsButton={isNew}
+            isCollaboratorsLocked={requiresSavedHivePrompt}
             canInvite={
               !isNew &&
               Boolean(hive) &&
@@ -518,6 +589,7 @@ export default function RucheEditorPage() {
             }
             canLeaveHive={!isNew && Boolean(hive) && isCollaborator}
             collaborators={hive?.collaborators || []}
+            onOpenCollaborators={isNew ? handleOpenCollaborators : undefined}
             onInviteCollaborator={
               !isNew && hive ? inviteCollaborator : undefined
             }
@@ -530,10 +602,10 @@ export default function RucheEditorPage() {
             onLeaveHive={
               !isNew && hive && isCollaborator ? leaveHive : undefined
             }
-            onOpenComments={
-              !isNew ? () => setShowCommentsModal(true) : undefined
-            }
+            isCommentsLocked={requiresSavedHivePrompt}
+            onOpenComments={handleOpenComments}
             commentCount={commentCount}
+            openCollaboratorsSignal={openCollaboratorsSignal}
           />
         </div>
       </div>
@@ -570,6 +642,10 @@ export default function RucheEditorPage() {
           resetSignal={resetSignal}
           canEdit={canEdit}
           canComment={canComment}
+          requireSaveBeforeComment={requiresSavedHivePrompt}
+          onRequireSaveBeforeComment={handleRequireSaveBeforeCardComment}
+          requestedCommentCardId={requestedCommentCardId}
+          onRequestedCommentHandled={() => setRequestedCommentCardId(null)}
           onStateChange={setBoardData}
         />
       )}
@@ -763,6 +839,24 @@ export default function RucheEditorPage() {
           setShowLeaveDirtyModal(false);
           navigate("/profile");
         }}
+      />
+
+      <UnifiedPromptModal
+        isOpen={Boolean(saveRequiredAction)}
+        title={t("editor.saveFirstTitle")}
+        message={t("editor.saveFirstMessage", {
+          feature:
+            saveRequiredAction?.type === "collaborators"
+              ? t("toolbar.collaborators")
+              : saveRequiredAction?.type === "card-comment"
+                ? t("workspace.cardCommentTitle")
+                : t("toolbar.comments"),
+        })}
+        cancelLabel={t("common.cancel")}
+        confirmLabel={t("editor.saveHive")}
+        confirmDisabled={isSaving}
+        onCancel={() => setSaveRequiredAction(null)}
+        onConfirm={handleSaveRequiredConfirm}
       />
 
       <UnifiedPromptModal

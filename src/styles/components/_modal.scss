@@ -327,6 +327,12 @@
   position: relative;
 }
 
+.toolbar-action-btn.is-locked,
+.toolbar-comments-btn.is-locked {
+  opacity: 0.58;
+  cursor: not-allowed;
+}
+
 .toolbar-comments-badge {
   display: inline-flex;
   align-items: center;

@@ -52,6 +52,16 @@
   background: #cc1f2f;
 }
 
+.card-comment-indicator.is-locked {
+  background: #bfc4cb;
+  color: rgba(255, 255, 255, 0.92);
+  cursor: not-allowed;
+}
+
+.card-comment-indicator.has-comment.is-locked {
+  background: #bfc4cb;
+}
+
 .capture-mode .card-comment-indicator {
   display: none !important;
 }

@@ -132,6 +132,10 @@ export default function RucheWorkspace({
   onStateChange,
   canEdit = true,
   canComment = false,
+  requireSaveBeforeComment = false,
+  onRequireSaveBeforeComment,
+  requestedCommentCardId = null,
+  onRequestedCommentHandled,
 }) {
   const { user } = useAuth();
   const { language, t, dateLocale } = useLanguage();
@@ -210,6 +214,19 @@ export default function RucheWorkspace({
       document.body.style.overflow = "";
     };
   }, [commentModalCardId]);
+
+  useEffect(() => {
+    if (!requestedCommentCardId) return;
+
+    const requestedCard =
+      boardCards.find((card) => card.id === requestedCommentCardId) || null;
+    if (!requestedCard) return;
+
+    const existingComment = getCardComment(requestedCard);
+    setCommentModalCardId(requestedCard.id);
+    setCommentDraft(existingComment?.message || "");
+    onRequestedCommentHandled?.();
+  }, [boardCards, onRequestedCommentHandled, requestedCommentCardId]);
 
   useDeviceDetection();
 
@@ -330,7 +347,12 @@ export default function RucheWorkspace({
   };
 
   const handleOpenCardComment = (card) => {
-    if (!canComment) return;
+    if (!canComment) {
+      if (requireSaveBeforeComment) {
+        onRequireSaveBeforeComment?.(card.id);
+      }
+      return;
+    }
 
     const existingComment = getCardComment(card);
     setCommentModalCardId(card.id);
@@ -457,6 +479,7 @@ export default function RucheWorkspace({
           onToggleCardSelection={handleToggleCardSelection}
           onClearSelection={handleClearSelection}
           onOpenCardComment={handleOpenCardComment}
+          commentLocked={requireSaveBeforeComment}
         />
         <CustomDragPreview />
       </div>

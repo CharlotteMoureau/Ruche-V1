@@ -14,6 +14,7 @@ export default function DraggableFreeCard({
   onToggleSelection,
   onClearSelection,
   onOpenComment,
+  commentLocked = false,
 }) {
   const { t } = useLanguage();
   const { isDragging, handleMouseDown, handleTouchStart } = useDraggableCard({
@@ -49,8 +50,9 @@ export default function DraggableFreeCard({
     >
       <button
         type="button"
-        className={`card-comment-indicator ${hasComment ? "has-comment" : ""}`}
+        className={`card-comment-indicator ${hasComment ? "has-comment" : ""} ${commentLocked ? "is-locked" : ""}`.trim()}
         aria-label={t("workspace.cardCommentTitle")}
+        aria-disabled={commentLocked}
         onMouseDown={(event) => {
           event.preventDefault();
           event.stopPropagation();

@@ -14,6 +14,7 @@ export default function HiveBoard({
   onToggleCardSelection,
   onClearSelection,
   onOpenCardComment,
+  commentLocked = false,
 }) {
   const boardRef = useRef(null);
   const selectedCards = cards.filter((card) => selectedCardIds.has(card.id));
@@ -105,6 +106,7 @@ export default function HiveBoard({
               onToggleSelection={onToggleCardSelection}
               onClearSelection={onClearSelection}
               onOpenComment={onOpenCardComment}
+              commentLocked={commentLocked}
             />
           );
         }
@@ -122,6 +124,7 @@ export default function HiveBoard({
             onToggleSelection={onToggleCardSelection}
             onClearSelection={onClearSelection}
             onOpenComment={onOpenCardComment}
+            commentLocked={commentLocked}
           />
         );
       })}
