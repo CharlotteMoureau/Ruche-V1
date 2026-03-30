@@ -5,14 +5,15 @@ import { useLanguage } from "../context/LanguageContext";
 import { apiFetch } from "../lib/api";
 
 export default function AppHeader() {
-  const { isAuthenticated, user, logout, isAdmin, token } = useAuth();
+  const { isAuthenticated, logout, isAdmin, token } = useAuth();
   const { t } = useLanguage();
   const location = useLocation();
   const navigate = useNavigate();
   const [pendingInvitesCount, setPendingInvitesCount] = useState(0);
 
   const isEditorRoute =
-    location.pathname === "/hives/new" || location.pathname.startsWith("/hives/");
+    location.pathname === "/hives/new" ||
+    location.pathname.startsWith("/hives/");
   const shouldGuardHeaderNavigation = () =>
     isEditorRoute && Boolean(window.__RUCHE_EDITOR_IS_DIRTY);
 
@@ -65,10 +66,10 @@ export default function AppHeader() {
       <nav className="site-nav">
         {isAuthenticated ? (
           <>
-            <span className="user-pill">{user?.username}</span>
             {!isAdmin ? (
               <Link
                 to="/profile"
+                className={`header-nav-link${location.pathname === "/profile" ? " is-active" : ""}`}
                 onClick={(event) => {
                   if (!shouldGuardHeaderNavigation()) return;
                   event.preventDefault();
@@ -81,7 +82,7 @@ export default function AppHeader() {
             {!isAdmin ? (
               <Link
                 to="/inbox"
-                className="inbox-link"
+                className={`header-nav-link inbox-link${location.pathname === "/inbox" ? " is-active" : ""}`}
                 onClick={(event) => {
                   if (!shouldGuardHeaderNavigation()) return;
                   event.preventDefault();

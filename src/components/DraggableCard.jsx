@@ -11,6 +11,7 @@ export default function DraggableCard({
   onMoveCards,
   onReturnToLibrary,
   onReturnCardsToLibrary,
+  onDragStart,
   onToggleSelection,
   onClearSelection,
 }) {
@@ -27,6 +28,7 @@ export default function DraggableCard({
       onMoveCards={onMoveCards}
       onReturnToLibrary={onReturnToLibrary}
       onReturnCardsToLibrary={onReturnCardsToLibrary}
+      onDragStart={onDragStart}
       onToggleSelection={onToggleSelection}
       onClearSelection={onClearSelection}
     >

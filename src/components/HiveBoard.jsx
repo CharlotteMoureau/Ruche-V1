@@ -1,5 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useDrop } from "react-dnd";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faRotateLeft, faRotateRight } from "@fortawesome/free-solid-svg-icons";
 import DraggableCard from "./DraggableCard";
 import { useLanguage } from "../context/LanguageContext";
 import {
@@ -21,11 +23,17 @@ export default function HiveBoard({
   onMoveCards,
   onReturnToLibrary,
   onReturnCardsToLibrary,
+  onCardDragStart,
+  onUndo,
+  onRedo,
+  canUndo = false,
+  canRedo = false,
   selectedCardIds,
   onToggleCardSelection,
   onClearSelection,
   onOpenCardNote,
   noteLocked = false,
+  canEdit = true,
   isCompactLayout = false,
   isLibraryOpen = false,
   onToggleLibrary,
@@ -490,6 +498,20 @@ export default function HiveBoard({
     <main className="hive-board">
       <header className="hive-board__controls">
         <div className="hive-board__controls-group">
+          <button
+            type="button"
+            onClick={onUndo}
+            disabled={!canEdit || !canUndo}
+          >
+            <FontAwesomeIcon icon={faRotateLeft} /> {t("workspace.undo")}
+          </button>
+          <button
+            type="button"
+            onClick={onRedo}
+            disabled={!canEdit || !canRedo}
+          >
+            <FontAwesomeIcon icon={faRotateRight} /> {t("workspace.redo")}
+          </button>
           {isCompactLayout ? (
             <button type="button" onClick={onToggleLibrary}>
               {isLibraryOpen
@@ -566,6 +588,7 @@ export default function HiveBoard({
                     onMoveCards={onMoveCards}
                     onReturnToLibrary={onReturnToLibrary}
                     onReturnCardsToLibrary={onReturnCardsToLibrary}
+                    onDragStart={onCardDragStart}
                     onToggleSelection={onToggleCardSelection}
                     onClearSelection={onClearSelection}
                   />

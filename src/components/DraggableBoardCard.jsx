@@ -15,6 +15,7 @@ export default function DraggableBoardCard({
   onMoveCards,
   onReturnToLibrary,
   onReturnCardsToLibrary,
+  onDragStart,
   onToggleSelection,
   onClearSelection,
   children,
@@ -32,6 +33,7 @@ export default function DraggableBoardCard({
     onMoveCards,
     onReturnToLibrary,
     onReturnCardsToLibrary,
+    onDragStart,
     onToggleSelection,
     onClearSelection,
   });

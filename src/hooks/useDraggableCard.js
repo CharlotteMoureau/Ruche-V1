@@ -33,6 +33,7 @@ export function useDraggableCard({
   onMoveCards,
   onReturnToLibrary,
   onReturnCardsToLibrary,
+  onDragStart,
   onToggleSelection,
   onClearSelection,
 }) {
@@ -51,6 +52,14 @@ export function useDraggableCard({
     };
 
     dragStateRef.current.currentDelta = delta;
+
+    if (
+      !dragStateRef.current.historyCaptured &&
+      (Math.abs(delta.x) > 0 || Math.abs(delta.y) > 0)
+    ) {
+      dragStateRef.current.historyCaptured = true;
+      onDragStart?.();
+    }
 
     const nextPositions = dragStateRef.current.cards.map((entry) => ({
       id: entry.card.id,
@@ -74,7 +83,7 @@ export function useDraggableCard({
         position: clampBoardPosition(entry.position),
       })),
     );
-  }, [onMoveCard, onMoveCards, zoom]);
+  }, [onDragStart, onMoveCard, onMoveCards, zoom]);
 
   const finalizeDrag = useCallback(() => {
     if (!dragStateRef.current) return;
@@ -165,6 +174,7 @@ export function useDraggableCard({
     dragStateRef.current = {
       startPointer: { x: clientX, y: clientY },
       currentDelta: { x: 0, y: 0 },
+      historyCaptured: false,
       cards: dragCards.map((dragCard) => ({
         card: dragCard,
         startPosition: dragCard.position,

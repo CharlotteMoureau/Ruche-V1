@@ -35,6 +35,15 @@
     font-size: 0.9rem;
     line-height: 1;
     cursor: pointer;
+
+    &:disabled {
+      background: #e5e7eb;
+      color: #9ca3af;
+      border-color: #d1d5db;
+      cursor: not-allowed;
+      pointer-events: none;
+      opacity: 1;
+    }
   }
 }
 

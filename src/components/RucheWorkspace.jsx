@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
 import CardLibrary from "./CardLibrary";
@@ -14,6 +14,7 @@ import { useLanguage } from "../context/LanguageContext";
 import UnifiedPromptModal from "./UnifiedPromptModal";
 
 const COMPACT_EDITOR_MEDIA_QUERY = "(max-width: 1200px)";
+const HISTORY_LIMIT = 3;
 
 const CATEGORY_KEY_MAP = {
   fr: {
@@ -127,6 +128,14 @@ function normalizeBoardData(data, cardsData) {
   };
 }
 
+function cloneBoardState(state) {
+  if (typeof structuredClone === "function") {
+    return structuredClone(state);
+  }
+
+  return JSON.parse(JSON.stringify(state));
+}
+
 export default function RucheWorkspace({
   initialBoardData,
   loadKey,
@@ -176,6 +185,70 @@ export default function RucheWorkspace({
     return !window.matchMedia(COMPACT_EDITOR_MEDIA_QUERY).matches;
   });
   const [boardZoom, setBoardZoom] = useState(1);
+  const [undoStack, setUndoStack] = useState([]);
+  const [redoStack, setRedoStack] = useState([]);
+
+  const snapshotState = useMemo(
+    () => ({
+      availableCards,
+      boardCards,
+      userCards,
+      selectedCardIds: [...selectedCardIds],
+    }),
+    [availableCards, boardCards, selectedCardIds, userCards],
+  );
+
+  const pushUndoSnapshot = useCallback((snapshot) => {
+    setUndoStack((prev) => {
+      const next = [...prev, cloneBoardState(snapshot)];
+      return next.slice(-HISTORY_LIMIT);
+    });
+    setRedoStack([]);
+  }, []);
+
+  const applySnapshot = useCallback((snapshot) => {
+    setAvailableCards(snapshot.availableCards || []);
+    setBoardCards(snapshot.boardCards || []);
+    setUserCards(snapshot.userCards || []);
+    setSelectedCardIds(new Set(snapshot.selectedCardIds || []));
+  }, []);
+
+  const handleUndo = useCallback(() => {
+    if (!canEdit) return;
+
+    setUndoStack((prev) => {
+      if (!prev.length) return prev;
+
+      const nextSnapshot = prev[prev.length - 1];
+      setRedoStack((redoPrev) => {
+        const next = [...redoPrev, cloneBoardState(snapshotState)];
+        return next.slice(-HISTORY_LIMIT);
+      });
+      applySnapshot(nextSnapshot);
+      return prev.slice(0, -1);
+    });
+  }, [applySnapshot, canEdit, snapshotState]);
+
+  const handleRedo = useCallback(() => {
+    if (!canEdit) return;
+
+    setRedoStack((prev) => {
+      if (!prev.length) return prev;
+
+      const nextSnapshot = prev[prev.length - 1];
+      setUndoStack((undoPrev) => {
+        const next = [...undoPrev, cloneBoardState(snapshotState)];
+        return next.slice(-HISTORY_LIMIT);
+      });
+      applySnapshot(nextSnapshot);
+      return prev.slice(0, -1);
+    });
+  }, [applySnapshot, canEdit, snapshotState]);
+
+  const handleCardDragStart = useCallback(() => {
+    if (!canEdit) return;
+    pushUndoSnapshot(snapshotState);
+  }, [canEdit, pushUndoSnapshot, snapshotState]);
 
   useEffect(() => {
     if (loadKey === activeLoadKey) return;
@@ -185,8 +258,49 @@ export default function RucheWorkspace({
     setBoardCards(initial.boardCards);
     setUserCards(initial.userCards);
     setSelectedCardIds(new Set());
+    setUndoStack([]);
+    setRedoStack([]);
     setActiveLoadKey(loadKey);
   }, [activeLoadKey, cardsData, initialBoardData, loadKey]);
+
+  useEffect(() => {
+    const isTypingTarget = (target) => {
+      if (!target || !(target instanceof HTMLElement)) return false;
+      const tag = target.tagName;
+
+      return (
+        target.isContentEditable ||
+        tag === "INPUT" ||
+        tag === "TEXTAREA" ||
+        tag === "SELECT"
+      );
+    };
+
+    const handleKeyDown = (event) => {
+      if (!canEdit || isTypingTarget(event.target)) return;
+
+      const key = String(event.key || "").toLowerCase();
+      const hasModifier = event.ctrlKey || event.metaKey;
+      if (!hasModifier) return;
+
+      if (key === "z" && !event.shiftKey) {
+        event.preventDefault();
+        handleUndo();
+        return;
+      }
+
+      if (key === "y" || (key === "z" && event.shiftKey)) {
+        event.preventDefault();
+        handleRedo();
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [canEdit, handleRedo, handleUndo]);
 
   useEffect(() => {
     setBoardCards((previousBoardCards) => {
@@ -283,6 +397,8 @@ export default function RucheWorkspace({
 
   const handleDropCard = (card, position, fromLibrary = false) => {
     if (!canEdit) return;
+
+    pushUndoSnapshot(snapshotState);
 
     if (fromLibrary && card.category !== "free") {
       setAvailableCards((prev) => prev.filter((c) => c.id !== card.id));
@@ -495,6 +611,8 @@ export default function RucheWorkspace({
     if (!canEdit) return;
     if (userCards.length >= 10 || !inputText.trim()) return;
 
+    pushUndoSnapshot(snapshotState);
+
     const defaultPosition = {
       x: 300 + Math.random() * 50,
       y: 200 + Math.random() * 50,
@@ -521,6 +639,8 @@ export default function RucheWorkspace({
       setAvailableCards(cardsData);
       setUserCards([]);
       setSelectedCardIds(new Set());
+      setUndoStack([]);
+      setRedoStack([]);
       handleCloseCardNoteModal();
     }
     setActiveResetSignal(resetSignal);
@@ -558,11 +678,17 @@ export default function RucheWorkspace({
             onMoveCards={handleMoveCards}
             onReturnToLibrary={handleReturnToLibrary}
             onReturnCardsToLibrary={handleReturnCardsToLibrary}
+            onCardDragStart={handleCardDragStart}
+            onUndo={handleUndo}
+            onRedo={handleRedo}
+            canUndo={undoStack.length > 0}
+            canRedo={redoStack.length > 0}
             selectedCardIds={selectedCardIds}
             onToggleCardSelection={handleToggleCardSelection}
             onClearSelection={handleClearSelection}
             onOpenCardNote={handleOpenCardNote}
             noteLocked={requireSaveBeforeNote}
+            canEdit={canEdit}
             isCompactLayout={isCompactLayout}
             isLibraryOpen={isLibraryOpen}
             onToggleLibrary={() => setIsLibraryOpen((current) => !current)}
