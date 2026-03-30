@@ -26,6 +26,41 @@ const BOARD_PADDING = 60;
 const PROFILE_TAB_HIVES = "hives";
 const PROFILE_TAB_SETTINGS = "settings";
 
+function normalizeRoleText(value) {
+  return String(value || "")
+    .trim()
+    .normalize("NFD")
+    .replace(/\p{Diacritic}/gu, "")
+    .toLowerCase();
+}
+
+const OTHER_ROLE_KEY = normalizeRoleText("Autre");
+
+function isOtherRoleValue(value, translatedOtherLabel) {
+  const key = normalizeRoleText(value);
+  if (!key) return false;
+
+  return (
+    key === OTHER_ROLE_KEY ||
+    key === normalizeRoleText(translatedOtherLabel || "")
+  );
+}
+
+function resolveRoleFormValue(roleLabel, roleOptions) {
+  const normalizedRole = normalizeRoleText(roleLabel);
+  if (!normalizedRole) {
+    return roleOptions[0]?.value || "";
+  }
+
+  const match = roleOptions.find((option) => {
+    const optionValue = normalizeRoleText(option.value);
+    const optionLabel = normalizeRoleText(option.label);
+    return optionValue === normalizedRole || optionLabel === normalizedRole;
+  });
+
+  return match?.value || roleLabel;
+}
+
 const CATEGORY_KEY_MAP = {
   fr: {
     visees: "visees",
@@ -249,6 +284,7 @@ export default function ProfilePage() {
   const [activeProfileTab, setActiveProfileTab] = useState(PROFILE_TAB_HIVES);
   const defaultHiveKind = resolveDefaultHiveKind(profile?.user?.roleLabel);
   const isDcoProfile = defaultHiveKind === HIVE_KINDS.DCO;
+  const localizedOtherRoleLabel = translateRole("Autre");
 
   useEffect(() => {
     let mounted = true;
@@ -274,23 +310,27 @@ export default function ProfilePage() {
     setOwnedPage((current) => clampPage(current, profile.ownedHives.length));
     setSharedPage((current) => clampPage(current, profile.sharedHives.length));
     setRoleForm({
-      role: profile.user.roleLabel || "",
+      role: resolveRoleFormValue(profile.user.roleLabel, roleOptions),
       roleOtherText: profile.user.roleOtherText || "",
     });
-  }, [profile]);
+  }, [profile, roleOptions]);
 
   const updateRole = async (event) => {
     event.preventDefault();
 
     const selectedRole = roleForm.role;
     const trimmedRoleOtherText = roleForm.roleOtherText.trim();
+    const roleRequiresOtherText = isOtherRoleValue(
+      selectedRole,
+      localizedOtherRoleLabel,
+    );
 
     if (!selectedRole) {
       setError(t("profile.roleRequired"));
       return;
     }
 
-    if (selectedRole === "Autre" && !trimmedRoleOtherText) {
+    if (roleRequiresOtherText && !trimmedRoleOtherText) {
       setError(t("profile.roleOtherRequired"));
       return;
     }
@@ -305,7 +345,7 @@ export default function ProfilePage() {
         token,
         body: {
           role: selectedRole,
-          roleOtherText: selectedRole === "Autre" ? trimmedRoleOtherText : "",
+          roleOtherText: roleRequiresOtherText ? trimmedRoleOtherText : "",
         },
       });
 
@@ -659,7 +699,10 @@ export default function ProfilePage() {
           <p>
             <strong>{t("profile.role")} :</strong>{" "}
             {translateRole(profile.user.roleLabel)}
-            {profile.user.roleLabel === "Autre" && profile.user.roleOtherText
+            {isOtherRoleValue(
+              profile.user.roleLabel,
+              localizedOtherRoleLabel,
+            ) && profile.user.roleOtherText
               ? ` - ${profile.user.roleOtherText}`
               : ""}
           </p>
@@ -1033,7 +1076,7 @@ export default function ProfilePage() {
                     </select>
                   </label>
 
-                  {roleForm.role === "Autre" ? (
+                  {isOtherRoleValue(roleForm.role, localizedOtherRoleLabel) ? (
                     <label>
                       {t("register.roleOther")}
                       <input
