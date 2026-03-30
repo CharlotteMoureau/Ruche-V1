@@ -32,5 +32,5 @@ usersRouter.delete("/me", requireAuth, async (req, res) => {
   }
 
   await prisma.user.delete({ where: { id: req.user.id } });
-  return res.json({ message: "Profil supprime" });
+  return res.json({ message: "Profil supprimé" });
 });

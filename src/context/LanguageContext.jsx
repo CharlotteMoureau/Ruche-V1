@@ -291,7 +291,7 @@ const messages = {
       commentsTitle: "Chat de la Ruche",
       noComments: "Aucun commentaire pour l'instant.",
       reply: "Répondre",
-      edit: "Éditer",
+      edit: "Modifier",
       delete: "Supprimer",
       replyPlaceholder: "Écrire une réponse...",
       send: "Envoyer",
