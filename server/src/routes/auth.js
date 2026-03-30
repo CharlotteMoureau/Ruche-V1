@@ -18,6 +18,8 @@ const registerSchema = z
     email: z.string().trim().email(),
     password: z.string().min(8).max(100),
     passwordConfirm: z.string().min(8).max(100),
+    firstName: z.string().trim().min(1).max(50),
+    lastName: z.string().trim().min(1).max(50),
     role: z.string().trim().min(1),
     roleOtherText: z.string().trim().max(120).optional().or(z.literal("")),
   })
@@ -63,6 +65,8 @@ authRouter.post("/register", async (req, res) => {
       username: parsed.data.username,
       email: parsed.data.email.toLowerCase(),
       passwordHash: await bcrypt.hash(parsed.data.password, 12),
+      firstName: parsed.data.firstName,
+      lastName: parsed.data.lastName,
       roleLabel: role,
       roleOtherText: role === "Autre" ? parsed.data.roleOtherText?.trim() || null : null,
     },

@@ -26,6 +26,8 @@ export default function RegisterPage() {
   const [form, setForm] = useState({
     username: "",
     email: "",
+    firstName: "",
+    lastName: "",
     password: "",
     passwordConfirm: "",
     role: ROLE_OPTIONS[0],
@@ -73,6 +75,24 @@ export default function RegisterPage() {
             type="email"
             value={form.email}
             onChange={(e) => onChange("email", e.target.value)}
+            required
+          />
+        </label>
+
+        <label>
+          {t("register.firstName")}
+          <input
+            value={form.firstName}
+            onChange={(e) => onChange("firstName", e.target.value)}
+            required
+          />
+        </label>
+
+        <label>
+          {t("register.lastName")}
+          <input
+            value={form.lastName}
+            onChange={(e) => onChange("lastName", e.target.value)}
             required
           />
         </label>

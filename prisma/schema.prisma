@@ -18,6 +18,8 @@ model User {
   username       String               @unique
   email          String               @unique
   passwordHash   String
+  firstName      String?
+  lastName       String?
   roleLabel      String
   roleOtherText  String?
   createdAt      DateTime             @default(now())
