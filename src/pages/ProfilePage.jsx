@@ -789,6 +789,15 @@ export default function ProfilePage() {
                             ? t("profile.downloading")
                             : t("profile.download")}
                         </button>
+                        {hive.collaboratorRole === "ADMIN" ? (
+                          <button
+                            type="button"
+                            className="button-link button-link-delete"
+                            onClick={() => setConfirmDeleteHiveId(hive.id)}
+                          >
+                            {t("common.delete")}
+                          </button>
+                        ) : null}
                       </div>
                     </li>
                   ))}

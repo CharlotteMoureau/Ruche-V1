@@ -1,4 +1,4 @@
-import { CollaboratorRole } from "@prisma/client";
+import { randomUUID } from "node:crypto";
 import { Router } from "express";
 import { z } from "zod";
 import { prisma } from "../lib/prisma.js";
@@ -14,7 +14,73 @@ const hiveInputSchema = z.object({
   boardPreviewImage: z.string().max(5_000_000).nullable().optional(),
 });
 
-const collaboratorRoleSchema = z.nativeEnum(CollaboratorRole);
+const COLLABORATOR_ROLES = ["ADMIN", "EDITOR", "COMMENT", "READ", "EDIT"];
+const collaboratorRoleSchema = z.enum(COLLABORATOR_ROLES);
+
+let invitationsTableReadyPromise = null;
+
+function isEditorRole(role) {
+  return role === "EDITOR" || role === "EDIT";
+}
+
+function normalizeCollaboratorRole(role) {
+  return role === "EDIT" ? "EDITOR" : role;
+}
+
+function normalizeInvitationRole(role) {
+  return normalizeCollaboratorRole(role);
+}
+
+function mapInvitationRow(row) {
+  return {
+    id: row.id,
+    role: row.role,
+    status: row.status,
+    createdAt: row.createdAt,
+    respondedAt: row.respondedAt,
+    hive: {
+      id: row.hiveId,
+      title: row.hiveTitle,
+    },
+    inviter: {
+      id: row.inviterId,
+      username: row.inviterUsername,
+      email: row.inviterEmail,
+    },
+  };
+}
+
+async function ensureInvitationsTable() {
+  if (!invitationsTableReadyPromise) {
+    invitationsTableReadyPromise = (async () => {
+      await prisma.$executeRawUnsafe(`
+        CREATE TABLE IF NOT EXISTS "HiveInvitation" (
+          "id" TEXT NOT NULL PRIMARY KEY,
+          "hiveId" TEXT NOT NULL,
+          "inviterId" TEXT NOT NULL,
+          "inviteeId" TEXT NOT NULL,
+          "role" TEXT NOT NULL,
+          "status" TEXT NOT NULL DEFAULT 'PENDING',
+          "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+          "updatedAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+          "respondedAt" DATETIME,
+          CONSTRAINT "HiveInvitation_hiveId_fkey" FOREIGN KEY ("hiveId") REFERENCES "Hive" ("id") ON DELETE CASCADE ON UPDATE CASCADE,
+          CONSTRAINT "HiveInvitation_inviterId_fkey" FOREIGN KEY ("inviterId") REFERENCES "User" ("id") ON DELETE CASCADE ON UPDATE CASCADE,
+          CONSTRAINT "HiveInvitation_inviteeId_fkey" FOREIGN KEY ("inviteeId") REFERENCES "User" ("id") ON DELETE CASCADE ON UPDATE CASCADE
+        )
+      `);
+
+      await prisma.$executeRawUnsafe(
+        'CREATE INDEX IF NOT EXISTS "HiveInvitation_inviteeId_status_idx" ON "HiveInvitation"("inviteeId", "status")',
+      );
+      await prisma.$executeRawUnsafe(
+        'CREATE INDEX IF NOT EXISTS "HiveInvitation_hiveId_idx" ON "HiveInvitation"("hiveId")',
+      );
+    })();
+  }
+
+  return invitationsTableReadyPromise;
+}
 
 function toFiniteNumber(value, fallback = 0) {
   const number = Number(value);
@@ -59,7 +125,12 @@ function canReadHive(hive, user) {
 
 function canEditHive(hive, user) {
   const role = getMembershipRole(hive, user.id);
-  return user.isAdmin || hive.ownerId === user.id || role === CollaboratorRole.ADMIN;
+  return (
+    user.isAdmin ||
+    hive.ownerId === user.id ||
+    role === "ADMIN" ||
+    isEditorRole(role)
+  );
 }
 
 function canCommentOnHive(hive, user) {
@@ -67,9 +138,15 @@ function canCommentOnHive(hive, user) {
   return (
     user.isAdmin ||
     hive.ownerId === user.id ||
-    role === CollaboratorRole.ADMIN ||
-    role === CollaboratorRole.COMMENT
+    role === "ADMIN" ||
+    isEditorRole(role) ||
+    role === "COMMENT"
   );
+}
+
+function canManageHive(hive, user) {
+  const role = getMembershipRole(hive, user.id);
+  return user.isAdmin || hive.ownerId === user.id || role === "ADMIN";
 }
 
 hivesRouter.get("/", async (req, res) => {
@@ -103,10 +180,134 @@ hivesRouter.get("/", async (req, res) => {
   );
 });
 
+hivesRouter.get("/invitations/count", async (req, res) => {
+  await ensureInvitationsTable();
+
+  const rows = await prisma.$queryRaw`
+    SELECT COUNT(*) as count
+    FROM "HiveInvitation"
+    WHERE "inviteeId" = ${req.user.id}
+      AND "status" = 'PENDING'
+  `;
+
+  return res.json({ count: Number(rows[0]?.count || 0) });
+});
+
+hivesRouter.get("/invitations", async (req, res) => {
+  await ensureInvitationsTable();
+
+  const rows = await prisma.$queryRaw`
+    SELECT
+      i."id",
+      i."role",
+      i."status",
+      i."createdAt",
+      i."respondedAt",
+      h."id" as "hiveId",
+      h."title" as "hiveTitle",
+      u."id" as "inviterId",
+      u."username" as "inviterUsername",
+      u."email" as "inviterEmail"
+    FROM "HiveInvitation" i
+    JOIN "Hive" h ON h."id" = i."hiveId"
+    JOIN "User" u ON u."id" = i."inviterId"
+    WHERE i."inviteeId" = ${req.user.id}
+      AND i."status" = 'PENDING'
+    ORDER BY i."createdAt" DESC
+  `;
+
+  return res.json(rows.map(mapInvitationRow));
+});
+
+hivesRouter.post("/invitations/:invitationId/accept", async (req, res) => {
+  await ensureInvitationsTable();
+
+  const rows = await prisma.$queryRaw`
+    SELECT
+      i."id",
+      i."hiveId",
+      i."inviteeId",
+      i."role",
+      i."status"
+    FROM "HiveInvitation" i
+    WHERE i."id" = ${req.params.invitationId}
+  `;
+
+  const invitation = rows[0];
+  if (!invitation || invitation.inviteeId !== req.user.id) {
+    return res.status(404).json({ error: "Invitation introuvable" });
+  }
+
+  if (invitation.status !== "PENDING") {
+    return res.status(400).json({ error: "Invitation deja traitée" });
+  }
+
+  await prisma.$transaction(async (tx) => {
+    await tx.hiveCollaborator.upsert({
+      where: {
+        hiveId_userId: {
+          hiveId: invitation.hiveId,
+          userId: req.user.id,
+        },
+      },
+      create: {
+        hiveId: invitation.hiveId,
+        userId: req.user.id,
+        role: normalizeInvitationRole(invitation.role),
+      },
+      update: {
+        role: normalizeInvitationRole(invitation.role),
+      },
+    });
+
+    await tx.$executeRaw`
+      UPDATE "HiveInvitation"
+      SET "status" = 'ACCEPTED',
+          "updatedAt" = CURRENT_TIMESTAMP,
+          "respondedAt" = CURRENT_TIMESTAMP
+      WHERE "id" = ${invitation.id}
+    `;
+  });
+
+  return res.json({ message: "Invitation acceptée" });
+});
+
+hivesRouter.post("/invitations/:invitationId/decline", async (req, res) => {
+  await ensureInvitationsTable();
+
+  const rows = await prisma.$queryRaw`
+    SELECT
+      i."id",
+      i."inviteeId",
+      i."status"
+    FROM "HiveInvitation" i
+    WHERE i."id" = ${req.params.invitationId}
+  `;
+
+  const invitation = rows[0];
+  if (!invitation || invitation.inviteeId !== req.user.id) {
+    return res.status(404).json({ error: "Invitation introuvable" });
+  }
+
+  if (invitation.status !== "PENDING") {
+    return res.status(400).json({ error: "Invitation deja traitée" });
+  }
+
+  await prisma.$executeRaw`
+    UPDATE "HiveInvitation"
+    SET "status" = 'DECLINED',
+        "updatedAt" = CURRENT_TIMESTAMP,
+        "respondedAt" = CURRENT_TIMESTAMP
+    WHERE "id" = ${invitation.id}
+  `;
+
+  return res.json({ message: "Invitation refusée" });
+});
+
 hivesRouter.post("/", async (req, res) => {
   const parsed = hiveInputSchema.safeParse(req.body);
   if (!parsed.success) {
-    return res.status(400).json({ error: "Donnees de ruche invalides" });
+    return res.status(400).json({ error: "Données de ruche invalides" });
   }
 
   const hive = await prisma.hive.create({
@@ -180,10 +381,57 @@ hivesRouter.get("/:id", async (req, res) => {
   });
 });
 
+hivesRouter.get("/:id/invitations", async (req, res) => {
+  await ensureInvitationsTable();
+
+  const hive = await getHiveOr404(req.params.id);
+  if (!hive) {
+    return res.status(404).json({ error: "Ruche introuvable" });
+  }
+
+  if (!canManageHive(hive, req.user)) {
+    return res.status(403).json({ error: "Vous ne pouvez pas consulter les invitations" });
+  }
+
+  const rows = await prisma.$queryRaw`
+    SELECT
+      i."id",
+      i."role",
+      i."status",
+      i."createdAt",
+      i."respondedAt",
+      h."id" as "hiveId",
+      h."title" as "hiveTitle",
+      u."id" as "inviterId",
+      u."username" as "inviterUsername",
+      u."email" as "inviterEmail",
+      ui."id" as "inviteeId",
+      ui."username" as "inviteeUsername",
+      ui."email" as "inviteeEmail"
+    FROM "HiveInvitation" i
+    JOIN "Hive" h ON h."id" = i."hiveId"
+    JOIN "User" u ON u."id" = i."inviterId"
+    JOIN "User" ui ON ui."id" = i."inviteeId"
+    WHERE i."hiveId" = ${hive.id}
+    ORDER BY i."createdAt" DESC
+  `;
+
+  return res.json(
+    rows.map((row) => ({
+      ...mapInvitationRow(row),
+      invitee: {
+        id: row.inviteeId,
+        username: row.inviteeUsername,
+        email: row.inviteeEmail,
+      },
+    })),
+  );
+});
+
 hivesRouter.put("/:id", async (req, res) => {
   const parsed = hiveInputSchema.safeParse(req.body);
   if (!parsed.success) {
-    return res.status(400).json({ error: "Donnees de ruche invalides" });
+    return res.status(400).json({ error: "Données de ruche invalides" });
   }
 
   const hive = await getHiveOr404(req.params.id);
@@ -193,6 +441,11 @@ hivesRouter.put("/:id", async (req, res) => {
 
   if (!canEditHive(hive, req.user)) {
     return res.status(403).json({ error: "Vous ne pouvez pas modifier cette ruche" });
+  }
+
+  const isRenamingHive = parsed.data.title.trim() !== hive.title.trim();
+  if (isRenamingHive && !canManageHive(hive, req.user)) {
+    return res.status(403).json({ error: "Vous ne pouvez pas renommer cette ruche" });
   }
 
   const updated = await prisma.hive.update({
@@ -214,12 +467,12 @@ hivesRouter.delete("/:id", async (req, res) => {
     return res.status(404).json({ error: "Ruche introuvable" });
   }
 
-  if (!(req.user.isAdmin || hive.ownerId === req.user.id)) {
-    return res.status(403).json({ error: "Seul le proprietaire peut supprimer cette ruche" });
+  if (!canManageHive(hive, req.user)) {
+    return res.status(403).json({ error: "Vous ne pouvez pas supprimer cette ruche" });
   }
 
   await prisma.hive.delete({ where: { id: hive.id } });
-  return res.json({ message: "Ruche supprimee" });
+  return res.json({ message: "Ruche supprimée" });
 });
 
 const inviteSchema = z.object({
@@ -228,6 +481,8 @@ const inviteSchema = z.object({
 });
 
 hivesRouter.post("/:id/collaborators", async (req, res) => {
+  await ensureInvitationsTable();
+
   const parsed = inviteSchema.safeParse(req.body);
   if (!parsed.success) {
     return res.status(400).json({ error: "Invitation invalide" });
@@ -238,8 +493,8 @@ hivesRouter.post("/:id/collaborators", async (req, res) => {
     return res.status(404).json({ error: "Ruche introuvable" });
   }
 
-  if (!(req.user.isAdmin || hive.ownerId === req.user.id)) {
-    return res.status(403).json({ error: "Seul le proprietaire peut inviter" });
+  if (!canManageHive(hive, req.user)) {
+    return res.status(403).json({ error: "Vous ne pouvez pas inviter de collaborateurs" });
   }
 
   const invitee = await prisma.user.findUnique({ where: { email: parsed.data.email.toLowerCase() } });
@@ -248,32 +503,72 @@ hivesRouter.post("/:id/collaborators", async (req, res) => {
   }
 
   if (invitee.id === hive.ownerId) {
-    return res.status(400).json({ error: "Le proprietaire est deja membre" });
+    return res.status(400).json({ error: "Le propriétaire est deja membre" });
   }
 
-  const collaborator = await prisma.hiveCollaborator.upsert({
+  const existingCollaborator = await prisma.hiveCollaborator.findUnique({
     where: {
       hiveId_userId: {
         hiveId: hive.id,
         userId: invitee.id,
       },
     },
-    create: {
-      hiveId: hive.id,
-      userId: invitee.id,
-      role: parsed.data.role,
-    },
-    update: { role: parsed.data.role },
-    include: {
-      user: { select: { id: true, username: true, email: true } },
-    },
   });
 
+  if (existingCollaborator) {
+    return res.status(400).json({ error: "Cet utilisateur est deja collaborateur" });
+  }
+
+  const pendingRows = await prisma.$queryRaw`
+    SELECT "id"
+    FROM "HiveInvitation"
+    WHERE "hiveId" = ${hive.id}
+      AND "inviteeId" = ${invitee.id}
+      AND "status" = 'PENDING'
+    LIMIT 1
+  `;
+
+  const normalizedRole = normalizeInvitationRole(parsed.data.role);
+
+  if (pendingRows[0]?.id) {
+    await prisma.$executeRaw`
+      UPDATE "HiveInvitation"
+      SET "role" = ${normalizedRole},
+          "inviterId" = ${req.user.id},
+          "updatedAt" = CURRENT_TIMESTAMP
+      WHERE "id" = ${pendingRows[0].id}
+    `;
+
+    return res.status(200).json({
+      id: invitee.id,
+      username: invitee.username,
+      email: invitee.email,
+      role: normalizedRole,
+      status: "PENDING",
+    });
+  }
+
+  await prisma.$executeRaw`
+    INSERT INTO "HiveInvitation" (
+      "id", "hiveId", "inviterId", "inviteeId", "role", "status", "createdAt", "updatedAt"
+    ) VALUES (
+      ${randomUUID()},
+      ${hive.id},
+      ${req.user.id},
+      ${invitee.id},
+      ${normalizedRole},
+      'PENDING',
+      CURRENT_TIMESTAMP,
+      CURRENT_TIMESTAMP
+    )
+  `;
+
   return res.status(201).json({
-    id: collaborator.user.id,
-    username: collaborator.user.username,
-    email: collaborator.user.email,
-    role: collaborator.role,
+    id: invitee.id,
+    username: invitee.username,
+    email: invitee.email,
+    role: normalizedRole,
+    status: "PENDING",
   });
 });
 
@@ -284,7 +579,7 @@ const updateCollaboratorSchema = z.object({
 hivesRouter.patch("/:id/collaborators/:userId", async (req, res) => {
   const parsed = updateCollaboratorSchema.safeParse(req.body);
   if (!parsed.success) {
-    return res.status(400).json({ error: "Role invalide" });
+    return res.status(400).json({ error: "Rôle invalide" });
   }
 
   const hive = await getHiveOr404(req.params.id);
@@ -292,8 +587,8 @@ hivesRouter.patch("/:id/collaborators/:userId", async (req, res) => {
     return res.status(404).json({ error: "Ruche introuvable" });
   }
 
-  if (!(req.user.isAdmin || hive.ownerId === req.user.id)) {
-    return res.status(403).json({ error: "Seul le proprietaire peut modifier les droits" });
+  if (!canManageHive(hive, req.user)) {
+    return res.status(403).json({ error: "Vous ne pouvez pas modifier les droits" });
   }
 
   const updated = await prisma.hiveCollaborator.update({
@@ -304,7 +599,7 @@ hivesRouter.patch("/:id/collaborators/:userId", async (req, res) => {
       },
     },
     data: {
-      role: parsed.data.role,
+      role: normalizeCollaboratorRole(parsed.data.role),
     },
     include: {
       user: { select: { id: true, username: true, email: true } },
@@ -325,11 +620,11 @@ hivesRouter.delete("/:id/collaborators/:userId", async (req, res) => {
     return res.status(404).json({ error: "Ruche introuvable" });
   }
 
-  const isOwnerOrAdmin = req.user.isAdmin || hive.ownerId === req.user.id;
+  const isOwnerOrAdmin = canManageHive(hive, req.user);
   const isSelfRemoval = req.user.id === req.params.userId;
 
   if (!(isOwnerOrAdmin || isSelfRemoval)) {
-    return res.status(403).json({ error: "Action non autorisee" });
+    return res.status(403).json({ error: "Action non autorisée" });
   }
 
   await prisma.hiveCollaborator.delete({
@@ -341,7 +636,7 @@ hivesRouter.delete("/:id/collaborators/:userId", async (req, res) => {
     },
   });
 
-  return res.json({ message: "Collaborateur supprime" });
+  return res.json({ message: "Collaborateur supprimé" });
 });
 
 const commentSchema = z.object({
@@ -436,5 +731,5 @@ hivesRouter.delete("/:id/comments/:commentId", async (req, res) => {
   }
 
   await prisma.hiveComment.delete({ where: { id: comment.id } });
-  return res.json({ message: "Commentaire supprime" });
+  return res.json({ message: "Commentaire supprimé" });
 });

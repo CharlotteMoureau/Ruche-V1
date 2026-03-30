@@ -9,6 +9,7 @@ import RegisterPage from "./pages/RegisterPage";
 import ForgotPasswordPage from "./pages/ForgotPasswordPage";
 import ResetPasswordPage from "./pages/ResetPasswordPage";
 import ProfilePage from "./pages/ProfilePage";
+import InboxPage from "./pages/InboxPage";
 import RucheEditorPage from "./pages/RucheEditorPage";
 import AdminPage from "./pages/AdminPage";
 import { LanguageProvider } from "./context/LanguageContext";
@@ -59,6 +60,14 @@ export default function App() {
             element={
               <ProtectedRoute nonAdminOnly>
                 <ProfilePage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/inbox"
+            element={
+              <ProtectedRoute nonAdminOnly>
+                <InboxPage />
               </ProtectedRoute>
             }
           />

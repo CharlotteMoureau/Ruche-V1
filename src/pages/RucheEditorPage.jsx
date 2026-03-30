@@ -1,4 +1,4 @@
-﻿import { useEffect, useMemo, useRef, useState } from "react";
+﻿import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
 import domtoimage from "dom-to-image-more";
 import { apiFetch } from "../lib/api";
@@ -71,6 +71,7 @@ export default function RucheEditorPage() {
   const [requestedCommentCardId, setRequestedCommentCardId] = useState(null);
   const [renameOrDuplicateAction, setRenameOrDuplicateAction] = useState(null);
   const [pendingNewTitle, setPendingNewTitle] = useState("");
+  const [sentInvitations, setSentInvitations] = useState([]);
 
   const isOwner = Boolean(
     hive?.owner?.id && user?.id && hive.owner.id === user.id,
@@ -78,11 +79,20 @@ export default function RucheEditorPage() {
   const collaboratorRole =
     hive?.collaborators?.find((collaborator) => collaborator.id === user?.id)
       ?.role || null;
+  const hasEditorRole =
+    collaboratorRole === "EDITOR" || collaboratorRole === "EDIT";
+  const canManageHive = Boolean(
+    isOwner || isAdmin || collaboratorRole === "ADMIN",
+  );
   const isCollaborator = Boolean(collaboratorRole);
   const canEdit = isNew
     ? true
     : Boolean(
-        hive?.canEdit || isOwner || isAdmin || collaboratorRole === "ADMIN",
+        hive?.canEdit ||
+        isOwner ||
+        isAdmin ||
+        collaboratorRole === "ADMIN" ||
+        hasEditorRole,
       );
   const canComment = isNew
     ? false
@@ -91,6 +101,7 @@ export default function RucheEditorPage() {
         isOwner ||
         isAdmin ||
         collaboratorRole === "ADMIN" ||
+        hasEditorRole ||
         collaboratorRole === "COMMENT",
       );
   const workspaceLoadKey = isNew
@@ -198,7 +209,7 @@ export default function RucheEditorPage() {
     }
 
     // If existing hive and title changed, ask user whether to rename or duplicate
-    if (!isNew && hive && trimmedTitle !== hive.title.trim()) {
+    if (!isNew && canManageHive && hive && trimmedTitle !== hive.title.trim()) {
       setPendingNewTitle(trimmedTitle);
       setRenameOrDuplicateAction("pending");
       return;
@@ -402,19 +413,24 @@ export default function RucheEditorPage() {
     promptSaveForAction({ type: "card-comment", cardId });
   };
 
+  const loadHiveInvitations = useCallback(async () => {
+    if (!id || isNew) {
+      setSentInvitations([]);
+      return;
+    }
+
+    const data = await apiFetch(`/hives/${id}/invitations`, { token });
+    setSentInvitations(Array.isArray(data) ? data : []);
+  }, [id, isNew, token]);
+
   const inviteCollaborator = async (email, role) => {
-    const collaborator = await apiFetch(`/hives/${id}/collaborators`, {
+    await apiFetch(`/hives/${id}/collaborators`, {
       method: "POST",
       token,
       body: { email, role },
     });
-    setHive((prev) => ({
-      ...prev,
-      collaborators: [
-        ...(prev?.collaborators || []).filter((c) => c.id !== collaborator.id),
-        collaborator,
-      ],
-    }));
+
+    await loadHiveInvitations();
   };
 
   const removeCollaborator = async (collaboratorId) => {
@@ -633,14 +649,14 @@ export default function RucheEditorPage() {
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               onKeyDown={(event) => {
-                if (!canEdit || isSaving || event.nativeEvent.isComposing)
+                if (!canManageHive || isSaving || event.nativeEvent.isComposing)
                   return;
                 if (event.key !== "Enter") return;
                 event.preventDefault();
                 saveHive();
               }}
               maxLength={100}
-              disabled={!canEdit}
+              disabled={!canManageHive}
             />
           </label>
           {canEdit ? (
@@ -658,7 +674,9 @@ export default function RucheEditorPage() {
             canInvite={
               !isNew &&
               Boolean(hive) &&
-              (hive.owner?.id === user?.id || isAdmin)
+              (hive.owner?.id === user?.id ||
+                isAdmin ||
+                collaboratorRole === "ADMIN")
             }
             canLeaveHive={!isNew && Boolean(hive) && isCollaborator}
             collaborators={hive?.collaborators || []}
@@ -674,6 +692,10 @@ export default function RucheEditorPage() {
             }
             onLeaveHive={
               !isNew && hive && isCollaborator ? leaveHive : undefined
+            }
+            sentInvitations={sentInvitations}
+            onLoadSentInvitations={
+              !isNew && hive ? loadHiveInvitations : undefined
             }
             isCommentsLocked={requiresSavedHivePrompt}
             onOpenComments={handleOpenComments}

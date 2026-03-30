@@ -22,6 +22,8 @@ export default function Toolbar({
   onChangeCollaboratorRole,
   onRemoveCollaborator,
   onLeaveHive,
+  sentInvitations = [],
+  onLoadSentInvitations,
   isCommentsLocked = false,
   onOpenComments,
   commentCount = 0,
@@ -32,6 +34,7 @@ export default function Toolbar({
   const [inviteEmail, setInviteEmail] = useState("");
   const [inviteRole, setInviteRole] = useState("COMMENT");
   const [inviteWarning, setInviteWarning] = useState("");
+  const [inviteSuccess, setInviteSuccess] = useState("");
   const [inviteLoading, setInviteLoading] = useState(false);
   const [manageLoadingId, setManageLoadingId] = useState(null);
   const [leaveLoading, setLeaveLoading] = useState(false);
@@ -43,6 +46,9 @@ export default function Toolbar({
     switch (role) {
       case "ADMIN":
         return t("toolbar.roleAdmin");
+      case "EDITOR":
+      case "EDIT":
+        return t("toolbar.roleEdit");
       case "COMMENT":
         return t("toolbar.roleComment");
       case "READ":
@@ -55,6 +61,7 @@ export default function Toolbar({
   useEffect(() => {
     if (!showInviteModal) {
       setInviteWarning("");
+      setInviteSuccess("");
     }
   }, [showInviteModal]);
 
@@ -68,9 +75,39 @@ export default function Toolbar({
   }, [inviteWarning]);
 
   useEffect(() => {
+    if (!inviteSuccess) return undefined;
+    const timeoutId = window.setTimeout(() => {
+      setInviteSuccess("");
+    }, 3500);
+
+    return () => window.clearTimeout(timeoutId);
+  }, [inviteSuccess]);
+
+  useEffect(() => {
     if (!openCollaboratorsSignal) return;
     setShowInviteModal(true);
   }, [openCollaboratorsSignal]);
+
+  useEffect(() => {
+    if (!showInviteModal || !onLoadSentInvitations) return;
+
+    onLoadSentInvitations().catch(() => {
+      setInviteWarning(t("toolbar.invitesLoadFailed"));
+    });
+  }, [onLoadSentInvitations, showInviteModal, t]);
+
+  const getInvitationStatusLabel = (status) => {
+    switch (status) {
+      case "PENDING":
+        return t("toolbar.inviteStatusPending");
+      case "ACCEPTED":
+        return t("toolbar.inviteStatusAccepted");
+      case "DECLINED":
+        return t("toolbar.inviteStatusDeclined");
+      default:
+        return status;
+    }
+  };
 
   const handleExport = async () => {
     const board = document.querySelector(".hive-board");
@@ -114,8 +151,9 @@ export default function Toolbar({
       await onInviteCollaborator(email, inviteRole);
       setInviteEmail("");
       setInviteRole("COMMENT");
-      setShowInviteModal(false);
       setInviteWarning("");
+      setInviteSuccess(t("toolbar.inviteSent"));
+      await onLoadSentInvitations?.();
     } catch (err) {
       const message = err?.message || "";
       const normalized = message.toLowerCase();
@@ -276,6 +314,7 @@ export default function Toolbar({
                     onChange={(event) => setInviteRole(event.target.value)}
                   >
                     <option value="ADMIN">{getRoleLabel("ADMIN")}</option>
+                    <option value="EDITOR">{getRoleLabel("EDITOR")}</option>
                     <option value="COMMENT">{getRoleLabel("COMMENT")}</option>
                     <option value="READ">{getRoleLabel("READ")}</option>
                   </select>
@@ -296,6 +335,10 @@ export default function Toolbar({
               </p>
             ) : null}
 
+            {inviteSuccess ? (
+              <p className="form-info toolbar-modal-warning">{inviteSuccess}</p>
+            ) : null}
+
             <div className="toolbar-collaborators-section">
               <h3>{t("toolbar.currentCollaborators")}</h3>
               {collaborators.length === 0 ? (
@@ -311,7 +354,11 @@ export default function Toolbar({
                       {canInvite ? (
                         <div className="inline-actions">
                           <select
-                            value={collaborator.role}
+                            value={
+                              collaborator.role === "EDIT"
+                                ? "EDITOR"
+                                : collaborator.role
+                            }
                             disabled={manageLoadingId === collaborator.id}
                             onChange={(event) =>
                               handleChangeRole(
@@ -322,6 +369,9 @@ export default function Toolbar({
                           >
                             <option value="ADMIN">
                               {getRoleLabel("ADMIN")}
+                            </option>
+                            <option value="EDITOR">
+                              {getRoleLabel("EDITOR")}
                             </option>
                             <option value="COMMENT">
                               {getRoleLabel("COMMENT")}
@@ -345,6 +395,31 @@ export default function Toolbar({
                 </ul>
               )}
             </div>
+
+            {canInvite ? (
+              <div className="toolbar-collaborators-section">
+                <h3>{t("toolbar.sentInvitations")}</h3>
+                {sentInvitations.length === 0 ? (
+                  <p className="comments-empty">
+                    {t("toolbar.noSentInvitations")}
+                  </p>
+                ) : (
+                  <ul className="list-grid toolbar-collaborators-list">
+                    {sentInvitations.map((invitation) => (
+                      <li key={invitation.id}>
+                        <span>
+                          {invitation.invitee?.username ||
+                            invitation.invitee?.email ||
+                            "-"}{" "}
+                          - {getRoleLabel(invitation.role)} -{" "}
+                          {getInvitationStatusLabel(invitation.status)}
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </div>
+            ) : null}
 
             {canLeaveHive && onLeaveHive ? (
               <div className="toolbar-leave-section">

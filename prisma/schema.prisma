@@ -9,6 +9,7 @@ datasource db {
 
 enum CollaboratorRole {
   ADMIN
+  EDITOR
   COMMENT
   READ
 }
