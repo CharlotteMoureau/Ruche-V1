@@ -123,7 +123,6 @@ export default function ProfilePage() {
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [deletePassword, setDeletePassword] = useState("");
   const [deletePasswordConfirm, setDeletePasswordConfirm] = useState("");
-  const [showDeletePasswords, setShowDeletePasswords] = useState(false);
   const [deleteError, setDeleteError] = useState("");
   const [isDeleting, setIsDeleting] = useState(false);
   const [ownedPage, setOwnedPage] = useState(1);
@@ -368,7 +367,6 @@ export default function ProfilePage() {
   const openDeleteModal = () => {
     setDeletePassword("");
     setDeletePasswordConfirm("");
-    setShowDeletePasswords(false);
     setDeleteError("");
     setIsDeleteModalOpen(true);
   };
@@ -378,7 +376,6 @@ export default function ProfilePage() {
     setIsDeleteModalOpen(false);
     setDeletePassword("");
     setDeletePasswordConfirm("");
-    setShowDeletePasswords(false);
     setDeleteError("");
   };
 
@@ -806,43 +803,28 @@ export default function ProfilePage() {
                 ) : null}
 
                 <form onSubmit={deleteProfile} className="form-grid">
-                  <label>
-                    {t("register.password")}
-                    <input
-                      type={showDeletePasswords ? "text" : "password"}
-                      value={deletePassword}
-                      onChange={(event) =>
-                        setDeletePassword(event.target.value)
-                      }
-                      autoFocus
-                      disabled={isDeleting}
-                    />
-                  </label>
-
-                  <label>
-                    {t("profile.confirmPassword")}
-                    <input
-                      type={showDeletePasswords ? "text" : "password"}
-                      value={deletePasswordConfirm}
-                      onChange={(event) =>
-                        setDeletePasswordConfirm(event.target.value)
-                      }
-                      disabled={isDeleting}
-                    />
-                  </label>
-
-                  <button
-                    type="button"
-                    className="button-link"
-                    onClick={() =>
-                      setShowDeletePasswords((current) => !current)
-                    }
+                  <PasswordField
+                    label={t("register.password")}
+                    value={deletePassword}
+                    onChange={(event) => setDeletePassword(event.target.value)}
+                    required
+                    minLength={1}
+                    autoComplete="current-password"
                     disabled={isDeleting}
-                  >
-                    {showDeletePasswords
-                      ? t("profile.hide")
-                      : t("profile.show")}
-                  </button>
+                    autoFocus
+                  />
+
+                  <PasswordField
+                    label={t("profile.confirmPassword")}
+                    value={deletePasswordConfirm}
+                    onChange={(event) =>
+                      setDeletePasswordConfirm(event.target.value)
+                    }
+                    required
+                    minLength={1}
+                    autoComplete="current-password"
+                    disabled={isDeleting}
+                  />
 
                   <div className="modal-actions">
                     <button

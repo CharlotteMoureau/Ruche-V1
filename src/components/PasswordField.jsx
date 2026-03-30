@@ -47,6 +47,8 @@ export default function PasswordField({
   minLength,
   required = false,
   autoComplete,
+  disabled = false,
+  autoFocus = false,
 }) {
   const { t } = useLanguage();
   const [isRevealing, setIsRevealing] = useState(false);
@@ -79,12 +81,15 @@ export default function PasswordField({
           minLength={minLength}
           required={required}
           autoComplete={autoComplete}
+          disabled={disabled}
+          autoFocus={autoFocus}
         />
         <button
           type="button"
           className="password-visibility-button"
           title={t("passwordField.showPassword")}
           aria-label={t("passwordField.showPassword")}
+          disabled={disabled}
           onMouseDown={startReveal}
           onMouseUp={stopReveal}
           onMouseLeave={stopReveal}
