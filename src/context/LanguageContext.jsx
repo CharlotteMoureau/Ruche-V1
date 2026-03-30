@@ -251,8 +251,7 @@ const messages = {
       downloading: "Téléchargement...",
       downloadFailed: "Erreur lors du téléchargement : {message}",
       modifyProfileTitle: "Modifier mon profil",
-      modifyProfileDesc:
-        "Mettez à jour votre rôle ou votre mot de passe.",
+      modifyProfileDesc: "Mettez à jour votre rôle ou votre mot de passe.",
       changeRole: "Changer le rôle",
       changePassword: "Changer le mot de passe",
       updateRole: "Mettre à jour le rôle",
@@ -795,8 +794,7 @@ const messages = {
       downloading: "Downloaden...",
       downloadFailed: "Download mislukt: {message}",
       modifyProfileTitle: "Mijn profiel wijzigen",
-      modifyProfileDesc:
-        "Werk je rol of wachtwoord bij.",
+      modifyProfileDesc: "Werk je rol of wachtwoord bij.",
       changeRole: "Rol wijzigen",
       changePassword: "Wachtwoord wijzigen",
       updateRole: "Rol bijwerken",
@@ -810,8 +808,7 @@ const messages = {
       passwordUpdateSuccess: "Wachtwoord is succesvol bijgewerkt.",
       roleRequired: "Selecteer een rol.",
       roleOtherRequired: "Specificeer je rol.",
-      passwordUpdateRequiredFields:
-        "Vul alle drie de wachtwoordvelden in.",
+      passwordUpdateRequiredFields: "Vul alle drie de wachtwoordvelden in.",
       passwordTooShort:
         "Het nieuwe wachtwoord moet minstens 8 tekens bevatten.",
     },
