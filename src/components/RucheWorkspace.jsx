@@ -156,6 +156,7 @@ export default function RucheWorkspace({
   );
   const [showModal, setShowModal] = useState(false);
   const [inputText, setInputText] = useState("");
+  const [cardColor, setCardColor] = useState("lime");
   const [selectedCardIds, setSelectedCardIds] = useState(() => new Set());
   const [activeLoadKey, setActiveLoadKey] = useState(loadKey);
   const [activeResetSignal, setActiveResetSignal] = useState(resetSignal);
@@ -435,12 +436,14 @@ export default function RucheWorkspace({
       id: Date.now() + Math.floor(Math.random() * 1000),
       title: inputText,
       category: "free",
+      color: cardColor,
       position: defaultPosition,
     };
     setBoardCards((prev) => [...prev, newCard]);
     setUserCards((prev) => [...prev, newCard]);
     setShowModal(false);
     setInputText("");
+    setCardColor("lime");
   };
 
   useEffect(() => {
@@ -489,6 +492,8 @@ export default function RucheWorkspace({
         onValidate={handleAddUserCard}
         inputText={inputText}
         setInputText={setInputText}
+        selectedColor={cardColor}
+        setSelectedColor={setCardColor}
         userCardsCount={userCards.length}
       />
       {commentModalCardId && activeCommentCard ? (

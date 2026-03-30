@@ -69,8 +69,13 @@
 }
 
 /* ----------------------- */
-/* Firefox spécifique       */
+/* Variantes de couleur     */
 /* ----------------------- */
+.free-space-card.free-card--pink      { stroke: $rose;       color: $rose; }
+.free-space-card.free-card--purple    { stroke: $mauve;      color: $mauve; }
+.free-space-card.free-card--turquoise { stroke: $turquoise;  color: $turquoise; }
+.free-space-card.free-card--orange    { stroke: $orange;     color: $orange; }
+
 @-moz-document url-prefix() {
   .free-space-card {
     perspective: none !important;

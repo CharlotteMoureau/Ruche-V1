@@ -18,7 +18,7 @@ export default function FreeHexCard({ card }) {
     >
       <path
         id="vert"
-        fill="#8BB31D"
+        fill="currentColor"
         opacity="1.000000"
         stroke="none"
         d="
@@ -155,7 +155,7 @@ z"
 
   return (
     <svg
-      className={`free-space-card`}
+      className={`free-space-card${card.color && card.color !== "lime" ? ` free-card--${card.color}` : ""}`}
       viewBox="0 0 100 100"
       xmlns="http://www.w3.org/2000/svg"
     >

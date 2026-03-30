@@ -102,6 +102,70 @@
   margin-bottom: 10px;
 }
 
+.modal-error {
+  margin: 0.35rem 0 0.5rem;
+  color: $rose;
+  font-size: 0.85rem;
+  text-align: left;
+}
+
+.color-picker-label {
+  font-size: 0.85rem;
+  color: #555;
+  margin-bottom: 0.4rem;
+}
+
+.color-picker {
+  display: flex;
+  gap: 0.6rem;
+  justify-content: center;
+  margin-bottom: 1rem;
+
+  .color-swatch {
+    position: relative;
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    border: none;
+    cursor: pointer;
+    transition: transform 0.15s;
+    outline: 3px solid transparent;
+    outline-offset: 2px;
+
+    &:hover {
+      transform: scale(1.2);
+    }
+
+    &.selected {
+      outline-color: #333;
+    }
+
+    &[data-label]::after {
+      content: attr(data-label);
+      position: absolute;
+      bottom: calc(100% + 6px);
+      left: 50%;
+      transform: translateX(-50%);
+      background: #333;
+      color: #fff;
+      font-size: 0.72rem;
+      white-space: normal;
+      max-width: 180px;
+      text-align: center;
+      padding: 4px 8px;
+      border-radius: 4px;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.15s;
+      z-index: 10001;
+    }
+
+    &[data-label]:hover::after {
+      opacity: 1;
+    }
+  }
+}
+
 .popup-warning {
   position: fixed;
   top: 20px;
