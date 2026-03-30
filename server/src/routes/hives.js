@@ -14,10 +14,14 @@ const hiveInputSchema = z.object({
   boardData: z.any(),
   boardPreviewImage: z.string().max(5_000_000).nullable().optional(),
   kind: z.string().trim().optional(),
+  expectedUpdatedAt: z.string().trim().optional(),
 });
 
 const COLLABORATOR_ROLES = ["ADMIN", "EDITOR", "COMMENT", "READ", "EDIT"];
 const collaboratorRoleSchema = z.enum(COLLABORATOR_ROLES);
+const PRESENCE_TTL_MS = 30_000;
+
+const hivePresence = new Map();
 
 let invitationsTableReadyPromise = null;
 
@@ -149,6 +153,64 @@ function canCommentOnHive(hive, user) {
 function canManageHive(hive, user) {
   const role = getMembershipRole(hive, user.id);
   return user.isAdmin || hive.ownerId === user.id || role === "ADMIN";
+}
+
+function getOrCreatePresenceBucket(hiveId) {
+  let bucket = hivePresence.get(hiveId);
+  if (!bucket) {
+    bucket = new Map();
+    hivePresence.set(hiveId, bucket);
+  }
+  return bucket;
+}
+
+function prunePresence(hiveId) {
+  const bucket = hivePresence.get(hiveId);
+  if (!bucket) return;
+
+  const now = Date.now();
+  for (const [userId, entry] of bucket.entries()) {
+    if (now - entry.lastSeenAt > PRESENCE_TTL_MS) {
+      bucket.delete(userId);
+    }
+  }
+
+  if (bucket.size === 0) {
+    hivePresence.delete(hiveId);
+  }
+}
+
+function listPresence(hiveId) {
+  prunePresence(hiveId);
+  const bucket = hivePresence.get(hiveId);
+  if (!bucket) return [];
+
+  return Array.from(bucket.values())
+    .map((entry) => ({
+      userId: entry.userId,
+      username: entry.username,
+      lastSeenAt: new Date(entry.lastSeenAt).toISOString(),
+    }))
+    .sort((a, b) => a.username.localeCompare(b.username));
+}
+
+function registerPresence(hiveId, user) {
+  const bucket = getOrCreatePresenceBucket(hiveId);
+  bucket.set(user.id, {
+    userId: user.id,
+    username: user.username || user.email || "unknown",
+    lastSeenAt: Date.now(),
+  });
+}
+
+function removePresence(hiveId, userId) {
+  const bucket = hivePresence.get(hiveId);
+  if (!bucket) return;
+
+  bucket.delete(userId);
+  if (bucket.size === 0) {
+    hivePresence.delete(hiveId);
+  }
 }
 
 hivesRouter.get("/", async (req, res) => {
@@ -448,6 +510,52 @@ hivesRouter.get("/:id/invitations", async (req, res) => {
   );
 });
 
+hivesRouter.get("/:id/presence", async (req, res) => {
+  const hive = await getHiveOr404(req.params.id);
+  if (!hive) {
+    return res.status(404).json({ error: "Ruche introuvable" });
+  }
+
+  if (!canReadHive(hive, req.user)) {
+    return res.status(403).json({ error: "Acces interdit" });
+  }
+
+  return res.json({
+    activeEditors: listPresence(hive.id),
+  });
+});
+
+hivesRouter.post("/:id/presence", async (req, res) => {
+  const hive = await getHiveOr404(req.params.id);
+  if (!hive) {
+    return res.status(404).json({ error: "Ruche introuvable" });
+  }
+
+  if (!canReadHive(hive, req.user)) {
+    return res.status(403).json({ error: "Acces interdit" });
+  }
+
+  registerPresence(hive.id, req.user);
+
+  return res.json({
+    activeEditors: listPresence(hive.id),
+  });
+});
+
+hivesRouter.delete("/:id/presence", async (req, res) => {
+  const hive = await getHiveOr404(req.params.id);
+  if (!hive) {
+    return res.status(404).json({ error: "Ruche introuvable" });
+  }
+
+  if (!canReadHive(hive, req.user)) {
+    return res.status(403).json({ error: "Acces interdit" });
+  }
+
+  removePresence(hive.id, req.user.id);
+  return res.json({ ok: true });
+});
+
 hivesRouter.put("/:id", async (req, res) => {
   const parsed = hiveInputSchema.safeParse(req.body);
   if (!parsed.success) {
@@ -466,6 +574,28 @@ hivesRouter.put("/:id", async (req, res) => {
   const isRenamingHive = parsed.data.title.trim() !== hive.title.trim();
   if (isRenamingHive && !canManageHive(hive, req.user)) {
     return res.status(403).json({ error: "Vous ne pouvez pas renommer cette ruche" });
+  }
+
+  const expectedUpdatedAt = parsed.data.expectedUpdatedAt?.trim();
+  if (!expectedUpdatedAt) {
+    return res.status(409).json({
+      error: "Version de ruche manquante. Rechargez la ruche avant d'enregistrer.",
+      code: "HIVE_VERSION_REQUIRED",
+      currentUpdatedAt: hive.updatedAt.toISOString(),
+    });
+  }
+
+  const expectedTimestamp = Date.parse(expectedUpdatedAt);
+  if (Number.isNaN(expectedTimestamp)) {
+    return res.status(400).json({ error: "Version de ruche invalide" });
+  }
+
+  if (expectedTimestamp !== hive.updatedAt.getTime()) {
+    return res.status(409).json({
+      error: "Cette ruche a été modifiée par un autre collaborateur. Rechargez-la avant d'enregistrer.",
+      code: "HIVE_VERSION_CONFLICT",
+      currentUpdatedAt: hive.updatedAt.toISOString(),
+    });
   }
 
   const updated = await prisma.hive.update({

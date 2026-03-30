@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { useLanguage } from "../context/LanguageContext";
@@ -25,35 +25,51 @@ export default function AppHeader() {
     );
   };
 
+  const refreshPendingInvitesCount = useCallback(async () => {
+    if (!isAuthenticated || isAdmin || !token) {
+      setPendingInvitesCount(0);
+      return;
+    }
+
+    try {
+      const data = await apiFetch("/hives/invitations/count", { token });
+      setPendingInvitesCount(Number(data?.count || 0));
+    } catch {
+      setPendingInvitesCount(0);
+    }
+  }, [isAuthenticated, isAdmin, token]);
+
   useEffect(() => {
     if (!isAuthenticated || isAdmin || !token) {
       setPendingInvitesCount(0);
       return;
     }
 
-    let mounted = true;
-
-    const loadCount = async () => {
-      try {
-        const data = await apiFetch("/hives/invitations/count", { token });
-        if (mounted) {
-          setPendingInvitesCount(Number(data?.count || 0));
-        }
-      } catch {
-        if (mounted) {
-          setPendingInvitesCount(0);
-        }
-      }
+    const handleVisibilityOrFocus = () => {
+      if (document.visibilityState === "hidden") return;
+      refreshPendingInvitesCount();
     };
 
-    loadCount();
-    const intervalId = window.setInterval(loadCount, 15000);
+    const handleManualRefresh = () => {
+      refreshPendingInvitesCount();
+    };
+
+    refreshPendingInvitesCount();
+    const intervalId = window.setInterval(refreshPendingInvitesCount, 5000);
+    window.addEventListener("focus", handleVisibilityOrFocus);
+    document.addEventListener("visibilitychange", handleVisibilityOrFocus);
+    window.addEventListener("ruche:invitations-updated", handleManualRefresh);
 
     return () => {
-      mounted = false;
       window.clearInterval(intervalId);
+      window.removeEventListener("focus", handleVisibilityOrFocus);
+      document.removeEventListener("visibilitychange", handleVisibilityOrFocus);
+      window.removeEventListener(
+        "ruche:invitations-updated",
+        handleManualRefresh,
+      );
     };
-  }, [isAuthenticated, isAdmin, token]);
+  }, [isAuthenticated, isAdmin, refreshPendingInvitesCount, token]);
 
   return (
     <header className="site-header">

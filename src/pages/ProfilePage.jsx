@@ -174,6 +174,21 @@ function sortHives(hives, sortMode, locale) {
   return sorted;
 }
 
+function getCollaboratorRoleLabel(role, t) {
+  const normalizedRole = String(role || "")
+    .trim()
+    .toUpperCase();
+
+  if (normalizedRole === "ADMIN") return t("toolbar.roleAdmin");
+  if (normalizedRole === "EDITOR" || normalizedRole === "EDIT") {
+    return t("toolbar.roleEdit");
+  }
+  if (normalizedRole === "COMMENT") return t("toolbar.roleComment");
+  if (normalizedRole === "READ") return t("toolbar.roleRead");
+
+  return role || "";
+}
+
 function getCaptureBoardSize(boardCards) {
   if (boardCards.length === 0) {
     return { width: 1200, height: 760 };
@@ -311,7 +326,10 @@ export default function ProfilePage() {
     setOwnedPage((current) => clampPage(current, profile.ownedHives.length));
     setSharedPage((current) => clampPage(current, profile.sharedHives.length));
 
-    const canonicalRole = resolveRoleFormValue(profile.user.roleLabel, roleOptions);
+    const canonicalRole = resolveRoleFormValue(
+      profile.user.roleLabel,
+      roleOptions,
+    );
     const roleOtherText = profile.user.roleOtherText || "";
     const profileUserId = profile.user?.id || "profile-user";
 
@@ -985,7 +1003,12 @@ export default function ProfilePage() {
                         <li key={hive.id}>
                           <div className="hive-details">
                             <strong>
-                              {hive.title} ({hive.collaboratorRole})
+                              {hive.title} (
+                              {getCollaboratorRoleLabel(
+                                hive.collaboratorRole,
+                                t,
+                              )}
+                              )
                             </strong>
                             <br />
                             {t("profile.createdAt")} :{" "}

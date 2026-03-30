@@ -87,6 +87,7 @@ export default function InboxPage() {
         token,
       });
       await loadInvitations();
+      window.dispatchEvent(new Event("ruche:invitations-updated"));
     } catch (err) {
       setError(err.message || t("inbox.actionError"));
     } finally {
@@ -117,14 +118,14 @@ export default function InboxPage() {
                     {invitation.hive?.title || t("inbox.unknownHive")}
                   </strong>
                   <br />
-                  {t("inbox.invitedBy")}: {" "}
+                  {t("inbox.invitedBy")}:{" "}
                   {invitation.inviter?.username ||
                     invitation.inviter?.email ||
                     "-"}
                   <br />
                   {t("inbox.role")}: {getRoleLabel(invitation.role, t)}
                   <br />
-                  {t("inbox.sentAt")}: {" "}
+                  {t("inbox.sentAt")}:{" "}
                   {formatDateTime(invitation.createdAt, dateLocale)}
                 </div>
 

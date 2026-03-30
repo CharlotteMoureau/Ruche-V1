@@ -382,6 +382,12 @@ const messages = {
       createCopy: "Créer une copie",
       duplicateSuccess:
         "Copie créée avec succès ! La ruche '{newTitle}' a été créée et vous pouvez la retrouver dans votre profil.",
+      conflictTitle: "Mise à jour concurrente détectée",
+      conflictMessage:
+        "Un autre collaborateur a enregistré cette ruche avant vous. Rechargez la dernière version ou créez une copie pour conserver votre travail.",
+      conflictReload: "Recharger la dernière version",
+      activeEditorsOthers: "Collaborateurs en cours d'édition : {names}",
+      activeEditorsOnlyYou: "Vous éditez actuellement cette ruche.",
     },
     workspace: {
       cardNoteTitle: "Note de carte",
@@ -737,6 +743,12 @@ const messages = {
       createCopy: "Create a copy",
       duplicateSuccess:
         "Copy created successfully! The hive '{newTitle}' has been created and you can find it in your profile.",
+      conflictTitle: "Concurrent update detected",
+      conflictMessage:
+        "Another collaborator saved this hive before you. Reload the latest version or create a copy to keep your work.",
+      conflictReload: "Reload latest",
+      activeEditorsOthers: "Currently editing: {names}",
+      activeEditorsOnlyYou: "You are currently editing this hive.",
     },
     workspace: {
       cardNoteTitle: "Card note",
@@ -1090,6 +1102,12 @@ const messages = {
       createCopy: "Kopie maken",
       duplicateSuccess:
         "Kopie met succes aangemaakt! De bijenkorf '{newTitle}' is aangemaakt en je kunt deze in je profiel vinden.",
+      conflictTitle: "Gelijktijdige update gedetecteerd",
+      conflictMessage:
+        "Een andere samenwerker heeft deze bijenkorf eerder opgeslagen. Herlaad de nieuwste versie of maak een kopie om je werk te bewaren.",
+      conflictReload: "Nieuwste versie herladen",
+      activeEditorsOthers: "Momenteel aan het bewerken: {names}",
+      activeEditorsOnlyYou: "Je bewerkt deze bijenkorf momenteel.",
     },
     workspace: {
       cardNoteTitle: "Kaartnotitie",

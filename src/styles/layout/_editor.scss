@@ -69,6 +69,10 @@ body.editor-route #root {
   margin-bottom: 10px;
 }
 
+.editor-active-editors {
+  font-weight: 600;
+}
+
 .editor-page .editor-app {
   flex: 1;
   min-height: 0;

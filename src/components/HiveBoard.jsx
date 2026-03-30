@@ -58,6 +58,7 @@ export default function HiveBoard({
   const defaultZoom = isCompactLayout
     ? BOARD_COMPACT_DEFAULT_ZOOM
     : BOARD_DEFAULT_ZOOM;
+  const isDefaultZoom = Math.abs(zoom - defaultZoom) < 0.001;
   const supportsCssZoom = useMemo(() => {
     if (typeof CSS === "undefined" || typeof CSS.supports !== "function") {
       return false;
@@ -552,7 +553,7 @@ export default function HiveBoard({
       </header>
       <div
         ref={handleViewportRef}
-        className={`hive-board__viewport ${isPanning ? "is-panning" : ""}`}
+        className={`hive-board__viewport ${isPanning ? "is-panning" : ""} ${isDefaultZoom ? "is-default-zoom" : ""}`.trim()}
       >
         <div
           className="hive-board__canvas-shell"

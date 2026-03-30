@@ -1,5 +1,14 @@
 const API_BASE = import.meta.env.VITE_API_URL || "/api";
 
+export class ApiError extends Error {
+  constructor(message, { status, payload } = {}) {
+    super(message);
+    this.name = "ApiError";
+    this.status = status;
+    this.payload = payload;
+  }
+}
+
 async function parseResponse(response) {
   const contentType = response.headers.get("content-type") || "";
   const payload = contentType.includes("application/json")
@@ -10,7 +19,10 @@ async function parseResponse(response) {
     const message = typeof payload === "object" && payload?.error
       ? payload.error
       : `Request failed (${response.status})`;
-    throw new Error(message);
+    throw new ApiError(message, {
+      status: response.status,
+      payload,
+    });
   }
 
   return payload;

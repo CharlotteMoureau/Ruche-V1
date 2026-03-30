@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
 import domtoimage from "dom-to-image-more";
-import { apiFetch } from "../lib/api";
+import { ApiError, apiFetch } from "../lib/api";
 import { useAuth } from "../context/AuthContext";
 import RucheWorkspace from "../components/RucheWorkspace";
 import Toolbar from "../components/Toolbar";
@@ -69,6 +69,9 @@ export default function RucheEditorPage() {
   const [savedSnapshot, setSavedSnapshot] = useState("");
   const [error, setError] = useState("");
   const [isSaving, setIsSaving] = useState(false);
+  const [baseUpdatedAt, setBaseUpdatedAt] = useState(null);
+  const [showConflictModal, setShowConflictModal] = useState(false);
+  const [activeEditors, setActiveEditors] = useState([]);
 
   // Comments modal state
   const [showCommentsModal, setShowCommentsModal] = useState(false);
@@ -133,6 +136,17 @@ export default function RucheEditorPage() {
     [title, hiveKind, boardData],
   );
   const isDirty = Boolean(savedSnapshot) && currentSnapshot !== savedSnapshot;
+  const otherActiveEditors = useMemo(
+    () =>
+      activeEditors.filter(
+        (editor) => String(editor.userId) !== String(user?.id),
+      ),
+    [activeEditors, user?.id],
+  );
+  const activeEditorNames = useMemo(
+    () => otherActiveEditors.map((editor) => editor.username).join(", "),
+    [otherActiveEditors],
+  );
 
   useEffect(() => {
     if (!isNew || savedSnapshot || boardData === null) return;
@@ -146,7 +160,7 @@ export default function RucheEditorPage() {
   }, [isNew, savedSnapshot, boardData, initialHiveKind, initialNewTitle]);
 
   useEffect(() => {
-    if (isNew || canEdit) return;
+    if (isNew) return;
     let mounted = true;
 
     async function load() {
@@ -157,6 +171,7 @@ export default function RucheEditorPage() {
         setTitle(data.title);
         setHiveKind(normalizeHiveKind(data.kind));
         setBoardData(data.boardData);
+        setBaseUpdatedAt(data.updatedAt || null);
         setSavedSnapshot(
           JSON.stringify({
             title: data.title,
@@ -173,7 +188,7 @@ export default function RucheEditorPage() {
     return () => {
       mounted = false;
     };
-  }, [canEdit, id, isNew, token]);
+  }, [id, isNew, token]);
 
   useEffect(() => {
     if (isNew) return;
@@ -193,6 +208,7 @@ export default function RucheEditorPage() {
           setTitle(data.title);
           setHiveKind(normalizeHiveKind(data.kind));
           setBoardData(data.boardData);
+          setBaseUpdatedAt(data.updatedAt || null);
           setSavedSnapshot(nextSnapshot);
         }
       } catch {
@@ -202,6 +218,44 @@ export default function RucheEditorPage() {
 
     return () => clearInterval(intervalId);
   }, [canEdit, id, isDirty, isNew, token]);
+
+  useEffect(() => {
+    if (isNew || !id || !token || !user?.id) {
+      setActiveEditors([]);
+      return;
+    }
+
+    let isMounted = true;
+
+    const syncPresence = async () => {
+      try {
+        const data = await apiFetch(`/hives/${id}/presence`, {
+          method: "POST",
+          token,
+        });
+        if (!isMounted) return;
+        setActiveEditors(
+          Array.isArray(data?.activeEditors) ? data.activeEditors : [],
+        );
+      } catch {
+        // Ignore transient presence errors so editing can continue uninterrupted.
+      }
+    };
+
+    syncPresence();
+    const intervalId = setInterval(syncPresence, 10_000);
+
+    return () => {
+      isMounted = false;
+      clearInterval(intervalId);
+      apiFetch(`/hives/${id}/presence`, {
+        method: "DELETE",
+        token,
+      }).catch(() => {
+        // Ignore cleanup failures; stale presence expires automatically.
+      });
+    };
+  }, [id, isNew, token, user?.id]);
 
   useEffect(() => {
     const handler = (event) => {
@@ -277,6 +331,47 @@ export default function RucheEditorPage() {
     };
   }, [executeLeaveAction, isDirty]);
 
+  const reloadHiveFromServer = useCallback(async () => {
+    if (isNew || !id) return;
+
+    const data = await apiFetch(`/hives/${id}`, { token });
+    setHive(data);
+    setTitle(data.title);
+    setHiveKind(normalizeHiveKind(data.kind));
+    setBoardData(data.boardData);
+    setBaseUpdatedAt(data.updatedAt || null);
+    setSavedSnapshot(
+      JSON.stringify({
+        title: data.title,
+        hiveKind: normalizeHiveKind(data.kind),
+        boardData: data.boardData,
+      }),
+    );
+  }, [id, isNew, token]);
+
+  const captureBoardPreviewImage = useCallback(async () => {
+    const hasBoardCards = Array.isArray(boardData?.boardCards)
+      ? boardData.boardCards.length > 0
+      : false;
+
+    if (!hasBoardCards) return null;
+
+    const board = document.querySelector(".hive-board");
+    if (!board) return null;
+
+    document.body.classList.add("capture-mode");
+    try {
+      await waitForCaptureFrame();
+      return await domtoimage.toPng(board, {
+        cacheBust: true,
+      });
+    } catch {
+      return null;
+    } finally {
+      document.body.classList.remove("capture-mode");
+    }
+  }, [boardData]);
+
   const saveHive = async ({ skipNavigateAfterCreate = false } = {}) => {
     if (isSaving) return false;
 
@@ -309,27 +404,7 @@ export default function RucheEditorPage() {
   ) => {
     setIsSaving(true);
     try {
-      const hasBoardCards = Array.isArray(boardData?.boardCards)
-        ? boardData.boardCards.length > 0
-        : false;
-      let boardPreviewImage = null;
-
-      if (hasBoardCards) {
-        const board = document.querySelector(".hive-board");
-        if (board) {
-          document.body.classList.add("capture-mode");
-          try {
-            await waitForCaptureFrame();
-            boardPreviewImage = await domtoimage.toPng(board, {
-              cacheBust: true,
-            });
-          } catch {
-            boardPreviewImage = null;
-          } finally {
-            document.body.classList.remove("capture-mode");
-          }
-        }
-      }
+      const boardPreviewImage = await captureBoardPreviewImage();
 
       if (isNew) {
         const created = await apiFetch("/hives", {
@@ -351,6 +426,7 @@ export default function RucheEditorPage() {
           boardData,
         });
         setSavedSnapshot(snapshot);
+        setBaseUpdatedAt(created.updatedAt || null);
         setTitle(titleToSave);
         setHiveKind(normalizedCreatedKind);
         setHive({
@@ -371,7 +447,14 @@ export default function RucheEditorPage() {
         return true;
       }
 
-      await apiFetch(`/hives/${id}`, {
+      let expectedUpdatedAt = baseUpdatedAt;
+      if (!expectedUpdatedAt) {
+        const latest = await apiFetch(`/hives/${id}`, { token });
+        expectedUpdatedAt = latest?.updatedAt || null;
+        setBaseUpdatedAt(expectedUpdatedAt);
+      }
+
+      const updated = await apiFetch(`/hives/${id}`, {
         method: "PUT",
         token,
         body: {
@@ -379,6 +462,7 @@ export default function RucheEditorPage() {
           kind: hiveKind,
           boardData,
           boardPreviewImage,
+          expectedUpdatedAt,
         },
       });
       const snapshot = JSON.stringify({
@@ -388,6 +472,7 @@ export default function RucheEditorPage() {
       });
       setSavedSnapshot(snapshot);
       setTitle(titleToSave);
+      setBaseUpdatedAt(updated?.updatedAt || null);
 
       setHive((prev) =>
         prev
@@ -396,11 +481,15 @@ export default function RucheEditorPage() {
               title: titleToSave,
               kind: hiveKind,
               boardData,
+              updatedAt: updated?.updatedAt || prev.updatedAt,
             }
           : prev,
       );
       return true;
     } catch (err) {
+      if (err instanceof ApiError && err.status === 409) {
+        setShowConflictModal(true);
+      }
       setError(err.message);
       return false;
     } finally {
@@ -423,27 +512,7 @@ export default function RucheEditorPage() {
     setIsSaving(true);
 
     try {
-      const hasBoardCards = Array.isArray(boardData?.boardCards)
-        ? boardData.boardCards.length > 0
-        : false;
-      let boardPreviewImage = null;
-
-      if (hasBoardCards) {
-        const board = document.querySelector(".hive-board");
-        if (board) {
-          document.body.classList.add("capture-mode");
-          try {
-            await waitForCaptureFrame();
-            boardPreviewImage = await domtoimage.toPng(board, {
-              cacheBust: true,
-            });
-          } catch {
-            boardPreviewImage = null;
-          } finally {
-            document.body.classList.remove("capture-mode");
-          }
-        }
-      }
+      const boardPreviewImage = await captureBoardPreviewImage();
 
       // Create duplicate with new title
       const newHive = await apiFetch("/hives", {
@@ -464,6 +533,37 @@ export default function RucheEditorPage() {
     } catch (err) {
       setError(err.message);
       setPendingNewTitle("");
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const handleCreateCopyAfterConflict = async () => {
+    if (isSaving) return;
+
+    setIsSaving(true);
+    try {
+      const baseTitle =
+        title.trim() || hive?.title?.trim() || t("editor.newHiveTitle");
+      const copyTitle = `${baseTitle} (${t("profile.copySuffix")})`;
+      const boardPreviewImage = await captureBoardPreviewImage();
+
+      const created = await apiFetch("/hives", {
+        method: "POST",
+        token,
+        body: {
+          title: copyTitle,
+          kind: hiveKind,
+          boardData,
+          boardPreviewImage,
+        },
+      });
+
+      setShowConflictModal(false);
+      setError("");
+      navigate(`/hives/${created.id}`, { replace: true });
+    } catch (err) {
+      setError(err.message);
     } finally {
       setIsSaving(false);
     }
@@ -500,6 +600,16 @@ export default function RucheEditorPage() {
   const cancelLeave = () => {
     setShowLeaveDirtyModal(false);
     setPendingLeaveAction(null);
+  };
+
+  const handleReloadAfterConflict = async () => {
+    setShowConflictModal(false);
+    try {
+      await reloadHiveFromServer();
+      setError("");
+    } catch (err) {
+      setError(err.message);
+    }
   };
 
   const runSavedHiveAction = (action) => {
@@ -894,6 +1004,14 @@ export default function RucheEditorPage() {
         </p>
       ) : null}
 
+      {!isNew && hive ? (
+        <p className="form-info editor-active-editors" aria-live="polite">
+          {otherActiveEditors.length > 0
+            ? t("editor.activeEditorsOthers", { names: activeEditorNames })
+            : t("editor.activeEditorsOnlyYou")}
+        </p>
+      ) : null}
+
       {isSaving ? (
         <p className="form-info" aria-live="polite">
           {t("editor.updating")}
@@ -1106,6 +1224,19 @@ export default function RucheEditorPage() {
         confirmClassName="danger"
         onCancel={() => setShowResetConfirmModal(false)}
         onConfirm={handleConfirmReset}
+      />
+
+      <UnifiedPromptModal
+        isOpen={showConflictModal}
+        title={t("editor.conflictTitle")}
+        message={t("editor.conflictMessage")}
+        cancelLabel={t("common.cancel")}
+        confirmLabel={t("editor.conflictReload")}
+        extraActionLabel={t("editor.createCopy")}
+        confirmDisabled={isSaving}
+        onExtraAction={handleCreateCopyAfterConflict}
+        onCancel={() => setShowConflictModal(false)}
+        onConfirm={handleReloadAfterConflict}
       />
 
       <UnifiedPromptModal
