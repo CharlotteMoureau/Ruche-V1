@@ -1,5 +1,6 @@
 import { useDragLayer } from "react-dnd";
 import HexCard from "./HexCard";
+import { BOARD_CARD_SIZE } from "../lib/board";
 
 const layerStyles = {
   position: "fixed",
@@ -9,7 +10,7 @@ const layerStyles = {
   top: 0,
 };
 
-export default function CustomDragPreview() {
+export default function CustomDragPreview({ zoom = 1 }) {
   const { item, isDragging, currentOffset } = useDragLayer((monitor) => ({
     item: monitor.getItem(),
     isDragging: monitor.isDragging(),
@@ -21,7 +22,13 @@ export default function CustomDragPreview() {
 
   return (
     <div style={{ ...layerStyles, transform: `translate(${x}px, ${y}px)` }}>
-      <div style={{ transform: "translate(-50%, -50%)" }}>
+      <div
+        style={{
+          "--board-card-size": `${BOARD_CARD_SIZE}px`,
+          transform: `translate(-50%, -50%) scale(${zoom})`,
+          transformOrigin: "center center",
+        }}
+      >
         <HexCard card={item.card} onlyFront />
       </div>
     </div>

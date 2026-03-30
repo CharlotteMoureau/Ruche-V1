@@ -52,6 +52,7 @@ export default function AppHeader() {
         <label className="language-select-wrap">
           <span>{t("language.label")}</span>
           <select
+            id="language-select"
             className="language-select"
             value={language}
             onChange={(event) => setLanguage(event.target.value)}

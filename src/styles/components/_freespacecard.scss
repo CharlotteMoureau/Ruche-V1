@@ -1,7 +1,7 @@
 @use "../base/variables" as *;
 
 .free-space-card {
-  width: 200px;
+  width: var(--board-card-size, 200px);
   aspect-ratio: 1;
   perspective: 800px;
   stroke: $vert;

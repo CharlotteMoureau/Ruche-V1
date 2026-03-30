@@ -366,6 +366,14 @@ const messages = {
     },
     workspace: {
       cardNoteTitle: "Note de carte",
+      showLibrary: "Afficher la bibliothèque",
+      hideLibrary: "Masquer la bibliothèque",
+      closeLibrary: "Fermer la bibliothèque",
+      zoomOut: "-",
+      zoomIn: "+",
+      resetZoom: "100 %",
+      fitContent: "Cadrer les cartes",
+      fitBoard: "Vue d'ensemble",
       cardLabel: "Carte",
       createdBy: "Créé le {date} par {user}",
       updatedBy: "Dernière édition le {date} par {user}",
@@ -384,6 +392,10 @@ const messages = {
     },
     toolbar: {
       reset: "Réinitialiser",
+      confirmResetTitle: "Réinitialiser la ruche",
+      confirmResetMessage:
+        "Voulez-vous vraiment réinitialiser la ruche ? Cette action supprimera toutes les cartes du plateau.",
+      confirmReset: "Réinitialiser",
       screenshot: "Capture d'écran",
       collaborators: "Collaborateurs",
       comments: "Commentaires",
@@ -434,6 +446,10 @@ const messages = {
       freeCardTitle: "A vous de jouer !",
       maxFreeCardsReached:
         "Vous avez déjà atteint le maximum de 10 cartes libres !",
+      searchLabel: "Rechercher une carte",
+      searchPlaceholder: "Rechercher...",
+      clearSearch: "Effacer la recherche",
+      noResults: "Aucune carte ne correspond à votre recherche.",
     },
     addCardModal: {
       title: "A vous de jouer !",
@@ -685,6 +701,14 @@ const messages = {
     },
     workspace: {
       cardNoteTitle: "Card note",
+      showLibrary: "Show library",
+      hideLibrary: "Hide library",
+      closeLibrary: "Close library",
+      zoomOut: "-",
+      zoomIn: "+",
+      resetZoom: "100%",
+      fitContent: "Fit cards",
+      fitBoard: "Overview",
       cardLabel: "Card",
       createdBy: "Created on {date} by {user}",
       updatedBy: "Last edited on {date} by {user}",
@@ -703,6 +727,10 @@ const messages = {
     },
     toolbar: {
       reset: "Reset",
+      confirmResetTitle: "Reset hive",
+      confirmResetMessage:
+        "Are you sure you want to reset the hive? This will remove all cards from the board.",
+      confirmReset: "Reset",
       screenshot: "Screenshot",
       collaborators: "Collaborators",
       comments: "Comments",
@@ -749,6 +777,10 @@ const messages = {
       remaining: "remaining",
       freeCardTitle: "Your turn!",
       maxFreeCardsReached: "You already reached the maximum of 10 free cards!",
+      searchLabel: "Search a card",
+      searchPlaceholder: "Search...",
+      clearSearch: "Clear search",
+      noResults: "No cards match your search.",
     },
     addCardModal: {
       title: "Your turn!",
@@ -1001,6 +1033,14 @@ const messages = {
     },
     workspace: {
       cardNoteTitle: "Kaartnotitie",
+      showLibrary: "Bibliotheek tonen",
+      hideLibrary: "Bibliotheek verbergen",
+      closeLibrary: "Bibliotheek sluiten",
+      zoomOut: "-",
+      zoomIn: "+",
+      resetZoom: "100%",
+      fitContent: "Kaarten passend maken",
+      fitBoard: "Overzicht",
       cardLabel: "Kaart",
       createdBy: "Aangemaakt op {date} door {user}",
       updatedBy: "Laatst bewerkt op {date} door {user}",
@@ -1019,6 +1059,10 @@ const messages = {
     },
     toolbar: {
       reset: "Resetten",
+      confirmResetTitle: "Bijenkorf resetten",
+      confirmResetMessage:
+        "Weet je zeker dat je de bijenkorf wilt resetten? Dit verwijdert alle kaarten van het bord.",
+      confirmReset: "Resetten",
       screenshot: "Schermafbeelding",
       collaborators: "Samenwerkers",
       comments: "Reacties",
@@ -1069,6 +1113,10 @@ const messages = {
       freeCardTitle: "Jij bent aan zet!",
       maxFreeCardsReached:
         "Je hebt al het maximum van 10 vrije kaarten bereikt!",
+      searchLabel: "Een kaart zoeken",
+      searchPlaceholder: "Zoeken...",
+      clearSearch: "Zoekopdracht wissen",
+      noResults: "Geen kaarten komen overeen met uw zoekopdracht.",
     },
     addCardModal: {
       title: "Jij bent aan zet!",

@@ -13,6 +13,8 @@ import { useAuth } from "../context/AuthContext";
 import { useLanguage } from "../context/LanguageContext";
 import UnifiedPromptModal from "./UnifiedPromptModal";
 
+const COMPACT_EDITOR_MEDIA_QUERY = "(max-width: 1200px)";
+
 const CATEGORY_KEY_MAP = {
   fr: {
     visees: "visees",
@@ -164,8 +166,16 @@ export default function RucheWorkspace({
   const [noteDraft, setNoteDraft] = useState("");
   const [isEditingCardNote, setIsEditingCardNote] = useState(false);
   const [pendingReturnCardIds, setPendingReturnCardIds] = useState([]);
-  const [showDeleteCardNoteModal, setShowDeleteCardNoteModal] =
-    useState(false);
+  const [showDeleteCardNoteModal, setShowDeleteCardNoteModal] = useState(false);
+  const [isCompactLayout, setIsCompactLayout] = useState(() => {
+    if (typeof window === "undefined") return false;
+    return window.matchMedia(COMPACT_EDITOR_MEDIA_QUERY).matches;
+  });
+  const [isLibraryOpen, setIsLibraryOpen] = useState(() => {
+    if (typeof window === "undefined") return true;
+    return !window.matchMedia(COMPACT_EDITOR_MEDIA_QUERY).matches;
+  });
+  const [boardZoom, setBoardZoom] = useState(1);
 
   useEffect(() => {
     if (loadKey === activeLoadKey) return;
@@ -179,17 +189,24 @@ export default function RucheWorkspace({
   }, [activeLoadKey, cardsData, initialBoardData, loadKey]);
 
   useEffect(() => {
-    const localizedBoardCards = localizeBoardCards(boardCards, cardsData);
-    setBoardCards(localizedBoardCards);
+    setBoardCards((previousBoardCards) => {
+      const localizedBoardCards = localizeBoardCards(
+        previousBoardCards,
+        cardsData,
+      );
 
-    const boardCardIds = new Set(
-      localizedBoardCards
-        .filter((card) => card.category !== "free")
-        .map((card) => String(card.id)),
-    );
-    setAvailableCards(
-      cardsData.filter((card) => !boardCardIds.has(String(card.id))),
-    );
+      const boardCardIds = new Set(
+        localizedBoardCards
+          .filter((card) => card.category !== "free")
+          .map((card) => String(card.id)),
+      );
+
+      setAvailableCards(
+        cardsData.filter((card) => !boardCardIds.has(String(card.id))),
+      );
+
+      return localizedBoardCards;
+    });
   }, [cardsData]);
 
   useEffect(() => {
@@ -219,6 +236,28 @@ export default function RucheWorkspace({
   }, [noteModalCardId]);
 
   useEffect(() => {
+    if (typeof window === "undefined") return undefined;
+
+    const mediaQuery = window.matchMedia(COMPACT_EDITOR_MEDIA_QUERY);
+    const syncLayout = (matches) => {
+      setIsCompactLayout(matches);
+      setIsLibraryOpen(!matches);
+    };
+
+    syncLayout(mediaQuery.matches);
+
+    const handleChange = (event) => {
+      syncLayout(event.matches);
+    };
+
+    mediaQuery.addEventListener("change", handleChange);
+
+    return () => {
+      mediaQuery.removeEventListener("change", handleChange);
+    };
+  }, []);
+
+  useEffect(() => {
     if (!requestedNoteCardId) return;
 
     const requestedCard =
@@ -240,7 +279,7 @@ export default function RucheWorkspace({
       map[c.id] = i;
     });
     return map;
-  }, []);
+  }, [cardsData]);
 
   const handleDropCard = (card, position, fromLibrary = false) => {
     if (!canEdit) return;
@@ -495,26 +534,43 @@ export default function RucheWorkspace({
 
   return (
     <DndProvider backend={HTML5Backend}>
-      <div className="app editor-app">
-        <CardLibrary
-          cards={availableCards}
-          onFreeSpaceClick={() => setShowModal(true)}
-          userCards={userCards.length}
-        />
-        <HiveBoard
-          cards={boardCards}
-          onDropCard={handleDropCard}
-          onMoveCard={handleMoveCard}
-          onMoveCards={handleMoveCards}
-          onReturnToLibrary={handleReturnToLibrary}
-          onReturnCardsToLibrary={handleReturnCardsToLibrary}
-          selectedCardIds={selectedCardIds}
-          onToggleCardSelection={handleToggleCardSelection}
-          onClearSelection={handleClearSelection}
-          onOpenCardNote={handleOpenCardNote}
-          noteLocked={requireSaveBeforeNote}
-        />
-        <CustomDragPreview />
+      <div className={`app editor-app ${isLibraryOpen ? "library-open" : ""}`}>
+        <div className="editor-app__library-panel">
+          <CardLibrary
+            cards={availableCards}
+            onFreeSpaceClick={() => setShowModal(true)}
+            userCards={userCards.length}
+          />
+        </div>
+        {isCompactLayout && isLibraryOpen ? (
+          <button
+            type="button"
+            className="editor-app__library-backdrop"
+            aria-label={t("workspace.closeLibrary")}
+            onClick={() => setIsLibraryOpen(false)}
+          />
+        ) : null}
+        <div className="editor-app__board-panel">
+          <HiveBoard
+            cards={boardCards}
+            onDropCard={handleDropCard}
+            onMoveCard={handleMoveCard}
+            onMoveCards={handleMoveCards}
+            onReturnToLibrary={handleReturnToLibrary}
+            onReturnCardsToLibrary={handleReturnCardsToLibrary}
+            selectedCardIds={selectedCardIds}
+            onToggleCardSelection={handleToggleCardSelection}
+            onClearSelection={handleClearSelection}
+            onOpenCardNote={handleOpenCardNote}
+            noteLocked={requireSaveBeforeNote}
+            isCompactLayout={isCompactLayout}
+            isLibraryOpen={isLibraryOpen}
+            onToggleLibrary={() => setIsLibraryOpen((current) => !current)}
+            onZoomChange={setBoardZoom}
+            resetSignal={resetSignal}
+          />
+        </div>
+        <CustomDragPreview zoom={boardZoom} />
       </div>
       <AddCardModal
         show={canEdit && showModal}

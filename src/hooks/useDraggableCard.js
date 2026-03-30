@@ -1,24 +1,32 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import { useDeviceDetection } from "./useDeviceDetection";
+import {
+  BOARD_CARD_SIZE,
+  BOARD_CANVAS_HEIGHT,
+  BOARD_CANVAS_WIDTH,
+  clampBoardPosition,
+} from "../lib/board";
 
 function getCardDimensions() {
-  return { width: 200, height: 200 };
+  return { width: BOARD_CARD_SIZE, height: BOARD_CARD_SIZE };
 }
 
-function isCardOutsideBoard(position, width, height, boardRect) {
+function isCardOutsideBoard(position, width, height, boardWidth, boardHeight) {
   return (
     position.x < 0 ||
     position.y < 0 ||
-    position.x + width > boardRect.width ||
-    position.y + height > boardRect.height
+    position.x + width > boardWidth ||
+    position.y + height > boardHeight
   );
 }
 
 export function useDraggableCard({
   card,
-  boardRef,
   cardWidth,
   cardHeight,
+  boardWidth = BOARD_CANVAS_WIDTH,
+  boardHeight = BOARD_CANVAS_HEIGHT,
+  zoom = 1,
   isSelected,
   selectedCards,
   onMoveCard,
@@ -38,8 +46,8 @@ export function useDraggableCard({
     if (!dragStateRef.current) return;
 
     const delta = {
-      x: clientX - dragStateRef.current.startPointer.x,
-      y: clientY - dragStateRef.current.startPointer.y,
+      x: (clientX - dragStateRef.current.startPointer.x) / zoom,
+      y: (clientY - dragStateRef.current.startPointer.y) / zoom,
     };
 
     dragStateRef.current.currentDelta = delta;
@@ -53,17 +61,24 @@ export function useDraggableCard({
     }));
 
     if (nextPositions.length === 1) {
-      onMoveCard(nextPositions[0].id, nextPositions[0].position);
+      onMoveCard(
+        nextPositions[0].id,
+        clampBoardPosition(nextPositions[0].position),
+      );
       return;
     }
 
-    onMoveCards(nextPositions);
-  }, [onMoveCard, onMoveCards]);
+    onMoveCards(
+      nextPositions.map((entry) => ({
+        ...entry,
+        position: clampBoardPosition(entry.position),
+      })),
+    );
+  }, [onMoveCard, onMoveCards, zoom]);
 
   const finalizeDrag = useCallback(() => {
-    if (!dragStateRef.current || !boardRef.current) return;
+    if (!dragStateRef.current) return;
 
-    const boardRect = boardRef.current.getBoundingClientRect();
     const { cards, currentDelta } = dragStateRef.current;
     const finalCards = cards.map((entry) => {
       const position = {
@@ -76,7 +91,13 @@ export function useDraggableCard({
 
     if (finalCards.length > 1) {
       const shouldReturnAll = finalCards.some((entry) =>
-        isCardOutsideBoard(entry.position, entry.width, entry.height, boardRect),
+        isCardOutsideBoard(
+          entry.position,
+          entry.width,
+          entry.height,
+          boardWidth,
+          boardHeight,
+        ),
       );
 
       if (shouldReturnAll) {
@@ -96,26 +117,35 @@ export function useDraggableCard({
         onMoveCards(
           finalCards.map((entry) => ({
             id: entry.card.id,
-            position: entry.position,
+            position: clampBoardPosition(entry.position),
           })),
         );
       }
     } else {
       const [entry] = finalCards;
 
-      if (isCardOutsideBoard(entry.position, cardWidth, cardHeight, boardRect)) {
+      if (
+        isCardOutsideBoard(
+          entry.position,
+          cardWidth,
+          cardHeight,
+          boardWidth,
+          boardHeight,
+        )
+      ) {
         const didReturn = onReturnToLibrary(card);
         if (!didReturn) {
           onMoveCard(card.id, entry.startPosition);
         }
       } else {
-        onMoveCard(card.id, entry.position);
+        onMoveCard(card.id, clampBoardPosition(entry.position));
       }
     }
 
     dragStateRef.current = null;
   }, [
-    boardRef,
+    boardHeight,
+    boardWidth,
     card,
     cardHeight,
     cardWidth,

@@ -1,11 +1,16 @@
 import FreeHexCard from "./FreeSpaceCard";
 import { useDraggableCard } from "../hooks/useDraggableCard";
+import {
+  BOARD_CARD_SIZE,
+  BOARD_CANVAS_HEIGHT,
+  BOARD_CANVAS_WIDTH,
+} from "../lib/board";
 
 export default function DraggableFreeCard({
   card,
-  boardRef,
   isSelected,
   selectedCards,
+  zoom,
   onMoveCard,
   onMoveCards,
   onReturnToLibrary,
@@ -15,9 +20,11 @@ export default function DraggableFreeCard({
 }) {
   const { isDragging, handleMouseDown, handleTouchStart } = useDraggableCard({
     card,
-    boardRef,
-    cardWidth: 200,
-    cardHeight: 200,
+    cardWidth: BOARD_CARD_SIZE,
+    cardHeight: BOARD_CARD_SIZE,
+    boardWidth: BOARD_CANVAS_WIDTH,
+    boardHeight: BOARD_CANVAS_HEIGHT,
+    zoom,
     isSelected,
     selectedCards,
     onMoveCard,
@@ -32,12 +39,13 @@ export default function DraggableFreeCard({
     <div
       className={`draggable-card free-space ${isSelected ? "selected" : ""} ${isDragging ? "dragging" : ""}`}
       style={{
+        "--board-card-size": `${BOARD_CARD_SIZE}px`,
         position: "absolute",
         left: card.position.x,
         top: card.position.y,
         zIndex: isDragging || isSelected ? 1100 : 1000,
-        width: "200px",
-        height: "200px",
+        width: `${BOARD_CARD_SIZE}px`,
+        height: `${BOARD_CARD_SIZE}px`,
         cursor: isDragging ? "grabbing" : "grab",
       }}
       onMouseDown={handleMouseDown}

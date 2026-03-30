@@ -65,6 +65,7 @@ export default function RucheEditorPage() {
   const [showLeaveDirtyModal, setShowLeaveDirtyModal] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState(null);
   const [editingTarget, setEditingTarget] = useState(null);
+  const [showResetConfirmModal, setShowResetConfirmModal] = useState(false);
   const [resetSignal, setResetSignal] = useState(0);
   const [saveRequiredAction, setSaveRequiredAction] = useState(null);
   const [openCollaboratorsSignal, setOpenCollaboratorsSignal] = useState(0);
@@ -403,6 +404,15 @@ export default function RucheEditorPage() {
     setShowCommentsModal(true);
   };
 
+  const handleResetRequest = () => {
+    setShowResetConfirmModal(true);
+  };
+
+  const handleConfirmReset = () => {
+    setShowResetConfirmModal(false);
+    setResetSignal((prev) => prev + 1);
+  };
+
   const handleOpenCollaborators = () => {
     if (requiresSavedHivePrompt) {
       promptSaveForAction({ type: "collaborators" });
@@ -668,6 +678,7 @@ export default function RucheEditorPage() {
           <label>
             {t("editor.hiveTitleLabel")}
             <input
+              id="hive-title"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               onKeyDown={(event) => {
@@ -690,7 +701,7 @@ export default function RucheEditorPage() {
 
         <div className="editor-topbar-actions">
           <Toolbar
-            onReset={() => setResetSignal((prev) => prev + 1)}
+            onReset={handleResetRequest}
             showCollaboratorsButton={isNew}
             isCollaboratorsLocked={requiresSavedHivePrompt}
             canInvite={
@@ -942,6 +953,16 @@ export default function RucheEditorPage() {
           </div>
         </div>
       )}
+
+      <UnifiedPromptModal
+        isOpen={showResetConfirmModal}
+        title={t("toolbar.confirmResetTitle")}
+        message={t("toolbar.confirmResetMessage")}
+        confirmLabel={t("toolbar.confirmReset")}
+        confirmClassName="danger"
+        onCancel={() => setShowResetConfirmModal(false)}
+        onConfirm={handleConfirmReset}
+      />
 
       <UnifiedPromptModal
         isOpen={showLeaveDirtyModal}

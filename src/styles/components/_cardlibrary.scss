@@ -1,15 +1,56 @@
 .card-library {
-  flex: 1;
+  --board-card-size: 100%;
+  height: 100%;
   padding: 10px;
-  border-right: 1px solid #ddd;
   overflow-y: auto;
   background: #fff;
   border-radius: 8px;
+  border: 1px solid #ddd;
 
   h2 {
     font-size: 1rem;
     font-weight: bold;
     margin-bottom: 8px;
+  }
+
+  .card-library__search {
+    margin-bottom: 14px;
+
+    .card-library__search-input {
+      position: relative;
+    }
+
+    input {
+      width: 100%;
+      border: 1px solid #d8d2c7;
+      border-radius: 10px;
+      padding: 10px 38px 10px 12px;
+      font-size: 0.95rem;
+      background: #fffdf8;
+      color: #273043;
+    }
+
+    .card-library__clear-search {
+      position: absolute;
+      top: 50%;
+      right: 8px;
+      transform: translateY(-50%);
+      width: 24px;
+      height: 24px;
+      border: 0;
+      border-radius: 50%;
+      background: #ece6db;
+      color: #3a3a3a;
+      font-size: 0.9rem;
+      line-height: 1;
+      cursor: pointer;
+      display: grid;
+      place-items: center;
+    }
+
+    .card-library__clear-search:hover {
+      background: #ddd5c8;
+    }
   }
 
   .card-category {
@@ -22,15 +63,48 @@
     }
 
     .card-list {
-      display: flex;
-      flex-wrap: wrap;
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(155px, 1fr));
+      gap: 1px;
+      align-items: start;
     }
   }
 }
 
-.hive-board {
-  flex: 2;
-  position: relative;
-  background: #fffef9;
-  overflow: hidden;
+.card-library .library-card {
+  margin: 0 !important;
+  width: 100%;
 }
+
+.card-library .library-card.library-card--match {
+  border-radius: 10px;
+  box-shadow: 0 0 0 2px rgba(232, 166, 52, 0.75);
+  background: rgba(255, 252, 238, 0.92);
+}
+
+.card-library .library-card__match-snippet {
+  margin: 4px 8px 8px;
+  font-size: 0.75rem;
+  line-height: 1.2;
+  color: #2f3744;
+  text-align: center;
+}
+
+.card-library .library-card__match-snippet mark {
+  background: #ffe29f;
+  color: inherit;
+  padding: 0 2px;
+  border-radius: 3px;
+}
+
+.card-library .library-card.free-space {
+  width: 100%;
+}
+
+.card-library__empty-search {
+  margin: 12px 4px 0;
+  color: #5d6778;
+  font-size: 0.95rem;
+}
+
+
