@@ -8,6 +8,7 @@ import PageLoader from "../components/PageLoader";
 import HivePreview from "../components/HivePreview";
 import HexCard from "../components/HexCard";
 import FreeHexCard from "../components/FreeSpaceCard";
+import PasswordField from "../components/PasswordField";
 import { useLanguage } from "../context/LanguageContext";
 import {
   captureBoardFrontAndBack,
@@ -114,10 +115,11 @@ function ProfileCaptureBoard({ boardData }) {
 
 export default function ProfilePage() {
   const { token, refreshMe, logout } = useAuth();
-  const { t, dateLocale, translateRole } = useLanguage();
+  const { t, dateLocale, translateRole, roleOptions } = useLanguage();
   const navigate = useNavigate();
   const [profile, setProfile] = useState(null);
   const [error, setError] = useState("");
+  const [profileMessage, setProfileMessage] = useState("");
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [deletePassword, setDeletePassword] = useState("");
   const [deletePasswordConfirm, setDeletePasswordConfirm] = useState("");
@@ -136,6 +138,14 @@ export default function ProfilePage() {
     sourceTitle: "",
     nextTitle: "",
   });
+  const [roleForm, setRoleForm] = useState({ role: "", roleOtherText: "" });
+  const [passwordForm, setPasswordForm] = useState({
+    currentPassword: "",
+    newPassword: "",
+    newPasswordConfirm: "",
+  });
+  const [isUpdatingRole, setIsUpdatingRole] = useState(false);
+  const [isUpdatingPassword, setIsUpdatingPassword] = useState(false);
 
   useEffect(() => {
     let mounted = true;
@@ -160,7 +170,101 @@ export default function ProfilePage() {
 
     setOwnedPage((current) => clampPage(current, profile.ownedHives.length));
     setSharedPage((current) => clampPage(current, profile.sharedHives.length));
+    setRoleForm({
+      role: profile.user.roleLabel || "",
+      roleOtherText: profile.user.roleOtherText || "",
+    });
   }, [profile]);
+
+  const updateRole = async (event) => {
+    event.preventDefault();
+
+    const selectedRole = roleForm.role;
+    const trimmedRoleOtherText = roleForm.roleOtherText.trim();
+
+    if (!selectedRole) {
+      setError(t("profile.roleRequired"));
+      return;
+    }
+
+    if (selectedRole === "Autre" && !trimmedRoleOtherText) {
+      setError(t("profile.roleOtherRequired"));
+      return;
+    }
+
+    try {
+      setError("");
+      setProfileMessage("");
+      setIsUpdatingRole(true);
+
+      await apiFetch("/users/me", {
+        method: "PATCH",
+        token,
+        body: {
+          role: selectedRole,
+          roleOtherText: selectedRole === "Autre" ? trimmedRoleOtherText : "",
+        },
+      });
+
+      const data = await refreshMe();
+      setProfile(data);
+      setProfileMessage(t("profile.updateSuccess"));
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setIsUpdatingRole(false);
+    }
+  };
+
+  const updatePassword = async (event) => {
+    event.preventDefault();
+
+    const currentPassword = passwordForm.currentPassword.trim();
+    const newPassword = passwordForm.newPassword.trim();
+    const newPasswordConfirm = passwordForm.newPasswordConfirm.trim();
+
+    if (!currentPassword || !newPassword || !newPasswordConfirm) {
+      setError(t("profile.passwordUpdateRequiredFields"));
+      return;
+    }
+
+    if (newPassword !== newPasswordConfirm) {
+      setError(t("profile.passwordMismatch"));
+      return;
+    }
+
+    if (newPassword.length < 8) {
+      setError(t("profile.passwordTooShort"));
+      return;
+    }
+
+    try {
+      setError("");
+      setProfileMessage("");
+      setIsUpdatingPassword(true);
+
+      await apiFetch("/users/me", {
+        method: "PATCH",
+        token,
+        body: {
+          currentPassword,
+          newPassword,
+          newPasswordConfirm,
+        },
+      });
+
+      setPasswordForm({
+        currentPassword: "",
+        newPassword: "",
+        newPasswordConfirm: "",
+      });
+      setProfileMessage(t("profile.passwordUpdateSuccess"));
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setIsUpdatingPassword(false);
+    }
+  };
 
   const deleteHive = async () => {
     if (!confirmDeleteHiveId) return;
@@ -358,9 +462,10 @@ export default function ProfilePage() {
     : [];
 
   return (
-    <section className="page-shell">
+    <section className="page-shell profile-page">
       <h2>{t("profile.title")}</h2>
       {error ? <p className="form-error">{error}</p> : null}
+      {profileMessage ? <p className="form-success">{profileMessage}</p> : null}
       {profile ? (
         <>
           <p>
@@ -556,15 +661,123 @@ export default function ProfilePage() {
             </>
           ) : null}
 
-          <h3>{t("profile.deleteProfileTitle")}</h3>
-          <p>{t("profile.deleteProfileDesc")}</p>
-          <button
-            type="button"
-            className="danger-btn"
-            onClick={openDeleteModal}
-          >
-            {t("profile.deleteProfileTitle")}
-          </button>
+          <section className="profile-modify-section">
+            <h3>{t("profile.modifyProfileTitle")}</h3>
+            <p>{t("profile.modifyProfileDesc")}</p>
+
+            <h4>{t("profile.changeRole")}</h4>
+            <form onSubmit={updateRole} className="form-grid">
+              <label>
+                {t("register.role")}
+                <select
+                  value={roleForm.role}
+                  onChange={(event) =>
+                    setRoleForm((prev) => ({
+                      ...prev,
+                      role: event.target.value,
+                    }))
+                  }
+                  disabled={isUpdatingRole}
+                >
+                  {roleOptions.map((role) => (
+                    <option key={role.value} value={role.value}>
+                      {role.label}
+                    </option>
+                  ))}
+                </select>
+              </label>
+
+              {roleForm.role === "Autre" ? (
+                <label>
+                  {t("register.roleOther")}
+                  <input
+                    value={roleForm.roleOtherText}
+                    onChange={(event) =>
+                      setRoleForm((prev) => ({
+                        ...prev,
+                        roleOtherText: event.target.value,
+                      }))
+                    }
+                    disabled={isUpdatingRole}
+                    required
+                  />
+                </label>
+              ) : null}
+
+              <div className="inline-actions">
+                <button type="submit" disabled={isUpdatingRole}>
+                  {isUpdatingRole
+                    ? t("profile.updatingRole")
+                    : t("profile.updateRole")}
+                </button>
+              </div>
+            </form>
+
+            <h4>{t("profile.changePassword")}</h4>
+            <form onSubmit={updatePassword} className="form-grid">
+              <PasswordField
+                label={t("profile.currentPassword")}
+                value={passwordForm.currentPassword}
+                onChange={(event) =>
+                  setPasswordForm((prev) => ({
+                    ...prev,
+                    currentPassword: event.target.value,
+                  }))
+                }
+                required
+                minLength={1}
+                autoComplete="current-password"
+              />
+
+              <PasswordField
+                label={t("profile.newPassword")}
+                value={passwordForm.newPassword}
+                onChange={(event) =>
+                  setPasswordForm((prev) => ({
+                    ...prev,
+                    newPassword: event.target.value,
+                  }))
+                }
+                required
+                minLength={8}
+                autoComplete="new-password"
+              />
+
+              <PasswordField
+                label={t("profile.newPasswordConfirm")}
+                value={passwordForm.newPasswordConfirm}
+                onChange={(event) =>
+                  setPasswordForm((prev) => ({
+                    ...prev,
+                    newPasswordConfirm: event.target.value,
+                  }))
+                }
+                required
+                minLength={8}
+                autoComplete="new-password"
+              />
+
+              <div className="inline-actions">
+                <button type="submit" disabled={isUpdatingPassword}>
+                  {isUpdatingPassword
+                    ? t("profile.updatingPassword")
+                    : t("profile.updatePassword")}
+                </button>
+              </div>
+            </form>
+          </section>
+
+          <section className="profile-danger-zone">
+            <h3>{t("profile.deleteProfileTitle")}</h3>
+            <p>{t("profile.deleteProfileDesc")}</p>
+            <button
+              type="button"
+              className="danger-btn"
+              onClick={openDeleteModal}
+            >
+              {t("profile.deleteProfileTitle")}
+            </button>
+          </section>
 
           {isDeleteModalOpen ? (
             <div
