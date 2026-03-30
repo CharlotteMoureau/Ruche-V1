@@ -86,7 +86,7 @@ const CARD_CATEGORIES = {
       key: "recommandations-equipe",
       label: "Recommandations pour l'équipe éducative",
     },
-    { key: "free", label: "A vous de jouer !" },
+    { key: "free", label: "À vous de jouer !" },
   ],
   en: [
     { key: "domaine", label: "Cultural and artistic expression domains" },
@@ -443,7 +443,7 @@ const messages = {
     cardLibrary: {
       title: "Cartes disponibles",
       remaining: "restantes",
-      freeCardTitle: "A vous de jouer !",
+      freeCardTitle: "À vous de jouer !",
       maxFreeCardsReached:
         "Vous avez déjà atteint le maximum de 10 cartes libres !",
       searchLabel: "Rechercher une carte",
@@ -452,7 +452,7 @@ const messages = {
       noResults: "Aucune carte ne correspond à votre recherche.",
     },
     addCardModal: {
-      title: "A vous de jouer !",
+      title: "À vous de jouer !",
       placeholder: "Entrez votre texte (max. 50 caractères)",
       emptyError: "Veuillez entrer un texte pour la carte.",
       validate: "Valider",

@@ -127,11 +127,11 @@ export default function AddCardModal({
         </div>
 
         <div className="modal-actions">
+          <button className="btn danger" onClick={handleClose}>
+            {t("addCardModal.close")}
+          </button>
           <button className="btn" onClick={handleValidate}>
             {t("addCardModal.validate")}
-          </button>
-          <button className="btn secondary" onClick={handleClose}>
-            {t("addCardModal.close")}
           </button>
         </div>
 

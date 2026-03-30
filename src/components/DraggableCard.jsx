@@ -1,11 +1,6 @@
 import HexCard from "./HexCard";
 import FreeHexCard from "./FreeSpaceCard";
-import { useDraggableCard } from "../hooks/useDraggableCard";
-import {
-  BOARD_CARD_SIZE,
-  BOARD_CANVAS_HEIGHT,
-  BOARD_CANVAS_WIDTH,
-} from "../lib/board";
+import DraggableBoardCard from "./DraggableBoardCard";
 
 export default function DraggableCard({
   card,
@@ -19,47 +14,23 @@ export default function DraggableCard({
   onToggleSelection,
   onClearSelection,
 }) {
-  const { isDragging, handleMouseDown, handleTouchStart } = useDraggableCard({
-    card,
-    cardWidth: BOARD_CARD_SIZE,
-    cardHeight: BOARD_CARD_SIZE,
-    boardWidth: BOARD_CANVAS_WIDTH,
-    boardHeight: BOARD_CANVAS_HEIGHT,
-    zoom,
-    isSelected,
-    selectedCards,
-    onMoveCard,
-    onMoveCards,
-    onReturnToLibrary,
-    onReturnCardsToLibrary,
-    onToggleSelection,
-    onClearSelection,
-  });
+  const isFreeCard = card.category === "free";
 
   return (
-    <div
-      className={`draggable-card ${isSelected ? "selected" : ""} ${isDragging ? "dragging" : ""}`}
-      style={{
-        "--board-card-size": `${BOARD_CARD_SIZE}px`,
-        position: "absolute",
-        left: card.position.x,
-        top: card.position.y,
-        zIndex: isDragging || isSelected ? 1100 : 1000,
-        width: `${BOARD_CARD_SIZE}px`,
-        height: `${BOARD_CARD_SIZE}px`,
-        cursor: isDragging ? "grabbing" : "grab",
-        userSelect: "none",
-        WebkitUserSelect: "none",
-        WebkitTouchCallout: "none",
-      }}
-      onMouseDown={handleMouseDown}
-      onTouchStart={handleTouchStart}
+    <DraggableBoardCard
+      card={card}
+      className={isFreeCard ? "free-space" : ""}
+      isSelected={isSelected}
+      selectedCards={selectedCards}
+      zoom={zoom}
+      onMoveCard={onMoveCard}
+      onMoveCards={onMoveCards}
+      onReturnToLibrary={onReturnToLibrary}
+      onReturnCardsToLibrary={onReturnCardsToLibrary}
+      onToggleSelection={onToggleSelection}
+      onClearSelection={onClearSelection}
     >
-      {card.category === "free" ? (
-        <FreeHexCard card={card} />
-      ) : (
-        <HexCard card={card} />
-      )}
-    </div>
+      {isFreeCard ? <FreeHexCard card={card} /> : <HexCard card={card} />}
+    </DraggableBoardCard>
   );
 }

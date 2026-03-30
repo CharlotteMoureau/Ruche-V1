@@ -193,6 +193,13 @@ export default function RucheEditorPage() {
     };
   }, [showCommentsModal]);
 
+  useEffect(() => {
+    document.body.classList.add("editor-route");
+    return () => {
+      document.body.classList.remove("editor-route");
+    };
+  }, []);
+
   const saveHive = async () => {
     if (isSaving) return false;
 

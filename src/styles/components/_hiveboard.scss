@@ -166,6 +166,15 @@
   display: none !important;
 }
 
+.capture-mode .hive-board__viewport {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.capture-mode .hive-board__viewport::-webkit-scrollbar {
+  display: none;
+}
+
 @media (max-width: 900px) {
   .hive-board__controls-group--zoom {
     margin-left: 0;

@@ -22,6 +22,15 @@
   overflow: hidden;
 }
 
+body.editor-route {
+  overflow: hidden;
+}
+
+body.editor-route #root {
+  overflow: hidden;
+  padding-bottom: 0;
+}
+
 .editor-topbar {
   display: flex;
   align-items: center;
@@ -59,7 +68,7 @@
 .editor-page .editor-app {
   flex: 1;
   min-height: 0;
-  height: auto;
+  height: 100%;
   margin: 0;
   display: grid;
   grid-template-columns: clamp(250px, 25%, 510px) minmax(0, 1fr);

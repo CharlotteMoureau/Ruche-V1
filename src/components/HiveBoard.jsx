@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useDrop } from "react-dnd";
 import DraggableCard from "./DraggableCard";
-import DraggableFreeCard from "./DraggableFreeCard";
 import { useLanguage } from "../context/LanguageContext";
 import {
   BOARD_CANVAS_HEIGHT,
@@ -556,23 +555,6 @@ export default function HiveBoard({
               onTouchStart={handleBoardMouseDown}
             >
               {cards.map((card) => {
-                if (card.category === "free") {
-                  return (
-                    <DraggableFreeCard
-                      key={card.id}
-                      card={card}
-                      isSelected={selectedCardIds.has(card.id)}
-                      selectedCards={selectedCards}
-                      zoom={zoom}
-                      onMoveCard={onMoveCard}
-                      onMoveCards={onMoveCards}
-                      onReturnToLibrary={onReturnToLibrary}
-                      onReturnCardsToLibrary={onReturnCardsToLibrary}
-                      onToggleSelection={onToggleCardSelection}
-                      onClearSelection={onClearSelection}
-                    />
-                  );
-                }
                 return (
                   <DraggableCard
                     key={card.id}
