@@ -2,6 +2,7 @@ import { useRef } from "react";
 import { useDrop } from "react-dnd";
 import DraggableCard from "./DraggableCard";
 import DraggableFreeCard from "./DraggableFreeCard";
+import { useLanguage } from "../context/LanguageContext";
 
 export default function HiveBoard({
   cards,
@@ -16,6 +17,7 @@ export default function HiveBoard({
   onOpenCardNote,
   noteLocked = false,
 }) {
+  const { t } = useLanguage();
   const boardRef = useRef(null);
   const selectedCards = cards.filter((card) => selectedCardIds.has(card.id));
 
@@ -79,6 +81,12 @@ export default function HiveBoard({
     }
   };
 
+  const handleNoteOpen = (event, card) => {
+    event.preventDefault();
+    event.stopPropagation();
+    onOpenCardNote?.(card);
+  };
+
   return (
     <main
       ref={(node) => {
@@ -105,8 +113,6 @@ export default function HiveBoard({
               onReturnCardsToLibrary={onReturnCardsToLibrary}
               onToggleSelection={onToggleCardSelection}
               onClearSelection={onClearSelection}
-              onOpenNote={onOpenCardNote}
-              noteLocked={noteLocked}
             />
           );
         }
@@ -123,11 +129,43 @@ export default function HiveBoard({
             onReturnCardsToLibrary={onReturnCardsToLibrary}
             onToggleSelection={onToggleCardSelection}
             onClearSelection={onClearSelection}
-            onOpenNote={onOpenCardNote}
-            noteLocked={noteLocked}
           />
         );
       })}
+      <div className="hive-board__note-layer">
+        {cards.map((card) => {
+          const hasNote = Boolean(card?.comment?.message?.trim());
+
+          return (
+            <button
+              key={`${card.id}-note-indicator`}
+              type="button"
+              className={`card-note-indicator ${hasNote ? "has-note" : ""} ${noteLocked ? "is-locked" : ""}`.trim()}
+              style={{
+                left: card.position.x + 162,
+                top: card.position.y + 10,
+              }}
+              aria-label={t("workspace.cardNoteTitle")}
+              aria-disabled={noteLocked}
+              onMouseDown={(event) => {
+                event.preventDefault();
+                event.stopPropagation();
+              }}
+              onTouchStart={(event) => {
+                event.stopPropagation();
+              }}
+              onClick={(event) => handleNoteOpen(event, card)}
+            >
+              <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                <path
+                  d="M4 4h16v11H8l-4 4V4zm2 2v8.17L7.17 13H18V6H6z"
+                  fill="currentColor"
+                />
+              </svg>
+            </button>
+          );
+        })}
+      </div>
     </main>
   );
 }
