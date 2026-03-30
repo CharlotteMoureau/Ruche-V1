@@ -31,16 +31,16 @@ const registerSchema = z
 authRouter.post("/register", async (req, res) => {
   const parsed = registerSchema.safeParse(req.body);
   if (!parsed.success) {
-    return res.status(400).json({ error: parsed.error.issues[0]?.message || "Donnees invalides" });
+    return res.status(400).json({ error: parsed.error.issues[0]?.message || "Données invalides" });
   }
 
   const role = normalizeRole(parsed.data.role);
   if (!USER_ROLES.includes(role)) {
-    return res.status(400).json({ error: "Role invalide" });
+    return res.status(400).json({ error: "Rôle invalide" });
   }
 
   if (role === "Autre" && !parsed.data.roleOtherText?.trim()) {
-    return res.status(400).json({ error: "Veuillez preciser votre role" });
+    return res.status(400).json({ error: "Veuillez préciser votre rôle" });
   }
 
   const existing = await prisma.user.findFirst({
@@ -53,11 +53,11 @@ authRouter.post("/register", async (req, res) => {
   });
 
   if (existing?.username === parsed.data.username) {
-    return res.status(409).json({ error: "Nom d'utilisateur deja utilise" });
+    return res.status(409).json({ error: "Nom d'utilisateur déjà utilisé" });
   }
 
   if (existing?.email === parsed.data.email.toLowerCase()) {
-    return res.status(409).json({ error: "Email deja utilise" });
+    return res.status(409).json({ error: "Email déjà utilisé" });
   }
 
   const user = await prisma.user.create({
@@ -171,7 +171,7 @@ authRouter.post("/forgot-password", async (req, res) => {
   const email = parsed.data.email.toLowerCase();
   const user = await prisma.user.findUnique({ where: { email } });
   if (!user) {
-    return res.json({ message: "Si le compte existe, un email a ete envoye." });
+    return res.json({ message: "Si le compte existe, un email a été envoyé." });
   }
 
   const { token, tokenHash, expiresAt } = makeResetToken();
@@ -187,7 +187,7 @@ authRouter.post("/forgot-password", async (req, res) => {
   const link = `${appUrl}/reset-password?token=${token}`;
   await sendResetPasswordEmail({ to: user.email, link });
 
-  return res.json({ message: "Si le compte existe, un email a ete envoye." });
+  return res.json({ message: "Si le compte existe, un email a été envoyé." });
 });
 
 const resetSchema = z
@@ -204,7 +204,7 @@ const resetSchema = z
 authRouter.post("/reset-password", async (req, res) => {
   const parsed = resetSchema.safeParse(req.body);
   if (!parsed.success) {
-    return res.status(400).json({ error: parsed.error.issues[0]?.message || "Donnees invalides" });
+    return res.status(400).json({ error: parsed.error.issues[0]?.message || "Données invalides" });
   }
 
   const tokenHash = hashResetToken(parsed.data.token);
@@ -217,7 +217,7 @@ authRouter.post("/reset-password", async (req, res) => {
   });
 
   if (!record) {
-    return res.status(400).json({ error: "Lien invalide ou expire" });
+    return res.status(400).json({ error: "Lien invalide ou expiré" });
   }
 
   await prisma.$transaction([
@@ -231,5 +231,5 @@ authRouter.post("/reset-password", async (req, res) => {
     }),
   ]);
 
-  return res.json({ message: "Mot de passe mis a jour" });
+  return res.json({ message: "Mot de passe mis à jour" });
 });
