@@ -55,6 +55,8 @@ export default function CardLibrary({ cards, onFreeSpaceClick, userCards }) {
       <div className="card-library__search">
         <div className="card-library__search-input">
           <input
+            id="card-library-search"
+            name="card-library-search"
             type="text"
             value={searchTerm}
             onChange={(event) => setSearchTerm(event.target.value)}

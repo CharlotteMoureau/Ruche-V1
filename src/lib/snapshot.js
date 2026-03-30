@@ -453,6 +453,10 @@ export async function captureHiveExportBundle({
   title,
   comments = [],
   boardCards = [],
+  frontBoardFileName,
+  backBoardFileName,
+  chatFileName,
+  cardNotesFileName,
   chatTitle,
   noCommentsMessage,
   cardNotesTitle,
@@ -485,11 +489,20 @@ export async function captureHiveExportBundle({
     }),
   );
 
+  const resolvedFrontBoardFileName =
+    sanitizeSnapshotFileName(frontBoardFileName || "front-board") + ".png";
+  const resolvedBackBoardFileName =
+    sanitizeSnapshotFileName(backBoardFileName || "back-board") + ".png";
+  const resolvedChatFileName =
+    sanitizeSnapshotFileName(chatFileName || "hive-chat") + ".png";
+  const resolvedCardNotesFileName =
+    sanitizeSnapshotFileName(cardNotesFileName || "card-notes") + ".png";
+
   const zipBlob = await createZipFromImages([
-    { name: "01-front-board.png", dataUrl: frontDataUrl },
-    { name: "02-back-board.png", dataUrl: backDataUrl },
-    { name: "03-hive-chat.png", dataUrl: chatDataUrl },
-    { name: "04-card-notes.png", dataUrl: cardCommentsDataUrl },
+    { name: `01-${resolvedFrontBoardFileName}`, dataUrl: frontDataUrl },
+    { name: `02-${resolvedBackBoardFileName}`, dataUrl: backDataUrl },
+    { name: `03-${resolvedChatFileName}`, dataUrl: chatDataUrl },
+    { name: `04-${resolvedCardNotesFileName}`, dataUrl: cardCommentsDataUrl },
   ]);
 
   return {

@@ -113,6 +113,21 @@
   background: #fff;
   border-radius: 14px;
   border: 1px solid #e2ded8;
+
+  h2 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: $bleu-fonce;
+    margin: 0 0 12px 0;
+    letter-spacing: -0.5px;
+  }
+
+  > p {
+    font-size: 1.1rem;
+    color: #666;
+    margin: 0 0 32px 0;
+    line-height: 1.6;
+  }
 }
 
 @media (max-width: 900px) {

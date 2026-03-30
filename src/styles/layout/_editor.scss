@@ -65,6 +65,10 @@ body.editor-route #root {
   flex-shrink: 0;
 }
 
+.editor-page .form-info {
+  margin-bottom: 10px;
+}
+
 .editor-page .editor-app {
   flex: 1;
   min-height: 0;

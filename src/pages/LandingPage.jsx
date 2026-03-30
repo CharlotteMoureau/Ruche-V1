@@ -23,11 +23,29 @@ export default function LandingPage() {
         {isAuthenticated ? (
           <>
             <Link to="/profile" className="cta-card">
-              {t("landing.goProfile")}
+              <div className="cta-card-image">
+                <img src="https://via.placeholder.com/400x200?text=Your+Profile" alt="Profile" />
+              </div>
+              <div className="cta-card-content">
+                {t("landing.goProfile")}
+              </div>
             </Link>
             <Link to="/hives/new" className="cta-card">
-              {t("landing.createHive")}
+              <div className="cta-card-image">
+                <img src="https://via.placeholder.com/400x200?text=Create+a+Hive" alt="Create Hive" />
+              </div>
+              <div className="cta-card-content">
+                {t("landing.createHive")}
+              </div>
             </Link>
+            <a href="https://www.peca.be/ressources/boite-a-outils/la-ruche" target="_blank" rel="noopener noreferrer" className="cta-card">
+              <div className="cta-card-image">
+                <img src="https://via.placeholder.com/400x200?text=Learn+About+Hive" alt="Learn More" />
+              </div>
+              <div className="cta-card-content">
+                {t("landing.learnMore")}
+              </div>
+            </a>
           </>
         ) : (
           <>

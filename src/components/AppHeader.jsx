@@ -1,14 +1,28 @@
 import { useEffect, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { useLanguage } from "../context/LanguageContext";
 import { apiFetch } from "../lib/api";
 
 export default function AppHeader() {
   const { isAuthenticated, user, logout, isAdmin, token } = useAuth();
-  const { language, setLanguage, supportedLanguages, t } = useLanguage();
+  const { t } = useLanguage();
+  const location = useLocation();
   const navigate = useNavigate();
   const [pendingInvitesCount, setPendingInvitesCount] = useState(0);
+
+  const isEditorRoute =
+    location.pathname === "/hives/new" || location.pathname.startsWith("/hives/");
+  const shouldGuardHeaderNavigation = () =>
+    isEditorRoute && Boolean(window.__RUCHE_EDITOR_IS_DIRTY);
+
+  const requestEditorLeave = (request) => {
+    window.dispatchEvent(
+      new CustomEvent("ruche:request-editor-leave", {
+        detail: request,
+      }),
+    );
+  };
 
   useEffect(() => {
     if (!isAuthenticated || isAdmin || !token) {
@@ -49,27 +63,31 @@ export default function AppHeader() {
       </Link>
 
       <nav className="site-nav">
-        <label className="language-select-wrap">
-          <span>{t("language.label")}</span>
-          <select
-            id="language-select"
-            className="language-select"
-            value={language}
-            onChange={(event) => setLanguage(event.target.value)}
-          >
-            {supportedLanguages.map((langCode) => (
-              <option key={langCode} value={langCode}>
-                {t(`language.${langCode}`)}
-              </option>
-            ))}
-          </select>
-        </label>
         {isAuthenticated ? (
           <>
             <span className="user-pill">{user?.username}</span>
-            {!isAdmin ? <Link to="/profile">{t("header.profile")}</Link> : null}
             {!isAdmin ? (
-              <Link to="/inbox" className="inbox-link">
+              <Link
+                to="/profile"
+                onClick={(event) => {
+                  if (!shouldGuardHeaderNavigation()) return;
+                  event.preventDefault();
+                  requestEditorLeave({ type: "route", to: "/profile" });
+                }}
+              >
+                {t("header.profile")}
+              </Link>
+            ) : null}
+            {!isAdmin ? (
+              <Link
+                to="/inbox"
+                className="inbox-link"
+                onClick={(event) => {
+                  if (!shouldGuardHeaderNavigation()) return;
+                  event.preventDefault();
+                  requestEditorLeave({ type: "route", to: "/inbox" });
+                }}
+              >
                 {t("header.inbox")}
                 {pendingInvitesCount > 0 ? (
                   <span className="inbox-badge">{pendingInvitesCount}</span>
@@ -80,6 +98,10 @@ export default function AppHeader() {
             <button
               type="button"
               onClick={() => {
+                if (shouldGuardHeaderNavigation()) {
+                  requestEditorLeave({ type: "logout" });
+                  return;
+                }
                 logout();
                 navigate("/");
               }}

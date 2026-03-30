@@ -10,6 +10,9 @@ import HexCard from "../components/HexCard";
 import FreeHexCard from "../components/FreeSpaceCard";
 import PasswordField from "../components/PasswordField";
 import { useLanguage } from "../context/LanguageContext";
+import cardsFr from "../data/cards.json";
+import cardsEn from "../data/cards_en.json";
+import cardsNl from "../data/cards_nl.json";
 import {
   captureHiveExportBundle,
   triggerDownload,
@@ -19,6 +22,33 @@ import {
 const HIVES_PER_PAGE = 3;
 const CARD_SIZE = 200;
 const BOARD_PADDING = 60;
+
+const CATEGORY_KEY_MAP = {
+  fr: {
+    visees: "visees",
+    "conditions-enseignant": "conditions-enseignant",
+    "recommandations-enseignant": "recommandations-enseignant",
+    "conditions-equipe": "conditions-equipe",
+    "recommandations-equipe": "recommandations-equipe",
+    domaine: "domaine",
+  },
+  en: {
+    aims: "visees",
+    "teacher-conditions": "conditions-enseignant",
+    "teacher-recommendations": "recommandations-enseignant",
+    "team-conditions": "conditions-equipe",
+    "team-recommendations": "recommandations-equipe",
+    domain: "domaine",
+  },
+  nl: {
+    doelen: "visees",
+    "voorwaarden-leerkracht": "conditions-enseignant",
+    "aanbevelingen-leerkracht": "recommandations-enseignant",
+    "voorwaarden-team": "conditions-equipe",
+    "aanbevelingen-team": "recommandations-equipe",
+    domein: "domaine",
+  },
+};
 
 function getTotalPages(count) {
   return Math.max(1, Math.ceil(count / HIVES_PER_PAGE));
@@ -38,6 +68,32 @@ function formatDateTime(value, locale) {
     dateStyle: "medium",
     timeStyle: "short",
   }).format(date);
+}
+
+function toCanonicalCards(cards, language) {
+  const map = CATEGORY_KEY_MAP[language] || CATEGORY_KEY_MAP.fr;
+  return cards.map((card) => ({
+    ...card,
+    category: map[card.category] || card.category,
+  }));
+}
+
+function localizeBoardCards(boardCards, cardsData) {
+  const cardsById = new Map(cardsData.map((card) => [String(card.id), card]));
+
+  return boardCards.map((card) => {
+    if (card.category === "free") return card;
+
+    const localized = cardsById.get(String(card.id));
+    if (!localized) return card;
+
+    return {
+      ...card,
+      title: localized.title,
+      definition: localized.definition,
+      category: localized.category,
+    };
+  });
 }
 
 function getBoardCards(boardData) {
@@ -150,7 +206,7 @@ function ProfileCaptureBoard({ boardData }) {
 
 export default function ProfilePage() {
   const { token, refreshMe, logout } = useAuth();
-  const { t, dateLocale, translateRole, roleOptions } = useLanguage();
+  const { language, t, dateLocale, translateRole, roleOptions } = useLanguage();
   const navigate = useNavigate();
   const [profile, setProfile] = useState(null);
   const [error, setError] = useState("");
@@ -440,7 +496,19 @@ export default function ProfilePage() {
 
     try {
       const hiveData = await apiFetch(`/hives/${hiveId}`, { token });
-      root.render(<ProfileCaptureBoard boardData={hiveData.boardData} />);
+      const localizedCardsData =
+        language === "en" ? cardsEn : language === "nl" ? cardsNl : cardsFr;
+      const cardsData = toCanonicalCards(localizedCardsData, language);
+      const localizedBoardCards = localizeBoardCards(
+        getBoardCards(hiveData.boardData),
+        cardsData,
+      );
+      const localizedBoardData = {
+        ...(hiveData.boardData || {}),
+        boardCards: localizedBoardCards,
+      };
+
+      root.render(<ProfileCaptureBoard boardData={localizedBoardData} />);
       await waitForCaptureFrame();
       await waitForCaptureFrame();
 
@@ -449,7 +517,11 @@ export default function ProfilePage() {
         board,
         title: hiveData.title || fallbackTitle,
         comments: hiveData.comments || [],
-        boardCards: hiveData.boardData?.boardCards || [],
+        boardCards: localizedBoardCards,
+        frontBoardFileName: t("toolbar.frontBoardExportName"),
+        backBoardFileName: t("toolbar.backBoardExportName"),
+        chatFileName: t("toolbar.chatExportName"),
+        cardNotesFileName: t("toolbar.cardNotesExportName"),
         chatTitle: t("editor.commentsTitle"),
         noCommentsMessage: t("editor.noComments"),
         cardNotesTitle: t("toolbar.cardNotesExportTitle"),

@@ -35,7 +35,7 @@ export default function RucheEditorPage() {
   const { id } = useParams();
   const location = useLocation();
   const navigate = useNavigate();
-  const { token, user, isAdmin } = useAuth();
+  const { token, user, isAdmin, logout } = useAuth();
   const { t, dateLocale } = useLanguage();
 
   const isNew = !id;
@@ -73,6 +73,7 @@ export default function RucheEditorPage() {
   const [renameOrDuplicateAction, setRenameOrDuplicateAction] = useState(null);
   const [pendingNewTitle, setPendingNewTitle] = useState("");
   const [sentInvitations, setSentInvitations] = useState([]);
+  const [pendingLeaveAction, setPendingLeaveAction] = useState(null);
 
   const isOwner = Boolean(
     hive?.owner?.id && user?.id && hive.owner.id === user.id,
@@ -200,7 +201,56 @@ export default function RucheEditorPage() {
     };
   }, []);
 
-  const saveHive = async () => {
+  useEffect(() => {
+    window.__RUCHE_EDITOR_IS_DIRTY = isDirty;
+
+    return () => {
+      window.__RUCHE_EDITOR_IS_DIRTY = false;
+    };
+  }, [isDirty]);
+
+  const executeLeaveAction = useCallback(
+    (action) => {
+      if (!action) return;
+
+      if (action.type === "logout") {
+        logout();
+        navigate("/");
+        return;
+      }
+
+      if (action.type === "route" && action.to) {
+        navigate(action.to);
+      }
+    },
+    [logout, navigate],
+  );
+
+  useEffect(() => {
+    const handleRequestedLeave = (event) => {
+      const requestedAction = event.detail;
+      if (!requestedAction) return;
+
+      if (isDirty) {
+        setPendingLeaveAction(requestedAction);
+        setShowLeaveDirtyModal(true);
+        return;
+      }
+
+      executeLeaveAction(requestedAction);
+    };
+
+    window.addEventListener("ruche:request-editor-leave", handleRequestedLeave);
+
+    return () => {
+      window.removeEventListener(
+        "ruche:request-editor-leave",
+        handleRequestedLeave,
+      );
+    };
+  }, [executeLeaveAction, isDirty]);
+
+  const saveHive = async ({ skipNavigateAfterCreate = false } = {}) => {
     if (isSaving) return false;
 
     setError("");
@@ -223,10 +273,13 @@ export default function RucheEditorPage() {
       return;
     }
 
-    return performSaveHive(trimmedTitle);
+    return performSaveHive(trimmedTitle, { skipNavigateAfterCreate });
   };
 
-  const performSaveHive = async (titleToSave) => {
+  const performSaveHive = async (
+    titleToSave,
+    { skipNavigateAfterCreate = false } = {},
+  ) => {
     setIsSaving(true);
     try {
       const hasBoardCards = Array.isArray(boardData?.boardCards)
@@ -272,7 +325,9 @@ export default function RucheEditorPage() {
           canEdit: true,
           canComment: true,
         });
-        navigate(`/hives/${created.id}`, { replace: true });
+        if (!skipNavigateAfterCreate) {
+          navigate(`/hives/${created.id}`, { replace: true });
+        }
         return true;
       }
 
@@ -364,11 +419,36 @@ export default function RucheEditorPage() {
   };
 
   const saveAndLeave = async () => {
+    const requestedAction = pendingLeaveAction;
     setShowLeaveDirtyModal(false);
-    const success = await saveHive();
-    if (success && !isNew) {
-      navigate("/profile");
+    setPendingLeaveAction(null);
+    const success = await saveHive({ skipNavigateAfterCreate: true });
+    if (!success) return;
+
+    if (requestedAction) {
+      executeLeaveAction(requestedAction);
+      return;
     }
+
+    navigate("/profile");
+  };
+
+  const leaveWithoutSaving = () => {
+    const requestedAction = pendingLeaveAction;
+    setShowLeaveDirtyModal(false);
+    setPendingLeaveAction(null);
+
+    if (requestedAction) {
+      executeLeaveAction(requestedAction);
+      return;
+    }
+
+    navigate("/profile");
+  };
+
+  const cancelLeave = () => {
+    setShowLeaveDirtyModal(false);
+    setPendingLeaveAction(null);
   };
 
   const runSavedHiveAction = (action) => {
@@ -647,6 +727,10 @@ export default function RucheEditorPage() {
     title,
     comments,
     boardCards: boardData?.boardCards || [],
+    frontBoardFileName: t("toolbar.frontBoardExportName"),
+    backBoardFileName: t("toolbar.backBoardExportName"),
+    chatFileName: t("toolbar.chatExportName"),
+    cardNotesFileName: t("toolbar.cardNotesExportName"),
     chatTitle: t("editor.commentsTitle"),
     noCommentsMessage: t("editor.noComments"),
     cardNotesTitle: t("toolbar.cardNotesExportTitle"),
@@ -676,6 +760,7 @@ export default function RucheEditorPage() {
             onClick={(event) => {
               if (!isDirty) return;
               event.preventDefault();
+              setPendingLeaveAction({ type: "route", to: "/profile" });
               setShowLeaveDirtyModal(true);
             }}
           >
@@ -976,15 +1061,13 @@ export default function RucheEditorPage() {
         title={t("editor.unsavedTitle")}
         message={t("editor.unsavedMessage")}
         cancelLabel={t("editor.stay")}
-        extraActionLabel={t("editor.saveAndLeave")}
-        onExtraAction={saveAndLeave}
-        confirmLabel={t("editor.leaveWithoutSaving")}
-        confirmClassName="danger"
-        onCancel={() => setShowLeaveDirtyModal(false)}
-        onConfirm={() => {
-          setShowLeaveDirtyModal(false);
-          navigate("/profile");
-        }}
+        extraActionLabel={t("editor.leaveWithoutSaving")}
+        extraActionClassName="danger"
+        onExtraAction={leaveWithoutSaving}
+        confirmLabel={t("editor.saveAndLeave")}
+        confirmDisabled={isSaving}
+        onCancel={cancelLeave}
+        onConfirm={saveAndLeave}
       />
 
       <UnifiedPromptModal
