@@ -1,4 +1,4 @@
-﻿import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
 import domtoimage from "dom-to-image-more";
 import { apiFetch } from "../lib/api";
@@ -68,7 +68,7 @@ export default function RucheEditorPage() {
   const [resetSignal, setResetSignal] = useState(0);
   const [saveRequiredAction, setSaveRequiredAction] = useState(null);
   const [openCollaboratorsSignal, setOpenCollaboratorsSignal] = useState(0);
-  const [requestedCommentCardId, setRequestedCommentCardId] = useState(null);
+  const [requestedNoteCardId, setRequestedNoteCardId] = useState(null);
   const [renameOrDuplicateAction, setRenameOrDuplicateAction] = useState(null);
   const [pendingNewTitle, setPendingNewTitle] = useState("");
   const [sentInvitations, setSentInvitations] = useState([]);
@@ -376,8 +376,8 @@ export default function RucheEditorPage() {
       return;
     }
 
-    if (action.type === "card-comment" && action.cardId) {
-      setRequestedCommentCardId(action.cardId);
+    if (action.type === "card-note" && action.cardId) {
+      setRequestedNoteCardId(action.cardId);
     }
   };
 
@@ -409,8 +409,8 @@ export default function RucheEditorPage() {
     }
   };
 
-  const handleRequireSaveBeforeCardComment = (cardId) => {
-    promptSaveForAction({ type: "card-comment", cardId });
+  const handleRequireSaveBeforeCardNote = (cardId) => {
+    promptSaveForAction({ type: "card-note", cardId });
   };
 
   const loadHiveInvitations = useCallback(async () => {
@@ -626,6 +626,28 @@ export default function RucheEditorPage() {
   const comments = hive?.comments || [];
   const commentCount = totalCommentCount(comments);
   const isHiveLoading = !isNew && !hive && !error;
+  const exportOptions = {
+    title,
+    comments,
+    boardCards: boardData?.boardCards || [],
+    chatTitle: t("editor.commentsTitle"),
+    noCommentsMessage: t("editor.noComments"),
+    cardNotesTitle: t("toolbar.cardNotesExportTitle"),
+    noCardNotesMessage: t("toolbar.noCardNotesExport"),
+    cardLabel: t("workspace.cardLabel"),
+    unknownUserLabel: t("common.unknownUser"),
+    formatDateTime: (value) => formatDateTime(value, dateLocale),
+    formatCreatedByText: ({ createdAt, createdBy }) =>
+      t("workspace.createdBy", {
+        date: formatDateTime(createdAt, dateLocale),
+        user: createdBy,
+      }),
+    formatUpdatedByText: ({ updatedAt, updatedBy }) =>
+      t("workspace.updatedBy", {
+        date: formatDateTime(updatedAt, dateLocale),
+        user: updatedBy,
+      }),
+  };
 
   return (
     <section className="editor-page">
@@ -701,6 +723,7 @@ export default function RucheEditorPage() {
             onOpenComments={handleOpenComments}
             commentCount={commentCount}
             openCollaboratorsSignal={openCollaboratorsSignal}
+            exportOptions={exportOptions}
           />
         </div>
       </div>
@@ -736,11 +759,11 @@ export default function RucheEditorPage() {
           loadKey={workspaceLoadKey}
           resetSignal={resetSignal}
           canEdit={canEdit}
-          canComment={canComment}
-          requireSaveBeforeComment={requiresSavedHivePrompt}
-          onRequireSaveBeforeComment={handleRequireSaveBeforeCardComment}
-          requestedCommentCardId={requestedCommentCardId}
-          onRequestedCommentHandled={() => setRequestedCommentCardId(null)}
+          canNote={canComment}
+          requireSaveBeforeNote={requiresSavedHivePrompt}
+          onRequireSaveBeforeNote={handleRequireSaveBeforeCardNote}
+          requestedNoteCardId={requestedNoteCardId}
+          onRequestedNoteHandled={() => setRequestedNoteCardId(null)}
           onStateChange={setBoardData}
         />
       )}
@@ -767,7 +790,7 @@ export default function RucheEditorPage() {
               }}
               aria-label={t("common.close")}
             >
-              ×
+              x
             </button>
 
             <div className="comments-scroll">
@@ -943,8 +966,8 @@ export default function RucheEditorPage() {
           feature:
             saveRequiredAction?.type === "collaborators"
               ? t("toolbar.collaborators")
-              : saveRequiredAction?.type === "card-comment"
-                ? t("workspace.cardCommentTitle")
+              : saveRequiredAction?.type === "card-note"
+                ? t("workspace.cardNoteTitle")
                 : t("toolbar.comments"),
         })}
         cancelLabel={t("common.cancel")}

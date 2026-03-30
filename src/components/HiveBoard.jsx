@@ -13,8 +13,8 @@ export default function HiveBoard({
   selectedCardIds,
   onToggleCardSelection,
   onClearSelection,
-  onOpenCardComment,
-  commentLocked = false,
+  onOpenCardNote,
+  noteLocked = false,
 }) {
   const boardRef = useRef(null);
   const selectedCards = cards.filter((card) => selectedCardIds.has(card.id));
@@ -105,8 +105,8 @@ export default function HiveBoard({
               onReturnCardsToLibrary={onReturnCardsToLibrary}
               onToggleSelection={onToggleCardSelection}
               onClearSelection={onClearSelection}
-              onOpenComment={onOpenCardComment}
-              commentLocked={commentLocked}
+              onOpenNote={onOpenCardNote}
+              noteLocked={noteLocked}
             />
           );
         }
@@ -123,8 +123,8 @@ export default function HiveBoard({
             onReturnCardsToLibrary={onReturnCardsToLibrary}
             onToggleSelection={onToggleCardSelection}
             onClearSelection={onClearSelection}
-            onOpenComment={onOpenCardComment}
-            commentLocked={commentLocked}
+            onOpenNote={onOpenCardNote}
+            noteLocked={noteLocked}
           />
         );
       })}

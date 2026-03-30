@@ -494,16 +494,16 @@
 
 // ── Card comment modal ─────────────────────────────────────────────────────
 
-.card-comment-modal {
+.card-note-modal {
   max-width: 620px;
 
-  .card-comment-card-title {
+  .card-note-card-title {
     margin: 0 0 0.5rem;
     font-weight: 700;
   }
 
-  .card-comment-meta {
-    margin-bottom: 0.75rem;
+  .card-note-meta {
+    margin-top: 0.4rem;
 
     p {
       margin: 0;
@@ -512,43 +512,28 @@
     }
   }
 
-  .card-comment-editor {
-    border-top: none;
-    padding-top: 0;
+  .card-note-thread {
+    margin-bottom: 0.75rem;
   }
 
-  .card-comment-actions {
+  .card-note-item {
+    background: #f9f7f4;
+  }
+
+  .card-note-editor {
+    margin-top: 0.5rem;
+  }
+
+  .card-note-actions {
     display: flex;
     align-items: center;
-    justify-content: space-between;
+    justify-content: flex-end;
+    gap: 0.75rem;
     margin-top: 0.75rem;
 
-    .card-comment-actions-right {
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-    }
-
-    button {
-      padding: 0.45rem 0.9rem;
-      width: 112px;
-      flex: 0 0 112px;
-      border: none;
-      border-radius: 6px;
-      background: $jaune;
-      color: #222;
-      font-weight: 600;
-      cursor: pointer;
-    }
-
-    .secondary {
-      background: $jaune;
-      color: #222;
-    }
-
-    .card-comment-delete {
-      background: $rose;
-      color: #fff;
+    .card-note-save-btn {
+      color: $bleu-fonce;
+      font-weight: 700;
     }
   }
 }

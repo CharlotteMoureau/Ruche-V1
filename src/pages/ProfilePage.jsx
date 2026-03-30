@@ -11,8 +11,7 @@ import FreeHexCard from "../components/FreeSpaceCard";
 import PasswordField from "../components/PasswordField";
 import { useLanguage } from "../context/LanguageContext";
 import {
-  captureBoardFrontAndBack,
-  sanitizeSnapshotFileName,
+  captureHiveExportBundle,
   triggerDownload,
   waitForCaptureFrame,
 } from "../lib/snapshot";
@@ -446,15 +445,31 @@ export default function ProfilePage() {
       await waitForCaptureFrame();
 
       const board = stage.querySelector(".hive-board");
-      const dataUrl = await captureBoardFrontAndBack(
+      const { blob, fileName } = await captureHiveExportBundle({
         board,
-        t("toolbar.screenshotMergeError"),
-      );
+        title: hiveData.title || fallbackTitle,
+        comments: hiveData.comments || [],
+        boardCards: hiveData.boardData?.boardCards || [],
+        chatTitle: t("editor.commentsTitle"),
+        noCommentsMessage: t("editor.noComments"),
+        cardNotesTitle: t("toolbar.cardNotesExportTitle"),
+        noCardNotesMessage: t("toolbar.noCardNotesExport"),
+        cardLabel: t("workspace.cardLabel"),
+        unknownUserLabel: t("common.unknownUser"),
+        formatDateTime: (value) => formatDateTime(value, dateLocale),
+        formatCreatedByText: ({ createdAt, createdBy }) =>
+          t("workspace.createdBy", {
+            date: formatDateTime(createdAt, dateLocale),
+            user: createdBy,
+          }),
+        formatUpdatedByText: ({ updatedAt, updatedBy }) =>
+          t("workspace.updatedBy", {
+            date: formatDateTime(updatedAt, dateLocale),
+            user: updatedBy,
+          }),
+      });
 
-      const safeTitle = sanitizeSnapshotFileName(
-        hiveData.title || fallbackTitle,
-      );
-      triggerDownload(dataUrl, `${safeTitle}.png`);
+      triggerDownload(blob, fileName);
     } catch (err) {
       setError(
         t("profile.downloadFailed", {

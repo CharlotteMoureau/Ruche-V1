@@ -131,11 +131,11 @@ export default function RucheWorkspace({
   resetSignal = 0,
   onStateChange,
   canEdit = true,
-  canComment = false,
-  requireSaveBeforeComment = false,
-  onRequireSaveBeforeComment,
-  requestedCommentCardId = null,
-  onRequestedCommentHandled,
+  canNote = false,
+  requireSaveBeforeNote = false,
+  onRequireSaveBeforeNote,
+  requestedNoteCardId = null,
+  onRequestedNoteHandled,
 }) {
   const { user } = useAuth();
   const { language, t, dateLocale } = useLanguage();
@@ -160,10 +160,11 @@ export default function RucheWorkspace({
   const [selectedCardIds, setSelectedCardIds] = useState(() => new Set());
   const [activeLoadKey, setActiveLoadKey] = useState(loadKey);
   const [activeResetSignal, setActiveResetSignal] = useState(resetSignal);
-  const [commentModalCardId, setCommentModalCardId] = useState(null);
-  const [commentDraft, setCommentDraft] = useState("");
+  const [noteModalCardId, setNoteModalCardId] = useState(null);
+  const [noteDraft, setNoteDraft] = useState("");
+  const [isEditingCardNote, setIsEditingCardNote] = useState(false);
   const [pendingReturnCardIds, setPendingReturnCardIds] = useState([]);
-  const [showDeleteCardCommentModal, setShowDeleteCardCommentModal] =
+  const [showDeleteCardNoteModal, setShowDeleteCardNoteModal] =
     useState(false);
 
   useEffect(() => {
@@ -200,34 +201,36 @@ export default function RucheWorkspace({
   }, [availableCards, boardCards, userCards, onStateChange]);
 
   useEffect(() => {
-    if (!commentModalCardId) return;
+    if (!noteModalCardId) return;
 
-    const hasCard = boardCards.some((card) => card.id === commentModalCardId);
+    const hasCard = boardCards.some((card) => card.id === noteModalCardId);
     if (!hasCard) {
-      setCommentModalCardId(null);
-      setCommentDraft("");
+      setNoteModalCardId(null);
+      setNoteDraft("");
+      setIsEditingCardNote(false);
     }
-  }, [boardCards, commentModalCardId]);
+  }, [boardCards, noteModalCardId]);
 
   useEffect(() => {
-    document.body.style.overflow = commentModalCardId ? "hidden" : "";
+    document.body.style.overflow = noteModalCardId ? "hidden" : "";
     return () => {
       document.body.style.overflow = "";
     };
-  }, [commentModalCardId]);
+  }, [noteModalCardId]);
 
   useEffect(() => {
-    if (!requestedCommentCardId) return;
+    if (!requestedNoteCardId) return;
 
     const requestedCard =
-      boardCards.find((card) => card.id === requestedCommentCardId) || null;
+      boardCards.find((card) => card.id === requestedNoteCardId) || null;
     if (!requestedCard) return;
 
     const existingComment = getCardComment(requestedCard);
-    setCommentModalCardId(requestedCard.id);
-    setCommentDraft(existingComment?.message || "");
-    onRequestedCommentHandled?.();
-  }, [boardCards, onRequestedCommentHandled, requestedCommentCardId]);
+    setNoteModalCardId(requestedCard.id);
+    setNoteDraft(existingComment?.message || "");
+    setIsEditingCardNote(!existingComment?.message);
+    onRequestedNoteHandled?.();
+  }, [boardCards, onRequestedNoteHandled, requestedNoteCardId]);
 
   useDeviceDetection();
 
@@ -347,28 +350,52 @@ export default function RucheWorkspace({
     return handleReturnCardsToLibrary([card]);
   };
 
-  const handleOpenCardComment = (card) => {
-    if (!canComment) {
-      if (requireSaveBeforeComment) {
-        onRequireSaveBeforeComment?.(card.id);
+  const handleOpenCardNote = (card) => {
+    if (!canNote) {
+      if (requireSaveBeforeNote) {
+        onRequireSaveBeforeNote?.(card.id);
       }
       return;
     }
 
     const existingComment = getCardComment(card);
-    setCommentModalCardId(card.id);
-    setCommentDraft(existingComment?.message || "");
+    setNoteModalCardId(card.id);
+    setNoteDraft(existingComment?.message || "");
+    setIsEditingCardNote(!existingComment?.message);
   };
 
-  const handleCloseCardCommentModal = () => {
-    setCommentModalCardId(null);
-    setCommentDraft("");
+  const handleCloseCardNoteModal = () => {
+    setNoteModalCardId(null);
+    setNoteDraft("");
+    setIsEditingCardNote(false);
   };
 
-  const handleSaveCardComment = () => {
-    if (!canComment || !commentModalCardId) return;
+  const handleStartEditingCardNote = () => {
+    if (!canNote || !noteModalCardId) return;
 
-    const message = commentDraft.trim();
+    const activeCard = boardCards.find((card) => card.id === noteModalCardId);
+    const existingComment = getCardComment(activeCard);
+    setNoteDraft(existingComment?.message || "");
+    setIsEditingCardNote(true);
+  };
+
+  const handleCancelCardNoteEdit = () => {
+    const activeCard = boardCards.find((card) => card.id === noteModalCardId);
+    const existingComment = getCardComment(activeCard);
+
+    if (existingComment?.message) {
+      setNoteDraft(existingComment.message);
+      setIsEditingCardNote(false);
+      return;
+    }
+
+    handleCloseCardNoteModal();
+  };
+
+  const handleSaveCardNote = () => {
+    if (!canNote || !noteModalCardId) return;
+
+    const message = noteDraft.trim();
     if (!message) return;
 
     const now = new Date().toISOString();
@@ -380,7 +407,7 @@ export default function RucheWorkspace({
 
     setBoardCards((prev) =>
       prev.map((card) => {
-        if (card.id !== commentModalCardId) return card;
+        if (card.id !== noteModalCardId) return card;
 
         const existingComment = getCardComment(card);
         const isNewComment = !existingComment?.message;
@@ -400,20 +427,22 @@ export default function RucheWorkspace({
       }),
     );
 
-    handleCloseCardCommentModal();
+    setNoteDraft(message);
+    setIsEditingCardNote(false);
   };
 
-  const handleDeleteCardComment = () => {
-    if (!canComment || !commentModalCardId) return;
+  const handleDeleteCardNote = () => {
+    if (!canNote || !noteModalCardId) return;
 
     setBoardCards((prev) =>
       prev.map((card) => {
-        if (card.id !== commentModalCardId) return card;
+        if (card.id !== noteModalCardId) return card;
         return stripCardComment(card);
       }),
     );
 
-    handleCloseCardCommentModal();
+    setNoteDraft("");
+    setIsEditingCardNote(true);
   };
 
   const confirmPendingCardReturn = () => {
@@ -453,15 +482,16 @@ export default function RucheWorkspace({
       setAvailableCards(cardsData);
       setUserCards([]);
       setSelectedCardIds(new Set());
-      handleCloseCardCommentModal();
+      handleCloseCardNoteModal();
     }
     setActiveResetSignal(resetSignal);
   }, [activeResetSignal, resetSignal, canEdit, cardsData]);
 
-  const activeCommentCard = commentModalCardId
-    ? boardCards.find((card) => card.id === commentModalCardId) || null
+  const activeNoteCard = noteModalCardId
+    ? boardCards.find((card) => card.id === noteModalCardId) || null
     : null;
-  const activeComment = getCardComment(activeCommentCard);
+  const activeNote = getCardComment(activeNoteCard);
+  const hasActiveNote = Boolean(activeNote?.message?.trim());
 
   return (
     <DndProvider backend={HTML5Backend}>
@@ -481,8 +511,8 @@ export default function RucheWorkspace({
           selectedCardIds={selectedCardIds}
           onToggleCardSelection={handleToggleCardSelection}
           onClearSelection={handleClearSelection}
-          onOpenCardComment={handleOpenCardComment}
-          commentLocked={requireSaveBeforeComment}
+          onOpenCardNote={handleOpenCardNote}
+          noteLocked={requireSaveBeforeNote}
         />
         <CustomDragPreview />
       </div>
@@ -496,103 +526,152 @@ export default function RucheWorkspace({
         setSelectedColor={setCardColor}
         userCardsCount={userCards.length}
       />
-      {commentModalCardId && activeCommentCard ? (
+      {noteModalCardId && activeNoteCard ? (
         <div
           className="modal-overlay"
           onClick={(event) => {
             if (event.target === event.currentTarget) {
-              handleCloseCardCommentModal();
+              handleCloseCardNoteModal();
             }
           }}
         >
-          <div className="modal-box comments-modal card-comment-modal">
-            <h2>{t("workspace.cardCommentTitle")}</h2>
+          <div className="modal-box comments-modal card-note-modal">
+            <h2>{t("workspace.cardNoteTitle")}</h2>
             <button
               type="button"
               className="modal-close-btn"
-              onClick={handleCloseCardCommentModal}
+              onClick={handleCloseCardNoteModal}
               aria-label={t("common.close")}
             >
               x
             </button>
 
-            <p className="card-comment-card-title">
-              {t("workspace.cardLabel")} : {activeCommentCard.title}
+            <p className="card-note-card-title">
+              {t("workspace.cardLabel")} : {activeNoteCard.title}
             </p>
 
-            {activeComment?.message ? (
-              <div className="card-comment-meta">
-                <p>
-                  {t("workspace.createdBy", {
-                    date: formatDateTime(activeComment.createdAt, dateLocale),
-                    user: getUserLabel(
-                      activeComment.createdBy,
-                      t("common.unknownUser"),
-                    ),
-                  })}
-                </p>
-                <p>
-                  {t("workspace.updatedBy", {
-                    date: formatDateTime(activeComment.updatedAt, dateLocale),
-                    user: getUserLabel(
-                      activeComment.updatedBy,
-                      t("common.unknownUser"),
-                    ),
-                  })}
-                </p>
+            {hasActiveNote ? (
+              <div className="comment-thread card-note-thread">
+                <div className="comment-item card-note-item">
+                  <div className="comment-header">
+                    <strong>
+                      {getUserLabel(
+                        activeNote.updatedBy || activeNote.createdBy,
+                        t("common.unknownUser"),
+                      )}
+                    </strong>
+                    <span className="comment-date">
+                      {formatDateTime(
+                        activeNote.updatedAt || activeNote.createdAt,
+                        dateLocale,
+                      )}
+                    </span>
+                  </div>
+                  <p className="comment-message">{activeNote.message}</p>
+                  <div className="card-note-meta">
+                    <p>
+                      {t("workspace.createdBy", {
+                        date: formatDateTime(activeNote.createdAt, dateLocale),
+                        user: getUserLabel(
+                          activeNote.createdBy,
+                          t("common.unknownUser"),
+                        ),
+                      })}
+                    </p>
+                    <p>
+                      {t("workspace.updatedBy", {
+                        date: formatDateTime(activeNote.updatedAt, dateLocale),
+                        user: getUserLabel(
+                          activeNote.updatedBy,
+                          t("common.unknownUser"),
+                        ),
+                      })}
+                    </p>
+                  </div>
+                </div>
               </div>
             ) : (
-              <p className="comments-empty">{t("workspace.noCardComment")}</p>
+              <p className="comments-empty">{t("workspace.noCardNote")}</p>
             )}
 
-            {canComment ? (
+            {canNote ? (
               <>
-                <div className="comments-new card-comment-editor">
-                  <textarea
-                    value={commentDraft}
-                    onChange={(event) => setCommentDraft(event.target.value)}
-                    onKeyDown={(event) => {
-                      if (
-                        event.key !== "Enter" ||
-                        event.shiftKey ||
-                        event.nativeEvent.isComposing
-                      ) {
-                        return;
-                      }
+                {isEditingCardNote ? (
+                  <div className="comments-new card-note-editor">
+                    <textarea
+                      value={noteDraft}
+                      onChange={(event) => setNoteDraft(event.target.value)}
+                      onKeyDown={(event) => {
+                        if (
+                          event.key !== "Enter" ||
+                          event.shiftKey ||
+                          event.nativeEvent.isComposing
+                        ) {
+                          return;
+                        }
 
-                      event.preventDefault();
-                      handleSaveCardComment();
-                    }}
-                    placeholder={t("workspace.addCardCommentPlaceholder")}
-                    rows={4}
-                    maxLength={1200}
-                    autoFocus
-                  />
-                </div>
-                <div className="card-comment-actions">
-                  {activeComment?.message ? (
-                    <button
-                      type="button"
-                      className="btn card-comment-delete"
-                      onClick={() => setShowDeleteCardCommentModal(true)}
-                    >
-                      {t("common.delete")}
-                    </button>
-                  ) : null}
-                  <div className="card-comment-actions-right">
-                    <button
-                      type="button"
-                      className="btn secondary"
-                      onClick={handleCloseCardCommentModal}
-                    >
-                      {t("common.cancel")}
-                    </button>
-                    <button type="button" onClick={handleSaveCardComment}>
-                      {activeComment?.message
-                        ? t("common.save")
-                        : t("workspace.add")}
-                    </button>
+                        event.preventDefault();
+                        handleSaveCardNote();
+                      }}
+                      placeholder={t(
+                        hasActiveNote
+                          ? "workspace.editCardNotePlaceholder"
+                          : "workspace.addCardNotePlaceholder",
+                      )}
+                      rows={4}
+                      maxLength={1200}
+                      autoFocus
+                    />
                   </div>
+                ) : null}
+
+                <div className="comment-actions card-note-actions">
+                  {hasActiveNote && !isEditingCardNote ? (
+                    <>
+                      <button
+                        type="button"
+                        className="comment-action-btn"
+                        onClick={handleStartEditingCardNote}
+                      >
+                        {t("common.edit")}
+                      </button>
+                      <button
+                        type="button"
+                        className="comment-action-btn comment-action-btn--danger"
+                        onClick={() => setShowDeleteCardNoteModal(true)}
+                      >
+                        {t("common.delete")}
+                      </button>
+                    </>
+                  ) : null}
+
+                  {isEditingCardNote ? (
+                    <>
+                      {hasActiveNote ? (
+                        <button
+                          type="button"
+                          className="comment-action-btn comment-action-btn--danger"
+                          onClick={() => setShowDeleteCardNoteModal(true)}
+                        >
+                          {t("common.delete")}
+                        </button>
+                      ) : null}
+                      <button
+                        type="button"
+                        className="comment-action-btn"
+                        onClick={handleCancelCardNoteEdit}
+                      >
+                        {t("common.cancel")}
+                      </button>
+                      <button
+                        type="button"
+                        className="comment-action-btn card-note-save-btn"
+                        onClick={handleSaveCardNote}
+                      >
+                        {hasActiveNote ? t("common.save") : t("workspace.add")}
+                      </button>
+                    </>
+                  ) : null}
                 </div>
               </>
             ) : null}
@@ -601,28 +680,28 @@ export default function RucheWorkspace({
       ) : null}
       <UnifiedPromptModal
         isOpen={pendingReturnCardIds.length > 0}
-        title={t("workspace.deleteCardCommentsTitle")}
+        title={t("workspace.deleteCardNotesTitle")}
         message={
           pendingReturnCardIds.length === 1
-            ? t("workspace.deleteSingleCardCommentMessage")
-            : t("workspace.deleteMultipleCardCommentMessage")
+            ? t("workspace.deleteSingleCardNoteMessage")
+            : t("workspace.deleteMultipleCardNoteMessage")
         }
-        confirmLabel={t("workspace.continueDeleteCardComments")}
+        confirmLabel={t("workspace.continueDeleteCardNotes")}
         confirmClassName="danger"
         onCancel={() => setPendingReturnCardIds([])}
         onConfirm={confirmPendingCardReturn}
       />
 
       <UnifiedPromptModal
-        isOpen={showDeleteCardCommentModal}
-        title={t("workspace.deleteCardCommentTitle")}
+        isOpen={showDeleteCardNoteModal}
+        title={t("workspace.deleteCardNoteTitle")}
         message={t("workspace.irreversible")}
         confirmLabel={t("common.delete")}
         confirmClassName="danger"
-        onCancel={() => setShowDeleteCardCommentModal(false)}
+        onCancel={() => setShowDeleteCardNoteModal(false)}
         onConfirm={() => {
-          setShowDeleteCardCommentModal(false);
-          handleDeleteCardComment();
+          setShowDeleteCardNoteModal(false);
+          handleDeleteCardNote();
         }}
       />
     </DndProvider>

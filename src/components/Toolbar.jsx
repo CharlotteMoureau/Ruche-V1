@@ -8,7 +8,11 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import UnifiedPromptModal from "./UnifiedPromptModal";
 import { useLanguage } from "../context/LanguageContext";
-import { captureBoardFrontAndBack, triggerDownload } from "../lib/snapshot";
+import {
+  captureBoardFrontAndBack,
+  captureHiveExportBundle,
+  triggerDownload,
+} from "../lib/snapshot";
 
 export default function Toolbar({
   onReset,
@@ -28,6 +32,7 @@ export default function Toolbar({
   onOpenComments,
   commentCount = 0,
   openCollaboratorsSignal = 0,
+  exportOptions = null,
 }) {
   const { t } = useLanguage();
   const [showInviteModal, setShowInviteModal] = useState(false);
@@ -114,6 +119,15 @@ export default function Toolbar({
     if (!board) return;
 
     try {
+      if (exportOptions) {
+        const { blob, fileName } = await captureHiveExportBundle({
+          board,
+          ...exportOptions,
+        });
+        triggerDownload(blob, fileName);
+        return;
+      }
+
       const dataUrl = await captureBoardFrontAndBack(
         board,
         t("toolbar.screenshotMergeError"),

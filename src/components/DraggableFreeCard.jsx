@@ -13,8 +13,8 @@ export default function DraggableFreeCard({
   onReturnCardsToLibrary,
   onToggleSelection,
   onClearSelection,
-  onOpenComment,
-  commentLocked = false,
+  onOpenNote,
+  noteLocked = false,
 }) {
   const { t } = useLanguage();
   const { isDragging, handleMouseDown, handleTouchStart } = useDraggableCard({
@@ -31,7 +31,7 @@ export default function DraggableFreeCard({
     onToggleSelection,
     onClearSelection,
   });
-  const hasComment = Boolean(card?.comment?.message?.trim());
+  const hasNote = Boolean(card?.comment?.message?.trim());
 
   return (
     <div
@@ -50,9 +50,9 @@ export default function DraggableFreeCard({
     >
       <button
         type="button"
-        className={`card-comment-indicator ${hasComment ? "has-comment" : ""} ${commentLocked ? "is-locked" : ""}`.trim()}
-        aria-label={t("workspace.cardCommentTitle")}
-        aria-disabled={commentLocked}
+        className={`card-note-indicator ${hasNote ? "has-note" : ""} ${noteLocked ? "is-locked" : ""}`.trim()}
+        aria-label={t("workspace.cardNoteTitle")}
+        aria-disabled={noteLocked}
         onMouseDown={(event) => {
           event.preventDefault();
           event.stopPropagation();
@@ -62,7 +62,7 @@ export default function DraggableFreeCard({
         }}
         onClick={(event) => {
           event.stopPropagation();
-          onOpenComment?.(card);
+          onOpenNote?.(card);
         }}
       >
         <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
