@@ -71,7 +71,7 @@ const ROLE_LABELS = {
 
 const CARD_CATEGORIES = {
   fr: [
-    { key: "visees", label: "Visées & effets pour les élèves" },
+    { key: "domaine", label: "Domaines d'expression culturelle et artistique" },
     {
       key: "conditions-enseignant",
       label: "Conditions pour l'enseignant/intervenant",
@@ -80,16 +80,16 @@ const CARD_CATEGORIES = {
       key: "recommandations-enseignant",
       label: "Recommandations pour l'enseignant/intervenant",
     },
+    { key: "visees", label: "Visées & effets pour les élèves" },
     { key: "conditions-equipe", label: "Conditions pour l'équipe éducative" },
     {
       key: "recommandations-equipe",
       label: "Recommandations pour l'équipe éducative",
     },
-    { key: "domaine", label: "Domaines d'expression culturelle et artistique" },
     { key: "free", label: "A vous de jouer !" },
   ],
   en: [
-    { key: "visees", label: "Aims & impacts for students" },
+    { key: "domaine", label: "Cultural and artistic expression domains" },
     {
       key: "conditions-enseignant",
       label: "Conditions for teachers/practitioners",
@@ -98,16 +98,16 @@ const CARD_CATEGORIES = {
       key: "recommandations-enseignant",
       label: "Recommendations for teachers/practitioners",
     },
+    { key: "visees", label: "Aims & impacts for students" },
     { key: "conditions-equipe", label: "Conditions for the educational team" },
     {
       key: "recommandations-equipe",
       label: "Recommendations for the educational team",
     },
-    { key: "domaine", label: "Cultural and artistic expression domains" },
     { key: "free", label: "Your turn!" },
   ],
   nl: [
-    { key: "visees", label: "Doelen & effecten voor leerlingen" },
+    { key: "domaine", label: "Domeinen van culturele en artistieke expressie" },
     {
       key: "conditions-enseignant",
       label: "Voorwaarden voor leerkrachten/begeleiders",
@@ -116,12 +116,12 @@ const CARD_CATEGORIES = {
       key: "recommandations-enseignant",
       label: "Aanbevelingen voor leerkrachten/begeleiders",
     },
+    { key: "visees", label: "Doelen & effecten voor leerlingen" },
     { key: "conditions-equipe", label: "Voorwaarden voor het schoolteam" },
     {
       key: "recommandations-equipe",
       label: "Aanbevelingen voor het schoolteam",
     },
-    { key: "domaine", label: "Domeinen van culturele en artistieke expressie" },
     { key: "free", label: "Jij bent aan zet!" },
   ],
 };
