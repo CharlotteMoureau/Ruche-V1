@@ -139,3 +139,47 @@ Backend:
 - `prisma/`: schema and migrations
 - `public/`: public assets
 - `docs/`: end-user manuals
+
+## 🚀 Production deployment (Netlify + API)
+
+This project is a split architecture:
+
+- Frontend: React/Vite static site
+- Backend: Express API + Prisma + database
+
+For production signup/login to work, the frontend and backend must both be deployed.
+
+### 1. Deploy frontend on Netlify
+
+- Build command: `npm run build`
+- Publish directory: `dist`
+- Frontend environment variable:
+	- `VITE_API_URL=https://YOUR_API_DOMAIN/api`
+
+Without `VITE_API_URL`, the app falls back to `/api` on the same domain, which only works if your API is also served there.
+
+### 2. Deploy backend on a Node host
+
+Deploy `server/src/index.js` on a backend host (Render, Railway, Fly.io, VPS, etc.).
+
+Required backend environment variables:
+
+- `DATABASE_URL`
+- `JWT_SECRET`
+- `JWT_EXPIRES_IN` (example: `7d`)
+- `API_PORT` (or host-provided port)
+- `APP_URL` (your Netlify frontend URL)
+- `ADMIN_EMAIL` (optional business config)
+- `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASS`, `SMTP_FROM` (required for email reset flow)
+
+### 3. Run Prisma migrations on backend
+
+Before first production use, apply migrations in the backend environment:
+
+- `npx prisma migrate deploy`
+
+### 4. About Netlify secrets scanning config
+
+`SECRETS_SCAN_OMIT_KEYS = "API_PORT,APP_URL"` is acceptable because these are typically configuration values, not credentials.
+
+Do not omit real secrets (`JWT_SECRET`, SMTP credentials, DB credentials). Keep those protected by scanner coverage and never commit them.
