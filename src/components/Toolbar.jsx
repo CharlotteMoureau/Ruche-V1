@@ -32,7 +32,9 @@ export default function Toolbar({
   onOpenComments,
   commentCount = 0,
   openCollaboratorsSignal = 0,
+  captureSignal = 0,
   exportOptions = null,
+  hidden = false,
 }) {
   const { t } = useLanguage();
   const [showInviteModal, setShowInviteModal] = useState(false);
@@ -143,6 +145,11 @@ export default function Toolbar({
     }
   };
 
+  useEffect(() => {
+    if (!captureSignal) return;
+    handleExport();
+  }, [captureSignal, exportOptions, t]);
+
   const handleInvite = async () => {
     const email = inviteEmail.trim().toLowerCase();
     if (!email) {
@@ -244,7 +251,7 @@ export default function Toolbar({
 
   return (
     <>
-      <div className="toolbar">
+      <div className={`toolbar ${hidden ? "toolbar--hidden" : ""}`.trim()}>
         <button onClick={onReset}>
           <FontAwesomeIcon icon={faArrowsRotate} /> {t("toolbar.reset")}
         </button>

@@ -53,10 +53,33 @@ body.editor-route #root {
   align-items: center;
   gap: 14px;
   flex-wrap: wrap;
+
+  .button-link,
+  > button {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
 }
 
 .editor-topbar-actions {
   margin-left: auto;
+}
+
+.editor-topbar-meta {
+  margin: 0;
+  max-width: min(58vw, 620px);
+  border-radius: 999px;
+  border: 1px solid #c4bba9;
+  background: rgba(255, 251, 243, 0.95);
+  color: #273043;
+  padding: 8px 12px;
+  font-size: 0.82rem;
+  font-weight: 700;
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.16);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .editor-page .form-info,
@@ -97,10 +120,60 @@ body.editor-route #root {
 
 .editor-app__board-panel {
   display: flex;
+  position: relative;
 }
 
 .editor-app__library-backdrop {
   display: none;
+}
+
+.editor-topbar--tablet-spacer {
+  display: none;
+}
+
+.editor-active-badge {
+  position: absolute;
+  right: 16px;
+  bottom: 16px;
+  z-index: 1700;
+  margin: 0;
+  max-width: min(66vw, 520px);
+  border-radius: 999px;
+  border: 1px solid #c4bba9;
+  background: rgba(255, 251, 243, 0.95);
+  color: #273043;
+  padding: 8px 12px;
+  font-size: 0.82rem;
+  font-weight: 700;
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.16);
+}
+
+body.capture-mode .editor-active-badge {
+  display: none;
+}
+
+.editor-tablet-guard {
+  position: absolute;
+  inset: 0;
+  z-index: 2000;
+  display: grid;
+  place-items: center;
+  text-align: center;
+  padding: 24px;
+  background: rgba(17, 24, 39, 0.6);
+  backdrop-filter: blur(4px);
+
+  p {
+    margin: 0;
+    max-width: 420px;
+    border: 1px solid #c7bda8;
+    border-radius: 14px;
+    background: #fff9eb;
+    color: #1f2e4f;
+    font-weight: 700;
+    line-height: 1.45;
+    padding: 18px 20px;
+  }
 }
 
 @media (max-width: 1200px) {
@@ -136,5 +209,21 @@ body.editor-route #root {
   .editor-app__board-panel,
   .editor-page .hive-board {
     height: 100%;
+  }
+}
+
+@media (min-width: 768px) and (max-width: 1200px) and (orientation: landscape) and (pointer: coarse) {
+  .editor-page {
+    padding: 8px;
+  }
+
+  .editor-topbar {
+    display: none;
+  }
+
+  .editor-topbar--tablet-spacer {
+    display: block;
+    height: 2px;
+    margin-bottom: 6px;
   }
 }

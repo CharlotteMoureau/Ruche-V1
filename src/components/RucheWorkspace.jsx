@@ -149,6 +149,9 @@ export default function RucheWorkspace({
   onRequireSaveBeforeNote,
   requestedNoteCardId = null,
   onRequestedNoteHandled,
+  isTabletEditorMode = false,
+  tabletUsageBlocked = false,
+  activeEditorsLabel = "",
 }) {
   const { user } = useAuth();
   const { language, t, dateLocale } = useLanguage();
@@ -179,9 +182,9 @@ export default function RucheWorkspace({
   const [activeResetSignal, setActiveResetSignal] = useState(resetSignal);
   const [noteModalCardId, setNoteModalCardId] = useState(null);
   const [noteDraft, setNoteDraft] = useState("");
-  const [isEditingCardNote, setIsEditingCardNote] = useState(false);
   const [pendingReturnCardIds, setPendingReturnCardIds] = useState([]);
   const [showDeleteCardNoteModal, setShowDeleteCardNoteModal] = useState(false);
+  const [isEditingCardNote, setIsEditingCardNote] = useState(false);
   const [isCompactLayout, setIsCompactLayout] = useState(() => {
     if (typeof window === "undefined") return false;
     return window.matchMedia(COMPACT_EDITOR_MEDIA_QUERY).matches;
@@ -193,6 +196,10 @@ export default function RucheWorkspace({
   const [boardZoom, setBoardZoom] = useState(1);
   const [undoStack, setUndoStack] = useState([]);
   const [redoStack, setRedoStack] = useState([]);
+  const [isLibrarySelectionMode, setIsLibrarySelectionMode] = useState(false);
+  const [selectedLibraryCardIds, setSelectedLibraryCardIds] = useState(
+    () => new Set(),
+  );
 
   const snapshotState = useMemo(
     () => ({
@@ -264,6 +271,7 @@ export default function RucheWorkspace({
     setBoardCards(initial.boardCards);
     setUserCards(initial.userCards);
     setSelectedCardIds(new Set());
+    setSelectedLibraryCardIds(new Set());
     setUndoStack([]);
     setRedoStack([]);
     setActiveLoadKey(loadKey);
@@ -417,6 +425,62 @@ export default function RucheWorkspace({
       return [...prev, { ...card, position }];
     });
   };
+
+  const toggleLibraryCardSelection = useCallback(
+    (cardId) => {
+      if (!canEdit || !isTabletEditorMode) return;
+
+      setSelectedLibraryCardIds((prev) => {
+        const next = new Set(prev);
+        if (next.has(cardId)) {
+          next.delete(cardId);
+        } else {
+          next.add(cardId);
+        }
+        return next;
+      });
+    },
+    [canEdit, isTabletEditorMode],
+  );
+
+  const clearLibrarySelection = useCallback(() => {
+    setSelectedLibraryCardIds(new Set());
+  }, []);
+
+  const selectedLibraryCards = useMemo(
+    () => availableCards.filter((card) => selectedLibraryCardIds.has(card.id)),
+    [availableCards, selectedLibraryCardIds],
+  );
+
+  const handlePlaceLibraryCards = useCallback(
+    ({ anchor, cards }) => {
+      if (!canEdit || !cards.length) return;
+
+      pushUndoSnapshot(snapshotState);
+
+      const placements = cards.map((card, index) => {
+        const row = Math.floor(index / 3);
+        const col = index % 3;
+
+        return {
+          ...card,
+          position: {
+            x: anchor.x + col * 90,
+            y: anchor.y + row * 85,
+          },
+        };
+      });
+
+      const placedIds = new Set(placements.map((entry) => entry.id));
+
+      setAvailableCards((prev) =>
+        prev.filter((entry) => !placedIds.has(entry.id)),
+      );
+      setBoardCards((prev) => [...prev, ...placements]);
+      setSelectedLibraryCardIds(new Set());
+    },
+    [canEdit, pushUndoSnapshot, snapshotState],
+  );
 
   const handleMoveCard = (cardId, position) => {
     if (!canEdit) return;
@@ -645,6 +709,7 @@ export default function RucheWorkspace({
       setAvailableCards(cardsData);
       setUserCards([]);
       setSelectedCardIds(new Set());
+      setSelectedLibraryCardIds(new Set());
       setUndoStack([]);
       setRedoStack([]);
       handleCloseCardNoteModal();
@@ -666,6 +731,12 @@ export default function RucheWorkspace({
             cards={availableCards}
             onFreeSpaceClick={() => setShowModal(true)}
             userCards={userCards.length}
+            isTabletEditorMode={isTabletEditorMode}
+            selectedCount={selectedLibraryCards.length}
+            onClearSelected={clearLibrarySelection}
+            onGoToBoard={() => setIsLibraryOpen(false)}
+            onToggleLibraryCardSelection={toggleLibraryCardSelection}
+            selectedLibraryCardIds={selectedLibraryCardIds}
           />
         </div>
         {isCompactLayout && isLibraryOpen ? (
@@ -700,7 +771,22 @@ export default function RucheWorkspace({
             onToggleLibrary={() => setIsLibraryOpen((current) => !current)}
             onZoomChange={setBoardZoom}
             resetSignal={resetSignal}
+            pendingLibraryCards={selectedLibraryCards}
+            onPlaceLibraryCards={handlePlaceLibraryCards}
+            tabletUsageBlocked={tabletUsageBlocked}
           />
+          {activeEditorsLabel ? (
+            <p className="editor-active-badge">{activeEditorsLabel}</p>
+          ) : null}
+          {tabletUsageBlocked ? (
+            <div
+              className="editor-tablet-guard"
+              role="status"
+              aria-live="polite"
+            >
+              <p>{t("workspace.tabletOnlyMessage")}</p>
+            </div>
+          ) : null}
         </div>
         <CustomDragPreview zoom={boardZoom} />
       </div>

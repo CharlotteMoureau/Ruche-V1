@@ -161,6 +161,8 @@ const messages = {
       logout: "Déconnexion",
       login: "Connexion",
       register: "Créer un compte",
+      hiveMenu: "Menu ruche",
+      accountMenu: "Mon compte",
     },
     landing: {
       title: "Bienvenue dans La Ruche",
@@ -416,6 +418,8 @@ const messages = {
         "Certaines cartes contiennent des notes. Les remettre dans la bibliothèque supprimera ces notes. Continuer ?",
       deleteCardNoteTitle: "Supprimer la note de carte",
       irreversible: "Cette action est irréversible. Voulez-vous continuer ?",
+      tabletOnlyMessage:
+        "L'éditeur est optimisé pour tablette en mode paysage. Passez en paysage sur tablette pour continuer.",
     },
     toolbar: {
       reset: "Réinitialiser",
@@ -481,6 +485,11 @@ const messages = {
       searchPlaceholder: "Rechercher...",
       clearSearch: "Effacer la recherche",
       noResults: "Aucune carte ne correspond à votre recherche.",
+      clearSelection: "Effacer la sélection",
+      selectedCount: "{count} carte(s) sélectionnée(s)",
+      tapToSelectHelp:
+        "Touchez les cartes à ajouter, puis ouvrez le plateau pour les placer.",
+      goToBoard: "Envoyer au plateau ({count})",
     },
     addCardModal: {
       title: "À vous de jouer !",
@@ -531,6 +540,8 @@ const messages = {
       logout: "Log out",
       login: "Log in",
       register: "Create account",
+      hiveMenu: "Hive menu",
+      accountMenu: "Account",
     },
     landing: {
       title: "Welcome to La Ruche",
@@ -777,6 +788,8 @@ const messages = {
         "Some cards contain notes. Returning them to the library will delete those notes. Continue?",
       deleteCardNoteTitle: "Delete card note",
       irreversible: "This action is irreversible. Continue?",
+      tabletOnlyMessage:
+        "The editor is optimized for tablet landscape mode. Switch to landscape on a tablet to continue.",
     },
     toolbar: {
       reset: "Reset",
@@ -838,6 +851,11 @@ const messages = {
       searchPlaceholder: "Search...",
       clearSearch: "Clear search",
       noResults: "No cards match your search.",
+      clearSelection: "Clear selection",
+      selectedCount: "{count} card(s) selected",
+      tapToSelectHelp:
+        "Tap cards to add them, then go back to the board to place them.",
+      goToBoard: "Go to board ({count})",
     },
     addCardModal: {
       title: "Your turn!",
@@ -886,6 +904,8 @@ const messages = {
       logout: "Afmelden",
       login: "Aanmelden",
       register: "Account aanmaken",
+      hiveMenu: "Bijenkorfmenu",
+      accountMenu: "Account",
     },
     landing: {
       title: "Welkom bij La Ruche",
@@ -1136,6 +1156,8 @@ const messages = {
         "Sommige kaarten bevatten notities. Terugplaatsen in de bibliotheek verwijdert die notities. Doorgaan?",
       deleteCardNoteTitle: "Kaartnotitie verwijderen",
       irreversible: "Deze actie is onomkeerbaar. Wil je doorgaan?",
+      tabletOnlyMessage:
+        "De editor is geoptimaliseerd voor tablet in landschapsmodus. Draai je tablet naar landschap om verder te gaan.",
     },
     toolbar: {
       reset: "Resetten",
@@ -1201,6 +1223,11 @@ const messages = {
       searchPlaceholder: "Zoeken...",
       clearSearch: "Zoekopdracht wissen",
       noResults: "Geen kaarten komen overeen met uw zoekopdracht.",
+      clearSelection: "Selectie wissen",
+      selectedCount: "{count} kaart(en) geselecteerd",
+      tapToSelectHelp:
+        "Tik op kaarten om ze toe te voegen en ga daarna naar het bord om ze te plaatsen.",
+      goToBoard: "Naar bord ({count})",
     },
     addCardModal: {
       title: "Jij bent aan zet!",

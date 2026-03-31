@@ -39,11 +39,15 @@ export default function HiveBoard({
   onToggleLibrary,
   onZoomChange,
   resetSignal = 0,
+  pendingLibraryCards = [],
+  onPlaceLibraryCards,
+  tabletUsageBlocked = false,
 }) {
   const { t } = useLanguage();
   const boardRef = useRef(null);
   const viewportRef = useRef(null);
   const panStateRef = useRef(null);
+  const pinchStateRef = useRef(null);
   const zoomRef = useRef(BOARD_DEFAULT_ZOOM);
   const wheelZoomTargetRef = useRef(BOARD_DEFAULT_ZOOM);
   const wheelZoomAnchorRef = useRef(null);
@@ -318,6 +322,7 @@ export default function HiveBoard({
   );
 
   const handleBoardMouseDown = (event) => {
+    if (tabletUsageBlocked) return;
     if (event.target === event.currentTarget) {
       onClearSelection();
     }
@@ -344,10 +349,36 @@ export default function HiveBoard({
         return;
       }
 
+      if (tabletUsageBlocked) return;
+
+      if (pendingLibraryCards.length > 0) {
+        const boardPoint = getBoardPointFromClient(
+          event.clientX,
+          event.clientY,
+        );
+        if (!boardPoint) return;
+
+        onPlaceLibraryCards?.({
+          anchor: clampBoardPosition({
+            x: boardPoint.x - BOARD_CARD_SIZE / 2,
+            y: boardPoint.y - BOARD_CARD_SIZE / 2,
+          }),
+          cards: pendingLibraryCards,
+        });
+        return;
+      }
+
       onClearSelection();
       startPan(event.clientX, event.clientY);
     },
-    [onClearSelection, startPan],
+    [
+      getBoardPointFromClient,
+      onClearSelection,
+      onPlaceLibraryCards,
+      pendingLibraryCards,
+      startPan,
+      tabletUsageBlocked,
+    ],
   );
 
   useEffect(() => {
@@ -475,6 +506,79 @@ export default function HiveBoard({
     const viewport = viewportRef.current;
     if (!viewport) return undefined;
 
+    const getDistance = (touchA, touchB) => {
+      const dx = touchA.clientX - touchB.clientX;
+      const dy = touchA.clientY - touchB.clientY;
+      return Math.hypot(dx, dy);
+    };
+
+    const getMidpoint = (touchA, touchB) => ({
+      x: (touchA.clientX + touchB.clientX) / 2,
+      y: (touchA.clientY + touchB.clientY) / 2,
+    });
+
+    const handleTouchStart = (event) => {
+      if (tabletUsageBlocked) return;
+      if (event.touches.length !== 2) return;
+
+      const [touchA, touchB] = event.touches;
+      const midpoint = getMidpoint(touchA, touchB);
+      const anchor = getBoardPointFromClient(midpoint.x, midpoint.y);
+
+      if (!anchor) return;
+
+      pinchStateRef.current = {
+        startDistance: getDistance(touchA, touchB),
+        startZoom: zoomRef.current,
+        anchor,
+      };
+
+      panStateRef.current = null;
+      setIsPanning(false);
+      event.preventDefault();
+    };
+
+    const handleTouchMove = (event) => {
+      if (tabletUsageBlocked) return;
+      if (event.touches.length !== 2 || !pinchStateRef.current) return;
+
+      const [touchA, touchB] = event.touches;
+      const distance = getDistance(touchA, touchB);
+      const ratio = distance / Math.max(1, pinchStateRef.current.startDistance);
+
+      updateZoom(
+        pinchStateRef.current.startZoom * ratio,
+        pinchStateRef.current.anchor,
+      );
+      event.preventDefault();
+    };
+
+    const handleTouchEnd = () => {
+      if (!pinchStateRef.current) return;
+      pinchStateRef.current = null;
+    };
+
+    viewport.addEventListener("touchstart", handleTouchStart, {
+      passive: false,
+    });
+    viewport.addEventListener("touchmove", handleTouchMove, {
+      passive: false,
+    });
+    viewport.addEventListener("touchend", handleTouchEnd);
+    viewport.addEventListener("touchcancel", handleTouchEnd);
+
+    return () => {
+      viewport.removeEventListener("touchstart", handleTouchStart);
+      viewport.removeEventListener("touchmove", handleTouchMove);
+      viewport.removeEventListener("touchend", handleTouchEnd);
+      viewport.removeEventListener("touchcancel", handleTouchEnd);
+    };
+  }, [getBoardPointFromClient, tabletUsageBlocked, updateZoom]);
+
+  useEffect(() => {
+    const viewport = viewportRef.current;
+    if (!viewport) return undefined;
+
     const updateViewportSize = () => {
       setViewportSize({
         width: viewport.clientWidth,
@@ -502,14 +606,14 @@ export default function HiveBoard({
           <button
             type="button"
             onClick={onUndo}
-            disabled={!canEdit || !canUndo}
+            disabled={tabletUsageBlocked || !canEdit || !canUndo}
           >
             <FontAwesomeIcon icon={faRotateLeft} /> {t("workspace.undo")}
           </button>
           <button
             type="button"
             onClick={onRedo}
-            disabled={!canEdit || !canRedo}
+            disabled={tabletUsageBlocked || !canEdit || !canRedo}
           >
             <FontAwesomeIcon icon={faRotateRight} /> {t("workspace.redo")}
           </button>
@@ -525,6 +629,7 @@ export default function HiveBoard({
           <button
             type="button"
             onClick={() => updateZoom(zoom - BOARD_ZOOM_STEP)}
+            disabled={tabletUsageBlocked}
           >
             {t("workspace.zoomOut")}
           </button>
@@ -534,19 +639,29 @@ export default function HiveBoard({
             aria-label={t("workspace.resetZoom")}
             title={t("workspace.resetZoom")}
             onClick={() => updateZoom(defaultZoom)}
+            disabled={tabletUsageBlocked}
           >
             {Math.round(zoom * 100)}%
           </button>
           <button
             type="button"
             onClick={() => updateZoom(zoom + BOARD_ZOOM_STEP)}
+            disabled={tabletUsageBlocked}
           >
             {t("workspace.zoomIn")}
           </button>
-          <button type="button" onClick={handleFitContent}>
+          <button
+            type="button"
+            onClick={handleFitContent}
+            disabled={tabletUsageBlocked}
+          >
             {t("workspace.fitContent")}
           </button>
-          <button type="button" onClick={handleFitBoard}>
+          <button
+            type="button"
+            onClick={handleFitBoard}
+            disabled={tabletUsageBlocked}
+          >
             {t("workspace.fitBoard")}
           </button>
         </div>
@@ -592,6 +707,7 @@ export default function HiveBoard({
                     onDragStart={onCardDragStart}
                     onToggleSelection={onToggleCardSelection}
                     onClearSelection={onClearSelection}
+                    dragDisabled={tabletUsageBlocked}
                   />
                 );
               })}

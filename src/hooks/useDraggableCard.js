@@ -36,6 +36,7 @@ export function useDraggableCard({
   onDragStart,
   onToggleSelection,
   onClearSelection,
+  dragDisabled = false,
 }) {
   const { isIOS, isSafari } = useDeviceDetection();
   const [isDragging, setIsDragging] = useState(false);
@@ -186,6 +187,7 @@ export function useDraggableCard({
   }, [card, isSelected, onClearSelection, selectedCards]);
 
   const handleMouseDown = useCallback((event) => {
+    if (dragDisabled) return;
     if (event.button !== 0) return;
 
     event.preventDefault();
@@ -197,7 +199,7 @@ export function useDraggableCard({
     }
 
     startDrag(event.clientX, event.clientY);
-  }, [card.id, onToggleSelection, startDrag]);
+  }, [card.id, dragDisabled, onToggleSelection, startDrag]);
 
   const handleMouseMove = useCallback((event) => {
     if (!dragStateRef.current) return;
@@ -213,6 +215,7 @@ export function useDraggableCard({
   }, [finalizeDrag]);
 
   const handleTouchStart = useCallback((event) => {
+    if (dragDisabled) return;
     const touch = event.touches[0];
 
     event.stopPropagation();
@@ -227,7 +230,7 @@ export function useDraggableCard({
     } else {
       startDrag(touch.clientX, touch.clientY);
     }
-  }, [isIOS, isSafari, startDrag]);
+  }, [dragDisabled, isIOS, isSafari, startDrag]);
 
   const handleTouchMove = useCallback((event) => {
     const touch = event.touches[0];

@@ -111,32 +111,90 @@
   }
 
   .hive-list-controls {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 12px;
-    align-items: flex-end;
-    margin: 4px 0 12px;
+    display: grid;
+    grid-template-columns: minmax(0, 1.5fr) minmax(220px, 0.8fr);
+    gap: 14px;
+    align-items: stretch;
+    margin: 8px 0 16px;
 
-    label {
+    .hive-list-controls__group {
       display: flex;
       flex-direction: column;
-      gap: 6px;
-      min-width: 220px;
-      color: #2f2f2f;
-      font-size: 0.92rem;
-      font-weight: 700;
+      justify-content: space-between;
+      gap: 8px;
+      min-width: 0;
+      padding: 14px 16px;
+      border: 1px solid rgba(49, 39, 131, 0.14);
+      border-radius: 14px;
+      background: linear-gradient(
+        180deg,
+        rgba(49, 39, 131, 0.07) 0%,
+        rgba(255, 255, 255, 0.98) 100%
+      );
+      box-shadow: 0 8px 18px rgba(49, 39, 131, 0.06);
     }
 
-    input,
-    select {
-      min-height: 40px;
+    .hive-list-controls__label {
+      color: #2f2f2f;
+      font-size: 1rem;
+      font-weight: 800;
+      letter-spacing: 0.01em;
+      line-height: 1.2;
+    }
+
+    .hive-list-controls__search {
+      min-width: 0;
+    }
+
+    .hive-list-controls__sort {
+      min-width: 220px;
+    }
+
+    .hive-list-controls__search-row {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 10px;
+      align-items: stretch;
+    }
+
+    .hive-list-controls__input,
+    .hive-list-controls__select {
+      min-height: 52px;
+      width: 100%;
+      margin: 0;
+      padding: 12px 14px;
+      border: 1px solid rgba(49, 39, 131, 0.22);
+      border-radius: 12px;
+      background: #fff;
+      color: #1f1f1f;
+      font-size: 1rem;
+      box-sizing: border-box;
+    }
+
+    .hive-list-controls__input::placeholder {
+      color: #5f5f5f;
+      font-size: 1rem;
+      opacity: 1;
+    }
+
+    .hive-list-controls__input:focus,
+    .hive-list-controls__select:focus {
+      border-color: rgba(49, 39, 131, 0.5);
+      outline: 3px solid rgba(49, 39, 131, 0.14);
+      outline-offset: 0;
     }
 
     .hive-search-clear {
-      margin-top: auto;
+      align-self: stretch;
+      min-width: 132px;
+      min-height: 52px;
+      margin: 0;
+      padding: 12px 16px;
       border: 0;
       cursor: pointer;
       color: #222;
+      font-size: 0.98rem;
+      font-weight: 700;
     }
   }
 
@@ -232,6 +290,40 @@
   }
 }
 
+@media (max-width: 960px) {
+  .profile-page {
+    .hive-list-controls {
+      grid-template-columns: 1fr;
+      gap: 12px;
+
+      .hive-list-controls__search {
+        grid-column: auto;
+      }
+
+      .hive-list-controls__sort {
+        min-width: 0;
+      }
+
+      .hive-list-controls__group {
+        padding: 16px;
+      }
+
+      .hive-list-controls__label {
+        font-size: 1.02rem;
+      }
+
+      .hive-list-controls__search-row {
+        grid-template-columns: minmax(0, 1fr) auto;
+      }
+
+      .hive-search-clear {
+        min-width: 144px;
+        padding-inline: 16px;
+      }
+    }
+  }
+}
+
 @media (max-width: 720px) {
   .profile-page {
     .profile-tabs {
@@ -254,7 +346,17 @@
     }
 
     .hive-list-controls {
-      label {
+      grid-template-columns: 1fr;
+
+      .hive-list-controls__group {
+        padding: 14px;
+      }
+
+      .hive-list-controls__search-row {
+        grid-template-columns: 1fr;
+      }
+
+      .hive-search-clear {
         width: 100%;
       }
     }

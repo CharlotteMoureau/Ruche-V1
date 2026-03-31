@@ -54,14 +54,25 @@ function renderHighlightedText(text, searchTerm) {
  * LibraryCard - Draggable card for the library sidebar
  * Extracted to prevent unnecessary re-renders of parent component
  */
-function LibraryCard({ card, searchTerm = "", isSearchActive = false }) {
-  const [{ isDragging }, drag, preview] = useDrag(() => ({
-    type: "CARD",
-    item: { card, fromLibrary: true },
-    collect: (monitor) => ({
-      isDragging: !!monitor.isDragging(),
+function LibraryCard({
+  card,
+  searchTerm = "",
+  isSearchActive = false,
+  isTabletSelectable = false,
+  isSelected = false,
+  onToggleSelect,
+}) {
+  const [{ isDragging }, drag, preview] = useDrag(
+    () => ({
+      type: "CARD",
+      item: { card, fromLibrary: true },
+      canDrag: !isTabletSelectable,
+      collect: (monitor) => ({
+        isDragging: !!monitor.isDragging(),
+      }),
     }),
-  }));
+    [card, isTabletSelectable],
+  );
 
   useEffect(() => {
     preview(getEmptyImage(), { captureDraggingState: true });
@@ -74,11 +85,18 @@ function LibraryCard({ card, searchTerm = "", isSearchActive = false }) {
       ref={drag}
       className={`library-card ${isDragging ? "dragging" : ""} ${
         isSearchActive ? "library-card--match" : ""
-      }`}
+      } ${isSelected ? "library-card--selected" : ""}`}
       style={{
         opacity: isDragging ? 0.4 : 1,
-        margin: "4px",
-        cursor: isDragging ? "grabbing" : "grab",
+        cursor: isTabletSelectable
+          ? "pointer"
+          : isDragging
+            ? "grabbing"
+            : "grab",
+      }}
+      onClick={() => {
+        if (!isTabletSelectable) return;
+        onToggleSelect?.(card.id);
       }}
     >
       <HexCard card={card} />

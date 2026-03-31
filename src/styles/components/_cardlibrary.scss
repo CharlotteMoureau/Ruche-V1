@@ -1,11 +1,15 @@
+@use "../base/variables" as *;
+
 .card-library {
   --board-card-size: 100%;
   height: 100%;
   padding: 10px;
   overflow-y: auto;
+  overflow-x: hidden;
   background: #fff;
   border-radius: 8px;
   border: 1px solid #ddd;
+  box-sizing: border-box;
 
   h2 {
     font-size: 1rem;
@@ -65,8 +69,58 @@
     .card-list {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(155px, 1fr));
-      gap: 1px;
+      column-gap: 0;
+      row-gap: 14px;
       align-items: start;
+    }
+  }
+
+  .card-library__select-toolbar {
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px;
+    margin: 0 0 10px;
+    padding: 8px;
+    border-radius: 12px;
+    border: 1px solid #d9d1c1;
+    background: rgba(255, 251, 243, 0.98);
+    box-sizing: border-box;
+
+    .card-library__select-help {
+      flex: 1 1 100%;
+      margin: 0;
+      color: #334155;
+      font-size: 0.8rem;
+      line-height: 1.35;
+      font-weight: 600;
+    }
+
+    button {
+      flex: 1 1 160px;
+      min-width: 0;
+      border: 1px solid #d5ccb9;
+      border-radius: 999px;
+      background: #fff;
+      color: #273043;
+      font-weight: 700;
+      font-size: 0.76rem;
+      padding: 7px 10px;
+      cursor: pointer;
+    }
+
+    button:disabled {
+      opacity: 0.55;
+      cursor: not-allowed;
+    }
+
+    .is-active {
+      border-color: #a4781f;
+      background: #f7d77b;
+      color: #1f2e4f;
     }
   }
 }
@@ -74,12 +128,22 @@
 .card-library .library-card {
   margin: 0 !important;
   width: 100%;
+  min-width: 0;
 }
 
 .card-library .library-card.library-card--match {
   border-radius: 10px;
   box-shadow: 0 0 0 2px rgba(232, 166, 52, 0.75);
   background: rgba(255, 252, 238, 0.92);
+}
+
+.card-library .library-card.library-card--selected .hex {
+  overflow: visible;
+}
+
+.card-library .library-card.library-card--selected .hex-shape {
+  stroke: $bleu-fonce;
+  stroke-width: 3;
 }
 
 .card-library .library-card__match-snippet {
@@ -105,6 +169,20 @@
   margin: 12px 4px 0;
   color: #5d6778;
   font-size: 0.95rem;
+}
+
+@media (min-width: 768px) and (max-width: 1200px) and (orientation: landscape) and (pointer: coarse) {
+  .card-library .card-category .card-list {
+    grid-template-columns: repeat(auto-fill, minmax(132px, 1fr));
+  }
+
+  .card-library .hex-card .hex .hex-inner {
+    .hex-front,
+    .hex-back {
+      padding-left: 14px;
+      padding-right: 14px;
+    }
+  }
 }
 
 

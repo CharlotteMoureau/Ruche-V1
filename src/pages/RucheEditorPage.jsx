@@ -1,5 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faArrowLeft, faFloppyDisk } from "@fortawesome/free-solid-svg-icons";
 import domtoimage from "dom-to-image-more";
 import { ApiError, apiFetch } from "../lib/api";
 import { useAuth } from "../context/AuthContext";
@@ -13,6 +15,7 @@ import {
   normalizeHiveKind,
   resolveDefaultHiveKind,
 } from "../lib/hives";
+import { useTabletViewport } from "../hooks/useTabletViewport";
 
 function waitForCaptureFrame() {
   return new Promise((resolve) => {
@@ -42,6 +45,7 @@ export default function RucheEditorPage() {
   const navigate = useNavigate();
   const { token, user, isAdmin, logout } = useAuth();
   const { t, dateLocale } = useLanguage();
+  const { isTabletLandscape, isTabletPortrait, isPhone } = useTabletViewport();
 
   const isNew = !id;
   const duplicateSource = location.state?.duplicateSource || null;
@@ -91,6 +95,9 @@ export default function RucheEditorPage() {
   const [pendingNewTitle, setPendingNewTitle] = useState("");
   const [sentInvitations, setSentInvitations] = useState([]);
   const [pendingLeaveAction, setPendingLeaveAction] = useState(null);
+  const [showHeaderTitleModal, setShowHeaderTitleModal] = useState(false);
+  const [headerTitleDraft, setHeaderTitleDraft] = useState("");
+  const [captureSignal, setCaptureSignal] = useState(0);
 
   const isOwner = Boolean(
     hive?.owner?.id && user?.id && hive.owner.id === user.id,
@@ -126,6 +133,7 @@ export default function RucheEditorPage() {
   const workspaceLoadKey = isNew
     ? "new-hive"
     : `${id}:${hive ? "loaded" : "init"}`;
+  const isTabletEditorMode = isTabletLandscape && !isAdmin;
   const isDuplicateFlow = isNew && Boolean(duplicateSource?.title);
   const hasRenamedDuplicate =
     !isDuplicateFlow || title.trim() !== duplicateSource.title.trim();
@@ -146,6 +154,13 @@ export default function RucheEditorPage() {
   const activeEditorNames = useMemo(
     () => otherActiveEditors.map((editor) => editor.username).join(", "),
     [otherActiveEditors],
+  );
+  const activeEditorsLabel = useMemo(
+    () =>
+      otherActiveEditors.length > 0
+        ? t("editor.activeEditorsOthers", { names: activeEditorNames })
+        : t("editor.activeEditorsOnlyYou"),
+    [activeEditorNames, otherActiveEditors.length, t],
   );
 
   useEffect(() => {
@@ -652,9 +667,9 @@ export default function RucheEditorPage() {
     setShowCommentsModal(true);
   };
 
-  const handleResetRequest = () => {
+  const handleResetRequest = useCallback(() => {
     setShowResetConfirmModal(true);
-  };
+  }, []);
 
   const handleConfirmReset = () => {
     setShowResetConfirmModal(false);
@@ -910,112 +925,209 @@ export default function RucheEditorPage() {
         user: updatedBy,
       }),
   };
+  const topbarMetaLabel =
+    !isTabletEditorMode && !isNew && hive
+      ? `${t("editor.createdAt")}: ${formatDateTime(hive.createdAt, dateLocale)} | ${t("editor.updatedAt")}: ${formatDateTime(hive.updatedAt, dateLocale)}`
+      : "";
+
+  useEffect(() => {
+    if (!isTabletEditorMode) {
+      window.dispatchEvent(
+        new CustomEvent("ruche:editor-header-state", { detail: null }),
+      );
+      return;
+    }
+
+    window.dispatchEvent(
+      new CustomEvent("ruche:editor-header-state", {
+        detail: {
+          isSaving,
+          commentCount,
+        },
+      }),
+    );
+
+    return () => {
+      window.dispatchEvent(
+        new CustomEvent("ruche:editor-header-state", { detail: null }),
+      );
+    };
+  }, [commentCount, isSaving, isTabletEditorMode]);
+
+  useEffect(() => {
+    const handleHeaderAction = (event) => {
+      if (!isTabletEditorMode) return;
+
+      const actionType = event?.detail?.type;
+      if (!actionType) return;
+
+      if (actionType === "back-profile") {
+        if (isDirty) {
+          setPendingLeaveAction({ type: "route", to: "/profile" });
+          setShowLeaveDirtyModal(true);
+          return;
+        }
+
+        navigate("/profile");
+        return;
+      }
+
+      if (actionType === "edit-title") {
+        setHeaderTitleDraft(title);
+        setShowHeaderTitleModal(true);
+        return;
+      }
+
+      if (actionType === "save") {
+        saveHive();
+        return;
+      }
+
+      if (actionType === "reset") {
+        handleResetRequest();
+        return;
+      }
+
+      if (actionType === "capture") {
+        setCaptureSignal((prev) => prev + 1);
+        return;
+      }
+
+      if (actionType === "collaborators") {
+        if (requiresSavedHivePrompt) {
+          promptSaveForAction({ type: "collaborators" });
+          return;
+        }
+
+        setOpenCollaboratorsSignal((prev) => prev + 1);
+        return;
+      }
+
+      if (actionType === "comments") {
+        handleOpenComments();
+      }
+    };
+
+    window.addEventListener("ruche:editor-header-action", handleHeaderAction);
+
+    return () => {
+      window.removeEventListener(
+        "ruche:editor-header-action",
+        handleHeaderAction,
+      );
+    };
+  }, [
+    handleResetRequest,
+    handleOpenComments,
+    isDirty,
+    isTabletEditorMode,
+    navigate,
+    promptSaveForAction,
+    requiresSavedHivePrompt,
+    saveHive,
+    title,
+  ]);
 
   return (
     <section className="editor-page">
-      <div className="editor-topbar">
-        <div className="editor-topbar-main">
-          <Link
-            to="/profile"
-            className="button-link"
-            onClick={(event) => {
-              if (!isDirty) return;
-              event.preventDefault();
-              setPendingLeaveAction({ type: "route", to: "/profile" });
-              setShowLeaveDirtyModal(true);
-            }}
-          >
-            {t("editor.backToProfile")}
-          </Link>
-
-          <label>
-            {t("editor.hiveTitleLabel")}
-            <input
-              id="hive-title"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              onKeyDown={(event) => {
-                if (!canManageHive || isSaving || event.nativeEvent.isComposing)
-                  return;
-                if (event.key !== "Enter") return;
+      {!isTabletEditorMode ? (
+        <div className="editor-topbar">
+          <div className="editor-topbar-main">
+            <Link
+              to="/profile"
+              className="button-link"
+              onClick={(event) => {
+                if (!isDirty) return;
                 event.preventDefault();
-                saveHive();
+                setPendingLeaveAction({ type: "route", to: "/profile" });
+                setShowLeaveDirtyModal(true);
               }}
-              maxLength={100}
-              disabled={!canManageHive}
-            />
-          </label>
-          {canEdit ? (
-            <button type="button" onClick={saveHive} disabled={isSaving}>
-              {isSaving ? t("editor.saving") : t("editor.saveHive")}
-            </button>
-          ) : null}
-        </div>
+            >
+              <FontAwesomeIcon icon={faArrowLeft} />
+              {t("editor.backToProfile")}
+            </Link>
 
-        <div className="editor-topbar-actions">
-          <Toolbar
-            onReset={handleResetRequest}
-            showCollaboratorsButton={isNew}
-            isCollaboratorsLocked={requiresSavedHivePrompt}
-            canInvite={
-              !isNew &&
-              Boolean(hive) &&
-              (hive.owner?.id === user?.id ||
-                isAdmin ||
-                collaboratorRole === "ADMIN")
-            }
-            canLeaveHive={!isNew && Boolean(hive) && isCollaborator}
-            collaborators={hive?.collaborators || []}
-            onOpenCollaborators={isNew ? handleOpenCollaborators : undefined}
-            onInviteCollaborator={
-              !isNew && hive ? inviteCollaborator : undefined
-            }
-            onChangeCollaboratorRole={
-              !isNew && hive ? changeCollaboratorRole : undefined
-            }
-            onRemoveCollaborator={
-              !isNew && hive ? removeCollaborator : undefined
-            }
-            onLeaveHive={
-              !isNew && hive && isCollaborator ? leaveHive : undefined
-            }
-            sentInvitations={sentInvitations}
-            onLoadSentInvitations={
-              !isNew && hive ? loadHiveInvitations : undefined
-            }
-            isCommentsLocked={requiresSavedHivePrompt}
-            onOpenComments={handleOpenComments}
-            commentCount={commentCount}
-            openCollaboratorsSignal={openCollaboratorsSignal}
-            exportOptions={exportOptions}
-          />
+            <label>
+              {t("editor.hiveTitleLabel")}
+              <input
+                id="hive-title"
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                onKeyDown={(event) => {
+                  if (
+                    !canManageHive ||
+                    isSaving ||
+                    event.nativeEvent.isComposing
+                  )
+                    return;
+                  if (event.key !== "Enter") return;
+                  event.preventDefault();
+                  saveHive();
+                }}
+                maxLength={100}
+                disabled={!canManageHive}
+              />
+            </label>
+            {canEdit ? (
+              <button type="button" onClick={saveHive} disabled={isSaving}>
+                <FontAwesomeIcon icon={faFloppyDisk} />
+                {isSaving ? t("editor.saving") : t("editor.saveHive")}
+              </button>
+            ) : null}
+
+            {topbarMetaLabel ? (
+              <p className="editor-topbar-meta" aria-live="polite">
+                {topbarMetaLabel}
+              </p>
+            ) : null}
+          </div>
+
+          <div className="editor-topbar-actions">
+            <Toolbar
+              onReset={handleResetRequest}
+              showCollaboratorsButton={isNew}
+              isCollaboratorsLocked={requiresSavedHivePrompt}
+              canInvite={
+                !isNew &&
+                Boolean(hive) &&
+                (hive.owner?.id === user?.id ||
+                  isAdmin ||
+                  collaboratorRole === "ADMIN")
+              }
+              canLeaveHive={!isNew && Boolean(hive) && isCollaborator}
+              collaborators={hive?.collaborators || []}
+              onOpenCollaborators={isNew ? handleOpenCollaborators : undefined}
+              onInviteCollaborator={
+                !isNew && hive ? inviteCollaborator : undefined
+              }
+              onChangeCollaboratorRole={
+                !isNew && hive ? changeCollaboratorRole : undefined
+              }
+              onRemoveCollaborator={
+                !isNew && hive ? removeCollaborator : undefined
+              }
+              onLeaveHive={
+                !isNew && hive && isCollaborator ? leaveHive : undefined
+              }
+              sentInvitations={sentInvitations}
+              onLoadSentInvitations={
+                !isNew && hive ? loadHiveInvitations : undefined
+              }
+              isCommentsLocked={requiresSavedHivePrompt}
+              onOpenComments={handleOpenComments}
+              commentCount={commentCount}
+              openCollaboratorsSignal={openCollaboratorsSignal}
+              captureSignal={captureSignal}
+              exportOptions={exportOptions}
+            />
+          </div>
         </div>
-      </div>
+      ) : (
+        <div className="editor-topbar editor-topbar--tablet-spacer" />
+      )}
 
       {isDuplicateFlow ? (
         <p className="form-info">{t("editor.duplicateInfo")}</p>
-      ) : null}
-
-      {!isNew && hive ? (
-        <p className="form-info">
-          {t("editor.createdAt")}: {formatDateTime(hive.createdAt, dateLocale)}{" "}
-          | {t("editor.updatedAt")}:{" "}
-          {formatDateTime(hive.updatedAt, dateLocale)}
-        </p>
-      ) : null}
-
-      {!isNew && hive ? (
-        <p className="form-info editor-active-editors" aria-live="polite">
-          {otherActiveEditors.length > 0
-            ? t("editor.activeEditorsOthers", { names: activeEditorNames })
-            : t("editor.activeEditorsOnlyYou")}
-        </p>
-      ) : null}
-
-      {isSaving ? (
-        <p className="form-info" aria-live="polite">
-          {t("editor.updating")}
-        </p>
       ) : null}
 
       {error ? <p className="form-error">{error}</p> : null}
@@ -1037,9 +1149,47 @@ export default function RucheEditorPage() {
           onRequireSaveBeforeNote={handleRequireSaveBeforeCardNote}
           requestedNoteCardId={requestedNoteCardId}
           onRequestedNoteHandled={() => setRequestedNoteCardId(null)}
+          isTabletEditorMode={isTabletEditorMode}
+          tabletUsageBlocked={isTabletPortrait || isPhone}
+          activeEditorsLabel={activeEditorsLabel}
           onStateChange={setBoardData}
         />
       )}
+
+      {isTabletEditorMode ? (
+        <Toolbar
+          onReset={handleResetRequest}
+          showCollaboratorsButton={isNew}
+          isCollaboratorsLocked={requiresSavedHivePrompt}
+          canInvite={
+            !isNew &&
+            Boolean(hive) &&
+            (hive.owner?.id === user?.id ||
+              isAdmin ||
+              collaboratorRole === "ADMIN")
+          }
+          canLeaveHive={!isNew && Boolean(hive) && isCollaborator}
+          collaborators={hive?.collaborators || []}
+          onOpenCollaborators={isNew ? handleOpenCollaborators : undefined}
+          onInviteCollaborator={!isNew && hive ? inviteCollaborator : undefined}
+          onChangeCollaboratorRole={
+            !isNew && hive ? changeCollaboratorRole : undefined
+          }
+          onRemoveCollaborator={!isNew && hive ? removeCollaborator : undefined}
+          onLeaveHive={!isNew && hive && isCollaborator ? leaveHive : undefined}
+          sentInvitations={sentInvitations}
+          onLoadSentInvitations={
+            !isNew && hive ? loadHiveInvitations : undefined
+          }
+          isCommentsLocked={requiresSavedHivePrompt}
+          onOpenComments={handleOpenComments}
+          commentCount={commentCount}
+          openCollaboratorsSignal={openCollaboratorsSignal}
+          captureSignal={captureSignal}
+          exportOptions={exportOptions}
+          hidden
+        />
+      ) : null}
 
       {showCommentsModal && (
         <div
@@ -1313,6 +1463,24 @@ export default function RucheEditorPage() {
         }}
         onConfirm={handleRenameExistingHive}
         onExtraAction={handleDuplicateWithNewTitle}
+      />
+
+      <UnifiedPromptModal
+        isOpen={showHeaderTitleModal}
+        mode="prompt"
+        title={t("editor.hiveTitleLabel")}
+        inputLabel={t("editor.hiveTitleLabel")}
+        value={headerTitleDraft}
+        onValueChange={setHeaderTitleDraft}
+        confirmLabel={t("common.save")}
+        confirmDisabled={!headerTitleDraft.trim()}
+        onCancel={() => setShowHeaderTitleModal(false)}
+        onConfirm={() => {
+          const nextTitle = headerTitleDraft.trim();
+          if (!nextTitle) return;
+          setTitle(nextTitle);
+          setShowHeaderTitleModal(false);
+        }}
       />
     </section>
   );

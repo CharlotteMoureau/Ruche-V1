@@ -18,6 +18,7 @@ export default function DraggableBoardCard({
   onDragStart,
   onToggleSelection,
   onClearSelection,
+  dragDisabled = false,
   children,
 }) {
   const { isDragging, handleMouseDown, handleTouchStart } = useDraggableCard({
@@ -36,6 +37,7 @@ export default function DraggableBoardCard({
     onDragStart,
     onToggleSelection,
     onClearSelection,
+    dragDisabled,
   });
 
   return (

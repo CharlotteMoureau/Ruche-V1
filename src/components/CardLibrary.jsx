@@ -5,7 +5,17 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faExclamationTriangle } from "@fortawesome/free-solid-svg-icons";
 import { useLanguage } from "../context/LanguageContext";
 
-export default function CardLibrary({ cards, onFreeSpaceClick, userCards }) {
+export default function CardLibrary({
+  cards,
+  onFreeSpaceClick,
+  userCards,
+  isTabletEditorMode = false,
+  selectedCount = 0,
+  onClearSelected,
+  onGoToBoard,
+  onToggleLibraryCardSelection,
+  selectedLibraryCardIds,
+}) {
   const { cardCategories, t } = useLanguage();
   const categories = cardCategories;
 
@@ -77,6 +87,30 @@ export default function CardLibrary({ cards, onFreeSpaceClick, userCards }) {
         </div>
       </div>
 
+      {isTabletEditorMode ? (
+        <div className="card-library__select-toolbar">
+          <p className="card-library__select-help">
+            {selectedCount > 0
+              ? t("cardLibrary.selectedCount", { count: selectedCount })
+              : t("cardLibrary.tapToSelectHelp")}
+          </p>
+          <button
+            type="button"
+            onClick={onClearSelected}
+            disabled={selectedCount === 0}
+          >
+            {t("cardLibrary.clearSelection")}
+          </button>
+          <button
+            type="button"
+            onClick={onGoToBoard}
+            disabled={selectedCount === 0}
+          >
+            {t("cardLibrary.goToBoard", { count: selectedCount })}
+          </button>
+        </div>
+      ) : null}
+
       {categories.map(({ label, key }) => {
         const cardsInCategory = filteredCards.filter(
           (card) => card.category === key,
@@ -124,6 +158,9 @@ export default function CardLibrary({ cards, onFreeSpaceClick, userCards }) {
                   card={card}
                   searchTerm={normalizedSearch}
                   isSearchActive={Boolean(normalizedSearch)}
+                  isTabletSelectable={isTabletEditorMode}
+                  isSelected={selectedLibraryCardIds?.has(card.id)}
+                  onToggleSelect={onToggleLibraryCardSelection}
                 />
               ))}
             </div>

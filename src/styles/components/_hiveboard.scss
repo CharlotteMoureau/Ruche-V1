@@ -124,6 +124,10 @@
   gap: 10px;
 }
 
+.toolbar--hidden {
+  display: none;
+}
+
 .draggable-card {
   position: relative;
 }

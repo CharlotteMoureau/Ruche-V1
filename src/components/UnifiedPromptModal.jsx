@@ -53,12 +53,9 @@ export default function UnifiedPromptModal({
     if (event.key === "Escape") {
       onCancel?.();
     }
-  };
-
-  const handleSubmit = (event) => {
-    event.preventDefault();
-    if (confirmDisabled) return;
-    onConfirm?.();
+    if (event.key === "Enter" && !confirmDisabled) {
+      onConfirm?.();
+    }
   };
 
   return (
@@ -75,7 +72,7 @@ export default function UnifiedPromptModal({
         <h2>{title}</h2>
         {message ? <p className="unified-prompt-message">{message}</p> : null}
 
-        <form onSubmit={handleSubmit} className="form-grid unified-prompt-form">
+        <div className="form-grid unified-prompt-form">
           {mode === "prompt" ? (
             <label>
               {inputLabel || "Value"}
@@ -84,6 +81,12 @@ export default function UnifiedPromptModal({
                 type="text"
                 value={value}
                 onChange={(event) => onValueChange?.(event.target.value)}
+                onKeyDown={(event) => {
+                  if (event.key === "Enter" && !confirmDisabled) {
+                    event.preventDefault();
+                    onConfirm?.();
+                  }
+                }}
                 placeholder={inputPlaceholder}
                 maxLength={100}
               />
@@ -105,14 +108,18 @@ export default function UnifiedPromptModal({
             ) : null}
             <button
               ref={confirmRef}
-              type="submit"
+              type="button"
               className={`btn ${confirmClassName}`.trim()}
               disabled={confirmDisabled}
+              onClick={() => {
+                if (confirmDisabled) return;
+                onConfirm?.();
+              }}
             >
               {resolvedConfirmLabel}
             </button>
           </div>
-        </form>
+        </div>
       </div>
     </div>
   );

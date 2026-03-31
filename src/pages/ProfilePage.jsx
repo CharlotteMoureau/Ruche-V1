@@ -804,33 +804,49 @@ export default function ProfilePage() {
                 <>
                   <h3>{t("profile.myHives")}</h3>
                   <div className="hive-list-controls">
-                    <label>
-                      {t("profile.searchLabel")}
-                      <input
-                        type="search"
-                        value={ownedSearchQuery}
-                        onChange={(event) => {
-                          setOwnedSearchQuery(event.target.value);
-                          setOwnedPage(1);
-                        }}
-                        placeholder={t("profile.searchPlaceholder")}
-                      />
-                    </label>
-                    {ownedSearchQuery.trim() ? (
-                      <button
-                        type="button"
-                        className="button-link hive-search-clear"
-                        onClick={() => {
-                          setOwnedSearchQuery("");
-                          setOwnedPage(1);
-                        }}
+                    <div className="hive-list-controls__group hive-list-controls__search">
+                      <label
+                        className="hive-list-controls__label"
+                        htmlFor="owned-hive-search"
                       >
-                        {t("profile.clearSearch")}
-                      </button>
-                    ) : null}
-                    <label>
-                      {t("profile.sortLabel")}
+                        {t("profile.searchLabel")}
+                      </label>
+                      <div className="hive-list-controls__search-row">
+                        <input
+                          id="owned-hive-search"
+                          className="hive-list-controls__input"
+                          type="search"
+                          value={ownedSearchQuery}
+                          onChange={(event) => {
+                            setOwnedSearchQuery(event.target.value);
+                            setOwnedPage(1);
+                          }}
+                          placeholder={t("profile.searchPlaceholder")}
+                        />
+                        {ownedSearchQuery.trim() ? (
+                          <button
+                            type="button"
+                            className="button-link hive-search-clear"
+                            onClick={() => {
+                              setOwnedSearchQuery("");
+                              setOwnedPage(1);
+                            }}
+                          >
+                            {t("profile.clearSearch")}
+                          </button>
+                        ) : null}
+                      </div>
+                    </div>
+                    <div className="hive-list-controls__group hive-list-controls__sort">
+                      <label
+                        className="hive-list-controls__label"
+                        htmlFor="owned-hive-sort"
+                      >
+                        {t("profile.sortLabel")}
+                      </label>
                       <select
+                        id="owned-hive-sort"
+                        className="hive-list-controls__select"
                         value={ownedSortMode}
                         onChange={(event) => {
                           setOwnedSortMode(event.target.value);
@@ -850,7 +866,7 @@ export default function ProfilePage() {
                           {t("profile.sortNameDesc")}
                         </option>
                       </select>
-                    </label>
+                    </div>
                   </div>
                   {ownedVisibleCount > 0 ? (
                     <ul className="list-grid">
@@ -949,33 +965,49 @@ export default function ProfilePage() {
                 <>
                   <h3>{t("profile.sharedHives")}</h3>
                   <div className="hive-list-controls">
-                    <label>
-                      {t("profile.searchLabel")}
-                      <input
-                        type="search"
-                        value={sharedSearchQuery}
-                        onChange={(event) => {
-                          setSharedSearchQuery(event.target.value);
-                          setSharedPage(1);
-                        }}
-                        placeholder={t("profile.searchPlaceholder")}
-                      />
-                    </label>
-                    {sharedSearchQuery.trim() ? (
-                      <button
-                        type="button"
-                        className="button-link hive-search-clear"
-                        onClick={() => {
-                          setSharedSearchQuery("");
-                          setSharedPage(1);
-                        }}
+                    <div className="hive-list-controls__group hive-list-controls__search">
+                      <label
+                        className="hive-list-controls__label"
+                        htmlFor="shared-hive-search"
                       >
-                        {t("profile.clearSearch")}
-                      </button>
-                    ) : null}
-                    <label>
-                      {t("profile.sortLabel")}
+                        {t("profile.searchLabel")}
+                      </label>
+                      <div className="hive-list-controls__search-row">
+                        <input
+                          id="shared-hive-search"
+                          className="hive-list-controls__input"
+                          type="search"
+                          value={sharedSearchQuery}
+                          onChange={(event) => {
+                            setSharedSearchQuery(event.target.value);
+                            setSharedPage(1);
+                          }}
+                          placeholder={t("profile.searchPlaceholder")}
+                        />
+                        {sharedSearchQuery.trim() ? (
+                          <button
+                            type="button"
+                            className="button-link hive-search-clear"
+                            onClick={() => {
+                              setSharedSearchQuery("");
+                              setSharedPage(1);
+                            }}
+                          >
+                            {t("profile.clearSearch")}
+                          </button>
+                        ) : null}
+                      </div>
+                    </div>
+                    <div className="hive-list-controls__group hive-list-controls__sort">
+                      <label
+                        className="hive-list-controls__label"
+                        htmlFor="shared-hive-sort"
+                      >
+                        {t("profile.sortLabel")}
+                      </label>
                       <select
+                        id="shared-hive-sort"
+                        className="hive-list-controls__select"
                         value={sharedSortMode}
                         onChange={(event) => {
                           setSharedSortMode(event.target.value);
@@ -995,7 +1027,7 @@ export default function ProfilePage() {
                           {t("profile.sortNameDesc")}
                         </option>
                       </select>
-                    </label>
+                    </div>
                   </div>
                   {sharedVisibleCount > 0 ? (
                     <ul className="list-grid">
