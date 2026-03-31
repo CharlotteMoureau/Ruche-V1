@@ -1,3 +1,4 @@
+@use "sass:color";
 @use "../base/variables" as *;
 
 .login-link-row {
@@ -27,7 +28,7 @@
   background: $jaune;
   border-radius: 6px;
   padding: 3px 12px;
-   background: darken($jaune, 8%);
+  background: color.adjust($jaune, $lightness: -8%);
    color: #222;
   text-decoration: none;
   transition: background 0.2s, color 0.2s;

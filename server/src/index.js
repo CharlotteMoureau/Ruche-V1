@@ -8,12 +8,12 @@ import { adminRouter } from "./routes/admin.js";
 
 const app = express();
 const env = globalThis.process?.env || {};
-const port = Number(env.API_PORT || 4000);
-const appUrl = env.APP_URL || "http://localhost:5173";
+const port = Number(env.API_PORT || 4010);
+const appUrl = env.APP_URL || "http://127.0.0.1:5173";
 
 app.use(
   cors({
-    origin: [appUrl, "http://localhost:5173"],
+    origin: [appUrl, "http://127.0.0.1:5173"],
     credentials: false,
   }),
 );

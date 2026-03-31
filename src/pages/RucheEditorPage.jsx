@@ -236,7 +236,7 @@ export default function RucheEditorPage() {
       } catch {
         // Ignore transient refresh errors and keep local editing state.
       }
-    }, 4000);
+    }, 4500);
 
     return () => clearInterval(intervalId);
   }, [canEdit, id, isDirty, isNew, token]);
