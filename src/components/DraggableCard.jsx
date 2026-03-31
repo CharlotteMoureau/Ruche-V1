@@ -14,6 +14,7 @@ export default function DraggableCard({
   onDragStart,
   onToggleSelection,
   onClearSelection,
+  selectionMode = false,
 }) {
   const isFreeCard = card.category === "free";
 
@@ -31,6 +32,7 @@ export default function DraggableCard({
       onDragStart={onDragStart}
       onToggleSelection={onToggleSelection}
       onClearSelection={onClearSelection}
+      selectionMode={selectionMode}
     >
       {isFreeCard ? <FreeHexCard card={card} /> : <HexCard card={card} />}
     </DraggableBoardCard>

@@ -29,8 +29,12 @@ export default function HiveBoard({
   canUndo = false,
   canRedo = false,
   selectedCardIds,
+  boardSelectionMode = false,
   onToggleCardSelection,
   onClearSelection,
+  onToggleBoardSelectionMode,
+  onExitBoardSelectionMode,
+  onReturnSelectedCards,
   onOpenCardNote,
   noteLocked = false,
   canEdit = true,
@@ -63,6 +67,7 @@ export default function HiveBoard({
     useState(autoPlaceSignal);
   const [isPanning, setIsPanning] = useState(false);
   const selectedCards = cards.filter((card) => selectedCardIds.has(card.id));
+  const selectedCount = selectedCardIds.size;
   const defaultZoom = isCompactLayout
     ? BOARD_COMPACT_DEFAULT_ZOOM
     : BOARD_DEFAULT_ZOOM;
@@ -376,6 +381,10 @@ export default function HiveBoard({
   const handleBoardMouseDown = (event) => {
     if (tabletUsageBlocked) return;
     if (event.target === event.currentTarget) {
+      if (boardSelectionMode) {
+        onExitBoardSelectionMode?.();
+        return;
+      }
       onClearSelection();
     }
   };
@@ -420,14 +429,21 @@ export default function HiveBoard({
         return;
       }
 
+      if (boardSelectionMode) {
+        onExitBoardSelectionMode?.();
+        return;
+      }
+
       onClearSelection();
       startPan(event.clientX, event.clientY);
     },
     [
       getBoardPointFromClient,
       onClearSelection,
+      onExitBoardSelectionMode,
       onPlaceLibraryCards,
       pendingLibraryCards,
+      boardSelectionMode,
       startPan,
       tabletUsageBlocked,
     ],
@@ -651,29 +667,56 @@ export default function HiveBoard({
     };
   }, []);
 
+  const historyControls = (
+    <>
+      <button
+        type="button"
+        onClick={onUndo}
+        disabled={tabletUsageBlocked || !canEdit || !canUndo}
+      >
+        <FontAwesomeIcon icon={faRotateLeft} /> {t("workspace.undo")}
+      </button>
+      <button
+        type="button"
+        onClick={onRedo}
+        disabled={tabletUsageBlocked || !canEdit || !canRedo}
+      >
+        <FontAwesomeIcon icon={faRotateRight} /> {t("workspace.redo")}
+      </button>
+    </>
+  );
+
   return (
     <main className="hive-board">
       <header className="hive-board__controls">
         <div className="hive-board__controls-group">
-          <button
-            type="button"
-            onClick={onUndo}
-            disabled={tabletUsageBlocked || !canEdit || !canUndo}
-          >
-            <FontAwesomeIcon icon={faRotateLeft} /> {t("workspace.undo")}
-          </button>
-          <button
-            type="button"
-            onClick={onRedo}
-            disabled={tabletUsageBlocked || !canEdit || !canRedo}
-          >
-            <FontAwesomeIcon icon={faRotateRight} /> {t("workspace.redo")}
-          </button>
+          {!isTabletEditorMode ? historyControls : null}
           {isCompactLayout ? (
             <button type="button" onClick={onToggleLibrary}>
               {isLibraryOpen
                 ? t("workspace.hideLibrary")
                 : t("workspace.showLibrary")}
+            </button>
+          ) : null}
+          {isTabletEditorMode ? (
+            <button
+              type="button"
+              className={boardSelectionMode ? "is-active" : ""}
+              onClick={onToggleBoardSelectionMode}
+              disabled={tabletUsageBlocked || !canEdit}
+            >
+              {boardSelectionMode
+                ? t("workspace.disableMultiSelect")
+                : t("workspace.enableMultiSelect")}
+            </button>
+          ) : null}
+          {isTabletEditorMode && boardSelectionMode && selectedCount > 0 ? (
+            <button
+              type="button"
+              onClick={onReturnSelectedCards}
+              disabled={tabletUsageBlocked || !canEdit}
+            >
+              {t("workspace.returnSelectedToLibrary", { count: selectedCount })}
             </button>
           ) : null}
         </div>
@@ -722,6 +765,9 @@ export default function HiveBoard({
         ref={handleViewportRef}
         className={`hive-board__viewport ${isPanning ? "is-panning" : ""} ${isDefaultZoom ? "is-default-zoom" : ""}`.trim()}
       >
+        {isTabletEditorMode ? (
+          <div className="hive-board__history-tablet">{historyControls}</div>
+        ) : null}
         <div
           className="hive-board__canvas-shell"
           style={{
@@ -759,6 +805,7 @@ export default function HiveBoard({
                     onDragStart={onCardDragStart}
                     onToggleSelection={onToggleCardSelection}
                     onClearSelection={onClearSelection}
+                    selectionMode={isTabletEditorMode && boardSelectionMode}
                     dragDisabled={tabletUsageBlocked}
                   />
                 );

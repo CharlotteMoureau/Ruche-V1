@@ -18,6 +18,7 @@ export default function DraggableBoardCard({
   onDragStart,
   onToggleSelection,
   onClearSelection,
+  selectionMode = false,
   dragDisabled = false,
   children,
 }) {
@@ -37,6 +38,7 @@ export default function DraggableBoardCard({
     onDragStart,
     onToggleSelection,
     onClearSelection,
+    selectionMode,
     dragDisabled,
   });
 

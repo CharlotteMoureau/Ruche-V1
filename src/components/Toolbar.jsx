@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faArrowsRotate,
-  faCamera,
+  faDownload,
   faComments,
   faUserPlus,
 } from "@fortawesome/free-solid-svg-icons";
@@ -32,7 +32,7 @@ export default function Toolbar({
   onOpenComments,
   commentCount = 0,
   openCollaboratorsSignal = 0,
-  captureSignal = 0,
+  exportSignal = 0,
   exportOptions = null,
   hidden = false,
 }) {
@@ -132,13 +132,13 @@ export default function Toolbar({
 
       const dataUrl = await captureBoardFrontAndBack(
         board,
-        t("toolbar.screenshotMergeError"),
+        t("toolbar.exportMergeError"),
       );
       triggerDownload(dataUrl, "ruche.png");
     } catch (err) {
       console.error("Erreur lors de la capture :", err);
       setExportErrorMessage(
-        t("toolbar.screenshotFailed", {
+        t("toolbar.exportFailed", {
           message: err?.message || "unknown",
         }),
       );
@@ -146,9 +146,9 @@ export default function Toolbar({
   };
 
   useEffect(() => {
-    if (!captureSignal) return;
+    if (!exportSignal) return;
     handleExport();
-  }, [captureSignal, exportOptions, t]);
+  }, [exportSignal, exportOptions, t]);
 
   const handleInvite = async () => {
     const email = inviteEmail.trim().toLowerCase();
@@ -256,7 +256,7 @@ export default function Toolbar({
           <FontAwesomeIcon icon={faArrowsRotate} /> {t("toolbar.reset")}
         </button>
         <button onClick={handleExport}>
-          <FontAwesomeIcon icon={faCamera} /> {t("toolbar.screenshot")}
+          <FontAwesomeIcon icon={faDownload} /> {t("toolbar.export")}
         </button>
         {shouldShowCollaboratorsButton ? (
           <button
@@ -473,7 +473,7 @@ export default function Toolbar({
 
       <UnifiedPromptModal
         isOpen={Boolean(exportErrorMessage)}
-        title={t("toolbar.screenshotTitle")}
+        title={t("toolbar.exportTitle")}
         message={exportErrorMessage}
         cancelLabel={t("common.close")}
         confirmLabel="OK"

@@ -17,6 +17,10 @@ import { BOARD_CARD_SIZE, clampBoardPosition } from "../lib/board";
 
 const COMPACT_EDITOR_MEDIA_QUERY = "(max-width: 1200px)";
 const HISTORY_LIMIT = 3;
+const FREE_LIBRARY_SELECTION_CARD = {
+  id: "__free-library-selection__",
+  category: "free",
+};
 
 const CATEGORY_KEY_MAP = {
   fr: {
@@ -197,10 +201,12 @@ export default function RucheWorkspace({
   const [boardZoom, setBoardZoom] = useState(1);
   const [undoStack, setUndoStack] = useState([]);
   const [redoStack, setRedoStack] = useState([]);
-  const [isLibrarySelectionMode, setIsLibrarySelectionMode] = useState(false);
+  const [isBoardSelectionMode, setIsBoardSelectionMode] = useState(false);
   const [selectedLibraryCardIds, setSelectedLibraryCardIds] = useState(
     () => new Set(),
   );
+  const [isFreeCardSelected, setIsFreeCardSelected] = useState(false);
+  const [pendingFreeCardAnchor, setPendingFreeCardAnchor] = useState(null);
   const [autoPlaceSignal, setAutoPlaceSignal] = useState(0);
 
   const snapshotState = useMemo(
@@ -273,6 +279,7 @@ export default function RucheWorkspace({
     setBoardCards(initial.boardCards);
     setUserCards(initial.userCards);
     setSelectedCardIds(new Set());
+    setIsBoardSelectionMode(false);
     setSelectedLibraryCardIds(new Set());
     setUndoStack([]);
     setRedoStack([]);
@@ -447,32 +454,53 @@ export default function RucheWorkspace({
 
   const clearLibrarySelection = useCallback(() => {
     setSelectedLibraryCardIds(new Set());
+    setIsFreeCardSelected(false);
   }, []);
+
+  const toggleFreeCardSelection = useCallback(() => {
+    if (!canEdit || !isTabletEditorMode) return;
+    if (userCards >= 10) return;
+    setIsFreeCardSelected((prev) => !prev);
+  }, [canEdit, isTabletEditorMode, userCards]);
 
   const selectedLibraryCards = useMemo(
     () => availableCards.filter((card) => selectedLibraryCardIds.has(card.id)),
     [availableCards, selectedLibraryCardIds],
   );
+  const selectedLibraryCount =
+    selectedLibraryCards.length + (isFreeCardSelected ? 1 : 0);
+  const pendingLibraryCards = useMemo(() => {
+    if (!isFreeCardSelected) return selectedLibraryCards;
+    return [...selectedLibraryCards, FREE_LIBRARY_SELECTION_CARD];
+  }, [isFreeCardSelected, selectedLibraryCards]);
 
   const handleGoToBoard = useCallback(() => {
     setIsLibraryOpen(false);
 
-    if (!isTabletEditorMode || !selectedLibraryCards.length) return;
+    if (!isTabletEditorMode || selectedLibraryCount === 0) return;
 
     setAutoPlaceSignal((current) => current + 1);
-  }, [isTabletEditorMode, selectedLibraryCards.length]);
+  }, [isTabletEditorMode, selectedLibraryCount]);
 
   const handlePlaceLibraryCards = useCallback(
     ({ anchor, cards }) => {
       if (!canEdit || !cards.length) return;
 
-      const hasFreeCardSelection = cards.some((card) => card.category === "free");
+      const hasFreeCardSelection = cards.some(
+        (card) => card.category === "free",
+      );
       if (hasFreeCardSelection) {
+        setPendingFreeCardAnchor(anchor);
         setShowModal(true);
       }
 
       const cardsToPlace = cards.filter((card) => card.category !== "free");
-      if (!cardsToPlace.length) return;
+      if (!cardsToPlace.length) {
+        setSelectedCardIds(new Set());
+        setSelectedLibraryCardIds(new Set());
+        setIsFreeCardSelected(false);
+        return;
+      }
 
       pushUndoSnapshot(snapshotState);
 
@@ -518,6 +546,7 @@ export default function RucheWorkspace({
       });
       setSelectedCardIds(new Set());
       setSelectedLibraryCardIds(new Set());
+      setIsFreeCardSelected(false);
     },
     [canEdit, pushUndoSnapshot, snapshotState],
   );
@@ -563,6 +592,23 @@ export default function RucheWorkspace({
   const handleClearSelection = () => {
     setSelectedCardIds((prev) => (prev.size ? new Set() : prev));
   };
+
+  const toggleBoardSelectionMode = useCallback(() => {
+    if (!canEdit || !isTabletEditorMode) return;
+
+    setIsBoardSelectionMode((current) => {
+      const next = !current;
+      if (!next) {
+        setSelectedCardIds(new Set());
+      }
+      return next;
+    });
+  }, [canEdit, isTabletEditorMode]);
+
+  const exitBoardSelectionMode = useCallback(() => {
+    setIsBoardSelectionMode(false);
+    setSelectedCardIds(new Set());
+  }, []);
 
   const applyReturnCardsToLibrary = (cards) => {
     if (!canEdit || !cards.length) return false;
@@ -614,6 +660,25 @@ export default function RucheWorkspace({
   const handleReturnToLibrary = (card) => {
     return handleReturnCardsToLibrary([card]);
   };
+
+  const returnSelectedBoardCards = useCallback(() => {
+    if (!canEdit || selectedCardIds.size === 0) return;
+
+    const selectedCards = boardCards.filter((card) =>
+      selectedCardIds.has(card.id),
+    );
+    if (!selectedCards.length) return;
+
+    pushUndoSnapshot(snapshotState);
+    handleReturnCardsToLibrary(selectedCards);
+  }, [
+    boardCards,
+    canEdit,
+    handleReturnCardsToLibrary,
+    pushUndoSnapshot,
+    selectedCardIds,
+    snapshotState,
+  ]);
 
   const handleOpenCardNote = (card) => {
     if (!canNote) {
@@ -723,10 +788,12 @@ export default function RucheWorkspace({
 
     pushUndoSnapshot(snapshotState);
 
-    const defaultPosition = {
-      x: 300 + Math.random() * 50,
-      y: 200 + Math.random() * 50,
-    };
+    const defaultPosition = pendingFreeCardAnchor
+      ? clampBoardPosition(pendingFreeCardAnchor)
+      : {
+          x: 300 + Math.random() * 50,
+          y: 200 + Math.random() * 50,
+        };
 
     const newCard = {
       id: Date.now() + Math.floor(Math.random() * 1000),
@@ -740,6 +807,7 @@ export default function RucheWorkspace({
     setShowModal(false);
     setInputText("");
     setCardColor("lime");
+    setPendingFreeCardAnchor(null);
   };
 
   useEffect(() => {
@@ -749,7 +817,10 @@ export default function RucheWorkspace({
       setAvailableCards(cardsData);
       setUserCards([]);
       setSelectedCardIds(new Set());
+      setIsBoardSelectionMode(false);
       setSelectedLibraryCardIds(new Set());
+      setIsFreeCardSelected(false);
+      setPendingFreeCardAnchor(null);
       setUndoStack([]);
       setRedoStack([]);
       handleCloseCardNoteModal();
@@ -769,14 +840,19 @@ export default function RucheWorkspace({
         <div className="editor-app__library-panel">
           <CardLibrary
             cards={availableCards}
-            onFreeSpaceClick={() => setShowModal(true)}
+            onFreeSpaceClick={() => {
+              setPendingFreeCardAnchor(null);
+              setShowModal(true);
+            }}
             userCards={userCards.length}
             isTabletEditorMode={isTabletEditorMode}
-            selectedCount={selectedLibraryCards.length}
+            selectedCount={selectedLibraryCount}
             onClearSelected={clearLibrarySelection}
             onGoToBoard={handleGoToBoard}
             onToggleLibraryCardSelection={toggleLibraryCardSelection}
             selectedLibraryCardIds={selectedLibraryCardIds}
+            isFreeCardSelected={isFreeCardSelected}
+            onToggleFreeCardSelection={toggleFreeCardSelection}
           />
         </div>
         {isCompactLayout && isLibraryOpen ? (
@@ -801,8 +877,12 @@ export default function RucheWorkspace({
             canUndo={undoStack.length > 0}
             canRedo={redoStack.length > 0}
             selectedCardIds={selectedCardIds}
+            boardSelectionMode={isBoardSelectionMode}
             onToggleCardSelection={handleToggleCardSelection}
             onClearSelection={handleClearSelection}
+            onToggleBoardSelectionMode={toggleBoardSelectionMode}
+            onExitBoardSelectionMode={exitBoardSelectionMode}
+            onReturnSelectedCards={returnSelectedBoardCards}
             onOpenCardNote={handleOpenCardNote}
             noteLocked={requireSaveBeforeNote}
             canEdit={canEdit}
@@ -812,7 +892,7 @@ export default function RucheWorkspace({
             onToggleLibrary={() => setIsLibraryOpen((current) => !current)}
             onZoomChange={setBoardZoom}
             resetSignal={resetSignal}
-            pendingLibraryCards={selectedLibraryCards}
+            pendingLibraryCards={pendingLibraryCards}
             onPlaceLibraryCards={handlePlaceLibraryCards}
             autoPlaceSignal={autoPlaceSignal}
             tabletUsageBlocked={tabletUsageBlocked}
@@ -834,7 +914,10 @@ export default function RucheWorkspace({
       </div>
       <AddCardModal
         show={canEdit && showModal}
-        onClose={() => setShowModal(false)}
+        onClose={() => {
+          setShowModal(false);
+          setPendingFreeCardAnchor(null);
+        }}
         onValidate={handleAddUserCard}
         inputText={inputText}
         setInputText={setInputText}

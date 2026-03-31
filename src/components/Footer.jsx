@@ -22,33 +22,31 @@ export default function Footer() {
           />
         </a>
       </div>
-      <div className="unif-and-language">
-        <div className="unif">
-          <a href="https://web.umons.ac.be/" target="_blank">
-            <img src="/data/logos/umons.png" alt="logo UMons" />
-          </a>
-          <a href="https://www.unamur.be/" target="_blank">
-            <img src="/data/logos/unamur.svg" alt="logo UNamur" />
-          </a>
-          <a href="https://www.uliege.be/" target="_blank">
-            <img src="/data/logos/uliège.png" alt="logo ULiège" />
-          </a>
-        </div>
-        <label className="language-select-wrap">
-          <span>{t("language.label")}</span>
-          <select
-            id="language-select"
-            className="language-select"
-            value={language}
-            onChange={(event) => setLanguage(event.target.value)}
-          >
-            {supportedLanguages.map((langCode) => (
-              <option key={langCode} value={langCode}>
-                {t(`language.${langCode}`)}
-              </option>
-            ))}
-          </select>
-        </label>
+      <label className="language-select-wrap">
+        <span>{t("language.label")}</span>
+        <select
+          id="language-select"
+          className="language-select"
+          value={language}
+          onChange={(event) => setLanguage(event.target.value)}
+        >
+          {supportedLanguages.map((langCode) => (
+            <option key={langCode} value={langCode}>
+              {t(`language.${langCode}`)}
+            </option>
+          ))}
+        </select>
+      </label>
+      <div className="unif">
+        <a href="https://web.umons.ac.be/" target="_blank">
+          <img src="/data/logos/umons.png" alt="logo UMons" />
+        </a>
+        <a href="https://www.unamur.be/" target="_blank">
+          <img src="/data/logos/unamur.svg" alt="logo UNamur" />
+        </a>
+        <a href="https://www.uliege.be/" target="_blank">
+          <img src="/data/logos/uliège.png" alt="logo ULiège" />
+        </a>
       </div>
     </footer>
   );

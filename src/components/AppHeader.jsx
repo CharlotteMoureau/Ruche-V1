@@ -9,7 +9,7 @@ import {
   faPen,
   faFloppyDisk,
   faArrowsRotate,
-  faCamera,
+  faDownload,
   faUserPlus,
   faComments,
   faEnvelope,
@@ -219,12 +219,12 @@ export default function AppHeader() {
                       <button
                         type="button"
                         onClick={() => {
-                          dispatchEditorAction("capture");
+                          dispatchEditorAction("export");
                           setIsHiveMenuOpen(false);
                         }}
                       >
-                        <FontAwesomeIcon icon={faCamera} />
-                        {t("toolbar.screenshot")}
+                        <FontAwesomeIcon icon={faDownload} />
+                        {t("toolbar.export")}
                       </button>
                       <button
                         type="button"

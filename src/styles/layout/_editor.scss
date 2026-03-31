@@ -148,7 +148,43 @@ body.editor-route #root {
   box-shadow: 0 8px 18px rgba(0, 0, 0, 0.16);
 }
 
+.editor-tablet-save-feedback {
+  position: fixed;
+  right: 16px;
+  top: calc(var(--app-header-height, 64px) + 10px);
+  z-index: 1750;
+  margin: 0;
+  border-radius: 999px;
+  border: 1px solid transparent;
+  padding: 8px 12px;
+  font-size: 0.82rem;
+  font-weight: 700;
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.16);
+
+  &.is-saving {
+    background: rgba(233, 244, 255, 0.96);
+    color: #17406c;
+    border-color: #8fbbe8;
+  }
+
+  &.is-success {
+    background: rgba(235, 251, 239, 0.96);
+    color: #114f2b;
+    border-color: #91d8a6;
+  }
+
+  &.is-error {
+    background: rgba(255, 238, 238, 0.97);
+    color: #7a1d1d;
+    border-color: #edaaaa;
+  }
+}
+
 body.capture-mode .editor-active-badge {
+  display: none;
+}
+
+body.capture-mode .editor-tablet-save-feedback {
   display: none;
 }
 

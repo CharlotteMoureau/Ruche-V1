@@ -83,6 +83,7 @@ export default function RucheEditorPage() {
   const [replyingTo, setReplyingTo] = useState(null);
   const [replyText, setReplyText] = useState("");
   const commentsEndRef = useRef(null);
+  const saveFeedbackTimeoutRef = useRef(null);
   const [showLeaveDirtyModal, setShowLeaveDirtyModal] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState(null);
   const [editingTarget, setEditingTarget] = useState(null);
@@ -97,7 +98,8 @@ export default function RucheEditorPage() {
   const [pendingLeaveAction, setPendingLeaveAction] = useState(null);
   const [showHeaderTitleModal, setShowHeaderTitleModal] = useState(false);
   const [headerTitleDraft, setHeaderTitleDraft] = useState("");
-  const [captureSignal, setCaptureSignal] = useState(0);
+  const [exportSignal, setExportSignal] = useState(0);
+  const [tabletSaveFeedbackStatus, setTabletSaveFeedbackStatus] = useState("");
 
   const isOwner = Boolean(
     hive?.owner?.id && user?.id && hive.owner.id === user.id,
@@ -395,11 +397,13 @@ export default function RucheEditorPage() {
 
     if (!trimmedTitle) {
       setError(t("editor.saveTitleError"));
+      showTabletSaveFeedback("error", 3000);
       return;
     }
 
     if (isDuplicateFlow && !hasRenamedDuplicate) {
       setError(t("editor.duplicateRenameError"));
+      showTabletSaveFeedback("error", 3000);
       return;
     }
 
@@ -418,6 +422,7 @@ export default function RucheEditorPage() {
     { skipNavigateAfterCreate = false } = {},
   ) => {
     setIsSaving(true);
+    showTabletSaveFeedback("saving");
     try {
       const boardPreviewImage = await captureBoardPreviewImage();
 
@@ -459,6 +464,7 @@ export default function RucheEditorPage() {
         if (!skipNavigateAfterCreate) {
           navigate(`/hives/${created.id}`, { replace: true });
         }
+        showTabletSaveFeedback("success", 2200);
         return true;
       }
 
@@ -500,12 +506,14 @@ export default function RucheEditorPage() {
             }
           : prev,
       );
+      showTabletSaveFeedback("success", 2200);
       return true;
     } catch (err) {
       if (err instanceof ApiError && err.status === 409) {
         setShowConflictModal(true);
       }
       setError(err.message);
+      showTabletSaveFeedback("error", 3200);
       return false;
     } finally {
       setIsSaving(false);
@@ -525,6 +533,7 @@ export default function RucheEditorPage() {
 
     setRenameOrDuplicateAction(null);
     setIsSaving(true);
+    showTabletSaveFeedback("saving");
 
     try {
       const boardPreviewImage = await captureBoardPreviewImage();
@@ -545,9 +554,11 @@ export default function RucheEditorPage() {
 
       // Navigate to the newly created hive
       navigate(`/hives/${newHive.id}`, { replace: true });
+      showTabletSaveFeedback("success", 2200);
     } catch (err) {
       setError(err.message);
       setPendingNewTitle("");
+      showTabletSaveFeedback("error", 3200);
     } finally {
       setIsSaving(false);
     }
@@ -557,6 +568,7 @@ export default function RucheEditorPage() {
     if (isSaving) return;
 
     setIsSaving(true);
+    showTabletSaveFeedback("saving");
     try {
       const baseTitle =
         title.trim() || hive?.title?.trim() || t("editor.newHiveTitle");
@@ -577,8 +589,10 @@ export default function RucheEditorPage() {
       setShowConflictModal(false);
       setError("");
       navigate(`/hives/${created.id}`, { replace: true });
+      showTabletSaveFeedback("success", 2200);
     } catch (err) {
       setError(err.message);
+      showTabletSaveFeedback("error", 3200);
     } finally {
       setIsSaving(false);
     }
@@ -930,6 +944,40 @@ export default function RucheEditorPage() {
       ? `${t("editor.createdAt")}: ${formatDateTime(hive.createdAt, dateLocale)} | ${t("editor.updatedAt")}: ${formatDateTime(hive.updatedAt, dateLocale)}`
       : "";
 
+  const showTabletSaveFeedback = useCallback(
+    (status, autoHideMs = 0) => {
+      if (!isTabletEditorMode) return;
+
+      if (saveFeedbackTimeoutRef.current) {
+        clearTimeout(saveFeedbackTimeoutRef.current);
+        saveFeedbackTimeoutRef.current = null;
+      }
+
+      setTabletSaveFeedbackStatus(status);
+
+      if (autoHideMs > 0) {
+        saveFeedbackTimeoutRef.current = setTimeout(() => {
+          setTabletSaveFeedbackStatus("");
+          saveFeedbackTimeoutRef.current = null;
+        }, autoHideMs);
+      }
+    },
+    [isTabletEditorMode],
+  );
+
+  useEffect(() => {
+    return () => {
+      if (!saveFeedbackTimeoutRef.current) return;
+      clearTimeout(saveFeedbackTimeoutRef.current);
+      saveFeedbackTimeoutRef.current = null;
+    };
+  }, []);
+
+  useEffect(() => {
+    if (isTabletEditorMode) return;
+    setTabletSaveFeedbackStatus("");
+  }, [isTabletEditorMode]);
+
   useEffect(() => {
     if (!isTabletEditorMode) {
       window.dispatchEvent(
@@ -988,8 +1036,8 @@ export default function RucheEditorPage() {
         return;
       }
 
-      if (actionType === "capture") {
-        setCaptureSignal((prev) => prev + 1);
+      if (actionType === "export") {
+        setExportSignal((prev) => prev + 1);
         return;
       }
 
@@ -1117,7 +1165,7 @@ export default function RucheEditorPage() {
               onOpenComments={handleOpenComments}
               commentCount={commentCount}
               openCollaboratorsSignal={openCollaboratorsSignal}
-              captureSignal={captureSignal}
+              exportSignal={exportSignal}
               exportOptions={exportOptions}
             />
           </div>
@@ -1185,10 +1233,26 @@ export default function RucheEditorPage() {
           onOpenComments={handleOpenComments}
           commentCount={commentCount}
           openCollaboratorsSignal={openCollaboratorsSignal}
-          captureSignal={captureSignal}
+          exportSignal={exportSignal}
           exportOptions={exportOptions}
           hidden
         />
+      ) : null}
+
+      {isTabletEditorMode && tabletSaveFeedbackStatus ? (
+        <p
+          className={`editor-tablet-save-feedback is-${tabletSaveFeedbackStatus}`}
+          role="status"
+          aria-live={
+            tabletSaveFeedbackStatus === "error" ? "assertive" : "polite"
+          }
+        >
+          {tabletSaveFeedbackStatus === "saving"
+            ? t("editor.saveStatusSaving")
+            : tabletSaveFeedbackStatus === "success"
+              ? t("editor.saveStatusSaved")
+              : t("editor.saveStatusError")}
+        </p>
       ) : null}
 
       {showCommentsModal && (

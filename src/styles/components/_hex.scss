@@ -183,7 +183,30 @@
 }
 
 .draggable-card.selected::before {
-  opacity: 0.9;
+  opacity: 0;
+}
+
+.draggable-card.selected .hex {
+  overflow: visible;
+}
+
+.draggable-card.selected .hex-shape {
+  stroke: $bleu-fonce;
+  stroke-width: 3;
+  stroke-dasharray: none;
+}
+
+.draggable-card.selected .hex.reco-enseignant .hex-shape,
+.draggable-card.selected .hex.reco-equipe .hex-shape {
+  stroke: $bleu-fonce;
+  stroke-width: 3;
+  stroke-dasharray: none;
+}
+
+.draggable-card.selected .free-space-card .hex-shape {
+  stroke: $bleu-fonce;
+  stroke-width: 3;
+  stroke-dasharray: none;
 }
 
 .draggable-card.dragging {

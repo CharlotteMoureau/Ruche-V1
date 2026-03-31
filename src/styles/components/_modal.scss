@@ -296,19 +296,33 @@
 }
 
 .comment-action-btn {
-  background: none;
-  border: none;
-  padding: 0;
-  font-size: 0.78rem;
-  color: $bleu-clair;
+  border: 0;
+  border-radius: 8px;
+  padding: 0.35rem 0.75rem;
+  font-size: 0.82rem;
+  font-weight: 600;
+  line-height: 1.2;
+  background: $jaune;
+  color: #222;
   cursor: pointer;
-  text-decoration: underline;
+  text-decoration: none;
 
-  &:hover { color: $bleu-fonce; }
+  &:hover {
+    background: color.adjust($jaune, $lightness: -8%);
+  }
+
+  &:focus-visible {
+    outline: 3px solid $bleu-fonce;
+    outline-offset: 2px;
+  }
 
   &--danger {
-    color: $rose;
-    &:hover { color: color.adjust($rose, $lightness: -10%); }
+    background: $rose;
+    color: #fff;
+
+    &:hover {
+      background: color.adjust($rose, $lightness: -8%);
+    }
   }
 }
 
@@ -334,13 +348,14 @@
   display: flex;
   gap: 0.5rem;
   margin-top: 0.4rem;
+  flex-wrap: wrap;
 
   button {
-    padding: 0.3rem 0.75rem;
+    padding: 0.4rem 0.8rem;
     border: none;
-    border-radius: 5px;
+    border-radius: 8px;
     cursor: pointer;
-    font-size: 0.85rem;
+    font-size: 0.82rem;
     font-weight: 600;
     background: $jaune;
     color: #222;
@@ -357,7 +372,7 @@
   gap: 0.5rem;
   align-items: flex-end;
   border-top: 1px solid #eee;
-  padding-top: 0.75rem;
+  padding-top: 0.9rem;
   flex-shrink: 0;
 
   textarea {
@@ -373,9 +388,9 @@
   }
 
   button {
-    padding: 0.45rem 1rem;
+    padding: 0.5rem 1rem;
     border: none;
-    border-radius: 6px;
+    border-radius: 8px;
     background: $jaune;
     color: #222;
     font-weight: 600;
@@ -498,15 +513,18 @@
   max-width: 620px;
 
   .card-note-card-title {
-    margin: 0 0 0.5rem;
+    margin: 0 0 0.65rem;
     font-weight: 700;
+    color: #3a3a3a;
   }
 
   .card-note-meta {
-    margin-top: 0.4rem;
+    margin-top: 0.65rem;
+    padding-top: 0.55rem;
+    border-top: 1px dashed #ddd2c7;
 
     p {
-      margin: 0;
+      margin: 0.1rem 0;
       font-size: 0.82rem;
       color: #666;
     }
@@ -517,24 +535,45 @@
   }
 
   .card-note-item {
-    background: #f9f7f4;
+    background: #fff9ef;
+    border-color: #e7dccf;
   }
 
   .card-note-editor {
-    margin-top: 0.5rem;
+    margin-top: 0.6rem;
+
+    textarea {
+      min-height: 7.25rem;
+    }
   }
 
   .card-note-actions {
     display: flex;
     align-items: center;
     justify-content: flex-end;
-    gap: 0.75rem;
+    gap: 0.5rem;
+    flex-wrap: wrap;
     margin-top: 0.75rem;
 
     .card-note-save-btn {
       color: $bleu-fonce;
       font-weight: 700;
     }
+  }
+}
+
+@media (max-width: 640px) {
+  .comments-new {
+    flex-direction: column;
+    align-items: stretch;
+
+    button {
+      align-self: flex-end;
+    }
+  }
+
+  .card-note-modal .card-note-actions {
+    justify-content: flex-start;
   }
 }
 

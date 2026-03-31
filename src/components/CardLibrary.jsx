@@ -15,6 +15,8 @@ export default function CardLibrary({
   onGoToBoard,
   onToggleLibraryCardSelection,
   selectedLibraryCardIds,
+  isFreeCardSelected = false,
+  onToggleFreeCardSelection,
 }) {
   const { cardCategories, t } = useLanguage();
   const categories = cardCategories;
@@ -56,8 +58,14 @@ export default function CardLibrary({
       setTimeout(() => setShowPopup(false), 5000);
       return;
     }
+
+    if (isTabletEditorMode) {
+      onToggleFreeCardSelection?.();
+      return;
+    }
+
     onFreeSpaceClick();
-  }, [userCards, onFreeSpaceClick]);
+  }, [isTabletEditorMode, onFreeSpaceClick, onToggleFreeCardSelection, userCards]);
 
   return (
     <aside className="card-library">
@@ -96,6 +104,7 @@ export default function CardLibrary({
           </p>
           <button
             type="button"
+            className={selectedCount > 0 ? "is-active" : ""}
             onClick={onClearSelected}
             disabled={selectedCount === 0}
           >
@@ -103,6 +112,7 @@ export default function CardLibrary({
           </button>
           <button
             type="button"
+            className={selectedCount > 0 ? "is-active is-active--primary" : ""}
             onClick={onGoToBoard}
             disabled={selectedCount === 0}
           >
@@ -131,7 +141,7 @@ export default function CardLibrary({
               </h3>
               <div className="card-list">
                 <div
-                  className="library-card free-space"
+                  className={`library-card free-space ${isFreeCardSelected ? "library-card--selected" : ""}`.trim()}
                   onClick={handleFreeSpaceClick}
                 >
                   <FreeHexCard

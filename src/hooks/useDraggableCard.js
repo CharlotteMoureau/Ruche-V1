@@ -10,15 +10,6 @@ function getCardDimensions() {
   return { width: BOARD_CARD_SIZE, height: BOARD_CARD_SIZE };
 }
 
-function isCardOutsideBoard(position, width, height, boardWidth, boardHeight) {
-  return (
-    position.x < 0 ||
-    position.y < 0 ||
-    position.x + width > boardWidth ||
-    position.y + height > boardHeight
-  );
-}
-
 export function useDraggableCard({
   card,
   cardWidth,
@@ -35,10 +26,12 @@ export function useDraggableCard({
   onDragStart,
   onToggleSelection,
   onClearSelection,
+  selectionMode = false,
   dragDisabled = false,
 }) {
   const [isDragging, setIsDragging] = useState(false);
   const dragStateRef = useRef(null);
+  const ignoreMouseUntilRef = useRef(0);
 
   const updateDraggedCards = useCallback((clientX, clientY) => {
     if (!dragStateRef.current) return;
@@ -96,56 +89,16 @@ export function useDraggableCard({
     });
 
     if (finalCards.length > 1) {
-      const shouldReturnAll = finalCards.some((entry) =>
-        isCardOutsideBoard(
-          entry.position,
-          entry.width,
-          entry.height,
-          boardWidth,
-          boardHeight,
-        ),
+      onMoveCards(
+        finalCards.map((entry) => ({
+          id: entry.card.id,
+          position: clampBoardPosition(entry.position),
+        })),
       );
-
-      if (shouldReturnAll) {
-        const didReturn = onReturnCardsToLibrary(
-          finalCards.map((entry) => entry.card),
-        );
-
-        if (!didReturn) {
-          onMoveCards(
-            finalCards.map((entry) => ({
-              id: entry.card.id,
-              position: entry.startPosition,
-            })),
-          );
-        }
-      } else {
-        onMoveCards(
-          finalCards.map((entry) => ({
-            id: entry.card.id,
-            position: clampBoardPosition(entry.position),
-          })),
-        );
-      }
     } else {
       const [entry] = finalCards;
 
-      if (
-        isCardOutsideBoard(
-          entry.position,
-          cardWidth,
-          cardHeight,
-          boardWidth,
-          boardHeight,
-        )
-      ) {
-        const didReturn = onReturnToLibrary(card);
-        if (!didReturn) {
-          onMoveCard(card.id, entry.startPosition);
-        }
-      } else {
-        onMoveCard(card.id, clampBoardPosition(entry.position));
-      }
+      onMoveCard(card.id, clampBoardPosition(entry.position));
     }
 
     dragStateRef.current = null;
@@ -157,8 +110,6 @@ export function useDraggableCard({
     cardWidth,
     onMoveCard,
     onMoveCards,
-    onReturnCardsToLibrary,
-    onReturnToLibrary,
   ]);
 
   const startDrag = useCallback((clientX, clientY) => {
@@ -185,9 +136,19 @@ export function useDraggableCard({
   const handleMouseDown = useCallback((event) => {
     if (dragDisabled) return;
     if (event.button !== 0) return;
+    if (Date.now() < ignoreMouseUntilRef.current) return;
 
     event.preventDefault();
     event.stopPropagation();
+
+    if (selectionMode) {
+      if (isSelected) {
+        startDrag(event.clientX, event.clientY);
+      } else {
+        onToggleSelection(card.id);
+      }
+      return;
+    }
 
     if (event.ctrlKey || event.metaKey) {
       onToggleSelection(card.id);
@@ -195,7 +156,14 @@ export function useDraggableCard({
     }
 
     startDrag(event.clientX, event.clientY);
-  }, [card.id, dragDisabled, onToggleSelection, startDrag]);
+  }, [
+    card.id,
+    dragDisabled,
+    isSelected,
+    onToggleSelection,
+    selectionMode,
+    startDrag,
+  ]);
 
   const handleMouseMove = useCallback((event) => {
     if (!dragStateRef.current) return;
@@ -214,9 +182,28 @@ export function useDraggableCard({
     if (dragDisabled) return;
     const touch = event.touches[0];
 
+    event.preventDefault();
     event.stopPropagation();
+    ignoreMouseUntilRef.current = Date.now() + 700;
+
+    if (selectionMode) {
+      if (isSelected) {
+        startDrag(touch.clientX, touch.clientY);
+      } else {
+        onToggleSelection(card.id);
+      }
+      return;
+    }
+
     startDrag(touch.clientX, touch.clientY);
-  }, [dragDisabled, startDrag]);
+  }, [
+    card.id,
+    dragDisabled,
+    isSelected,
+    onToggleSelection,
+    selectionMode,
+    startDrag,
+  ]);
 
   const handleTouchMove = useCallback((event) => {
     if (event.touches.length < 1) return;
