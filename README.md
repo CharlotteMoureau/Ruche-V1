@@ -154,7 +154,7 @@ For production signup/login to work, the frontend and backend must both be deplo
 - Build command: `npm run build`
 - Publish directory: `dist`
 - Frontend environment variable:
-	- `VITE_API_URL=https://YOUR_API_DOMAIN/api`
+  - `VITE_API_URL=https://YOUR_API_DOMAIN/api`
 
 Without `VITE_API_URL`, the app falls back to `/api` on the same domain, which only works if your API is also served there.
 
@@ -183,3 +183,86 @@ Before first production use, apply migrations in the backend environment:
 `SECRETS_SCAN_OMIT_KEYS = "API_PORT,APP_URL"` is acceptable because these are typically configuration values, not credentials.
 
 Do not omit real secrets (`JWT_SECRET`, SMTP credentials, DB credentials). Keep those protected by scanner coverage and never commit them.
+
+### 5. Render deployment checklist (free-tier friendly, ready to copy)
+
+Current repository structure (important for Render):
+
+- Frontend build lives at root (`npm run build` -> `dist`)
+- Backend entrypoint lives at `server/src/index.js`
+- Prisma schema and migrations live in `prisma/`
+
+For production users, you need:
+
+- Netlify site for frontend
+- Render Web Service for backend API
+- A free Postgres database (recommended: Neon free tier)
+
+Checklist:
+
+1. Create a free Postgres database (Neon)
+
+- Create a Neon project (free tier).
+- Copy the pooled connection string as your future `DATABASE_URL`.
+
+2. Create a Render Web Service
+
+- New -> Web Service -> Connect this GitHub repository.
+- Service name: `ruche-api`
+- Root Directory: leave empty (repository root)
+- Runtime: Node
+- Build Command: `npm ci && npm run prisma:generate`
+- Start Command: `npx prisma migrate deploy && node server/src/index.js`
+
+3. Add backend environment variables in Render
+
+Copy and adapt:
+
+```env
+DATABASE_URL=YOUR_NEON_POSTGRES_URL
+JWT_SECRET=REPLACE_WITH_A_LONG_RANDOM_SECRET
+JWT_EXPIRES_IN=7d
+API_PORT=4010
+APP_URL=https://YOUR_NETLIFY_SITE.netlify.app
+ADMIN_EMAIL=admin@example.com
+SMTP_HOST=
+SMTP_PORT=587
+SMTP_USER=
+SMTP_PASS=
+SMTP_FROM=no-reply@example.com
+```
+
+Notes:
+
+- Render injects a runtime `PORT`. Your server currently uses `API_PORT`, so keep `API_PORT=4010` unless you update the server to prefer `PORT`.
+- Password reset emails require SMTP values.
+
+4. Database choice
+
+- Recommended: use Neon PostgreSQL free tier and set `DATABASE_URL` to your Neon URL.
+- Important: current Prisma datasource provider is SQLite in `prisma/schema.prisma`. To use PostgreSQL, switch provider to `postgresql` and create/apply migrations for Postgres.
+- If you keep SQLite on Render without a persistent disk, data can be lost between deploys.
+
+5. Point Netlify frontend to Render backend
+
+- In Netlify Site settings -> Environment variables:
+  - `VITE_API_URL=https://YOUR_RENDER_DOMAIN/api`
+- Trigger a new Netlify deploy.
+
+6. Verify production health
+
+- Open `https://YOUR_RENDER_DOMAIN/api/health`
+- Expect JSON response with `{"ok": true}`
+- Then test register/login from the Netlify site.
+
+7. Quick rollback checks if signup fails
+
+- Confirm `VITE_API_URL` is set on Netlify (no fallback to same-origin `/api`).
+- Confirm Render service has valid `DATABASE_URL` and `JWT_SECRET`.
+- Confirm migrations ran successfully in Render deploy logs.
+
+8. Free-tier reality check
+
+- Netlify frontend: free tier is enough for testing with real users.
+- Render Web Service: free tier can sleep after inactivity, causing first request delay.
+- Neon Postgres: free tier is enough for small pilots.
