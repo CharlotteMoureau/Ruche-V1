@@ -13,6 +13,7 @@ import { useAuth } from "../context/AuthContext";
 import { useLanguage } from "../context/LanguageContext";
 import UnifiedPromptModal from "./UnifiedPromptModal";
 import { filterCardsForHiveKind } from "../lib/hives";
+import { BOARD_CARD_SIZE, clampBoardPosition } from "../lib/board";
 
 const COMPACT_EDITOR_MEDIA_QUERY = "(max-width: 1200px)";
 const HISTORY_LIMIT = 3;
@@ -200,6 +201,7 @@ export default function RucheWorkspace({
   const [selectedLibraryCardIds, setSelectedLibraryCardIds] = useState(
     () => new Set(),
   );
+  const [autoPlaceSignal, setAutoPlaceSignal] = useState(0);
 
   const snapshotState = useMemo(
     () => ({
@@ -452,31 +454,69 @@ export default function RucheWorkspace({
     [availableCards, selectedLibraryCardIds],
   );
 
+  const handleGoToBoard = useCallback(() => {
+    setIsLibraryOpen(false);
+
+    if (!isTabletEditorMode || !selectedLibraryCards.length) return;
+
+    setAutoPlaceSignal((current) => current + 1);
+  }, [isTabletEditorMode, selectedLibraryCards.length]);
+
   const handlePlaceLibraryCards = useCallback(
     ({ anchor, cards }) => {
       if (!canEdit || !cards.length) return;
 
+      const hasFreeCardSelection = cards.some((card) => card.category === "free");
+      if (hasFreeCardSelection) {
+        setShowModal(true);
+      }
+
+      const cardsToPlace = cards.filter((card) => card.category !== "free");
+      if (!cardsToPlace.length) return;
+
       pushUndoSnapshot(snapshotState);
 
-      const placements = cards.map((card, index) => {
-        const row = Math.floor(index / 3);
-        const col = index % 3;
-
-        return {
-          ...card,
-          position: {
-            x: anchor.x + col * 90,
-            y: anchor.y + row * 85,
-          },
-        };
-      });
-
-      const placedIds = new Set(placements.map((entry) => entry.id));
+      const requestedIds = new Set(cardsToPlace.map((entry) => entry.id));
 
       setAvailableCards((prev) =>
-        prev.filter((entry) => !placedIds.has(entry.id)),
+        prev.filter((entry) => !requestedIds.has(entry.id)),
       );
-      setBoardCards((prev) => [...prev, ...placements]);
+      setBoardCards((prev) => {
+        const existingIds = new Set(prev.map((entry) => entry.id));
+        const uniqueCards = cardsToPlace.filter(
+          (entry) => !existingIds.has(entry.id),
+        );
+
+        if (!uniqueCards.length) return prev;
+
+        const columnCount = Math.min(3, uniqueCards.length);
+        const spacingX = BOARD_CARD_SIZE * 0.9;
+        const spacingY = BOARD_CARD_SIZE * 0.85;
+        const totalRows = Math.ceil(uniqueCards.length / columnCount);
+
+        const placements = uniqueCards.map((card, index) => {
+          const row = Math.floor(index / columnCount);
+          const col = index % columnCount;
+          const cardsInRow = Math.min(
+            columnCount,
+            uniqueCards.length - row * columnCount,
+          );
+
+          const offsetX = (col - (cardsInRow - 1) / 2) * spacingX;
+          const offsetY = (row - (totalRows - 1) / 2) * spacingY;
+
+          return {
+            ...card,
+            position: clampBoardPosition({
+              x: anchor.x + offsetX,
+              y: anchor.y + offsetY,
+            }),
+          };
+        });
+
+        return [...prev, ...placements];
+      });
+      setSelectedCardIds(new Set());
       setSelectedLibraryCardIds(new Set());
     },
     [canEdit, pushUndoSnapshot, snapshotState],
@@ -734,7 +774,7 @@ export default function RucheWorkspace({
             isTabletEditorMode={isTabletEditorMode}
             selectedCount={selectedLibraryCards.length}
             onClearSelected={clearLibrarySelection}
-            onGoToBoard={() => setIsLibraryOpen(false)}
+            onGoToBoard={handleGoToBoard}
             onToggleLibraryCardSelection={toggleLibraryCardSelection}
             selectedLibraryCardIds={selectedLibraryCardIds}
           />
@@ -766,6 +806,7 @@ export default function RucheWorkspace({
             onOpenCardNote={handleOpenCardNote}
             noteLocked={requireSaveBeforeNote}
             canEdit={canEdit}
+            isTabletEditorMode={isTabletEditorMode}
             isCompactLayout={isCompactLayout}
             isLibraryOpen={isLibraryOpen}
             onToggleLibrary={() => setIsLibraryOpen((current) => !current)}
@@ -773,6 +814,7 @@ export default function RucheWorkspace({
             resetSignal={resetSignal}
             pendingLibraryCards={selectedLibraryCards}
             onPlaceLibraryCards={handlePlaceLibraryCards}
+            autoPlaceSignal={autoPlaceSignal}
             tabletUsageBlocked={tabletUsageBlocked}
           />
           {activeEditorsLabel ? (

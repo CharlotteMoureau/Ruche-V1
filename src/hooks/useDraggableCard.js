@@ -1,5 +1,4 @@
 import { useState, useRef, useEffect, useCallback } from "react";
-import { useDeviceDetection } from "./useDeviceDetection";
 import {
   BOARD_CARD_SIZE,
   BOARD_CANVAS_HEIGHT,
@@ -38,11 +37,8 @@ export function useDraggableCard({
   onClearSelection,
   dragDisabled = false,
 }) {
-  const { isIOS, isSafari } = useDeviceDetection();
   const [isDragging, setIsDragging] = useState(false);
   const dragStateRef = useRef(null);
-  const longPressTimer = useRef(null);
-  const hasMovedBeforeDrag = useRef(false);
 
   const updateDraggedCards = useCallback((clientX, clientY) => {
     if (!dragStateRef.current) return;
@@ -219,36 +215,23 @@ export function useDraggableCard({
     const touch = event.touches[0];
 
     event.stopPropagation();
-    hasMovedBeforeDrag.current = false;
-
-    if (isIOS && isSafari) {
-      longPressTimer.current = setTimeout(() => {
-        if (!hasMovedBeforeDrag.current) {
-          startDrag(touch.clientX, touch.clientY);
-        }
-      }, 400);
-    } else {
-      startDrag(touch.clientX, touch.clientY);
-    }
-  }, [dragDisabled, isIOS, isSafari, startDrag]);
+    startDrag(touch.clientX, touch.clientY);
+  }, [dragDisabled, startDrag]);
 
   const handleTouchMove = useCallback((event) => {
+    if (event.touches.length < 1) return;
     const touch = event.touches[0];
 
-    if (!dragStateRef.current && longPressTimer.current) {
-      hasMovedBeforeDrag.current = true;
-      clearTimeout(longPressTimer.current);
-      return;
-    }
-
     if (!dragStateRef.current) return;
+
+    event.preventDefault();
+    event.stopPropagation();
 
     updateDraggedCards(touch.clientX, touch.clientY);
   }, [updateDraggedCards]);
 
-  const handleTouchEnd = useCallback(() => {
-    clearTimeout(longPressTimer.current);
-
+  const handleTouchEnd = useCallback((event) => {
+    event.stopPropagation();
     if (!dragStateRef.current) return;
 
     setIsDragging(false);
@@ -267,7 +250,6 @@ export function useDraggableCard({
       document.removeEventListener("mouseup", handleMouseUp);
       document.removeEventListener("touchmove", handleTouchMove, options);
       document.removeEventListener("touchend", handleTouchEnd);
-      clearTimeout(longPressTimer.current);
     };
   }, [handleMouseMove, handleMouseUp, handleTouchMove, handleTouchEnd]);
 

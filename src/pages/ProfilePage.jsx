@@ -1135,43 +1135,65 @@ export default function ProfilePage() {
                 <p>{t("profile.modifyProfileDesc")}</p>
 
                 <h4>{t("profile.changeRole")}</h4>
-                <form onSubmit={updateRole} className="form-grid">
-                  <label>
-                    {t("register.role")}
-                    <select
-                      value={roleForm.role}
-                      onChange={(event) =>
-                        setRoleForm((prev) => ({
-                          ...prev,
-                          role: event.target.value,
-                        }))
-                      }
-                      disabled={isUpdatingRole}
-                    >
-                      {roleOptions.map((role) => (
-                        <option key={role.value} value={role.value}>
-                          {role.label}
-                        </option>
-                      ))}
-                    </select>
-                  </label>
-
-                  {isOtherRoleValue(roleForm.role, localizedOtherRoleLabel) ? (
-                    <label>
-                      {t("register.roleOther")}
-                      <input
-                        value={roleForm.roleOtherText}
+                <form
+                  onSubmit={updateRole}
+                  className="form-grid profile-role-form"
+                >
+                  <div className="profile-role-controls">
+                    <div className="profile-role-controls__group">
+                      <label
+                        className="profile-role-controls__label"
+                        htmlFor="profile-role-select"
+                      >
+                        {t("register.role")}
+                      </label>
+                      <select
+                        id="profile-role-select"
+                        className="profile-role-controls__select"
+                        value={roleForm.role}
                         onChange={(event) =>
                           setRoleForm((prev) => ({
                             ...prev,
-                            roleOtherText: event.target.value,
+                            role: event.target.value,
                           }))
                         }
                         disabled={isUpdatingRole}
-                        required
-                      />
-                    </label>
-                  ) : null}
+                      >
+                        {roleOptions.map((role) => (
+                          <option key={role.value} value={role.value}>
+                            {role.label}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+
+                    {isOtherRoleValue(
+                      roleForm.role,
+                      localizedOtherRoleLabel,
+                    ) ? (
+                      <div className="profile-role-controls__group">
+                        <label
+                          className="profile-role-controls__label"
+                          htmlFor="profile-role-other"
+                        >
+                          {t("register.roleOther")}
+                        </label>
+                        <input
+                          id="profile-role-other"
+                          className="profile-role-controls__input"
+                          value={roleForm.roleOtherText}
+                          onChange={(event) =>
+                            setRoleForm((prev) => ({
+                              ...prev,
+                              roleOtherText: event.target.value,
+                            }))
+                          }
+                          disabled={isUpdatingRole}
+                          required
+                        />
+                      </div>
+                    ) : null}
+                  </div>
 
                   {roleSuccessMessage ? (
                     <p

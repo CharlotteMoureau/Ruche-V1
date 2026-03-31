@@ -34,6 +34,7 @@ export default function HiveBoard({
   onOpenCardNote,
   noteLocked = false,
   canEdit = true,
+  isTabletEditorMode = false,
   isCompactLayout = false,
   isLibraryOpen = false,
   onToggleLibrary,
@@ -41,6 +42,7 @@ export default function HiveBoard({
   resetSignal = 0,
   pendingLibraryCards = [],
   onPlaceLibraryCards,
+  autoPlaceSignal = 0,
   tabletUsageBlocked = false,
 }) {
   const { t } = useLanguage();
@@ -57,6 +59,8 @@ export default function HiveBoard({
     isCompactLayout ? BOARD_COMPACT_DEFAULT_ZOOM : BOARD_DEFAULT_ZOOM,
   );
   const [activeResetSignal, setActiveResetSignal] = useState(resetSignal);
+  const [activeAutoPlaceSignal, setActiveAutoPlaceSignal] =
+    useState(autoPlaceSignal);
   const [isPanning, setIsPanning] = useState(false);
   const selectedCards = cards.filter((card) => selectedCardIds.has(card.id));
   const defaultZoom = isCompactLayout
@@ -70,6 +74,7 @@ export default function HiveBoard({
 
     return CSS.supports("zoom", "1");
   }, []);
+  const useCssZoom = supportsCssZoom && !isTabletEditorMode;
 
   useEffect(() => {
     onZoomChange?.(zoom);
@@ -105,6 +110,43 @@ export default function HiveBoard({
     setActiveResetSignal(resetSignal);
   }, [activeResetSignal, defaultZoom, resetSignal]);
 
+  useEffect(() => {
+    if (autoPlaceSignal === activeAutoPlaceSignal) return;
+
+    if (!pendingLibraryCards.length || tabletUsageBlocked) {
+      setActiveAutoPlaceSignal(autoPlaceSignal);
+      return;
+    }
+
+    requestAnimationFrame(() => {
+      const board = boardRef.current;
+      const viewport = viewportRef.current;
+      if (!board || !viewport) return;
+
+      const boardRect = board.getBoundingClientRect();
+      const viewportRect = viewport.getBoundingClientRect();
+      const centerX = viewportRect.left + viewportRect.width / 2;
+      const centerY = viewportRect.top + viewportRect.height / 2;
+
+      onPlaceLibraryCards?.({
+        anchor: clampBoardPosition({
+          x: (centerX - boardRect.left) / zoom - BOARD_CARD_SIZE / 2,
+          y: (centerY - boardRect.top) / zoom - BOARD_CARD_SIZE / 2,
+        }),
+        cards: pendingLibraryCards,
+      });
+    });
+
+    setActiveAutoPlaceSignal(autoPlaceSignal);
+  }, [
+    activeAutoPlaceSignal,
+    autoPlaceSignal,
+    onPlaceLibraryCards,
+    pendingLibraryCards,
+    tabletUsageBlocked,
+    zoom,
+  ]);
+
   useEffect(
     () => () => {
       if (wheelZoomFrameRef.current) {
@@ -123,14 +165,14 @@ export default function HiveBoard({
       height: `${BOARD_CANVAS_HEIGHT}px`,
     };
 
-    if (supportsCssZoom) {
+    if (useCssZoom) {
       style.zoom = zoom;
       return style;
     }
 
     style.transform = `scale(${zoom})`;
     return style;
-  }, [supportsCssZoom, zoom]);
+  }, [useCssZoom, zoom]);
 
   const contentBounds = useMemo(() => {
     if (!cards.length) return null;
@@ -288,27 +330,37 @@ export default function HiveBoard({
       drop: (item, monitor) => {
         if (!item?.card) return;
 
-        const offset =
-          monitor.getClientOffset() || monitor.getSourceClientOffset();
+        const offset = monitor.getClientOffset();
         if (!boardRef.current) return;
 
         const boardRect = boardRef.current.getBoundingClientRect();
+        const viewport = viewportRef.current;
+        const viewportRect = viewport?.getBoundingClientRect();
+        const isInsideBoard =
+          Boolean(offset) &&
+          offset.x >= boardRect.left &&
+          offset.x <= boardRect.right &&
+          offset.y >= boardRect.top &&
+          offset.y <= boardRect.bottom;
+        const isInsideViewport =
+          Boolean(offset) &&
+          Boolean(viewportRect) &&
+          offset.x >= viewportRect.left &&
+          offset.x <= viewportRect.right &&
+          offset.y >= viewportRect.top &&
+          offset.y <= viewportRect.bottom;
 
-        if (
-          offset &&
-          (offset.x < boardRect.left ||
-            offset.x > boardRect.right ||
-            offset.y < boardRect.top ||
-            offset.y > boardRect.bottom)
-        ) {
-          return;
-        }
-
-        const fallbackOffset = {
-          x: boardRect.left + boardRect.width / 2,
-          y: boardRect.top + boardRect.height / 2,
-        };
-        const effectiveOffset = offset || fallbackOffset;
+        const fallbackOffset = viewportRect
+          ? {
+              x: viewportRect.left + viewportRect.width / 2,
+              y: viewportRect.top + viewportRect.height / 2,
+            }
+          : {
+              x: boardRect.left + boardRect.width / 2,
+              y: boardRect.top + boardRect.height / 2,
+            };
+        const effectiveOffset =
+          isInsideBoard && isInsideViewport ? offset : fallbackOffset;
 
         const position = clampBoardPosition({
           x: (effectiveOffset.x - boardRect.left) / zoom - BOARD_CARD_SIZE / 2,
