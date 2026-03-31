@@ -22,7 +22,12 @@ export default function DraggableBoardCard({
   dragDisabled = false,
   children,
 }) {
-  const { isDragging, handleMouseDown, handleTouchStart } = useDraggableCard({
+  const {
+    isDragging,
+    isDraggingOverLibrary,
+    handleMouseDown,
+    handleTouchStart,
+  } = useDraggableCard({
     card,
     cardWidth: BOARD_CARD_SIZE,
     cardHeight: BOARD_CARD_SIZE,
@@ -54,6 +59,7 @@ export default function DraggableBoardCard({
         width: `${BOARD_CARD_SIZE}px`,
         height: `${BOARD_CARD_SIZE}px`,
         cursor: isDragging ? "grabbing" : "grab",
+        opacity: isDraggingOverLibrary ? 0 : 1,
         userSelect: "none",
         WebkitUserSelect: "none",
         WebkitTouchCallout: "none",

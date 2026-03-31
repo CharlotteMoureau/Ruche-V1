@@ -3,6 +3,7 @@ import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
 import CardLibrary from "./CardLibrary";
 import HiveBoard from "./HiveBoard";
+import HexCard from "./HexCard";
 import cardsFr from "../data/cards.json";
 import cardsEn from "../data/cards_en.json";
 import cardsNl from "../data/cards_nl.json";
@@ -210,6 +211,7 @@ export default function RucheWorkspace({
   const [autoPlaceSignal, setAutoPlaceSignal] = useState(0);
   const [isBoardDragActive, setIsBoardDragActive] = useState(false);
   const [isLibraryDropHover, setIsLibraryDropHover] = useState(false);
+  const [boardDragPreview, setBoardDragPreview] = useState(null);
 
   const snapshotState = useMemo(
     () => ({
@@ -414,15 +416,23 @@ export default function RucheWorkspace({
     const handleBoardDragState = (event) => {
       const dragging = Boolean(event.detail?.dragging);
       const overLibrary = Boolean(event.detail?.overLibrary);
+      const previewCard = event.detail?.card || null;
+      const previewPointer = event.detail?.pointer || null;
 
       if (isTabletEditorMode) {
         setIsBoardDragActive(false);
         setIsLibraryDropHover(false);
+        setBoardDragPreview(null);
         return;
       }
 
       setIsBoardDragActive(dragging);
       setIsLibraryDropHover(dragging && overLibrary);
+      setBoardDragPreview(
+        dragging && overLibrary && previewCard && previewPointer
+          ? { card: previewCard, pointer: previewPointer }
+          : null,
+      );
     };
 
     window.addEventListener("ruche:board-drag-state", handleBoardDragState);
@@ -943,6 +953,22 @@ export default function RucheWorkspace({
           ) : null}
         </div>
         <CustomDragPreview zoom={boardZoom} />
+        {boardDragPreview ? (
+          <div
+            style={{
+              position: "fixed",
+              left: boardDragPreview.pointer.x,
+              top: boardDragPreview.pointer.y,
+              transform: `translate(-50%, -50%) scale(${boardZoom})`,
+              transformOrigin: "center center",
+              pointerEvents: "none",
+              zIndex: 12000,
+            }}
+            aria-hidden="true"
+          >
+            <HexCard card={boardDragPreview.card} onlyFront />
+          </div>
+        ) : null}
       </div>
       <AddCardModal
         show={canEdit && showModal}

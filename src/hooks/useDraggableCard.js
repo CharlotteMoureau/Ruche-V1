@@ -78,6 +78,7 @@ export function useDraggableCard({
 }) {
   const DRAG_ACTIVATION_THRESHOLD = 2;
   const [isDragging, setIsDragging] = useState(false);
+  const [isDraggingOverLibrary, setIsDraggingOverLibrary] = useState(false);
   const dragStateRef = useRef(null);
   const ignoreMouseUntilRef = useRef(0);
 
@@ -115,15 +116,30 @@ export function useDraggableCard({
       dragStateRef.current.isActive = true;
       setIsDragging(true);
       onDragStart?.();
-      emitBoardDragState({ dragging: true, overLibrary: false });
+      emitBoardDragState({
+        dragging: true,
+        overLibrary: false,
+        card,
+        pointer: { x: clientX, y: clientY },
+      });
     }
 
     const isOverLibrary = isDropInLibraryZone(clientX, clientY);
     if (isOverLibrary !== dragStateRef.current.isOverLibrary) {
       dragStateRef.current.isOverLibrary = isOverLibrary;
+      setIsDraggingOverLibrary(isOverLibrary);
       emitBoardDragState({
         dragging: true,
         overLibrary: isOverLibrary,
+        card,
+        pointer: { x: clientX, y: clientY },
+      });
+    } else {
+      emitBoardDragState({
+        dragging: true,
+        overLibrary: isOverLibrary,
+        card,
+        pointer: { x: clientX, y: clientY },
       });
     }
 
@@ -144,7 +160,7 @@ export function useDraggableCard({
     }
 
     onMoveCards(nextPositions);
-  }, [onDragStart, onMoveCard, onMoveCards, zoom]);
+  }, [card, onDragStart, onMoveCard, onMoveCards, zoom]);
 
   const finalizeDrag = useCallback((endPointer) => {
     if (!dragStateRef.current) return;
@@ -154,6 +170,7 @@ export function useDraggableCard({
 
     if (!isActive) {
       dragStateRef.current = null;
+      setIsDraggingOverLibrary(false);
       emitBoardDragState({ dragging: false, overLibrary: false });
       return;
     }
@@ -169,6 +186,7 @@ export function useDraggableCard({
 
       if (returned !== false) {
         dragStateRef.current = null;
+        setIsDraggingOverLibrary(false);
         emitBoardDragState({ dragging: false, overLibrary: false });
         return;
       }
@@ -197,6 +215,7 @@ export function useDraggableCard({
     }
 
     dragStateRef.current = null;
+    setIsDraggingOverLibrary(false);
     emitBoardDragState({ dragging: false, overLibrary: false });
   }, [
     boardHeight,
@@ -231,6 +250,7 @@ export function useDraggableCard({
     };
 
     setIsDragging(false);
+    setIsDraggingOverLibrary(false);
   }, [card, isSelected, onClearSelection, selectedCards]);
 
   const handleMouseDown = useCallback((event) => {
@@ -360,6 +380,7 @@ export function useDraggableCard({
     if (!stillDraggingCard) {
       dragStateRef.current = null;
       setIsDragging(false);
+      setIsDraggingOverLibrary(false);
       emitBoardDragState({ dragging: false, overLibrary: false });
     }
   }, [card.id, card.position]);
@@ -373,6 +394,7 @@ export function useDraggableCard({
 
   return {
     isDragging,
+    isDraggingOverLibrary,
     handleMouseDown,
     handleTouchStart,
   };
