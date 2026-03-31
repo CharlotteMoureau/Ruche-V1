@@ -130,6 +130,12 @@ export default function AdminPage() {
       if (field === "username") {
         av = a.username.toLowerCase();
         bv = b.username.toLowerCase();
+      } else if (field === "firstName") {
+        av = (a.firstName ?? "").toLowerCase();
+        bv = (b.firstName ?? "").toLowerCase();
+      } else if (field === "lastName") {
+        av = (a.lastName ?? "").toLowerCase();
+        bv = (b.lastName ?? "").toLowerCase();
       } else if (field === "email") {
         av = a.email.toLowerCase();
         bv = b.email.toLowerCase();
@@ -347,8 +353,30 @@ export default function AdminPage() {
                   {sortIndicator("username", userSortField, userSortDir)}
                 </button>
               </th>
-              <th>{t("profile.firstname")}</th>
-              <th>{t("profile.lastname")}</th>
+              <th>
+                <button
+                  type="button"
+                  className="admin-sort-btn"
+                  onClick={() =>
+                    toggleSort("firstName", userSort, setUserSort)
+                  }
+                >
+                  {t("profile.firstname")}
+                  {sortIndicator("firstName", userSortField, userSortDir)}
+                </button>
+              </th>
+              <th>
+                <button
+                  type="button"
+                  className="admin-sort-btn"
+                  onClick={() =>
+                    toggleSort("lastName", userSort, setUserSort)
+                  }
+                >
+                  {t("profile.lastname")}
+                  {sortIndicator("lastName", userSortField, userSortDir)}
+                </button>
+              </th>
               <th>
                 <button
                   type="button"

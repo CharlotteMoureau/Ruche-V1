@@ -451,6 +451,34 @@
   }
 }
 
+.toolbar-role-toggle {
+  min-height: 40px;
+  border: 1px solid #cfc7bc;
+  border-radius: 999px;
+  padding: 8px 36px 8px 12px;
+  background-color: #fff;
+  color: #273043;
+  font-weight: 600;
+  line-height: 1.1;
+  cursor: pointer;
+  -webkit-appearance: none;
+  appearance: none;
+  background-image:
+    linear-gradient(45deg, transparent 50%, #6f6556 50%),
+    linear-gradient(135deg, #6f6556 50%, transparent 50%);
+  background-position:
+    calc(100% - 18px) calc(50% - 3px),
+    calc(100% - 12px) calc(50% - 3px);
+  background-size: 6px 6px, 6px 6px;
+  background-repeat: no-repeat;
+
+  &:focus-visible {
+    outline: 3px solid rgba(47, 127, 146, 0.28);
+    outline-offset: 1px;
+    border-color: #8ca9b1;
+  }
+}
+
 .toolbar-collaborators-section {
   margin-top: 1rem;
   padding-top: 0.9rem;
@@ -504,6 +532,14 @@
   button[disabled] {
     opacity: 0.65;
     cursor: wait;
+  }
+}
+
+@media (min-width: 768px) and (max-width: 1200px) and (pointer: coarse) {
+  .toolbar-collaborators-list .inline-actions .toolbar-role-toggle {
+    min-width: 170px;
+    min-height: 42px;
+    padding-right: 38px;
   }
 }
 

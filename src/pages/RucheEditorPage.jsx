@@ -996,6 +996,7 @@ export default function RucheEditorPage() {
         detail: {
           isSaving,
           commentCount,
+          canReset: canEdit,
         },
       }),
     );
@@ -1005,7 +1006,7 @@ export default function RucheEditorPage() {
         new CustomEvent("ruche:editor-header-state", { detail: null }),
       );
     };
-  }, [commentCount, isSaving, isTabletEditorMode]);
+  }, [canEdit, commentCount, isSaving, isTabletEditorMode]);
 
   useEffect(() => {
     const handleHeaderAction = (event) => {
@@ -1037,6 +1038,7 @@ export default function RucheEditorPage() {
       }
 
       if (actionType === "reset") {
+        if (!canEdit) return;
         handleResetRequest();
         return;
       }
@@ -1070,6 +1072,7 @@ export default function RucheEditorPage() {
       );
     };
   }, [
+    canEdit,
     handleResetRequest,
     handleOpenComments,
     isDirty,
@@ -1138,6 +1141,7 @@ export default function RucheEditorPage() {
           <div className="editor-topbar-actions">
             <Toolbar
               onReset={handleResetRequest}
+              showResetButton={canEdit}
               showCollaboratorsButton={isNew}
               isCollaboratorsLocked={requiresSavedHivePrompt}
               canInvite={
@@ -1212,6 +1216,7 @@ export default function RucheEditorPage() {
       {isTabletEditorMode ? (
         <Toolbar
           onReset={handleResetRequest}
+          showResetButton={canEdit}
           showCollaboratorsButton={isNew}
           isCollaboratorsLocked={requiresSavedHivePrompt}
           canInvite={

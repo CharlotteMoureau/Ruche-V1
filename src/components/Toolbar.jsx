@@ -16,6 +16,7 @@ import {
 
 export default function Toolbar({
   onReset,
+  showResetButton = true,
   showCollaboratorsButton = false,
   isCollaboratorsLocked = false,
   canInvite = false,
@@ -256,9 +257,11 @@ export default function Toolbar({
   return (
     <>
       <div className={`toolbar ${hidden ? "toolbar--hidden" : ""}`.trim()}>
-        <button onClick={onReset}>
-          <FontAwesomeIcon icon={faArrowsRotate} /> {t("toolbar.reset")}
-        </button>
+        {showResetButton ? (
+          <button onClick={onReset}>
+            <FontAwesomeIcon icon={faArrowsRotate} /> {t("toolbar.reset")}
+          </button>
+        ) : null}
         <button onClick={handleExport}>
           <FontAwesomeIcon icon={faDownload} /> {t("toolbar.export")}
         </button>
@@ -335,6 +338,7 @@ export default function Toolbar({
                 <label>
                   {t("admin.role")}
                   <select
+                    className="toolbar-role-toggle"
                     value={inviteRole}
                     onChange={(event) => setInviteRole(event.target.value)}
                   >
@@ -379,6 +383,7 @@ export default function Toolbar({
                       {canInvite ? (
                         <div className="inline-actions">
                           <select
+                            className="toolbar-role-toggle"
                             value={
                               collaborator.role === "EDIT"
                                 ? "EDITOR"

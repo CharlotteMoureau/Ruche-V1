@@ -208,16 +208,18 @@ export default function AppHeader() {
                           ? t("editor.saving")
                           : t("editor.saveHive")}
                       </button>
-                      <button
-                        type="button"
-                        onClick={() => {
-                          dispatchEditorAction("reset");
-                          setIsHiveMenuOpen(false);
-                        }}
-                      >
-                        <FontAwesomeIcon icon={faArrowsRotate} />
-                        {t("toolbar.reset")}
-                      </button>
+                      {editorHeaderState?.canReset ? (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            dispatchEditorAction("reset");
+                            setIsHiveMenuOpen(false);
+                          }}
+                        >
+                          <FontAwesomeIcon icon={faArrowsRotate} />
+                          {t("toolbar.reset")}
+                        </button>
+                      ) : null}
                       <button
                         type="button"
                         onClick={() => {
