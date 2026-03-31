@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faArrowsRotate,
@@ -47,6 +47,7 @@ export default function Toolbar({
   const [leaveLoading, setLeaveLoading] = useState(false);
   const [showLeaveConfirmModal, setShowLeaveConfirmModal] = useState(false);
   const [exportErrorMessage, setExportErrorMessage] = useState("");
+  const lastHandledExportSignalRef = useRef(0);
 
   const isValidEmail = (value) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
   const getRoleLabel = (role) => {
@@ -147,8 +148,11 @@ export default function Toolbar({
 
   useEffect(() => {
     if (!exportSignal) return;
+    if (lastHandledExportSignalRef.current === exportSignal) return;
+
+    lastHandledExportSignalRef.current = exportSignal;
     handleExport();
-  }, [exportSignal, exportOptions, t]);
+  }, [exportSignal, handleExport]);
 
   const handleInvite = async () => {
     const email = inviteEmail.trim().toLowerCase();

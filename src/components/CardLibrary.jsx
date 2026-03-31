@@ -112,7 +112,7 @@ export default function CardLibrary({
           </button>
           <button
             type="button"
-            className={selectedCount > 0 ? "is-active is-active--primary" : ""}
+            className={selectedCount > 0 ? "is-active" : ""}
             onClick={onGoToBoard}
             disabled={selectedCount === 0}
           >
