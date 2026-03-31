@@ -54,6 +54,7 @@ export default function HiveBoard({
   const boardRef = useRef(null);
   const viewportRef = useRef(null);
   const panStateRef = useRef(null);
+  const dragScrollLockRef = useRef(null);
   const pinchStateRef = useRef(null);
   const zoomRef = useRef(BOARD_DEFAULT_ZOOM);
   const wheelZoomTargetRef = useRef(BOARD_DEFAULT_ZOOM);
@@ -487,6 +488,40 @@ export default function HiveBoard({
     if (!isCardDragging) return;
     panStateRef.current = null;
     setIsPanning(false);
+  }, [isCardDragging]);
+
+  useEffect(() => {
+    if (!isCardDragging) {
+      dragScrollLockRef.current = null;
+      return undefined;
+    }
+
+    const viewport = viewportRef.current;
+    if (!viewport) return undefined;
+
+    dragScrollLockRef.current = {
+      left: viewport.scrollLeft,
+      top: viewport.scrollTop,
+    };
+
+    const lockScroll = () => {
+      const lock = dragScrollLockRef.current;
+      if (!lock) return;
+
+      if (viewport.scrollLeft !== lock.left) {
+        viewport.scrollLeft = lock.left;
+      }
+
+      if (viewport.scrollTop !== lock.top) {
+        viewport.scrollTop = lock.top;
+      }
+    };
+
+    viewport.addEventListener("scroll", lockScroll, { passive: true });
+
+    return () => {
+      viewport.removeEventListener("scroll", lockScroll);
+    };
   }, [isCardDragging]);
 
   const handleNoteOpen = (event, card) => {

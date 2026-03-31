@@ -128,12 +128,6 @@ body.editor-route #root {
     filter: grayscale(0.28);
   }
 
-  .editor-app.is-board-dragging .hive-board,
-  .editor-app.is-board-dragging .hive-board__canvas-shell,
-  .editor-app.is-board-dragging .hive-board__viewport {
-    overflow: visible;
-  }
-
   .editor-app.is-board-dragging .editor-app__library-panel.is-drop-hover {
     opacity: 1;
     filter: none;
