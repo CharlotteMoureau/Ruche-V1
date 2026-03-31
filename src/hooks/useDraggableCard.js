@@ -76,6 +76,7 @@ export function useDraggableCard({
   selectionMode = false,
   dragDisabled = false,
 }) {
+  const DRAG_ACTIVATION_THRESHOLD = 2;
   const [isDragging, setIsDragging] = useState(false);
   const dragStateRef = useRef(null);
   const ignoreMouseUntilRef = useRef(0);
@@ -97,6 +98,26 @@ export function useDraggableCard({
     if (!dragStateRef.current) return;
 
     dragStateRef.current.lastPointerClient = { x: clientX, y: clientY };
+    const delta = {
+      x: (clientX - dragStateRef.current.startPointer.x) / zoom,
+      y: (clientY - dragStateRef.current.startPointer.y) / zoom,
+    };
+
+    const hasMovedEnough =
+      Math.abs(delta.x) >= DRAG_ACTIVATION_THRESHOLD ||
+      Math.abs(delta.y) >= DRAG_ACTIVATION_THRESHOLD;
+
+    if (!dragStateRef.current.isActive) {
+      if (!hasMovedEnough) {
+        return;
+      }
+
+      dragStateRef.current.isActive = true;
+      setIsDragging(true);
+      onDragStart?.();
+      emitBoardDragState({ dragging: true, overLibrary: false });
+    }
+
     const isOverLibrary = isDropInLibraryZone(clientX, clientY);
     if (isOverLibrary !== dragStateRef.current.isOverLibrary) {
       dragStateRef.current.isOverLibrary = isOverLibrary;
@@ -106,20 +127,7 @@ export function useDraggableCard({
       });
     }
 
-    const delta = {
-      x: (clientX - dragStateRef.current.startPointer.x) / zoom,
-      y: (clientY - dragStateRef.current.startPointer.y) / zoom,
-    };
-
     dragStateRef.current.currentDelta = delta;
-
-    if (
-      !dragStateRef.current.historyCaptured &&
-      (Math.abs(delta.x) > 0 || Math.abs(delta.y) > 0)
-    ) {
-      dragStateRef.current.historyCaptured = true;
-      onDragStart?.();
-    }
 
     const nextPositions = dragStateRef.current.cards.map((entry) => ({
       id: entry.card.id,
@@ -141,7 +149,15 @@ export function useDraggableCard({
   const finalizeDrag = useCallback((endPointer) => {
     if (!dragStateRef.current) return;
 
-    const { cards, currentDelta, lastPointerClient } = dragStateRef.current;
+    const { cards, currentDelta, lastPointerClient, isActive } =
+      dragStateRef.current;
+
+    if (!isActive) {
+      dragStateRef.current = null;
+      emitBoardDragState({ dragging: false, overLibrary: false });
+      return;
+    }
+
     const pointer = endPointer || lastPointerClient;
     const droppedInLibrary = isDropInLibraryZone(pointer?.x, pointer?.y);
 
@@ -205,8 +221,8 @@ export function useDraggableCard({
       startPointer: { x: clientX, y: clientY },
       lastPointerClient: { x: clientX, y: clientY },
       currentDelta: { x: 0, y: 0 },
+      isActive: false,
       isOverLibrary: false,
-      historyCaptured: false,
       cards: dragCards.map((dragCard) => ({
         card: dragCard,
         startPosition: dragCard.position,
@@ -214,8 +230,7 @@ export function useDraggableCard({
       })),
     };
 
-    setIsDragging(true);
-    emitBoardDragState({ dragging: true, overLibrary: false });
+    setIsDragging(false);
   }, [card, isSelected, onClearSelection, selectedCards]);
 
   const handleMouseDown = useCallback((event) => {

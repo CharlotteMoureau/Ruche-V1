@@ -48,6 +48,7 @@ export default function HiveBoard({
   onPlaceLibraryCards,
   autoPlaceSignal = 0,
   tabletUsageBlocked = false,
+  isCardDragging = false,
 }) {
   const { t } = useLanguage();
   const boardRef = useRef(null);
@@ -404,6 +405,7 @@ export default function HiveBoard({
 
   const handleCanvasPointerDown = useCallback(
     (event) => {
+      if (isCardDragging) return;
       if (event.target !== event.currentTarget) return;
 
       if (event.pointerType === "mouse" && event.button !== 0) {
@@ -439,6 +441,7 @@ export default function HiveBoard({
     },
     [
       getBoardPointFromClient,
+      isCardDragging,
       onClearSelection,
       onExitBoardSelectionMode,
       onPlaceLibraryCards,
@@ -453,6 +456,7 @@ export default function HiveBoard({
     if (!isPanning) return undefined;
 
     const handlePointerMove = (event) => {
+      if (isCardDragging) return;
       const viewport = viewportRef.current;
       const panState = panStateRef.current;
       if (!viewport || !panState) return;
@@ -477,7 +481,13 @@ export default function HiveBoard({
       window.removeEventListener("pointerup", stopPanning);
       window.removeEventListener("pointercancel", stopPanning);
     };
-  }, [isPanning]);
+  }, [isCardDragging, isPanning]);
+
+  useEffect(() => {
+    if (!isCardDragging) return;
+    panStateRef.current = null;
+    setIsPanning(false);
+  }, [isCardDragging]);
 
   const handleNoteOpen = (event, card) => {
     event.preventDefault();

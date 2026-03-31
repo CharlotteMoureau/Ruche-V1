@@ -927,6 +927,7 @@ export default function RucheWorkspace({
             onPlaceLibraryCards={handlePlaceLibraryCards}
             autoPlaceSignal={autoPlaceSignal}
             tabletUsageBlocked={tabletUsageBlocked}
+            isCardDragging={isBoardDragActive}
           />
           {activeEditorsLabel ? (
             <p className="editor-active-badge">{activeEditorsLabel}</p>
