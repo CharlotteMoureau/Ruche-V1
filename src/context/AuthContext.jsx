@@ -69,8 +69,7 @@ export function AuthProvider({ children }) {
         localStorage.setItem(TOKEN_STORAGE_KEY, data.token);
         setToken(data.token);
         setUser(data.user);
-        const me = await apiFetch("/auth/me", { token: data.token });
-        setIsAdmin(Boolean(me.isAdmin));
+        setIsAdmin(Boolean(data.isAdmin));
       },
       async register(payload) {
         const data = await apiFetch("/auth/register", {
@@ -81,8 +80,7 @@ export function AuthProvider({ children }) {
         localStorage.setItem(TOKEN_STORAGE_KEY, data.token);
         setToken(data.token);
         setUser(data.user);
-        const me = await apiFetch("/auth/me", { token: data.token });
-        setIsAdmin(Boolean(me.isAdmin));
+        setIsAdmin(Boolean(data.isAdmin));
       },
       logout() {
         localStorage.removeItem(TOKEN_STORAGE_KEY);
@@ -92,7 +90,7 @@ export function AuthProvider({ children }) {
       },
       async refreshMe() {
         if (!token) return;
-        const data = await apiFetch("/auth/me", { token });
+        const data = await apiFetch("/auth/me?includeCollections=1", { token });
         setUser(data.user);
         setIsAdmin(Boolean(data.isAdmin));
         return data;

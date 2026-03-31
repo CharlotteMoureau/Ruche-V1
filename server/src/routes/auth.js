@@ -4,7 +4,7 @@ import { Router } from "express";
 import bcrypt from "bcryptjs";
 import { z } from "zod";
 import { prisma } from "../lib/prisma.js";
-import { signAccessToken, sanitizeUser } from "../lib/auth.js";
+import { signAccessToken, sanitizeUser, isAdminEmail } from "../lib/auth.js";
 import { USER_ROLES, normalizeRole } from "../lib/roles.js";
 import { makeResetToken, hashResetToken } from "../lib/passwordReset.js";
 import { sendResetPasswordEmail } from "../lib/email.js";
@@ -73,7 +73,11 @@ authRouter.post("/register", async (req, res) => {
   });
 
   const token = signAccessToken(user);
-  return res.status(201).json({ token, user: sanitizeUser(user) });
+  return res.status(201).json({
+    token,
+    user: sanitizeUser(user),
+    isAdmin: isAdminEmail(user.email),
+  });
 });
 
 const loginSchema = z.object({
@@ -104,10 +108,24 @@ authRouter.post("/login", async (req, res) => {
   }
 
   const token = signAccessToken(user);
-  return res.json({ token, user: sanitizeUser(user) });
+  return res.json({
+    token,
+    user: sanitizeUser(user),
+    isAdmin: isAdminEmail(user.email),
+  });
 });
 
 authRouter.get("/me", requireAuth, async (req, res) => {
+  const includeCollections = req.query.includeCollections === "1";
+  if (!includeCollections) {
+    return res.json({
+      user: sanitizeUser(req.user),
+      isAdmin: req.user.isAdmin,
+      ownedHives: [],
+      sharedHives: [],
+    });
+  }
+
   const user = await prisma.user.findUnique({
     where: { id: req.user.id },
     include: {
