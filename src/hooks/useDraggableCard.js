@@ -130,19 +130,12 @@ export function useDraggableCard({
     }));
 
     if (nextPositions.length === 1) {
-      onMoveCard(
-        nextPositions[0].id,
-        clampBoardPosition(nextPositions[0].position),
-      );
+      // Keep drag movement unconstrained so the card can visibly hover above the library.
+      onMoveCard(nextPositions[0].id, nextPositions[0].position);
       return;
     }
 
-    onMoveCards(
-      nextPositions.map((entry) => ({
-        ...entry,
-        position: clampBoardPosition(entry.position),
-      })),
-    );
+    onMoveCards(nextPositions);
   }, [onDragStart, onMoveCard, onMoveCards, zoom]);
 
   const finalizeDrag = useCallback((endPointer) => {

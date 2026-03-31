@@ -9,6 +9,7 @@ import { adminRouter } from "./routes/admin.js";
 const app = express();
 const env = globalThis.process?.env || {};
 const port = Number(env.PORT || env.API_PORT || 4010);
+const host = env.API_HOST || "0.0.0.0";
 const appUrl = env.APP_URL || "http://127.0.0.1:5173";
 const localhostOriginPattern = /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/i;
 
@@ -54,6 +55,6 @@ app.use((err, _req, res, next) => {
   res.status(500).json({ error: "Erreur serveur" });
 });
 
-app.listen(port, () => {
-  console.log(`API running on http://localhost:${port}`);
+app.listen(port, host, () => {
+  console.log(`API running on http://${host}:${port}`);
 });
