@@ -8,7 +8,7 @@
     "dev:client": "vite --host",
     "dev:server": "node --watch server/src/index.js",
     "start:server": "node server/src/index.js",
-    "start:server:prod": "npx prisma migrate deploy && npm run start:server",
+    "start:server:prod": "npx prisma db push && npm run start:server",
     "build": "vite build",
     "lint": "eslint .",
     "preview": "vite preview",

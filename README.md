@@ -164,6 +164,7 @@ Deploy `server/src/index.js` on a backend host (Render, Railway, Fly.io, VPS, et
 
 Required backend environment variables:
 
+- `DATABASE_PROVIDER` (`sqlite` locally, `postgresql` on Neon/Render)
 - `DATABASE_URL`
 - `JWT_SECRET`
 - `JWT_EXPIRES_IN` (example: `7d`)
@@ -172,11 +173,11 @@ Required backend environment variables:
 - `ADMIN_EMAIL` (optional business config)
 - `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASS`, `SMTP_FROM` (required for email reset flow)
 
-### 3. Run Prisma migrations on backend
+### 3. Initialize Prisma schema on backend
 
-Before first production use, apply migrations in the backend environment:
+Before first production use, initialize schema in the backend environment:
 
-- `npx prisma migrate deploy`
+- `npx prisma db push`
 
 ### 4. About Netlify secrets scanning config
 
@@ -220,6 +221,7 @@ Copy and adapt:
 
 ```env
 DATABASE_URL=YOUR_NEON_POSTGRES_URL
+DATABASE_PROVIDER=postgresql
 JWT_SECRET=REPLACE_WITH_A_LONG_RANDOM_SECRET
 JWT_EXPIRES_IN=7d
 API_PORT=4010
@@ -240,7 +242,7 @@ Notes:
 4. Database choice
 
 - Recommended: use Neon PostgreSQL free tier and set `DATABASE_URL` to your Neon URL.
-- Important: current Prisma datasource provider is SQLite in `prisma/schema.prisma`. To use PostgreSQL, switch provider to `postgresql` and create/apply migrations for Postgres.
+- Set `DATABASE_PROVIDER=postgresql` in Render.
 - If you keep SQLite on Render without a persistent disk, data can be lost between deploys.
 
 5. Point Netlify frontend to Render backend
