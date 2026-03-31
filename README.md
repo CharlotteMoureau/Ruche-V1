@@ -212,7 +212,7 @@ Checklist:
 - Root Directory: leave empty (repository root)
 - Runtime: Node
 - Build Command: `npm ci && npm run prisma:generate`
-- Start Command: `npx prisma migrate deploy && node server/src/index.js`
+- Start Command: `npm run start:server:prod`
 
 3. Add backend environment variables in Render
 
