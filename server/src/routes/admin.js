@@ -2,6 +2,7 @@
 
 import { Router } from "express";
 import { z } from "zod";
+import { Prisma } from "@prisma/client";
 import { prisma } from "../lib/prisma.js";
 import { requireAuth, requireAdmin } from "../middleware/auth.js";
 import { USER_ROLES } from "../lib/roles.js";
@@ -100,8 +101,33 @@ adminRouter.delete("/users/:id", async (req, res) => {
     return res.status(400).json({ error: "Le compte admin ne peut pas etre supprime" });
   }
 
-  await prisma.user.delete({ where: { id: user.id } });
-  return res.json({ message: "Utilisateur supprime" });
+  try {
+    await prisma.$transaction(async (tx) => {
+      const ownedHives = await tx.hive.findMany({
+        where: { ownerId: user.id },
+        select: { id: true },
+      });
+      const ownedHiveIds = ownedHives.map((h) => h.id);
+
+      if (ownedHiveIds.length > 0) {
+        await tx.hiveComment.deleteMany({ where: { hiveId: { in: ownedHiveIds } } });
+        await tx.hiveCollaborator.deleteMany({ where: { hiveId: { in: ownedHiveIds } } });
+        await tx.hive.deleteMany({ where: { id: { in: ownedHiveIds } } });
+      }
+
+      await tx.hiveComment.deleteMany({ where: { authorId: user.id } });
+      await tx.hiveCollaborator.deleteMany({ where: { userId: user.id } });
+      await tx.passwordResetToken.deleteMany({ where: { userId: user.id } });
+      await tx.user.delete({ where: { id: user.id } });
+    });
+
+    return res.json({ message: "Utilisateur supprime" });
+  } catch (err) {
+    if (err instanceof Prisma.PrismaClientKnownRequestError && err.code === "P2003") {
+      return res.status(409).json({ error: "Suppression impossible: donnees liees" });
+    }
+    throw err;
+  }
 });
 
 adminRouter.get("/hives", async (_req, res) => {
