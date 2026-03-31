@@ -8,7 +8,7 @@ import { adminRouter } from "./routes/admin.js";
 
 const app = express();
 const env = globalThis.process?.env || {};
-const port = Number(env.API_PORT || 4010);
+const port = Number(env.PORT || env.API_PORT || 4010);
 const appUrl = env.APP_URL || "http://127.0.0.1:5173";
 
 app.use(
