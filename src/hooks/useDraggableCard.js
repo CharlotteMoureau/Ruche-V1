@@ -20,12 +20,40 @@ function isDropInLibraryZone(clientX, clientY) {
     return false;
   }
 
+  const isWithinRect = (rect) =>
+    clientX >= rect.left &&
+    clientX <= rect.right &&
+    clientY >= rect.top &&
+    clientY <= rect.bottom;
+
+  const libraryPanel = document.querySelector(".editor-app__library-panel");
+  if (libraryPanel) {
+    const panelRect = libraryPanel.getBoundingClientRect();
+    if (isWithinRect(panelRect)) return true;
+  }
+
+  const cardLibrary = document.querySelector(".card-library");
+  if (cardLibrary) {
+    const libraryRect = cardLibrary.getBoundingClientRect();
+    if (isWithinRect(libraryRect)) return true;
+  }
+
   const element = document.elementFromPoint(clientX, clientY);
   if (!element) return false;
 
   return Boolean(
     element.closest(".editor-app__library-panel") ||
       element.closest(".card-library"),
+  );
+}
+
+function emitBoardDragState(detail) {
+  if (typeof window === "undefined") return;
+
+  window.dispatchEvent(
+    new CustomEvent("ruche:board-drag-state", {
+      detail,
+    }),
   );
 }
 
@@ -69,6 +97,14 @@ export function useDraggableCard({
     if (!dragStateRef.current) return;
 
     dragStateRef.current.lastPointerClient = { x: clientX, y: clientY };
+    const isOverLibrary = isDropInLibraryZone(clientX, clientY);
+    if (isOverLibrary !== dragStateRef.current.isOverLibrary) {
+      dragStateRef.current.isOverLibrary = isOverLibrary;
+      emitBoardDragState({
+        dragging: true,
+        overLibrary: isOverLibrary,
+      });
+    }
 
     const delta = {
       x: (clientX - dragStateRef.current.startPointer.x) / zoom,
@@ -124,6 +160,7 @@ export function useDraggableCard({
 
       if (returned !== false) {
         dragStateRef.current = null;
+        emitBoardDragState({ dragging: false, overLibrary: false });
         return;
       }
     }
@@ -151,6 +188,7 @@ export function useDraggableCard({
     }
 
     dragStateRef.current = null;
+    emitBoardDragState({ dragging: false, overLibrary: false });
   }, [
     boardHeight,
     boardWidth,
@@ -174,6 +212,7 @@ export function useDraggableCard({
       startPointer: { x: clientX, y: clientY },
       lastPointerClient: { x: clientX, y: clientY },
       currentDelta: { x: 0, y: 0 },
+      isOverLibrary: false,
       historyCaptured: false,
       cards: dragCards.map((dragCard) => ({
         card: dragCard,
@@ -183,6 +222,7 @@ export function useDraggableCard({
     };
 
     setIsDragging(true);
+    emitBoardDragState({ dragging: true, overLibrary: false });
   }, [card, isSelected, onClearSelection, selectedCards]);
 
   const handleMouseDown = useCallback((event) => {
@@ -312,8 +352,16 @@ export function useDraggableCard({
     if (!stillDraggingCard) {
       dragStateRef.current = null;
       setIsDragging(false);
+      emitBoardDragState({ dragging: false, overLibrary: false });
     }
   }, [card.id, card.position]);
+
+  useEffect(
+    () => () => {
+      emitBoardDragState({ dragging: false, overLibrary: false });
+    },
+    [],
+  );
 
   return {
     isDragging,

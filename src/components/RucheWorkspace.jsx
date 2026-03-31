@@ -208,6 +208,8 @@ export default function RucheWorkspace({
   const [isFreeCardSelected, setIsFreeCardSelected] = useState(false);
   const [pendingFreeCardAnchor, setPendingFreeCardAnchor] = useState(null);
   const [autoPlaceSignal, setAutoPlaceSignal] = useState(0);
+  const [isBoardDragActive, setIsBoardDragActive] = useState(false);
+  const [isLibraryDropHover, setIsLibraryDropHover] = useState(false);
 
   const snapshotState = useMemo(
     () => ({
@@ -407,6 +409,31 @@ export default function RucheWorkspace({
     setIsEditingCardNote(!existingComment?.message);
     onRequestedNoteHandled?.();
   }, [boardCards, onRequestedNoteHandled, requestedNoteCardId]);
+
+  useEffect(() => {
+    const handleBoardDragState = (event) => {
+      const dragging = Boolean(event.detail?.dragging);
+      const overLibrary = Boolean(event.detail?.overLibrary);
+
+      if (isTabletEditorMode) {
+        setIsBoardDragActive(false);
+        setIsLibraryDropHover(false);
+        return;
+      }
+
+      setIsBoardDragActive(dragging);
+      setIsLibraryDropHover(dragging && overLibrary);
+    };
+
+    window.addEventListener("ruche:board-drag-state", handleBoardDragState);
+
+    return () => {
+      window.removeEventListener(
+        "ruche:board-drag-state",
+        handleBoardDragState,
+      );
+    };
+  }, [isTabletEditorMode]);
 
   useDeviceDetection();
 
@@ -836,8 +863,12 @@ export default function RucheWorkspace({
 
   return (
     <DndProvider backend={HTML5Backend}>
-      <div className={`app editor-app ${isLibraryOpen ? "library-open" : ""}`}>
-        <div className="editor-app__library-panel">
+      <div
+        className={`app editor-app ${isLibraryOpen ? "library-open" : ""} ${isBoardDragActive ? "is-board-dragging" : ""}`.trim()}
+      >
+        <div
+          className={`editor-app__library-panel ${isLibraryDropHover ? "is-drop-hover" : ""}`.trim()}
+        >
           <CardLibrary
             cards={availableCards}
             onFreeSpaceClick={() => {

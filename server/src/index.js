@@ -10,10 +10,28 @@ const app = express();
 const env = globalThis.process?.env || {};
 const port = Number(env.PORT || env.API_PORT || 4010);
 const appUrl = env.APP_URL || "http://127.0.0.1:5173";
+const localhostOriginPattern = /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/i;
+
+function isAllowedOrigin(origin) {
+  if (!origin) return true;
+  if (origin === appUrl) return true;
+  if (origin === "http://127.0.0.1:5173") return true;
+  if (origin === "http://localhost:5173") return true;
+  if (origin === "http://127.0.0.1:5174") return true;
+  if (origin === "http://localhost:5174") return true;
+  return localhostOriginPattern.test(origin);
+}
 
 app.use(
   cors({
-    origin: [appUrl, "http://127.0.0.1:5173"],
+    origin: (origin, callback) => {
+      if (isAllowedOrigin(origin)) {
+        callback(null, true);
+        return;
+      }
+
+      callback(new Error("Not allowed by CORS"));
+    },
     credentials: false,
   }),
 );
