@@ -67,9 +67,9 @@ async function ensureInvitationsTable() {
           "inviteeId" TEXT NOT NULL,
           "role" TEXT NOT NULL,
           "status" TEXT NOT NULL DEFAULT 'PENDING',
-          "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-          "updatedAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-          "respondedAt" DATETIME,
+          "createdAt" TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+          "updatedAt" TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+          "respondedAt" TIMESTAMP,
           CONSTRAINT "HiveInvitation_hiveId_fkey" FOREIGN KEY ("hiveId") REFERENCES "Hive" ("id") ON DELETE CASCADE ON UPDATE CASCADE,
           CONSTRAINT "HiveInvitation_inviterId_fkey" FOREIGN KEY ("inviterId") REFERENCES "User" ("id") ON DELETE CASCADE ON UPDATE CASCADE,
           CONSTRAINT "HiveInvitation_inviteeId_fkey" FOREIGN KEY ("inviteeId") REFERENCES "User" ("id") ON DELETE CASCADE ON UPDATE CASCADE
@@ -82,7 +82,10 @@ async function ensureInvitationsTable() {
       await prisma.$executeRawUnsafe(
         'CREATE INDEX IF NOT EXISTS "HiveInvitation_hiveId_idx" ON "HiveInvitation"("hiveId")',
       );
-    })();
+    })().catch((error) => {
+      invitationsTableReadyPromise = null;
+      throw error;
+    });
   }
 
   return invitationsTableReadyPromise;
@@ -246,16 +249,21 @@ hivesRouter.get("/", async (req, res) => {
 });
 
 hivesRouter.get("/invitations/count", async (req, res) => {
-  await ensureInvitationsTable();
+  try {
+    await ensureInvitationsTable();
 
-  const rows = await prisma.$queryRaw`
-    SELECT COUNT(*) as count
-    FROM "HiveInvitation"
-    WHERE "inviteeId" = ${req.user.id}
-      AND "status" = 'PENDING'
-  `;
+    const rows = await prisma.$queryRaw`
+      SELECT COUNT(*) as count
+      FROM "HiveInvitation"
+      WHERE "inviteeId" = ${req.user.id}
+        AND "status" = 'PENDING'
+    `;
 
-  return res.json({ count: Number(rows[0]?.count || 0) });
+    return res.json({ count: Number(rows[0]?.count || 0) });
+  } catch (error) {
+    console.error("Failed to fetch invitations count", error);
+    return res.json({ count: 0 });
+  }
 });
 
 hivesRouter.get("/invitations", async (req, res) => {
