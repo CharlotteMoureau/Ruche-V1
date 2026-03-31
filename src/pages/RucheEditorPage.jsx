@@ -48,6 +48,7 @@ export default function RucheEditorPage() {
   const { isTabletLandscape, isTabletPortrait, isPhone } = useTabletViewport();
 
   const isNew = !id;
+  const adminReadOnly = Boolean(location.state?.adminReadOnly);
   const duplicateSource = location.state?.duplicateSource || null;
   const requestedHiveKind = normalizeHiveKind(
     location.state?.hiveKind ||
@@ -113,25 +114,29 @@ export default function RucheEditorPage() {
     isOwner || isAdmin || collaboratorRole === "ADMIN",
   );
   const isCollaborator = Boolean(collaboratorRole);
-  const canEdit = isNew
-    ? true
-    : Boolean(
-        hive?.canEdit ||
-        isOwner ||
-        isAdmin ||
-        collaboratorRole === "ADMIN" ||
-        hasEditorRole,
-      );
-  const canComment = isNew
+  const canEdit = adminReadOnly
     ? false
-    : Boolean(
-        hive?.canComment ||
-        isOwner ||
-        isAdmin ||
-        collaboratorRole === "ADMIN" ||
-        hasEditorRole ||
-        collaboratorRole === "COMMENT",
-      );
+    : isNew
+      ? true
+      : Boolean(
+          hive?.canEdit ||
+          isOwner ||
+          isAdmin ||
+          collaboratorRole === "ADMIN" ||
+          hasEditorRole,
+        );
+  const canComment = adminReadOnly
+    ? false
+    : isNew
+      ? false
+      : Boolean(
+          hive?.canComment ||
+          isOwner ||
+          isAdmin ||
+          collaboratorRole === "ADMIN" ||
+          hasEditorRole ||
+          collaboratorRole === "COMMENT",
+        );
   const workspaceLoadKey = isNew
     ? "new-hive"
     : `${id}:${hive ? "loaded" : "init"}`;

@@ -1,4 +1,5 @@
 import { Fragment, useCallback, useEffect, useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { apiFetch } from "../lib/api";
 import { useAuth } from "../context/AuthContext";
 import UnifiedPromptModal from "../components/UnifiedPromptModal";
@@ -23,6 +24,8 @@ function formatDate(value, locale) {
 export default function AdminPage() {
   const { token } = useAuth();
   const { t, dateLocale, roleOptions, translateRole } = useLanguage();
+  const navigate = useNavigate();
+
   const [users, setUsers] = useState([]);
   const [hives, setHives] = useState([]);
   const [error, setError] = useState("");
@@ -35,6 +38,17 @@ export default function AdminPage() {
   const [userSort, setUserSort] = useState("createdAt_desc");
   const [hiveSort, setHiveSort] = useState("updatedAt_desc");
   const [deleteTarget, setDeleteTarget] = useState({ type: null, id: null });
+  const [doubleConfirm, setDoubleConfirm] = useState(false);
+
+  // Hive details panel (collaborators + comments)
+  const [expandedHiveId, setExpandedHiveId] = useState(null);
+  const [hiveDetails, setHiveDetails] = useState(null);
+  const [hiveDetailsLoading, setHiveDetailsLoading] = useState(false);
+
+  // Remove collaborator confirm
+  const [removeCollabTarget, setRemoveCollabTarget] = useState(null);
+  // Delete comment confirm
+  const [deleteCommentTarget, setDeleteCommentTarget] = useState(null);
 
   const userSortField = userSort.split("_")[0];
   const userSortDir = userSort.split("_")[1];
@@ -71,6 +85,34 @@ export default function AdminPage() {
   useEffect(() => {
     load();
   }, [load]);
+
+  const loadHiveDetails = useCallback(
+    async (hiveId) => {
+      setHiveDetailsLoading(true);
+      setHiveDetails(null);
+      try {
+        const data = await apiFetch(`/admin/hives/${hiveId}/details`, {
+          token,
+        });
+        setHiveDetails(data);
+      } catch (err) {
+        setError(err.message);
+      } finally {
+        setHiveDetailsLoading(false);
+      }
+    },
+    [token],
+  );
+
+  const toggleHiveDetails = (hiveId) => {
+    if (expandedHiveId === hiveId) {
+      setExpandedHiveId(null);
+      setHiveDetails(null);
+    } else {
+      setExpandedHiveId(hiveId);
+      loadHiveDetails(hiveId);
+    }
+  };
 
   const filteredUsers = useMemo(() => {
     const q = userSearch.toLowerCase();
@@ -169,6 +211,10 @@ export default function AdminPage() {
   const removeHive = async (id) => {
     try {
       await apiFetch(`/admin/hives/${id}`, { method: "DELETE", token });
+      if (expandedHiveId === id) {
+        setExpandedHiveId(null);
+        setHiveDetails(null);
+      }
       await load();
     } catch (err) {
       setError(err.message);
@@ -177,14 +223,17 @@ export default function AdminPage() {
 
   const confirmDeleteTarget = async () => {
     if (!deleteTarget.type || !deleteTarget.id) return;
-
+    if (!doubleConfirm) {
+      setDoubleConfirm(true);
+      return;
+    }
     if (deleteTarget.type === "user") {
       await removeUser(deleteTarget.id);
     } else if (deleteTarget.type === "hive") {
       await removeHive(deleteTarget.id);
     }
-
     setDeleteTarget({ type: null, id: null });
+    setDoubleConfirm(false);
   };
 
   const saveUser = async () => {
@@ -194,6 +243,9 @@ export default function AdminPage() {
         token,
         body: {
           username: editingUser.username,
+          email: editingUser.email,
+          firstName: editingUser.firstName,
+          lastName: editingUser.lastName,
           roleLabel: editingUser.roleLabel,
           roleOtherText: editingUser.roleOtherText || null,
         },
@@ -213,6 +265,35 @@ export default function AdminPage() {
         body: { title: editingHive.title },
       });
       setEditingHive(null);
+      await load();
+    } catch (err) {
+      setError(err.message);
+    }
+  };
+
+  const removeCollaborator = async () => {
+    if (!removeCollabTarget) return;
+    try {
+      await apiFetch(
+        `/admin/hives/${removeCollabTarget.hiveId}/collaborators/${removeCollabTarget.userId}`,
+        { method: "DELETE", token },
+      );
+      setRemoveCollabTarget(null);
+      await loadHiveDetails(expandedHiveId);
+    } catch (err) {
+      setError(err.message);
+    }
+  };
+
+  const deleteComment = async () => {
+    if (!deleteCommentTarget) return;
+    try {
+      await apiFetch(
+        `/admin/hives/${deleteCommentTarget.hiveId}/comments/${deleteCommentTarget.commentId}`,
+        { method: "DELETE", token },
+      );
+      setDeleteCommentTarget(null);
+      await loadHiveDetails(expandedHiveId);
       await load();
     } catch (err) {
       setError(err.message);
@@ -266,6 +347,8 @@ export default function AdminPage() {
                   {sortIndicator("username", userSortField, userSortDir)}
                 </button>
               </th>
+              <th>{t("profile.firstname")}</th>
+              <th>{t("profile.lastname")}</th>
               <th>
                 <button
                   type="button"
@@ -330,6 +413,8 @@ export default function AdminPage() {
                   <td>
                     <strong>{u.username}</strong>
                   </td>
+                  <td>{u.firstName || "—"}</td>
+                  <td>{u.lastName || "—"}</td>
                   <td>{u.email}</td>
                   <td>
                     {translateRole(u.roleLabel)}
@@ -354,6 +439,9 @@ export default function AdminPage() {
                               : {
                                   id: u.id,
                                   username: u.username,
+                                  email: u.email,
+                                  firstName: u.firstName,
+                                  lastName: u.lastName,
                                   roleLabel: u.roleLabel,
                                   roleOtherText: u.roleOtherText || "",
                                 },
@@ -367,9 +455,10 @@ export default function AdminPage() {
                       <button
                         type="button"
                         className="button-link button-link-delete"
-                        onClick={() =>
-                          setDeleteTarget({ type: "user", id: u.id })
-                        }
+                        onClick={() => {
+                          setDeleteTarget({ type: "user", id: u.id });
+                          setDoubleConfirm(false);
+                        }}
                       >
                         {t("common.delete")}
                       </button>
@@ -378,12 +467,16 @@ export default function AdminPage() {
                 </tr>
                 {editingUser?.id === u.id ? (
                   <tr className="admin-edit-row">
-                    <td colSpan={7}>
+                    <td colSpan={9}>
                       <form
                         className="form-grid admin-inline-form"
                         onSubmit={(event) => {
                           event.preventDefault();
-                          if (!editingUser.username.trim()) return;
+                          if (
+                            !editingUser.username.trim() ||
+                            !editingUser.email?.trim()
+                          )
+                            return;
                           saveUser();
                         }}
                       >
@@ -399,6 +492,48 @@ export default function AdminPage() {
                               })
                             }
                             maxLength={40}
+                          />
+                        </label>
+                        <label>
+                          {t("profile.email")}
+                          <input
+                            type="email"
+                            value={editingUser.email || ""}
+                            onChange={(e) =>
+                              setEditingUser({
+                                ...editingUser,
+                                email: e.target.value,
+                              })
+                            }
+                            maxLength={120}
+                          />
+                        </label>
+                        <label>
+                          {t("profile.firstname")}
+                          <input
+                            type="text"
+                            value={editingUser.firstName || ""}
+                            onChange={(e) =>
+                              setEditingUser({
+                                ...editingUser,
+                                firstName: e.target.value,
+                              })
+                            }
+                            maxLength={80}
+                          />
+                        </label>
+                        <label>
+                          {t("profile.lastname")}
+                          <input
+                            type="text"
+                            value={editingUser.lastName || ""}
+                            onChange={(e) =>
+                              setEditingUser({
+                                ...editingUser,
+                                lastName: e.target.value,
+                              })
+                            }
+                            maxLength={80}
                           />
                         </label>
                         <label>
@@ -439,7 +574,10 @@ export default function AdminPage() {
                           <button
                             type="submit"
                             className="button-link"
-                            disabled={!editingUser.username.trim()}
+                            disabled={
+                              !editingUser.username.trim() ||
+                              !editingUser.email?.trim()
+                            }
                           >
                             {t("admin.save")}
                           </button>
@@ -593,6 +731,17 @@ export default function AdminPage() {
                         type="button"
                         className="button-link"
                         onClick={() =>
+                          navigate(`/admin/hives/${hive.id}`, {
+                            state: { adminReadOnly: true },
+                          })
+                        }
+                      >
+                        {t("admin.viewHive")}
+                      </button>
+                      <button
+                        type="button"
+                        className="button-link"
+                        onClick={() =>
                           setEditingHive(
                             editingHive?.id === hive.id
                               ? null
@@ -603,6 +752,15 @@ export default function AdminPage() {
                         {editingHive?.id === hive.id
                           ? t("admin.cancelEdit")
                           : t("admin.edit")}
+                      </button>
+                      <button
+                        type="button"
+                        className="button-link"
+                        onClick={() => toggleHiveDetails(hive.id)}
+                      >
+                        {expandedHiveId === hive.id
+                          ? t("admin.cancelEdit")
+                          : t("admin.hiveDetails")}
                       </button>
                       <button
                         type="button"
@@ -660,6 +818,120 @@ export default function AdminPage() {
                     </td>
                   </tr>
                 ) : null}
+                {expandedHiveId === hive.id ? (
+                  <tr className="admin-edit-row">
+                    <td colSpan={7}>
+                      {hiveDetailsLoading ? (
+                        <p>{t("common.loading")}</p>
+                      ) : hiveDetails ? (
+                        <div className="admin-hive-details">
+                          <h4>{t("admin.hiveCollaborators")}</h4>
+                          {hiveDetails.collaborators.length === 0 ? (
+                            <p>{t("admin.noCollaborators")}</p>
+                          ) : (
+                            <table className="admin-table admin-details-table">
+                              <tbody>
+                                {hiveDetails.collaborators.map((c) => (
+                                  <tr key={c.id}>
+                                    <td>{c.username}</td>
+                                    <td>{c.email}</td>
+                                    <td>{c.role}</td>
+                                    <td>
+                                      <button
+                                        type="button"
+                                        className="button-link button-link-delete"
+                                        onClick={() =>
+                                          setRemoveCollabTarget({
+                                            hiveId: hive.id,
+                                            userId: c.userId,
+                                            username: c.username,
+                                          })
+                                        }
+                                      >
+                                        {t("admin.removeCollaborator")}
+                                      </button>
+                                    </td>
+                                  </tr>
+                                ))}
+                              </tbody>
+                            </table>
+                          )}
+                          <h4>{t("admin.hiveComments")}</h4>
+                          {hiveDetails.comments.length === 0 ? (
+                            <p>{t("admin.noComments")}</p>
+                          ) : (
+                            <table className="admin-table admin-details-table">
+                              <tbody>
+                                {hiveDetails.comments.map((c) => (
+                                  <Fragment key={c.id}>
+                                    <tr>
+                                      <td>
+                                        <strong>
+                                          {c.author?.username ??
+                                            t("common.unknownUser")}
+                                        </strong>
+                                      </td>
+                                      <td>{c.message}</td>
+                                      <td className="admin-date">
+                                        {formatDate(c.createdAt, dateLocale)}
+                                      </td>
+                                      <td>
+                                        <button
+                                          type="button"
+                                          className="button-link button-link-delete"
+                                          onClick={() =>
+                                            setDeleteCommentTarget({
+                                              hiveId: hive.id,
+                                              commentId: c.id,
+                                            })
+                                          }
+                                        >
+                                          {t("common.delete")}
+                                        </button>
+                                      </td>
+                                    </tr>
+                                    {c.replies?.map((r) => (
+                                      <tr
+                                        key={r.id}
+                                        className="admin-reply-row"
+                                      >
+                                        <td className="admin-reply-indent">
+                                          ↳{" "}
+                                          <strong>
+                                            {r.author?.username ??
+                                              t("common.unknownUser")}
+                                          </strong>
+                                        </td>
+                                        <td>{r.message}</td>
+                                        <td className="admin-date">
+                                          {formatDate(r.createdAt, dateLocale)}
+                                        </td>
+                                        <td>
+                                          <button
+                                            type="button"
+                                            className="button-link button-link-delete"
+                                            onClick={() =>
+                                              setDeleteCommentTarget({
+                                                hiveId: hive.id,
+                                                commentId: r.id,
+                                              })
+                                            }
+                                          >
+                                            {t("common.delete")}
+                                          </button>
+                                        </td>
+                                      </tr>
+                                    ))}
+                                  </Fragment>
+                                ))}
+                              </tbody>
+                            </table>
+                          )}
+                        </div>
+                      ) : null}
+                    </td>
+                  </tr>
+                ) : null}
               </Fragment>
             ))}
           </tbody>
@@ -693,15 +965,44 @@ export default function AdminPage() {
       <UnifiedPromptModal
         isOpen={Boolean(deleteTarget.type && deleteTarget.id)}
         title={
-          deleteTarget.type === "user"
-            ? t("admin.deleteUser")
-            : t("admin.deleteHive")
+          doubleConfirm
+            ? t("admin.confirmDeleteFinal")
+            : deleteTarget.type === "user"
+              ? t("admin.deleteUser")
+              : t("admin.deleteHive")
         }
+        message={
+          doubleConfirm
+            ? t("admin.doubleConfirmMessage")
+            : t("admin.irreversible")
+        }
+        confirmLabel={doubleConfirm ? t("common.confirm") : t("common.delete")}
+        confirmClassName="danger"
+        onCancel={() => {
+          setDeleteTarget({ type: null, id: null });
+          setDoubleConfirm(false);
+        }}
+        onConfirm={confirmDeleteTarget}
+      />
+
+      <UnifiedPromptModal
+        isOpen={Boolean(removeCollabTarget)}
+        title={t("admin.confirmRemoveCollaborator")}
+        message={t("admin.confirmRemoveMessage")}
+        confirmLabel={t("admin.removeCollaborator")}
+        confirmClassName="danger"
+        onCancel={() => setRemoveCollabTarget(null)}
+        onConfirm={removeCollaborator}
+      />
+
+      <UnifiedPromptModal
+        isOpen={Boolean(deleteCommentTarget)}
+        title={t("admin.confirmDeleteComment")}
         message={t("admin.irreversible")}
         confirmLabel={t("common.delete")}
         confirmClassName="danger"
-        onCancel={() => setDeleteTarget({ type: null, id: null })}
-        onConfirm={confirmDeleteTarget}
+        onCancel={() => setDeleteCommentTarget(null)}
+        onConfirm={deleteComment}
       />
     </section>
   );

@@ -33,6 +33,19 @@ export function useDraggableCard({
   const dragStateRef = useRef(null);
   const ignoreMouseUntilRef = useRef(0);
 
+  const shouldAllowNativeTextScroll = useCallback((eventTarget) => {
+    if (!(eventTarget instanceof Element)) return false;
+
+    // Traverse up to the .hex-back element (works across the SVG foreignObject boundary).
+    // .hex-back is the scroll container on tablet when back text is long.
+    const hexBack = eventTarget.closest(".hex-back");
+
+    return Boolean(
+      hexBack &&
+        hexBack.scrollHeight > hexBack.clientHeight + 1,
+    );
+  }, []);
+
   const updateDraggedCards = useCallback((clientX, clientY) => {
     if (!dragStateRef.current) return;
 
@@ -180,11 +193,16 @@ export function useDraggableCard({
 
   const handleTouchStart = useCallback((event) => {
     if (dragDisabled) return;
+    ignoreMouseUntilRef.current = Date.now() + 700;
+
+    if (shouldAllowNativeTextScroll(event.target)) {
+      return;
+    }
+
     const touch = event.touches[0];
 
     event.preventDefault();
     event.stopPropagation();
-    ignoreMouseUntilRef.current = Date.now() + 700;
 
     if (selectionMode) {
       if (isSelected) {
@@ -202,6 +220,7 @@ export function useDraggableCard({
     isSelected,
     onToggleSelection,
     selectionMode,
+    shouldAllowNativeTextScroll,
     startDrag,
   ]);
 

@@ -1,6 +1,7 @@
 @use "../base/variables" as *;
 
 .hive-board {
+    position: relative;
     border: 2px dashed #aaa;
     background: linear-gradient(180deg, #fffdf7 0%, #faf5ea 100%);
     border-radius: 8px;
@@ -99,10 +100,15 @@
   }
 }
 
-.hive-board__viewport {
+.hive-board__viewport-area {
   flex: 1;
-  position: relative;
   min-height: 0;
+  position: relative;
+}
+
+.hive-board__viewport {
+  height: 100%;
+  position: relative;
   overflow: auto;
   overscroll-behavior: contain;
   padding: 14px;

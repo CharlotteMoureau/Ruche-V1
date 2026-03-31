@@ -141,29 +141,23 @@
   display: flex !important;
 }
 
-.long-def {
-  /* Scroll enabled only for board cards on tablet */
-}
-
-/* Tablet-specific scroll for board cards with long text */
-@media (min-width: 768px) and (max-width: 1200px) and (orientation: landscape) and (pointer: coarse) {
-  .draggable-card .hex-back .long-def {
-    overflow-y: scroll;
-    scrollbar-width: thin !important;
-    scrollbar-color: rgba(0, 0, 0, 0.1) transparent;
-
+/* Tablet: make .hex-back the scroll container for long back text.
+   The hex shape is visually clipped by the SVG clipPath on <foreignObject>,
+   so overriding overflow: hidden here does not break the hex outline. */
+@media (min-width: 768px) and (max-width: 1200px) and (pointer: coarse) {
+  .draggable-card .hex-back:has(.long-def) {
+    overflow-y: auto !important;
+    -webkit-overflow-scrolling: touch;
+    touch-action: pan-y;
+    overscroll-behavior: contain;
+    /* Start content from the top so the user can scroll down into the hex */
+    justify-content: flex-start;
+    /* Push content below the tapered top of the hex shape (flat edge ≈ 25% of height) */
+    padding-top: 26%;
+    /* Hide scrollbar visually — scrolling still works */
+    scrollbar-width: none;
     &::-webkit-scrollbar {
-      width: 4px;
-      cursor: pointer;
-    }
-
-    &::-webkit-scrollbar-track {
-      background: transparent;
-    }
-
-    &::-webkit-scrollbar-thumb {
-      background-color: rgba(0, 0, 0, 0.1);
-      border-radius: 10px;
+      display: none;
     }
   }
 }

@@ -761,13 +761,14 @@ export default function HiveBoard({
           </button>
         </div>
       </header>
-      <div
-        ref={handleViewportRef}
-        className={`hive-board__viewport ${isPanning ? "is-panning" : ""} ${isDefaultZoom ? "is-default-zoom" : ""}`.trim()}
-      >
+      <div className="hive-board__viewport-area">
         {isTabletEditorMode ? (
           <div className="hive-board__history-tablet">{historyControls}</div>
         ) : null}
+        <div
+          ref={handleViewportRef}
+          className={`hive-board__viewport ${isPanning ? "is-panning" : ""} ${isDefaultZoom ? "is-default-zoom" : ""}`}
+        >
         <div
           className="hive-board__canvas-shell"
           style={{
@@ -851,6 +852,7 @@ export default function HiveBoard({
             </div>
           </div>
         </div>
+      </div>
       </div>
     </main>
   );

@@ -16,6 +16,8 @@ adminRouter.get("/users", async (_req, res) => {
       id: true,
       username: true,
       email: true,
+      firstName: true,
+      lastName: true,
       roleLabel: true,
       roleOtherText: true,
       createdAt: true,
@@ -35,6 +37,9 @@ adminRouter.get("/users", async (_req, res) => {
 
 const updateUserSchema = z.object({
   username: z.string().trim().min(3).max(40).optional(),
+  email: z.string().trim().email().max(120).optional(),
+  firstName: z.string().trim().max(80).optional().nullable(),
+  lastName: z.string().trim().max(80).optional().nullable(),
   roleLabel: z.string().trim().optional(),
   roleOtherText: z.string().trim().max(120).optional().nullable(),
 });
@@ -49,10 +54,22 @@ adminRouter.patch("/users/:id", async (req, res) => {
     return res.status(400).json({ error: "Role invalide" });
   }
 
+  if (parsed.data.email) {
+    const existing = await prisma.user.findFirst({
+      where: { email: parsed.data.email, NOT: { id: req.params.id } },
+    });
+    if (existing) {
+      return res.status(409).json({ error: "Cet email est deja utilise" });
+    }
+  }
+
   const updated = await prisma.user.update({
     where: { id: req.params.id },
     data: {
       username: parsed.data.username,
+      email: parsed.data.email,
+      firstName: parsed.data.firstName,
+      lastName: parsed.data.lastName,
       roleLabel: parsed.data.roleLabel,
       roleOtherText: parsed.data.roleOtherText,
     },
@@ -62,6 +79,8 @@ adminRouter.patch("/users/:id", async (req, res) => {
     id: updated.id,
     username: updated.username,
     email: updated.email,
+    firstName: updated.firstName,
+    lastName: updated.lastName,
     roleLabel: updated.roleLabel,
     roleOtherText: updated.roleOtherText,
   });
@@ -127,4 +146,74 @@ adminRouter.patch("/hives/:id", async (req, res) => {
 adminRouter.delete("/hives/:id", async (req, res) => {
   await prisma.hive.delete({ where: { id: req.params.id } });
   return res.json({ message: "Ruche supprimee" });
+});
+
+adminRouter.get("/hives/:id/details", async (req, res) => {
+  const hive = await prisma.hive.findUnique({
+    where: { id: req.params.id },
+    include: {
+      collaborators: {
+        include: {
+          user: { select: { id: true, username: true, email: true } },
+        },
+        orderBy: { invitedAt: "asc" },
+      },
+      comments: {
+        where: { parentId: null },
+        include: {
+          author: { select: { id: true, username: true } },
+          replies: {
+            include: { author: { select: { id: true, username: true } } },
+            orderBy: { createdAt: "asc" },
+          },
+        },
+        orderBy: { createdAt: "desc" },
+      },
+    },
+  });
+
+  if (!hive) {
+    return res.status(404).json({ error: "Ruche introuvable" });
+  }
+
+  return res.json({
+    collaborators: hive.collaborators.map((c) => ({
+      id: c.id,
+      userId: c.user.id,
+      username: c.user.username,
+      email: c.user.email,
+      role: c.role,
+    })),
+    comments: hive.comments.map((c) => ({
+      id: c.id,
+      message: c.message,
+      createdAt: c.createdAt,
+      author: c.author,
+      replies: c.replies.map((r) => ({
+        id: r.id,
+        message: r.message,
+        createdAt: r.createdAt,
+        author: r.author,
+        parentId: r.parentId,
+      })),
+    })),
+  });
+});
+
+adminRouter.delete("/hives/:id/collaborators/:userId", async (req, res) => {
+  await prisma.hiveCollaborator.deleteMany({
+    where: { hiveId: req.params.id, userId: req.params.userId },
+  });
+  return res.json({ message: "Collaborateur retire" });
+});
+
+adminRouter.delete("/hives/:id/comments/:commentId", async (req, res) => {
+  const comment = await prisma.hiveComment.findFirst({
+    where: { id: req.params.commentId, hiveId: req.params.id },
+  });
+  if (!comment) {
+    return res.status(404).json({ error: "Commentaire introuvable" });
+  }
+  await prisma.hiveComment.delete({ where: { id: comment.id } });
+  return res.json({ message: "Commentaire supprime" });
 });

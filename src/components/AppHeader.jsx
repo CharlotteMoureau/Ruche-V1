@@ -145,9 +145,11 @@ export default function AppHeader() {
     );
   };
 
+  const brandTarget = isAuthenticated && isAdmin ? "/admin" : "/";
+
   return (
     <header className="site-header">
-      <Link to="/" className="brand-link">
+      <Link to={brandTarget} className="brand-link">
         <img src="/hexagone.png" alt="hexagone" />
         <h1>La Ruche</h1>
         <img src="/abeille.png" alt="abeille" />

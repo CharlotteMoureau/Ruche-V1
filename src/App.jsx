@@ -14,7 +14,22 @@ import RucheEditorPage from "./pages/RucheEditorPage";
 import AdminPage from "./pages/AdminPage";
 import { LanguageProvider } from "./context/LanguageContext";
 import Footer from "./components/Footer";
+import { useAuth } from "./context/AuthContext";
 import "./styles/main.scss";
+
+function HomeRoute() {
+  const { isLoading, isAuthenticated, isAdmin } = useAuth();
+
+  if (isLoading) {
+    return <LandingPage />;
+  }
+
+  if (isAuthenticated && isAdmin) {
+    return <Navigate to="/admin" replace />;
+  }
+
+  return <LandingPage />;
+}
 
 export default function App() {
   useEffect(() => {
@@ -50,7 +65,7 @@ export default function App() {
       <AuthProvider>
         <AppHeader />
         <Routes>
-          <Route path="/" element={<LandingPage />} />
+          <Route path="/" element={<HomeRoute />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
           <Route path="/forgot-password" element={<ForgotPasswordPage />} />
@@ -83,6 +98,14 @@ export default function App() {
             path="/hives/:id"
             element={
               <ProtectedRoute nonAdminOnly>
+                <RucheEditorPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin/hives/:id"
+            element={
+              <ProtectedRoute adminOnly>
                 <RucheEditorPage />
               </ProtectedRoute>
             }
