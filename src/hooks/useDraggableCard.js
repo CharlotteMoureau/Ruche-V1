@@ -10,6 +10,25 @@ function getCardDimensions() {
   return { width: BOARD_CARD_SIZE, height: BOARD_CARD_SIZE };
 }
 
+function isDropInLibraryZone(clientX, clientY) {
+  if (
+    typeof clientX !== "number" ||
+    typeof clientY !== "number" ||
+    Number.isNaN(clientX) ||
+    Number.isNaN(clientY)
+  ) {
+    return false;
+  }
+
+  const element = document.elementFromPoint(clientX, clientY);
+  if (!element) return false;
+
+  return Boolean(
+    element.closest(".editor-app__library-panel") ||
+      element.closest(".card-library"),
+  );
+}
+
 export function useDraggableCard({
   card,
   cardWidth,
@@ -48,6 +67,8 @@ export function useDraggableCard({
 
   const updateDraggedCards = useCallback((clientX, clientY) => {
     if (!dragStateRef.current) return;
+
+    dragStateRef.current.lastPointerClient = { x: clientX, y: clientY };
 
     const delta = {
       x: (clientX - dragStateRef.current.startPointer.x) / zoom,
@@ -88,10 +109,25 @@ export function useDraggableCard({
     );
   }, [onDragStart, onMoveCard, onMoveCards, zoom]);
 
-  const finalizeDrag = useCallback(() => {
+  const finalizeDrag = useCallback((endPointer) => {
     if (!dragStateRef.current) return;
 
-    const { cards, currentDelta } = dragStateRef.current;
+    const { cards, currentDelta, lastPointerClient } = dragStateRef.current;
+    const pointer = endPointer || lastPointerClient;
+    const droppedInLibrary = isDropInLibraryZone(pointer?.x, pointer?.y);
+
+    if (droppedInLibrary) {
+      const returned =
+        cards.length > 1
+          ? onReturnCardsToLibrary?.(cards.map((entry) => entry.card))
+          : onReturnToLibrary?.(cards[0]?.card);
+
+      if (returned !== false) {
+        dragStateRef.current = null;
+        return;
+      }
+    }
+
     const finalCards = cards.map((entry) => {
       const position = {
         x: entry.startPosition.x + currentDelta.x,
@@ -123,6 +159,8 @@ export function useDraggableCard({
     cardWidth,
     onMoveCard,
     onMoveCards,
+    onReturnCardsToLibrary,
+    onReturnToLibrary,
   ]);
 
   const startDrag = useCallback((clientX, clientY) => {
@@ -134,6 +172,7 @@ export function useDraggableCard({
 
     dragStateRef.current = {
       startPointer: { x: clientX, y: clientY },
+      lastPointerClient: { x: clientX, y: clientY },
       currentDelta: { x: 0, y: 0 },
       historyCaptured: false,
       cards: dragCards.map((dragCard) => ({
@@ -184,11 +223,11 @@ export function useDraggableCard({
     updateDraggedCards(event.clientX, event.clientY);
   }, [updateDraggedCards]);
 
-  const handleMouseUp = useCallback(() => {
+  const handleMouseUp = useCallback((event) => {
     if (!dragStateRef.current) return;
 
     setIsDragging(false);
-    finalizeDrag();
+    finalizeDrag({ x: event.clientX, y: event.clientY });
   }, [finalizeDrag]);
 
   const handleTouchStart = useCallback((event) => {
@@ -240,8 +279,12 @@ export function useDraggableCard({
     event.stopPropagation();
     if (!dragStateRef.current) return;
 
+    const touch = event.changedTouches?.[0];
+
     setIsDragging(false);
-    finalizeDrag();
+    finalizeDrag(
+      touch ? { x: touch.clientX, y: touch.clientY } : undefined,
+    );
   }, [finalizeDrag]);
 
   useEffect(() => {
