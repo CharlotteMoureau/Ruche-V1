@@ -164,7 +164,6 @@ Deploy `server/src/index.js` on a backend host (Render, Railway, Fly.io, VPS, et
 
 Required backend environment variables:
 
-- `DATABASE_PROVIDER` (`sqlite` locally, `postgresql` on Neon/Render)
 - `DATABASE_URL`
 - `JWT_SECRET`
 - `JWT_EXPIRES_IN` (example: `7d`)
@@ -221,7 +220,6 @@ Copy and adapt:
 
 ```env
 DATABASE_URL=YOUR_NEON_POSTGRES_URL
-DATABASE_PROVIDER=postgresql
 JWT_SECRET=REPLACE_WITH_A_LONG_RANDOM_SECRET
 JWT_EXPIRES_IN=7d
 API_PORT=4010
@@ -242,7 +240,6 @@ Notes:
 4. Database choice
 
 - Recommended: use Neon PostgreSQL free tier and set `DATABASE_URL` to your Neon URL.
-- Set `DATABASE_PROVIDER=postgresql` in Render.
 - If you keep SQLite on Render without a persistent disk, data can be lost between deploys.
 
 5. Point Netlify frontend to Render backend
