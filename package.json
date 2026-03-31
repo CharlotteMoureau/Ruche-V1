@@ -4,10 +4,10 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "concurrently \"npm run dev:client\" \"npm run dev:server\"",
+    "dev": "npm run db:up && concurrently \"npm run dev:client\" \"npm run dev:server\"",
     "dev:client": "vite --host",
     "dev:server": "node --watch server/src/index.js",
-    "db:up": "docker compose -f docker-compose.dev.yml up -d",
+    "db:up": "docker compose -f docker-compose.dev.yml up -d --wait",
     "db:down": "docker compose -f docker-compose.dev.yml down",
     "db:logs": "docker compose -f docker-compose.dev.yml logs -f postgres",
     "start:server": "node server/src/index.js",
