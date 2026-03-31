@@ -142,22 +142,29 @@
 }
 
 .long-def {
-  overflow-y: scroll;
-  scrollbar-width: thin !important;
-  scrollbar-color: rgba(0, 0, 0, 0.1) transparent;
+  /* Scroll enabled only for board cards on tablet */
+}
 
-  &::-webkit-scrollbar {
-    width: 4px;
-    cursor: pointer;
-  }
+/* Tablet-specific scroll for board cards with long text */
+@media (min-width: 768px) and (max-width: 1200px) and (orientation: landscape) and (pointer: coarse) {
+  .draggable-card .hex-back .long-def {
+    overflow-y: scroll;
+    scrollbar-width: thin !important;
+    scrollbar-color: rgba(0, 0, 0, 0.1) transparent;
 
-  &::-webkit-scrollbar-track {
-    background: transparent;
-  }
+    &::-webkit-scrollbar {
+      width: 4px;
+      cursor: pointer;
+    }
 
-  &::-webkit-scrollbar-thumb {
-    background-color: rgba(0, 0, 0, 0.1);
-    border-radius: 10px;
+    &::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    &::-webkit-scrollbar-thumb {
+      background-color: rgba(0, 0, 0, 0.1);
+      border-radius: 10px;
+    }
   }
 }
 

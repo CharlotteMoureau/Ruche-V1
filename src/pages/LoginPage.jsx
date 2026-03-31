@@ -54,11 +54,16 @@ export default function LoginPage() {
           {loading ? t("login.submitting") : t("login.submit")}
         </button>
       </form>
-      <p>
-        <Link to="/forgot-password">{t("login.forgot")}</Link>
+      <p className="login-link-row">
+        <Link to="/forgot-password" className="signup-link">
+          {t("login.forgot")}
+        </Link>
       </p>
-      <p>
-        {t("login.noAccount")} <Link to="/register">{t("login.register")}</Link>
+      <p className="login-link-row">
+        {t("login.noAccount")}{" "}
+        <Link to="/register" className="signup-link">
+          {t("login.register")}
+        </Link>
       </p>
     </section>
   );
