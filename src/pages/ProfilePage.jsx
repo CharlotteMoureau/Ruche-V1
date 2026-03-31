@@ -258,10 +258,18 @@ function ProfileCaptureBoard({ boardData }) {
 }
 
 export default function ProfilePage() {
-  const { token, refreshMe, logout } = useAuth();
+  const { token, user, refreshMe, logout } = useAuth();
   const { language, t, dateLocale, translateRole, roleOptions } = useLanguage();
   const navigate = useNavigate();
-  const [profile, setProfile] = useState(null);
+  const [profile, setProfile] = useState(() =>
+    user
+      ? {
+          user,
+          ownedHives: [],
+          sharedHives: [],
+        }
+      : null,
+  );
   const [error, setError] = useState("");
   const [roleSuccessMessage, setRoleSuccessMessage] = useState("");
   const [passwordSuccessMessage, setPasswordSuccessMessage] = useState("");
@@ -303,9 +311,43 @@ export default function ProfilePage() {
   const localizedOtherRoleLabel = translateRole("Autre");
 
   useEffect(() => {
+    if (!user) {
+      setProfile(null);
+      return;
+    }
+
+    setProfile((current) => {
+      if (!current) {
+        return {
+          user,
+          ownedHives: [],
+          sharedHives: [],
+        };
+      }
+
+      if (current.user?.id === user.id) {
+        return {
+          ...current,
+          user,
+        };
+      }
+
+      return {
+        user,
+        ownedHives: [],
+        sharedHives: [],
+      };
+    });
+  }, [user]);
+
+  useEffect(() => {
     let mounted = true;
 
     async function load() {
+      if (!token) {
+        return;
+      }
+
       try {
         const data = await refreshMe();
         if (mounted) setProfile(data);
@@ -318,7 +360,7 @@ export default function ProfilePage() {
     return () => {
       mounted = false;
     };
-  }, [refreshMe]);
+  }, [token, refreshMe]);
 
   useEffect(() => {
     if (!profile) return;
