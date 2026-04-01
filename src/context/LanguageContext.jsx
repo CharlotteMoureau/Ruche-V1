@@ -193,6 +193,7 @@ const messages = {
     },
     register: {
       title: "Créer un compte",
+      requiredNotice: "Tous les champs sont obligatoires.",
       username: "Nom d'utilisateur (unique)",
       email: "Email",
       firstName: "Prénom",
@@ -594,6 +595,7 @@ const messages = {
     },
     register: {
       title: "Create account",
+      requiredNotice: "All fields are mandatory.",
       username: "Username (unique)",
       email: "Email",
       firstName: "First name",
@@ -981,6 +983,7 @@ const messages = {
     },
     register: {
       title: "Account aanmaken",
+      requiredNotice: "Alle velden zijn verplicht.",
       username: "Gebruikersnaam (uniek)",
       email: "E-mail",
       firstName: "Voornaam",

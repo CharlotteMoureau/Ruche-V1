@@ -53,9 +53,12 @@ export default function RegisterPage() {
   return (
     <section className="page-shell">
       <h2>{t("register.title")}</h2>
+      <p className="form-helper" aria-live="polite">
+        * {t("register.requiredNotice")}
+      </p>
       <form onSubmit={onSubmit} className="form-grid">
         <label>
-          {t("register.username")}
+          {t("register.username")} *
           <input
             value={form.username}
             onChange={(e) => onChange("username", e.target.value)}
@@ -65,7 +68,7 @@ export default function RegisterPage() {
         </label>
 
         <label>
-          {t("register.email")}
+          {t("register.email")} *
           <input
             type="email"
             value={form.email}
@@ -75,7 +78,7 @@ export default function RegisterPage() {
         </label>
 
         <label>
-          {t("register.firstName")}
+          {t("register.firstName")} *
           <input
             value={form.firstName}
             onChange={(e) => onChange("firstName", e.target.value)}
@@ -84,7 +87,7 @@ export default function RegisterPage() {
         </label>
 
         <label>
-          {t("register.lastName")}
+          {t("register.lastName")} *
           <input
             value={form.lastName}
             onChange={(e) => onChange("lastName", e.target.value)}
@@ -93,10 +96,11 @@ export default function RegisterPage() {
         </label>
 
         <label>
-          {t("register.role")}
+          {t("register.role")} *
           <select
             value={form.role}
             onChange={(e) => onChange("role", e.target.value)}
+            required
           >
             {roleOptions.map((role) => (
               <option key={role.value} value={role.value}>
@@ -108,7 +112,7 @@ export default function RegisterPage() {
 
         {form.role === "Autre" ? (
           <label>
-            {t("register.roleOther")}
+            {t("register.roleOther")} *
             <input
               value={form.roleOtherText}
               onChange={(e) => onChange("roleOtherText", e.target.value)}
@@ -118,7 +122,7 @@ export default function RegisterPage() {
         ) : null}
 
         <PasswordField
-          label={t("register.password")}
+          label={`${t("register.password")} *`}
           value={form.password}
           onChange={(e) => onChange("password", e.target.value)}
           required
@@ -127,7 +131,7 @@ export default function RegisterPage() {
         />
 
         <PasswordField
-          label={t("register.passwordConfirm")}
+          label={`${t("register.passwordConfirm")} *`}
           value={form.passwordConfirm}
           onChange={(e) => onChange("passwordConfirm", e.target.value)}
           required
