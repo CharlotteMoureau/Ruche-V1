@@ -401,8 +401,18 @@ export default function AppHeader() {
           )
         ) : (
           <>
-            <Link to="/login">{t("header.login")}</Link>
-            <Link to="/register">{t("header.register")}</Link>
+            <Link
+              to="/login"
+              className={`header-nav-link${location.pathname === "/login" ? " is-active" : ""}`}
+            >
+              {t("header.login")}
+            </Link>
+            <Link
+              to="/register"
+              className={`header-nav-link${location.pathname === "/register" ? " is-active" : ""}`}
+            >
+              {t("header.register")}
+            </Link>
           </>
         )}
       </nav>
