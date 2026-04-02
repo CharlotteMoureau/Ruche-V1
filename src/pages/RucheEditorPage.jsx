@@ -146,6 +146,40 @@ export default function RucheEditorPage() {
     !isDuplicateFlow || title.trim() !== duplicateSource.title.trim();
   const requiresSavedHivePrompt = isNew;
 
+  const showTabletSaveFeedback = useCallback(
+    (status, autoHideMs = 0) => {
+      if (!isTabletEditorMode) return;
+
+      if (saveFeedbackTimeoutRef.current) {
+        clearTimeout(saveFeedbackTimeoutRef.current);
+        saveFeedbackTimeoutRef.current = null;
+      }
+
+      setTabletSaveFeedbackStatus(status);
+
+      if (autoHideMs > 0) {
+        saveFeedbackTimeoutRef.current = setTimeout(() => {
+          setTabletSaveFeedbackStatus("");
+          saveFeedbackTimeoutRef.current = null;
+        }, autoHideMs);
+      }
+    },
+    [isTabletEditorMode],
+  );
+
+  useEffect(() => {
+    return () => {
+      if (!saveFeedbackTimeoutRef.current) return;
+      clearTimeout(saveFeedbackTimeoutRef.current);
+      saveFeedbackTimeoutRef.current = null;
+    };
+  }, []);
+
+  useEffect(() => {
+    if (isTabletEditorMode) return;
+    setTabletSaveFeedbackStatus("");
+  }, [isTabletEditorMode]);
+
   const currentSnapshot = useMemo(
     () => JSON.stringify({ title, hiveKind, boardData }),
     [title, hiveKind, boardData],
@@ -972,40 +1006,6 @@ export default function RucheEditorPage() {
     !isTabletEditorMode && !isNew && hive
       ? `${t("editor.createdAt")}: ${formatDateTime(hive.createdAt, dateLocale)} | ${t("editor.updatedAt")}: ${formatDateTime(hive.updatedAt, dateLocale)}`
       : "";
-
-  const showTabletSaveFeedback = useCallback(
-    (status, autoHideMs = 0) => {
-      if (!isTabletEditorMode) return;
-
-      if (saveFeedbackTimeoutRef.current) {
-        clearTimeout(saveFeedbackTimeoutRef.current);
-        saveFeedbackTimeoutRef.current = null;
-      }
-
-      setTabletSaveFeedbackStatus(status);
-
-      if (autoHideMs > 0) {
-        saveFeedbackTimeoutRef.current = setTimeout(() => {
-          setTabletSaveFeedbackStatus("");
-          saveFeedbackTimeoutRef.current = null;
-        }, autoHideMs);
-      }
-    },
-    [isTabletEditorMode],
-  );
-
-  useEffect(() => {
-    return () => {
-      if (!saveFeedbackTimeoutRef.current) return;
-      clearTimeout(saveFeedbackTimeoutRef.current);
-      saveFeedbackTimeoutRef.current = null;
-    };
-  }, []);
-
-  useEffect(() => {
-    if (isTabletEditorMode) return;
-    setTabletSaveFeedbackStatus("");
-  }, [isTabletEditorMode]);
 
   useEffect(() => {
     if (!isTabletEditorMode) {
