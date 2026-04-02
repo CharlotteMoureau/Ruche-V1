@@ -240,6 +240,10 @@ Checklist:
 - Build Command: `npm ci && npm run prisma:generate`
 - Start Command: `npm run start:server:prod`
 
+Important for Neon free tier (compute can be suspended): avoid running schema push at each boot. Keep startup fast and resilient.
+- Recommended Start Command: `npm run start:server`
+- Run schema sync as a one-off command after deploy: `npm run db:push:prod`
+
 3. Add backend environment variables in Render
 
 Copy and adapt:
