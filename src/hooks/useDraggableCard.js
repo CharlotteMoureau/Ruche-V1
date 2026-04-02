@@ -1,8 +1,6 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import {
   BOARD_CARD_SIZE,
-  BOARD_CANVAS_HEIGHT,
-  BOARD_CANVAS_WIDTH,
   clampBoardPosition,
 } from "../lib/board";
 
@@ -59,10 +57,6 @@ function emitBoardDragState(detail) {
 
 export function useDraggableCard({
   card,
-  cardWidth,
-  cardHeight,
-  boardWidth = BOARD_CANVAS_WIDTH,
-  boardHeight = BOARD_CANVAS_HEIGHT,
   zoom = 1,
   isSelected,
   selectedCards,
@@ -218,11 +212,7 @@ export function useDraggableCard({
     setIsDraggingOverLibrary(false);
     emitBoardDragState({ dragging: false, overLibrary: false });
   }, [
-    boardHeight,
-    boardWidth,
     card,
-    cardHeight,
-    cardWidth,
     onMoveCard,
     onMoveCards,
     onReturnCardsToLibrary,

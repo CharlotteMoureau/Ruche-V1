@@ -206,7 +206,11 @@ authRouter.post("/forgot-password", async (req, res) => {
 
   const appUrl = globalThis.process?.env.APP_URL || "http://127.0.0.1:5173";
   const link = `${appUrl}/reset-password?token=${token}`;
-  await sendResetPasswordEmail({ to: user.email, link });
+  try {
+    await sendResetPasswordEmail({ to: user.email, link });
+  } catch (error) {
+    console.error("Failed to send reset password email", error);
+  }
 
   return res.json({ message: "Si le compte existe, un email a été envoyé." });
 });

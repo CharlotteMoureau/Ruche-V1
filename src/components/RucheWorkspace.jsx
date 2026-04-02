@@ -647,7 +647,7 @@ export default function RucheWorkspace({
     setSelectedCardIds(new Set());
   }, []);
 
-  const applyReturnCardsToLibrary = (cards) => {
+  const applyReturnCardsToLibrary = useCallback((cards) => {
     if (!canEdit || !cards.length) return false;
 
     const cardIds = new Set(cards.map((card) => card.id));
@@ -676,9 +676,9 @@ export default function RucheWorkspace({
     });
 
     return true;
-  };
+  }, [canEdit, orderMap]);
 
-  const handleReturnCardsToLibrary = (cards) => {
+  const handleReturnCardsToLibrary = useCallback((cards) => {
     if (!canEdit || !cards.length) return false;
 
     const cardsWithComment = cards.filter((card) => {
@@ -692,7 +692,7 @@ export default function RucheWorkspace({
     }
 
     return applyReturnCardsToLibrary(cards);
-  };
+  }, [applyReturnCardsToLibrary, canEdit]);
 
   const handleReturnToLibrary = (card) => {
     return handleReturnCardsToLibrary([card]);
@@ -718,17 +718,16 @@ export default function RucheWorkspace({
   ]);
 
   const handleOpenCardNote = (card) => {
-    if (!canNote) {
-      if (requireSaveBeforeNote) {
-        onRequireSaveBeforeNote?.(card.id);
-      }
-      return;
-    }
-
     const existingComment = getCardComment(card);
     setNoteModalCardId(card.id);
     setNoteDraft(existingComment?.message || "");
-    setIsEditingCardNote(!existingComment?.message);
+
+    if (canNote) {
+      setIsEditingCardNote(!existingComment?.message);
+      return;
+    }
+
+    setIsEditingCardNote(false);
   };
 
   const handleCloseCardNoteModal = () => {
@@ -1056,6 +1055,13 @@ export default function RucheWorkspace({
                 {isEditingCardNote ? (
                   <div className="comments-new card-note-editor">
                     <textarea
+                      id="workspace-card-note"
+                      name="cardNote"
+                      aria-label={t(
+                        hasActiveNote
+                          ? "workspace.editCardNotePlaceholder"
+                          : "workspace.addCardNotePlaceholder",
+                      )}
                       value={noteDraft}
                       onChange={(event) => setNoteDraft(event.target.value)}
                       onKeyDown={(event) => {
@@ -1131,7 +1137,9 @@ export default function RucheWorkspace({
                   ) : null}
                 </div>
               </>
-            ) : null}
+            ) : (
+              <p className="comments-empty">{t("workspace.cardNoteReadOnlyHint")}</p>
+            )}
           </div>
         </div>
       ) : null}

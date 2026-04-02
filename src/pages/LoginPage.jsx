@@ -35,6 +35,8 @@ export default function LoginPage() {
         <label>
           {t("login.identifier")}
           <input
+            id="login-identifier"
+            name="identifier"
             value={identifier}
             onChange={(e) => setIdentifier(e.target.value)}
             required
@@ -43,6 +45,8 @@ export default function LoginPage() {
 
         <PasswordField
           label={t("login.password")}
+          id="login-password"
+          name="password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           required

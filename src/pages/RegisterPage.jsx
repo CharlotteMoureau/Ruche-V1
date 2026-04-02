@@ -60,6 +60,8 @@ export default function RegisterPage() {
         <label>
           {t("register.username")} *
           <input
+            id="register-username"
+            name="username"
             value={form.username}
             onChange={(e) => onChange("username", e.target.value)}
             required
@@ -70,6 +72,8 @@ export default function RegisterPage() {
         <label>
           {t("register.email")} *
           <input
+            id="register-email"
+            name="email"
             type="email"
             value={form.email}
             onChange={(e) => onChange("email", e.target.value)}
@@ -80,6 +84,8 @@ export default function RegisterPage() {
         <label>
           {t("register.firstName")} *
           <input
+            id="register-firstname"
+            name="firstName"
             value={form.firstName}
             onChange={(e) => onChange("firstName", e.target.value)}
             required
@@ -89,6 +95,8 @@ export default function RegisterPage() {
         <label>
           {t("register.lastName")} *
           <input
+            id="register-lastname"
+            name="lastName"
             value={form.lastName}
             onChange={(e) => onChange("lastName", e.target.value)}
             required
@@ -98,6 +106,8 @@ export default function RegisterPage() {
         <label>
           {t("register.role")} *
           <select
+            id="register-role"
+            name="role"
             value={form.role}
             onChange={(e) => onChange("role", e.target.value)}
             required
@@ -114,6 +124,8 @@ export default function RegisterPage() {
           <label>
             {t("register.roleOther")} *
             <input
+              id="register-role-other"
+              name="roleOtherText"
               value={form.roleOtherText}
               onChange={(e) => onChange("roleOtherText", e.target.value)}
               required
@@ -123,6 +135,8 @@ export default function RegisterPage() {
 
         <PasswordField
           label={`${t("register.password")} *`}
+          id="register-password"
+          name="password"
           value={form.password}
           onChange={(e) => onChange("password", e.target.value)}
           required
@@ -132,6 +146,8 @@ export default function RegisterPage() {
 
         <PasswordField
           label={`${t("register.passwordConfirm")} *`}
+          id="register-password-confirm"
+          name="passwordConfirm"
           value={form.passwordConfirm}
           onChange={(e) => onChange("passwordConfirm", e.target.value)}
           required

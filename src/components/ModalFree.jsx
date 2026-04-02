@@ -98,6 +98,8 @@ export default function AddCardModal({
         <h2>{t("addCardModal.title")}</h2>
 
         <input
+          id="add-card-title"
+          name="cardTitle"
           ref={inputRef}
           type="text"
           value={inputText}

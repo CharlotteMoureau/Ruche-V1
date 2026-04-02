@@ -42,6 +42,8 @@ function EyeIcon({ visible }) {
 
 export default function PasswordField({
   label,
+  id,
+  name,
   value,
   onChange,
   minLength,
@@ -75,6 +77,8 @@ export default function PasswordField({
       {label}
       <div className="password-input-wrap">
         <input
+          id={id}
+          name={name}
           type={isRevealing ? "text" : "password"}
           value={value}
           onChange={onChange}

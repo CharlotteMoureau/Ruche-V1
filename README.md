@@ -1,8 +1,16 @@
-# 🐝 La Ruche
+# 🐝 La Ruche – Application pédagogique modulaire (PECA)
 
-La Ruche est une application web conçue pour le PECA afin d'aider les équipes éducatives à explorer, organiser, commenter et partager des planches pédagogiques composées de cartes hexagonales.
+La Ruche est une application web conçue comme une structure modulaire en alvéoles, développée pour le PECA (Parcours d'Education Culturelle et Artistique) en Fédération Wallonie-Bruxelles.
 
-La Ruche is a web application built for PECA to help educational teams explore, organize, discuss, and share pedagogical boards made of hexagonal cards.
+Elle aide les équipes éducatives à explorer, organiser, commenter et partager des planches pédagogiques composées de cartes hexagonales.
+
+🏛️ Cet outil est développé par le Service de Pilotage du PECA, en adaptation d'un outil initialement conçu par les universités de Mons, Liège et Namur.
+
+La Ruche is a web application designed as a modular honeycomb-like structure, built for PECA (Parcours d'Education Culturelle et Artistique) in the Wallonia-Brussels Federation.
+
+It helps educational teams explore, organize, discuss, and share pedagogical boards made of hexagonal cards.
+
+🏛️ This tool is developed by the Service de Pilotage du PECA, as an adaptation of a tool initially designed by the universities of Mons, Liege, and Namur.
 
 Ce dépôt ne correspond plus au prototype V1 d'origine. V1 était essentiellement un éditeur de planches frontend uniquement. L'application actuelle est maintenant un produit complet avec authentification, sauvegarde, collaboration, contenu multilingue, export et administration.
 
@@ -19,6 +27,15 @@ https://la-ruche.netlify.app/
 - Nederlands: [docs/user-manual.nl.md](docs/user-manual.nl.md)
 
 ## 🇫🇷 Français
+
+### 🎯 Objectif pédagogique
+
+Le projet Ruche permet aux enseignants, intervenants et équipes éducatives de :
+
+- Visualiser et organiser des cartes pédagogiques sous forme d'alvéoles hexagonales.
+- Explorer des visées éducatives, des conditions de mise en œuvre, et des recommandations liées au PECA.
+- Manipuler les cartes via drag-and-drop pour construire des parcours ou des réflexions pédagogiques.
+- Mettre en avant des cartes spécifiques aux Délégués au Contrat d'Objectifs (DCO) via un type de ruche dédié.
 
 ### ✨ Principales évolutions depuis la V1
 
@@ -80,6 +97,15 @@ Backend :
 - `docs/` : manuels utilisateurs
 
 ## 🇬🇧 English
+
+### 🎯 Pedagogical objective
+
+The Ruche project helps teachers, facilitators, and educational teams:
+
+- Visualize and organize pedagogical cards as hexagonal honeycomb cells.
+- Explore educational aims, implementation conditions, and PECA-related recommendations.
+- Manipulate cards with drag-and-drop to build pedagogical pathways or structured reflections.
+- Highlight DCO-specific cards through a dedicated hive kind.
 
 ### ✨ What changed since V1
 
@@ -170,7 +196,7 @@ Required backend environment variables:
 - `API_PORT` (or host-provided port)
 - `APP_URL` (your Netlify frontend URL)
 - `ADMIN_EMAIL` (optional business config)
-- `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASS`, `SMTP_FROM` (required for email reset flow)
+- `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASS`, `SMTP_FROM` (required in production for email reset flow)
 
 ### 3. Initialize Prisma schema on backend
 
@@ -235,7 +261,8 @@ SMTP_FROM=no-reply@example.com
 Notes:
 
 - Render injects a runtime `PORT`. Your server currently uses `API_PORT`, so keep `API_PORT=4010` unless you update the server to prefer `PORT`.
-- Password reset emails require SMTP values.
+- Password reset emails require SMTP values in production.
+- In local development, if SMTP is not configured, the API sends through an Ethereal test inbox and logs the preview URL in the server console.
 
 4. Database choice
 

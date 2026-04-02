@@ -394,35 +394,7 @@ export default function RucheEditorPage() {
     }
   }, [boardData]);
 
-  const saveHive = async ({ skipNavigateAfterCreate = false } = {}) => {
-    if (isSaving) return false;
-
-    setError("");
-    const trimmedTitle = title.trim();
-
-    if (!trimmedTitle) {
-      setError(t("editor.saveTitleError"));
-      showTabletSaveFeedback("error", 3000);
-      return;
-    }
-
-    if (isDuplicateFlow && !hasRenamedDuplicate) {
-      setError(t("editor.duplicateRenameError"));
-      showTabletSaveFeedback("error", 3000);
-      return;
-    }
-
-    // If existing hive and title changed, ask user whether to rename or duplicate
-    if (!isNew && canManageHive && hive && trimmedTitle !== hive.title.trim()) {
-      setPendingNewTitle(trimmedTitle);
-      setRenameOrDuplicateAction("pending");
-      return;
-    }
-
-    return performSaveHive(trimmedTitle, { skipNavigateAfterCreate });
-  };
-
-  const performSaveHive = async (
+  const performSaveHive = useCallback(async (
     titleToSave,
     { skipNavigateAfterCreate = false } = {},
   ) => {
@@ -523,7 +495,59 @@ export default function RucheEditorPage() {
     } finally {
       setIsSaving(false);
     }
-  };
+  }, [
+    baseUpdatedAt,
+    boardData,
+    captureBoardPreviewImage,
+    hiveKind,
+    id,
+    isNew,
+    navigate,
+    showTabletSaveFeedback,
+    token,
+    user?.email,
+    user?.id,
+    user?.username,
+  ]);
+
+  const saveHive = useCallback(async ({ skipNavigateAfterCreate = false } = {}) => {
+    if (isSaving) return false;
+
+    setError("");
+    const trimmedTitle = title.trim();
+
+    if (!trimmedTitle) {
+      setError(t("editor.saveTitleError"));
+      showTabletSaveFeedback("error", 3000);
+      return;
+    }
+
+    if (isDuplicateFlow && !hasRenamedDuplicate) {
+      setError(t("editor.duplicateRenameError"));
+      showTabletSaveFeedback("error", 3000);
+      return;
+    }
+
+    // If existing hive and title changed, ask user whether to rename or duplicate
+    if (!isNew && canManageHive && hive && trimmedTitle !== hive.title.trim()) {
+      setPendingNewTitle(trimmedTitle);
+      setRenameOrDuplicateAction("pending");
+      return;
+    }
+
+    return performSaveHive(trimmedTitle, { skipNavigateAfterCreate });
+  }, [
+    canManageHive,
+    hasRenamedDuplicate,
+    hive,
+    isDuplicateFlow,
+    isNew,
+    isSaving,
+    performSaveHive,
+    showTabletSaveFeedback,
+    t,
+    title,
+  ]);
 
   const handleRenameExistingHive = async () => {
     setRenameOrDuplicateAction(null);
@@ -664,9 +688,9 @@ export default function RucheEditorPage() {
     }
   };
 
-  const promptSaveForAction = (action) => {
+  const promptSaveForAction = useCallback((action) => {
     setSaveRequiredAction(action);
-  };
+  }, []);
 
   const handleSaveRequiredConfirm = async () => {
     const action = saveRequiredAction;
@@ -677,14 +701,14 @@ export default function RucheEditorPage() {
     }
   };
 
-  const handleOpenComments = () => {
+  const handleOpenComments = useCallback(() => {
     if (requiresSavedHivePrompt) {
       promptSaveForAction({ type: "comments" });
       return;
     }
 
     setShowCommentsModal(true);
-  };
+  }, [promptSaveForAction, requiresSavedHivePrompt]);
 
   const handleResetRequest = useCallback(() => {
     setShowResetConfirmModal(true);
@@ -1386,6 +1410,9 @@ export default function RucheEditorPage() {
                   {replyingTo === comment.id && (
                     <div className="comment-reply-form">
                       <textarea
+                        id={`reply-text-${comment.id}`}
+                        name="replyText"
+                        aria-label={t("editor.replyPlaceholder")}
                         value={replyText}
                         onChange={(e) => setReplyText(e.target.value)}
                         onKeyDown={(event) =>
@@ -1425,6 +1452,9 @@ export default function RucheEditorPage() {
             {canComment && (
               <div className="comments-new">
                 <textarea
+                  id="new-comment-text"
+                  name="commentText"
+                  aria-label={t("editor.addCommentPlaceholder")}
                   value={commentText}
                   onChange={(e) => setCommentText(e.target.value)}
                   onKeyDown={(event) => handleEnterSubmit(event, submitComment)}

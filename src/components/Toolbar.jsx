@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faArrowsRotate,
@@ -118,7 +118,7 @@ export default function Toolbar({
     }
   };
 
-  const handleExport = async () => {
+  const handleExport = useCallback(async () => {
     const board = document.querySelector(".hive-board");
     if (!board) return;
 
@@ -145,7 +145,7 @@ export default function Toolbar({
         }),
       );
     }
-  };
+  }, [exportOptions, t]);
 
   useEffect(() => {
     if (!exportSignal) return;
@@ -319,6 +319,8 @@ export default function Toolbar({
                 <label>
                   Email
                   <input
+                    id="toolbar-invite-email"
+                    name="inviteEmail"
                     type="email"
                     value={inviteEmail}
                     onChange={(event) => setInviteEmail(event.target.value)}
@@ -338,6 +340,8 @@ export default function Toolbar({
                 <label>
                   {t("admin.role")}
                   <select
+                    id="toolbar-invite-role"
+                    name="inviteRole"
                     className="toolbar-role-toggle"
                     value={inviteRole}
                     onChange={(event) => setInviteRole(event.target.value)}
@@ -384,6 +388,8 @@ export default function Toolbar({
                         <div className="inline-actions">
                           <select
                             className="toolbar-role-toggle"
+                            name="collaboratorRole"
+                            aria-label={t("admin.role")}
                             value={
                               collaborator.role === "EDIT"
                                 ? "EDITOR"

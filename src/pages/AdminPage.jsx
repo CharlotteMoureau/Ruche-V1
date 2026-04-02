@@ -328,6 +328,9 @@ export default function AdminPage() {
       </h3>
       <div className="admin-toolbar">
         <input
+          id="admin-users-search"
+          name="userSearch"
+          aria-label={t("admin.searchUsers")}
           type="search"
           className="admin-search"
           placeholder={t("admin.searchUsers")}
@@ -511,6 +514,8 @@ export default function AdminPage() {
                         <label>
                           {t("profile.username")}
                           <input
+                            id="admin-edit-username"
+                            name="username"
                             type="text"
                             value={editingUser.username}
                             onChange={(e) =>
@@ -525,6 +530,8 @@ export default function AdminPage() {
                         <label>
                           {t("profile.email")}
                           <input
+                            id="admin-edit-email"
+                            name="email"
                             type="email"
                             value={editingUser.email || ""}
                             onChange={(e) =>
@@ -539,6 +546,8 @@ export default function AdminPage() {
                         <label>
                           {t("profile.firstname")}
                           <input
+                            id="admin-edit-firstname"
+                            name="firstName"
                             type="text"
                             value={editingUser.firstName || ""}
                             onChange={(e) =>
@@ -553,6 +562,8 @@ export default function AdminPage() {
                         <label>
                           {t("profile.lastname")}
                           <input
+                            id="admin-edit-lastname"
+                            name="lastName"
                             type="text"
                             value={editingUser.lastName || ""}
                             onChange={(e) =>
@@ -567,6 +578,8 @@ export default function AdminPage() {
                         <label>
                           {t("admin.role")}
                           <select
+                            id="admin-edit-role"
+                            name="roleLabel"
                             value={editingUser.roleLabel}
                             onChange={(e) =>
                               setEditingUser({
@@ -586,6 +599,8 @@ export default function AdminPage() {
                           <label>
                             {t("admin.specify")}
                             <input
+                              id="admin-edit-role-other"
+                              name="roleOtherText"
                               type="text"
                               value={editingUser.roleOtherText || ""}
                               onChange={(e) =>
@@ -655,6 +670,9 @@ export default function AdminPage() {
       </h3>
       <div className="admin-toolbar">
         <input
+          id="admin-hives-search"
+          name="hiveSearch"
+          aria-label={t("admin.searchHives")}
           type="search"
           className="admin-search"
           placeholder={t("admin.searchHives")}
@@ -816,6 +834,8 @@ export default function AdminPage() {
                         <label>
                           {t("admin.titleLabel")}
                           <input
+                            id="admin-edit-hive-title"
+                            name="title"
                             type="text"
                             value={editingHive.title}
                             onChange={(e) =>

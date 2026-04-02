@@ -77,6 +77,8 @@ export default function UnifiedPromptModal({
             <label>
               {inputLabel || "Value"}
               <input
+                id="unified-prompt-input"
+                name="promptValue"
                 ref={inputRef}
                 type="text"
                 value={value}
