@@ -1,11 +1,10 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { createRoot } from "react-dom/client";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { apiFetch } from "../lib/api";
 import UnifiedPromptModal from "../components/UnifiedPromptModal";
 import PageLoader from "../components/PageLoader";
-import HivePreview from "../components/HivePreview";
 import HexCard from "../components/HexCard";
 import FreeHexCard from "../components/FreeSpaceCard";
 import PasswordField from "../components/PasswordField";
@@ -305,6 +304,7 @@ export default function ProfilePage() {
   const [ownedSortMode, setOwnedSortMode] = useState("date-desc");
   const [sharedSortMode, setSharedSortMode] = useState("date-desc");
   const [activeProfileTab, setActiveProfileTab] = useState(PROFILE_TAB_HIVES);
+  const [isLoadingProfile, setIsLoadingProfile] = useState(false);
   const hydratedRoleFormUserIdRef = useRef(null);
   const defaultHiveKind = resolveDefaultHiveKind(profile?.user?.roleLabel);
   const isDcoProfile = defaultHiveKind === HIVE_KINDS.DCO;
@@ -348,11 +348,14 @@ export default function ProfilePage() {
         return;
       }
 
+      setIsLoadingProfile(true);
       try {
         const data = await refreshMe();
         if (mounted) setProfile(data);
       } catch (err) {
         if (mounted) setError(err.message);
+      } finally {
+        if (mounted) setIsLoadingProfile(false);
       }
     }
 
@@ -360,7 +363,7 @@ export default function ProfilePage() {
     return () => {
       mounted = false;
     };
-  }, [token, refreshMe]);
+  }, [token]);
 
   useEffect(() => {
     if (!profile) return;
@@ -545,7 +548,6 @@ export default function ProfilePage() {
           title: trimmedTitle,
           kind: sourceHive.kind,
           boardData: sourceHive.boardData,
-          boardPreviewImage: sourceHive.boardPreviewImage || null,
         },
       });
       const data = await refreshMe();
@@ -721,26 +723,39 @@ export default function ProfilePage() {
   const ownedBaseHives = profile ? profile.ownedHives : [];
   const sharedBaseHives = profile ? profile.sharedHives : [];
 
-  const ownedNormalizedSearch = ownedSearchQuery.trim().toLowerCase();
-  const sharedNormalizedSearch = sharedSearchQuery.trim().toLowerCase();
-
-  const filteredOwnedHives = ownedBaseHives.filter((hive) =>
-    (hive?.title || "").toLowerCase().includes(ownedNormalizedSearch),
-  );
-  const filteredSharedHives = sharedBaseHives.filter((hive) =>
-    (hive?.title || "").toLowerCase().includes(sharedNormalizedSearch),
-  );
-
-  const sortedOwnedHives = sortHives(
+  const {
     filteredOwnedHives,
-    ownedSortMode,
-    dateLocale,
-  );
-  const sortedSharedHives = sortHives(
+    sortedOwnedHives,
     filteredSharedHives,
+    sortedSharedHives,
+  } = useMemo(() => {
+    const ownedNormalizedSearch = ownedSearchQuery.trim().toLowerCase();
+    const sharedNormalizedSearch = sharedSearchQuery.trim().toLowerCase();
+
+    const filtered = {
+      owned: ownedBaseHives.filter((hive) =>
+        (hive?.title || "").toLowerCase().includes(ownedNormalizedSearch),
+      ),
+      shared: sharedBaseHives.filter((hive) =>
+        (hive?.title || "").toLowerCase().includes(sharedNormalizedSearch),
+      ),
+    };
+
+    return {
+      filteredOwnedHives: filtered.owned,
+      sortedOwnedHives: sortHives(filtered.owned, ownedSortMode, dateLocale),
+      filteredSharedHives: filtered.shared,
+      sortedSharedHives: sortHives(filtered.shared, sharedSortMode, dateLocale),
+    };
+  }, [
+    ownedBaseHives,
+    sharedBaseHives,
+    ownedSearchQuery,
+    sharedSearchQuery,
+    ownedSortMode,
     sharedSortMode,
     dateLocale,
-  );
+  ]);
 
   useEffect(() => {
     setOwnedPage((current) => clampPage(current, sortedOwnedHives.length));
@@ -759,21 +774,26 @@ export default function ProfilePage() {
   const ownedVisibleCount = sortedOwnedHives.length;
   const sharedVisibleCount = sortedSharedHives.length;
 
-  const pagedOwnedHives = sortedOwnedHives.slice(
-    (ownedPage - 1) * HIVES_PER_PAGE,
-    ownedPage * HIVES_PER_PAGE,
-  );
-
-  const pagedSharedHives = sortedSharedHives.slice(
-    (sharedPage - 1) * HIVES_PER_PAGE,
-    sharedPage * HIVES_PER_PAGE,
-  );
+  const { pagedOwnedHives, pagedSharedHives } = useMemo(() => {
+    return {
+      pagedOwnedHives: sortedOwnedHives.slice(
+        (ownedPage - 1) * HIVES_PER_PAGE,
+        ownedPage * HIVES_PER_PAGE,
+      ),
+      pagedSharedHives: sortedSharedHives.slice(
+        (sharedPage - 1) * HIVES_PER_PAGE,
+        sharedPage * HIVES_PER_PAGE,
+      ),
+    };
+  }, [sortedOwnedHives, sortedSharedHives, ownedPage, sharedPage]);
 
   return (
     <section className="page-shell profile-page">
       <h2>{t("profile.title")}</h2>
       {error ? <p className="form-error">{error}</p> : null}
-      {profile ? (
+      {isLoadingProfile ? (
+        <PageLoader />
+      ) : profile ? (
         <>
           <p>
             <strong>{t("profile.username")} :</strong> {profile.user.username}
@@ -922,13 +942,6 @@ export default function ProfilePage() {
                             <br />
                             {t("profile.updatedAt")} :{" "}
                             {formatDateTime(hive.updatedAt, dateLocale)}
-                            <div className="hive-preview">
-                              <HivePreview
-                                previewImage={hive.boardPreviewImage}
-                                snapshot={hive.boardSnapshot}
-                                emptyLabel={t("profile.emptyHive")}
-                              />
-                            </div>
                           </div>
                           <div className="inline-actions">
                             <Link
@@ -1090,13 +1103,6 @@ export default function ProfilePage() {
                             <br />
                             {t("profile.updatedAt")} :{" "}
                             {formatDateTime(hive.updatedAt, dateLocale)}
-                            <div className="hive-preview">
-                              <HivePreview
-                                previewImage={hive.boardPreviewImage}
-                                snapshot={hive.boardSnapshot}
-                                emptyLabel={t("profile.emptyHive")}
-                              />
-                            </div>
                           </div>
                           <div className="inline-actions">
                             <Link

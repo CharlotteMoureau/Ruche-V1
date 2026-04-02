@@ -12,7 +12,6 @@ hivesRouter.use(requireAuth);
 const hiveInputSchema = z.object({
   title: z.string().trim().min(1).max(100),
   boardData: z.any(),
-  boardPreviewImage: z.string().max(5_000_000).nullable().optional(),
   kind: z.string().trim().optional(),
   expectedUpdatedAt: z.string().trim().optional(),
 });
@@ -404,7 +403,6 @@ hivesRouter.post("/", async (req, res) => {
       kind: finalKind,
       boardData: parsed.data.boardData,
       boardSnapshot: buildBoardSnapshot(parsed.data.boardData),
-      boardPreviewImage: parsed.data.boardPreviewImage || null,
       ownerId: req.user.id,
     },
   });
@@ -441,7 +439,6 @@ hivesRouter.get("/:id", async (req, res) => {
     title: hive.title,
     kind: hive.kind,
     boardData: hive.boardData,
-    boardPreviewImage: hive.boardPreviewImage,
     owner: hive.owner,
     createdAt: hive.createdAt,
     updatedAt: hive.updatedAt,
@@ -613,7 +610,6 @@ hivesRouter.put("/:id", async (req, res) => {
       kind: normalizeHiveKind(parsed.data.kind || hive.kind),
       boardData: parsed.data.boardData,
       boardSnapshot: buildBoardSnapshot(parsed.data.boardData),
-      boardPreviewImage: parsed.data.boardPreviewImage || null,
     },
   });
 

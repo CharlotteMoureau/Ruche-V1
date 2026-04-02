@@ -405,183 +405,163 @@ export default function RucheEditorPage() {
     );
   }, [id, isNew, token]);
 
-  const captureBoardPreviewImage = useCallback(async () => {
-    const hasBoardCards = Array.isArray(boardData?.boardCards)
-      ? boardData.boardCards.length > 0
-      : false;
+  const performSaveHive = useCallback(
+    async (titleToSave, { skipNavigateAfterCreate = false } = {}) => {
+      setIsSaving(true);
+      showTabletSaveFeedback("saving");
+      try {
+        if (isNew) {
+          const created = await apiFetch("/hives", {
+            method: "POST",
+            token,
+            body: {
+              title: titleToSave,
+              kind: hiveKind,
+              boardData,
+            },
+          });
+          const normalizedCreatedKind = normalizeHiveKind(
+            created.kind || hiveKind,
+          );
+          const snapshot = JSON.stringify({
+            title: titleToSave,
+            hiveKind: normalizedCreatedKind,
+            boardData,
+          });
+          setSavedSnapshot(snapshot);
+          setBaseUpdatedAt(created.updatedAt || null);
+          setTitle(titleToSave);
+          setHiveKind(normalizedCreatedKind);
+          setHive({
+            ...created,
+            owner: {
+              id: user?.id || null,
+              username: user?.username || null,
+              email: user?.email || null,
+            },
+            collaborators: [],
+            comments: [],
+            canEdit: true,
+            canComment: true,
+          });
+          if (!skipNavigateAfterCreate) {
+            navigate(`/hives/${created.id}`, { replace: true });
+          }
+          showTabletSaveFeedback("success", 2200);
+          return true;
+        }
 
-    if (!hasBoardCards) return null;
+        let expectedUpdatedAt = baseUpdatedAt;
+        if (!expectedUpdatedAt) {
+          const latest = await apiFetch(`/hives/${id}`, { token });
+          expectedUpdatedAt = latest?.updatedAt || null;
+          setBaseUpdatedAt(expectedUpdatedAt);
+        }
 
-    const board = document.querySelector(".hive-board");
-    if (!board) return null;
-
-    document.body.classList.add("capture-mode");
-    try {
-      await waitForCaptureFrame();
-      return await domtoimage.toPng(board, {
-        cacheBust: true,
-      });
-    } catch {
-      return null;
-    } finally {
-      document.body.classList.remove("capture-mode");
-    }
-  }, [boardData]);
-
-  const performSaveHive = useCallback(async (
-    titleToSave,
-    { skipNavigateAfterCreate = false } = {},
-  ) => {
-    setIsSaving(true);
-    showTabletSaveFeedback("saving");
-    try {
-      const boardPreviewImage = await captureBoardPreviewImage();
-
-      if (isNew) {
-        const created = await apiFetch("/hives", {
-          method: "POST",
+        const updated = await apiFetch(`/hives/${id}`, {
+          method: "PUT",
           token,
           body: {
             title: titleToSave,
             kind: hiveKind,
             boardData,
-            boardPreviewImage,
+            expectedUpdatedAt,
           },
         });
-        const normalizedCreatedKind = normalizeHiveKind(
-          created.kind || hiveKind,
-        );
         const snapshot = JSON.stringify({
           title: titleToSave,
-          hiveKind: normalizedCreatedKind,
+          hiveKind,
           boardData,
         });
         setSavedSnapshot(snapshot);
-        setBaseUpdatedAt(created.updatedAt || null);
         setTitle(titleToSave);
-        setHiveKind(normalizedCreatedKind);
-        setHive({
-          ...created,
-          owner: {
-            id: user?.id || null,
-            username: user?.username || null,
-            email: user?.email || null,
-          },
-          collaborators: [],
-          comments: [],
-          canEdit: true,
-          canComment: true,
-        });
-        if (!skipNavigateAfterCreate) {
-          navigate(`/hives/${created.id}`, { replace: true });
-        }
+        setBaseUpdatedAt(updated?.updatedAt || null);
+
+        setHive((prev) =>
+          prev
+            ? {
+                ...prev,
+                title: titleToSave,
+                kind: hiveKind,
+                boardData,
+                updatedAt: updated?.updatedAt || prev.updatedAt,
+              }
+            : prev,
+        );
         showTabletSaveFeedback("success", 2200);
         return true;
+      } catch (err) {
+        if (err instanceof ApiError && err.status === 409) {
+          setShowConflictModal(true);
+        }
+        setError(err.message);
+        showTabletSaveFeedback("error", 3200);
+        return false;
+      } finally {
+        setIsSaving(false);
+      }
+    },
+    [
+      baseUpdatedAt,
+      boardData,
+      hiveKind,
+      id,
+      isNew,
+      navigate,
+      showTabletSaveFeedback,
+      token,
+      user?.email,
+      user?.id,
+      user?.username,
+    ],
+  );
+
+  const saveHive = useCallback(
+    async ({ skipNavigateAfterCreate = false } = {}) => {
+      if (isSaving) return false;
+
+      setError("");
+      const trimmedTitle = title.trim();
+
+      if (!trimmedTitle) {
+        setError(t("editor.saveTitleError"));
+        showTabletSaveFeedback("error", 3000);
+        return;
       }
 
-      let expectedUpdatedAt = baseUpdatedAt;
-      if (!expectedUpdatedAt) {
-        const latest = await apiFetch(`/hives/${id}`, { token });
-        expectedUpdatedAt = latest?.updatedAt || null;
-        setBaseUpdatedAt(expectedUpdatedAt);
+      if (isDuplicateFlow && !hasRenamedDuplicate) {
+        setError(t("editor.duplicateRenameError"));
+        showTabletSaveFeedback("error", 3000);
+        return;
       }
 
-      const updated = await apiFetch(`/hives/${id}`, {
-        method: "PUT",
-        token,
-        body: {
-          title: titleToSave,
-          kind: hiveKind,
-          boardData,
-          boardPreviewImage,
-          expectedUpdatedAt,
-        },
-      });
-      const snapshot = JSON.stringify({
-        title: titleToSave,
-        hiveKind,
-        boardData,
-      });
-      setSavedSnapshot(snapshot);
-      setTitle(titleToSave);
-      setBaseUpdatedAt(updated?.updatedAt || null);
-
-      setHive((prev) =>
-        prev
-          ? {
-              ...prev,
-              title: titleToSave,
-              kind: hiveKind,
-              boardData,
-              updatedAt: updated?.updatedAt || prev.updatedAt,
-            }
-          : prev,
-      );
-      showTabletSaveFeedback("success", 2200);
-      return true;
-    } catch (err) {
-      if (err instanceof ApiError && err.status === 409) {
-        setShowConflictModal(true);
+      // If existing hive and title changed, ask user whether to rename or duplicate
+      if (
+        !isNew &&
+        canManageHive &&
+        hive &&
+        trimmedTitle !== hive.title.trim()
+      ) {
+        setPendingNewTitle(trimmedTitle);
+        setRenameOrDuplicateAction("pending");
+        return;
       }
-      setError(err.message);
-      showTabletSaveFeedback("error", 3200);
-      return false;
-    } finally {
-      setIsSaving(false);
-    }
-  }, [
-    baseUpdatedAt,
-    boardData,
-    captureBoardPreviewImage,
-    hiveKind,
-    id,
-    isNew,
-    navigate,
-    showTabletSaveFeedback,
-    token,
-    user?.email,
-    user?.id,
-    user?.username,
-  ]);
 
-  const saveHive = useCallback(async ({ skipNavigateAfterCreate = false } = {}) => {
-    if (isSaving) return false;
-
-    setError("");
-    const trimmedTitle = title.trim();
-
-    if (!trimmedTitle) {
-      setError(t("editor.saveTitleError"));
-      showTabletSaveFeedback("error", 3000);
-      return;
-    }
-
-    if (isDuplicateFlow && !hasRenamedDuplicate) {
-      setError(t("editor.duplicateRenameError"));
-      showTabletSaveFeedback("error", 3000);
-      return;
-    }
-
-    // If existing hive and title changed, ask user whether to rename or duplicate
-    if (!isNew && canManageHive && hive && trimmedTitle !== hive.title.trim()) {
-      setPendingNewTitle(trimmedTitle);
-      setRenameOrDuplicateAction("pending");
-      return;
-    }
-
-    return performSaveHive(trimmedTitle, { skipNavigateAfterCreate });
-  }, [
-    canManageHive,
-    hasRenamedDuplicate,
-    hive,
-    isDuplicateFlow,
-    isNew,
-    isSaving,
-    performSaveHive,
-    showTabletSaveFeedback,
-    t,
-    title,
-  ]);
+      return performSaveHive(trimmedTitle, { skipNavigateAfterCreate });
+    },
+    [
+      canManageHive,
+      hasRenamedDuplicate,
+      hive,
+      isDuplicateFlow,
+      isNew,
+      isSaving,
+      performSaveHive,
+      showTabletSaveFeedback,
+      t,
+      title,
+    ],
+  );
 
   const handleRenameExistingHive = async () => {
     setRenameOrDuplicateAction(null);
@@ -599,8 +579,6 @@ export default function RucheEditorPage() {
     showTabletSaveFeedback("saving");
 
     try {
-      const boardPreviewImage = await captureBoardPreviewImage();
-
       // Create duplicate with new title
       const newHive = await apiFetch("/hives", {
         method: "POST",
@@ -609,7 +587,6 @@ export default function RucheEditorPage() {
           title: pendingNewTitle.trim(),
           kind: hiveKind,
           boardData,
-          boardPreviewImage,
         },
       });
 
@@ -636,7 +613,6 @@ export default function RucheEditorPage() {
       const baseTitle =
         title.trim() || hive?.title?.trim() || t("editor.newHiveTitle");
       const copyTitle = `${baseTitle} (${t("profile.copySuffix")})`;
-      const boardPreviewImage = await captureBoardPreviewImage();
 
       const created = await apiFetch("/hives", {
         method: "POST",
@@ -645,7 +621,6 @@ export default function RucheEditorPage() {
           title: copyTitle,
           kind: hiveKind,
           boardData,
-          boardPreviewImage,
         },
       });
 
