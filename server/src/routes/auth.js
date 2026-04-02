@@ -102,7 +102,17 @@ authRouter.post("/login", async (req, res) => {
     return res.status(401).json({ error: "Identifiants invalides" });
   }
 
-  const ok = await bcrypt.compare(parsed.data.password, user.passwordHash);
+  if (!user.passwordHash || typeof user.passwordHash !== "string") {
+    return res.status(401).json({ error: "Identifiants invalides" });
+  }
+
+  let ok = false;
+  try {
+    ok = await bcrypt.compare(parsed.data.password, user.passwordHash);
+  } catch {
+    return res.status(401).json({ error: "Identifiants invalides" });
+  }
+
   if (!ok) {
     return res.status(401).json({ error: "Identifiants invalides" });
   }

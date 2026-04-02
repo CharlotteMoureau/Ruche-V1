@@ -363,7 +363,7 @@ export default function ProfilePage() {
     return () => {
       mounted = false;
     };
-  }, [token]);
+  }, [token, refreshMe]);
 
   useEffect(() => {
     if (!profile) return;
@@ -720,15 +720,16 @@ export default function ProfilePage() {
     closeCreateHiveModal();
   };
 
-  const ownedBaseHives = profile ? profile.ownedHives : [];
-  const sharedBaseHives = profile ? profile.sharedHives : [];
+  const ownedBaseHives = useMemo(
+    () => (profile ? profile.ownedHives : []),
+    [profile],
+  );
+  const sharedBaseHives = useMemo(
+    () => (profile ? profile.sharedHives : []),
+    [profile],
+  );
 
-  const {
-    filteredOwnedHives,
-    sortedOwnedHives,
-    filteredSharedHives,
-    sortedSharedHives,
-  } = useMemo(() => {
+  const { sortedOwnedHives, sortedSharedHives } = useMemo(() => {
     const ownedNormalizedSearch = ownedSearchQuery.trim().toLowerCase();
     const sharedNormalizedSearch = sharedSearchQuery.trim().toLowerCase();
 
@@ -742,9 +743,7 @@ export default function ProfilePage() {
     };
 
     return {
-      filteredOwnedHives: filtered.owned,
       sortedOwnedHives: sortHives(filtered.owned, ownedSortMode, dateLocale),
-      filteredSharedHives: filtered.shared,
       sortedSharedHives: sortHives(filtered.shared, sharedSortMode, dateLocale),
     };
   }, [

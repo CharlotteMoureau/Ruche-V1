@@ -152,7 +152,6 @@ export default function RucheWorkspace({
   canEdit = true,
   canNote = false,
   requireSaveBeforeNote = false,
-  onRequireSaveBeforeNote,
   requestedNoteCardId = null,
   onRequestedNoteHandled,
   isTabletEditorMode = false,
@@ -647,52 +646,58 @@ export default function RucheWorkspace({
     setSelectedCardIds(new Set());
   }, []);
 
-  const applyReturnCardsToLibrary = useCallback((cards) => {
-    if (!canEdit || !cards.length) return false;
+  const applyReturnCardsToLibrary = useCallback(
+    (cards) => {
+      if (!canEdit || !cards.length) return false;
 
-    const cardIds = new Set(cards.map((card) => card.id));
-    const regularCards = cards
-      .filter((card) => card.category !== "free")
-      .map(stripCardComment);
-    const freeCards = cards.filter((card) => card.category === "free");
+      const cardIds = new Set(cards.map((card) => card.id));
+      const regularCards = cards
+        .filter((card) => card.category !== "free")
+        .map(stripCardComment);
+      const freeCards = cards.filter((card) => card.category === "free");
 
-    if (regularCards.length) {
-      setAvailableCards((prev) =>
-        [...prev.filter((c) => !cardIds.has(c.id)), ...regularCards].sort(
-          (a, b) => (orderMap[a.id] || 0) - (orderMap[b.id] || 0),
-        ),
-      );
-    }
+      if (regularCards.length) {
+        setAvailableCards((prev) =>
+          [...prev.filter((c) => !cardIds.has(c.id)), ...regularCards].sort(
+            (a, b) => (orderMap[a.id] || 0) - (orderMap[b.id] || 0),
+          ),
+        );
+      }
 
-    if (freeCards.length) {
-      setUserCards((prev) => prev.filter((card) => !cardIds.has(card.id)));
-    }
+      if (freeCards.length) {
+        setUserCards((prev) => prev.filter((card) => !cardIds.has(card.id)));
+      }
 
-    setBoardCards((prev) => prev.filter((card) => !cardIds.has(card.id)));
-    setSelectedCardIds((prev) => {
-      const nextSet = new Set(prev);
-      cards.forEach((card) => nextSet.delete(card.id));
-      return nextSet;
-    });
+      setBoardCards((prev) => prev.filter((card) => !cardIds.has(card.id)));
+      setSelectedCardIds((prev) => {
+        const nextSet = new Set(prev);
+        cards.forEach((card) => nextSet.delete(card.id));
+        return nextSet;
+      });
 
-    return true;
-  }, [canEdit, orderMap]);
+      return true;
+    },
+    [canEdit, orderMap],
+  );
 
-  const handleReturnCardsToLibrary = useCallback((cards) => {
-    if (!canEdit || !cards.length) return false;
+  const handleReturnCardsToLibrary = useCallback(
+    (cards) => {
+      if (!canEdit || !cards.length) return false;
 
-    const cardsWithComment = cards.filter((card) => {
-      const comment = getCardComment(card);
-      return Boolean(comment?.message?.trim());
-    });
+      const cardsWithComment = cards.filter((card) => {
+        const comment = getCardComment(card);
+        return Boolean(comment?.message?.trim());
+      });
 
-    if (cardsWithComment.length) {
-      setPendingReturnCardIds(cards.map((card) => card.id));
-      return false;
-    }
+      if (cardsWithComment.length) {
+        setPendingReturnCardIds(cards.map((card) => card.id));
+        return false;
+      }
 
-    return applyReturnCardsToLibrary(cards);
-  }, [applyReturnCardsToLibrary, canEdit]);
+      return applyReturnCardsToLibrary(cards);
+    },
+    [applyReturnCardsToLibrary, canEdit],
+  );
 
   const handleReturnToLibrary = (card) => {
     return handleReturnCardsToLibrary([card]);
@@ -1138,7 +1143,9 @@ export default function RucheWorkspace({
                 </div>
               </>
             ) : (
-              <p className="comments-empty">{t("workspace.cardNoteReadOnlyHint")}</p>
+              <p className="comments-empty">
+                {t("workspace.cardNoteReadOnlyHint")}
+              </p>
             )}
           </div>
         </div>

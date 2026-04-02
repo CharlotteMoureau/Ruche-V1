@@ -2,7 +2,6 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faArrowLeft, faFloppyDisk } from "@fortawesome/free-solid-svg-icons";
-import domtoimage from "dom-to-image-more";
 import { ApiError, apiFetch } from "../lib/api";
 import { useAuth } from "../context/AuthContext";
 import RucheWorkspace from "../components/RucheWorkspace";
@@ -16,12 +15,6 @@ import {
   resolveDefaultHiveKind,
 } from "../lib/hives";
 import { useTabletViewport } from "../hooks/useTabletViewport";
-
-function waitForCaptureFrame() {
-  return new Promise((resolve) => {
-    window.setTimeout(resolve, 300);
-  });
-}
 
 function formatDateTime(value, locale) {
   if (!value) return "-";
