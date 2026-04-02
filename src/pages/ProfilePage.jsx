@@ -260,15 +260,7 @@ export default function ProfilePage() {
   const { token, user, refreshMe, logout } = useAuth();
   const { language, t, dateLocale, translateRole, roleOptions } = useLanguage();
   const navigate = useNavigate();
-  const [profile, setProfile] = useState(() =>
-    user
-      ? {
-          user,
-          ownedHives: [],
-          sharedHives: [],
-        }
-      : null,
-  );
+  const [profile, setProfile] = useState(null);
   const [error, setError] = useState("");
   const [roleSuccessMessage, setRoleSuccessMessage] = useState("");
   const [passwordSuccessMessage, setPasswordSuccessMessage] = useState("");
@@ -304,7 +296,9 @@ export default function ProfilePage() {
   const [ownedSortMode, setOwnedSortMode] = useState("date-desc");
   const [sharedSortMode, setSharedSortMode] = useState("date-desc");
   const [activeProfileTab, setActiveProfileTab] = useState(PROFILE_TAB_HIVES);
-  const [isLoadingProfile, setIsLoadingProfile] = useState(false);
+  const [isLoadingProfile, setIsLoadingProfile] = useState(() =>
+    Boolean(token),
+  );
   const hydratedRoleFormUserIdRef = useRef(null);
   const defaultHiveKind = resolveDefaultHiveKind(profile?.user?.roleLabel);
   const isDcoProfile = defaultHiveKind === HIVE_KINDS.DCO;
@@ -313,16 +307,13 @@ export default function ProfilePage() {
   useEffect(() => {
     if (!user) {
       setProfile(null);
+      hydratedRoleFormUserIdRef.current = null;
       return;
     }
 
     setProfile((current) => {
       if (!current) {
-        return {
-          user,
-          ownedHives: [],
-          sharedHives: [],
-        };
+        return current;
       }
 
       if (current.user?.id === user.id) {
@@ -332,11 +323,8 @@ export default function ProfilePage() {
         };
       }
 
-      return {
-        user,
-        ownedHives: [],
-        sharedHives: [],
-      };
+      hydratedRoleFormUserIdRef.current = null;
+      return null;
     });
   }, [user]);
 
@@ -345,15 +333,25 @@ export default function ProfilePage() {
 
     async function load() {
       if (!token) {
+        if (mounted) {
+          setProfile(null);
+          setIsLoadingProfile(false);
+        }
         return;
       }
 
+      if (mounted) {
+        setError("");
+      }
       setIsLoadingProfile(true);
       try {
         const data = await refreshMe();
         if (mounted) setProfile(data);
       } catch (err) {
-        if (mounted) setError(err.message);
+        if (mounted) {
+          setProfile(null);
+          setError(err.message);
+        }
       } finally {
         if (mounted) setIsLoadingProfile(false);
       }
@@ -790,9 +788,7 @@ export default function ProfilePage() {
     <section className="page-shell profile-page">
       <h2>{t("profile.title")}</h2>
       {error ? <p className="form-error">{error}</p> : null}
-      {isLoadingProfile ? (
-        <PageLoader />
-      ) : profile ? (
+      {profile ? (
         <>
           <p>
             <strong>{t("profile.username")} :</strong> {profile.user.username}
@@ -1413,13 +1409,13 @@ export default function ProfilePage() {
             </div>
           ) : null}
         </>
-      ) : (
+      ) : isLoadingProfile ? (
         <PageLoader
           title={t("profile.loadingTitle")}
           subtitle={t("profile.loadingSubtitle")}
           variant="profile"
         />
-      )}
+      ) : null}
 
       <UnifiedPromptModal
         isOpen={Boolean(confirmDeleteHiveId)}
