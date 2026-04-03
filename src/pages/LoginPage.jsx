@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import PasswordField from "../components/PasswordField";
 import { useLanguage } from "../context/LanguageContext";
+import { getApiErrorMessage } from "../lib/api";
 
 export default function LoginPage() {
   const { login } = useAuth();
@@ -22,7 +23,7 @@ export default function LoginPage() {
       await login(identifier, password);
       navigate("/profile");
     } catch (err) {
-      setError(err.message);
+      setError(getApiErrorMessage(err, t));
     } finally {
       setLoading(false);
     }

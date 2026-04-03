@@ -52,7 +52,7 @@ app.use((err, _req, res, next) => {
     return next(err);
   }
   console.error(err);
-  res.status(500).json({ error: "Erreur serveur" });
+  res.status(500).json({ error: "Server error" });
 });
 
 app.listen(port, host, () => {

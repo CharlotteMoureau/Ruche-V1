@@ -48,11 +48,11 @@ const updateUserSchema = z.object({
 adminRouter.patch("/users/:id", async (req, res) => {
   const parsed = updateUserSchema.safeParse(req.body);
   if (!parsed.success) {
-    return res.status(400).json({ error: "Donnees invalides" });
+    return res.status(400).json({ error: "Invalid data" });
   }
 
   if (parsed.data.roleLabel && !USER_ROLES.includes(parsed.data.roleLabel)) {
-    return res.status(400).json({ error: "Role invalide" });
+    return res.status(400).json({ error: "Invalid role" });
   }
 
   if (parsed.data.email) {
@@ -60,7 +60,7 @@ adminRouter.patch("/users/:id", async (req, res) => {
       where: { email: parsed.data.email, NOT: { id: req.params.id } },
     });
     if (existing) {
-      return res.status(409).json({ error: "Cet email est deja utilise" });
+      return res.status(409).json({ error: "Email already in use" });
     }
   }
 
@@ -94,11 +94,11 @@ adminRouter.delete("/users/:id", async (req, res) => {
   const user = await prisma.user.findUnique({ where: { id: req.params.id } });
 
   if (!user) {
-    return res.status(404).json({ error: "Utilisateur introuvable" });
+    return res.status(404).json({ error: "User not found" });
   }
 
   if (user.email.toLowerCase() === adminEmail) {
-    return res.status(400).json({ error: "Le compte admin ne peut pas etre supprime" });
+    return res.status(400).json({ error: "Admin account cannot be deleted" });
   }
 
   try {
@@ -121,10 +121,10 @@ adminRouter.delete("/users/:id", async (req, res) => {
       await tx.user.delete({ where: { id: user.id } });
     });
 
-    return res.json({ message: "Utilisateur supprime" });
+    return res.json({ message: "User deleted" });
   } catch (err) {
     if (err instanceof Prisma.PrismaClientKnownRequestError && err.code === "P2003") {
-      return res.status(409).json({ error: "Suppression impossible: donnees liees" });
+      return res.status(409).json({ error: "Deletion blocked: linked data exists" });
     }
     throw err;
   }
@@ -155,7 +155,7 @@ const updateHiveSchema = z.object({
 adminRouter.patch("/hives/:id", async (req, res) => {
   const parsed = updateHiveSchema.safeParse(req.body);
   if (!parsed.success) {
-    return res.status(400).json({ error: "Donnees invalides" });
+    return res.status(400).json({ error: "Invalid data" });
   }
 
   const updated = await prisma.hive.update({
@@ -171,7 +171,7 @@ adminRouter.patch("/hives/:id", async (req, res) => {
 
 adminRouter.delete("/hives/:id", async (req, res) => {
   await prisma.hive.delete({ where: { id: req.params.id } });
-  return res.json({ message: "Ruche supprimee" });
+  return res.json({ message: "Hive deleted" });
 });
 
 adminRouter.get("/hives/:id/details", async (req, res) => {
@@ -199,7 +199,7 @@ adminRouter.get("/hives/:id/details", async (req, res) => {
   });
 
   if (!hive) {
-    return res.status(404).json({ error: "Ruche introuvable" });
+    return res.status(404).json({ error: "Hive not found" });
   }
 
   return res.json({
@@ -230,7 +230,7 @@ adminRouter.delete("/hives/:id/collaborators/:userId", async (req, res) => {
   await prisma.hiveCollaborator.deleteMany({
     where: { hiveId: req.params.id, userId: req.params.userId },
   });
-  return res.json({ message: "Collaborateur retire" });
+  return res.json({ message: "Collaborator removed" });
 });
 
 adminRouter.delete("/hives/:id/comments/:commentId", async (req, res) => {
@@ -238,8 +238,8 @@ adminRouter.delete("/hives/:id/comments/:commentId", async (req, res) => {
     where: { id: req.params.commentId, hiveId: req.params.id },
   });
   if (!comment) {
-    return res.status(404).json({ error: "Commentaire introuvable" });
+    return res.status(404).json({ error: "Comment not found" });
   }
   await prisma.hiveComment.delete({ where: { id: comment.id } });
-  return res.json({ message: "Commentaire supprime" });
+  return res.json({ message: "Comment deleted" });
 });

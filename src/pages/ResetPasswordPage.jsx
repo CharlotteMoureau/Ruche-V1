@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { apiFetch } from "../lib/api";
+import { apiFetch, getApiErrorMessage, getApiPayloadMessage } from "../lib/api";
 import PasswordField from "../components/PasswordField";
 import { useLanguage } from "../context/LanguageContext";
 
@@ -25,10 +25,10 @@ export default function ResetPasswordPage() {
         method: "POST",
         body: { token, password, passwordConfirm },
       });
-      setMessage(data.message);
+      setMessage(getApiPayloadMessage(data, t));
       setTimeout(() => navigate("/login"), 1000);
     } catch (err) {
-      setError(err.message);
+      setError(getApiErrorMessage(err, t));
     }
   };
 

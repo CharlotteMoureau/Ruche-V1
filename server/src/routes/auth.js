@@ -24,23 +24,31 @@ const registerSchema = z
     roleOtherText: z.string().trim().max(120).optional().or(z.literal("")),
   })
   .refine((data) => data.password === data.passwordConfirm, {
-    message: "Les mots de passe ne correspondent pas",
+    message: "Passwords do not match",
     path: ["passwordConfirm"],
   });
 
 authRouter.post("/register", async (req, res) => {
   const parsed = registerSchema.safeParse(req.body);
   if (!parsed.success) {
-    return res.status(400).json({ error: parsed.error.issues[0]?.message || "Données invalides" });
+    const firstIssueMessage = parsed.error.issues[0]?.message;
+    const isPasswordMismatch = firstIssueMessage === "Passwords do not match";
+    return res.status(400).json({
+      error: firstIssueMessage || "Invalid data",
+      code: isPasswordMismatch ? "PASSWORDS_DO_NOT_MATCH" : "VALIDATION_INVALID_DATA",
+    });
   }
 
   const role = normalizeRole(parsed.data.role);
   if (!USER_ROLES.includes(role)) {
-    return res.status(400).json({ error: "Rôle invalide" });
+    return res.status(400).json({ error: "Invalid role", code: "VALIDATION_INVALID_ROLE" });
   }
 
   if (role === "Autre" && !parsed.data.roleOtherText?.trim()) {
-    return res.status(400).json({ error: "Veuillez préciser votre rôle" });
+    return res.status(400).json({
+      error: "Please specify your role",
+      code: "VALIDATION_ROLE_REQUIRED",
+    });
   }
 
   const existing = await prisma.user.findFirst({
@@ -53,11 +61,11 @@ authRouter.post("/register", async (req, res) => {
   });
 
   if (existing?.username === parsed.data.username) {
-    return res.status(409).json({ error: "Nom d'utilisateur déjà utilisé" });
+    return res.status(409).json({ error: "Username already in use", code: "AUTH_USERNAME_TAKEN" });
   }
 
   if (existing?.email === parsed.data.email.toLowerCase()) {
-    return res.status(409).json({ error: "Email déjà utilisé" });
+    return res.status(409).json({ error: "Email already in use", code: "AUTH_EMAIL_TAKEN" });
   }
 
   const user = await prisma.user.create({
@@ -88,7 +96,7 @@ const loginSchema = z.object({
 authRouter.post("/login", async (req, res) => {
   const parsed = loginSchema.safeParse(req.body);
   if (!parsed.success) {
-    return res.status(400).json({ error: "Identifiants invalides" });
+    return res.status(400).json({ error: "Invalid credentials", code: "AUTH_INVALID_CREDENTIALS" });
   }
 
   const identifier = parsed.data.identifier.trim();
@@ -99,22 +107,22 @@ authRouter.post("/login", async (req, res) => {
   });
 
   if (!user) {
-    return res.status(401).json({ error: "Identifiants invalides" });
+    return res.status(401).json({ error: "Invalid credentials", code: "AUTH_INVALID_CREDENTIALS" });
   }
 
   if (!user.passwordHash || typeof user.passwordHash !== "string") {
-    return res.status(401).json({ error: "Identifiants invalides" });
+    return res.status(401).json({ error: "Invalid credentials", code: "AUTH_INVALID_CREDENTIALS" });
   }
 
   let ok = false;
   try {
     ok = await bcrypt.compare(parsed.data.password, user.passwordHash);
   } catch {
-    return res.status(401).json({ error: "Identifiants invalides" });
+    return res.status(401).json({ error: "Invalid credentials", code: "AUTH_INVALID_CREDENTIALS" });
   }
 
   if (!ok) {
-    return res.status(401).json({ error: "Identifiants invalides" });
+    return res.status(401).json({ error: "Invalid credentials", code: "AUTH_INVALID_CREDENTIALS" });
   }
 
   const token = signAccessToken(user);
@@ -190,13 +198,16 @@ const forgotSchema = z.object({
 authRouter.post("/forgot-password", async (req, res) => {
   const parsed = forgotSchema.safeParse(req.body);
   if (!parsed.success) {
-    return res.status(400).json({ error: "Email invalide" });
+    return res.status(400).json({ error: "Invalid email", code: "AUTH_INVALID_EMAIL" });
   }
 
   const email = parsed.data.email.toLowerCase();
   const user = await prisma.user.findUnique({ where: { email } });
   if (!user) {
-    return res.json({ message: "Si le compte existe, un email a été envoyé." });
+    return res.json({
+      message: "If the account exists, an email has been sent.",
+      code: "MSG_PASSWORD_RESET_EMAIL_SENT",
+    });
   }
 
   const { token, tokenHash, expiresAt } = makeResetToken();
@@ -216,7 +227,10 @@ authRouter.post("/forgot-password", async (req, res) => {
     console.error("Failed to send reset password email", error);
   }
 
-  return res.json({ message: "Si le compte existe, un email a été envoyé." });
+  return res.json({
+    message: "If the account exists, an email has been sent.",
+    code: "MSG_PASSWORD_RESET_EMAIL_SENT",
+  });
 });
 
 const resetSchema = z
@@ -226,14 +240,19 @@ const resetSchema = z
     passwordConfirm: z.string().min(8).max(100),
   })
   .refine((data) => data.password === data.passwordConfirm, {
-    message: "Les mots de passe ne correspondent pas",
+    message: "Passwords do not match",
     path: ["passwordConfirm"],
   });
 
 authRouter.post("/reset-password", async (req, res) => {
   const parsed = resetSchema.safeParse(req.body);
   if (!parsed.success) {
-    return res.status(400).json({ error: parsed.error.issues[0]?.message || "Données invalides" });
+    const firstIssueMessage = parsed.error.issues[0]?.message;
+    const isPasswordMismatch = firstIssueMessage === "Passwords do not match";
+    return res.status(400).json({
+      error: firstIssueMessage || "Invalid data",
+      code: isPasswordMismatch ? "PASSWORDS_DO_NOT_MATCH" : "VALIDATION_INVALID_DATA",
+    });
   }
 
   const tokenHash = hashResetToken(parsed.data.token);
@@ -246,7 +265,10 @@ authRouter.post("/reset-password", async (req, res) => {
   });
 
   if (!record) {
-    return res.status(400).json({ error: "Lien invalide ou expiré" });
+    return res.status(400).json({
+      error: "Invalid or expired link",
+      code: "AUTH_RESET_LINK_INVALID",
+    });
   }
 
   await prisma.$transaction([
@@ -260,5 +282,5 @@ authRouter.post("/reset-password", async (req, res) => {
     }),
   ]);
 
-  return res.json({ message: "Mot de passe mis à jour" });
+  return res.json({ message: "Password updated", code: "MSG_PASSWORD_UPDATED" });
 });

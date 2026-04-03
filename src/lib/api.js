@@ -1,11 +1,12 @@
 const API_BASE = import.meta.env.VITE_API_URL || "/api";
 
 export class ApiError extends Error {
-  constructor(message, { status, payload } = {}) {
+  constructor(message, { status, payload, code } = {}) {
     super(message);
     this.name = "ApiError";
     this.status = status;
     this.payload = payload;
+    this.code = code || null;
   }
 }
 
@@ -22,6 +23,7 @@ async function parseResponse(response) {
     throw new ApiError(message, {
       status: response.status,
       payload,
+      code: typeof payload === "object" ? payload?.code : null,
     });
   }
 
@@ -39,4 +41,34 @@ export async function apiFetch(path, { method = "GET", body, token } = {}) {
   });
 
   return parseResponse(response);
+}
+
+export function getApiErrorMessage(error, t, fallbackPath = "common.unexpectedError") {
+  if (error?.code) {
+    const localizedByCode = t(`apiErrors.${error.code}`);
+    if (localizedByCode !== `apiErrors.${error.code}`) {
+      return localizedByCode;
+    }
+  }
+
+  if (error?.message) {
+    return error.message;
+  }
+
+  return t(fallbackPath);
+}
+
+export function getApiPayloadMessage(payload, t, fallbackMessage = "") {
+  if (payload?.code) {
+    const localizedByCode = t(`apiMessages.${payload.code}`);
+    if (localizedByCode !== `apiMessages.${payload.code}`) {
+      return localizedByCode;
+    }
+  }
+
+  if (typeof payload?.message === "string" && payload.message) {
+    return payload.message;
+  }
+
+  return fallbackMessage;
 }

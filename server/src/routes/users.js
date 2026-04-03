@@ -24,12 +24,15 @@ const updateMeSchema = z.object({
 usersRouter.patch("/me", requireAuth, async (req, res) => {
   const parsed = updateMeSchema.safeParse(req.body);
   if (!parsed.success) {
-    return res.status(400).json({ error: parsed.error.issues[0]?.message || "Données invalides" });
+    return res.status(400).json({
+      error: parsed.error.issues[0]?.message || "Invalid data",
+      code: "VALIDATION_INVALID_DATA",
+    });
   }
 
   const user = await prisma.user.findUnique({ where: { id: req.user.id } });
   if (!user) {
-    return res.status(404).json({ error: "Utilisateur introuvable" });
+    return res.status(404).json({ error: "User not found", code: "PROFILE_USER_NOT_FOUND" });
   }
 
   const {
@@ -47,17 +50,21 @@ usersRouter.patch("/me", requireAuth, async (req, res) => {
   if (wantsPasswordChange) {
     if (!currentPassword || !newPassword || !newPasswordConfirm) {
       return res.status(400).json({
-        error: "Veuillez renseigner le mot de passe actuel et le nouveau mot de passe deux fois",
+        error: "Please provide your current password and confirm the new password",
+        code: "PROFILE_PASSWORD_CHANGE_FIELDS_REQUIRED",
       });
     }
 
     if (newPassword !== newPasswordConfirm) {
-      return res.status(400).json({ error: "Les mots de passe ne correspondent pas" });
+      return res.status(400).json({ error: "Passwords do not match", code: "PASSWORDS_DO_NOT_MATCH" });
     }
 
     const passwordOk = await bcrypt.compare(currentPassword, user.passwordHash);
     if (!passwordOk) {
-      return res.status(401).json({ error: "Mot de passe actuel incorrect" });
+      return res.status(401).json({
+        error: "Current password is incorrect",
+        code: "PROFILE_PASSWORD_CURRENT_INCORRECT",
+      });
     }
   }
 
@@ -65,7 +72,7 @@ usersRouter.patch("/me", requireAuth, async (req, res) => {
   if (typeof role === "string") {
     normalizedRole = normalizeRole(role);
     if (!USER_ROLES.includes(normalizedRole)) {
-      return res.status(400).json({ error: "Rôle invalide" });
+      return res.status(400).json({ error: "Invalid role", code: "VALIDATION_INVALID_ROLE" });
     }
   }
 
@@ -80,7 +87,10 @@ usersRouter.patch("/me", requireAuth, async (req, res) => {
       : user.roleOtherText?.trim() || "";
 
     if (!effectiveOtherText) {
-      return res.status(400).json({ error: "Veuillez préciser votre rôle" });
+      return res.status(400).json({
+        error: "Please specify your role",
+        code: "VALIDATION_ROLE_REQUIRED",
+      });
     }
   }
 
@@ -108,7 +118,8 @@ usersRouter.patch("/me", requireAuth, async (req, res) => {
   });
 
   return res.json({
-    message: "Profil mis à jour",
+    message: "Profile updated",
+    code: "MSG_PROFILE_UPDATED",
     user: sanitizeUser(updated),
   });
 });
@@ -116,23 +127,29 @@ usersRouter.patch("/me", requireAuth, async (req, res) => {
 usersRouter.delete("/me", requireAuth, async (req, res) => {
   const parsed = deleteMeSchema.safeParse(req.body);
   if (!parsed.success) {
-    return res.status(400).json({ error: "Confirmation invalide" });
+    return res.status(400).json({
+      error: "Invalid confirmation",
+      code: "PROFILE_CONFIRMATION_INVALID",
+    });
   }
 
   if (parsed.data.confirmation !== "DELETE") {
-    return res.status(400).json({ error: "Veuillez confirmer avec DELETE" });
+    return res.status(400).json({
+      error: "Please confirm with DELETE",
+      code: "PROFILE_CONFIRM_DELETE_REQUIRED",
+    });
   }
 
   const user = await prisma.user.findUnique({ where: { id: req.user.id } });
   if (!user) {
-    return res.status(404).json({ error: "Utilisateur introuvable" });
+    return res.status(404).json({ error: "User not found", code: "PROFILE_USER_NOT_FOUND" });
   }
 
   const ok = await bcrypt.compare(parsed.data.password, user.passwordHash);
   if (!ok) {
-    return res.status(401).json({ error: "Mot de passe incorrect" });
+    return res.status(401).json({ error: "Incorrect password", code: "PROFILE_PASSWORD_INCORRECT" });
   }
 
   await prisma.user.delete({ where: { id: req.user.id } });
-  return res.json({ message: "Profil supprimé" });
+  return res.json({ message: "Profile deleted", code: "MSG_PROFILE_DELETED" });
 });

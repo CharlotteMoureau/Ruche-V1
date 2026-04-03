@@ -61,13 +61,13 @@ async function getTransport() {
 
 export async function sendResetPasswordEmail({ to, link }) {
   const from = (env.SMTP_FROM || "no-reply@ruche.local").trim();
-  const subject = "Reinitialisation de votre mot de passe - La Ruche";
-  const text = `Pour reinitialiser votre mot de passe, cliquez sur ce lien: ${link}`;
+  const subject = "Reset your password - La Ruche";
+  const text = `To reset your password, click this link: ${link}`;
   const html = `
-    <p>Bonjour,</p>
-    <p>Vous avez demande la reinitialisation de votre mot de passe.</p>
-    <p><a href="${link}">Reinitialiser mon mot de passe</a></p>
-    <p>Si vous n'etes pas a l'origine de cette demande, ignorez simplement cet email.</p>
+    <p>Hello,</p>
+    <p>You requested a password reset.</p>
+    <p><a href="${link}">Reset my password</a></p>
+    <p>If you did not request this, you can safely ignore this email.</p>
   `;
 
   const transport = await getTransport();

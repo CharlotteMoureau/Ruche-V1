@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import PasswordField from "../components/PasswordField";
 import { useLanguage } from "../context/LanguageContext";
+import { getApiErrorMessage } from "../lib/api";
 
 export default function RegisterPage() {
   const { register } = useAuth();
@@ -44,7 +45,7 @@ export default function RegisterPage() {
       await register(form);
       navigate("/profile");
     } catch (err) {
-      setError(err.message);
+      setError(getApiErrorMessage(err, t));
     } finally {
       setLoading(false);
     }

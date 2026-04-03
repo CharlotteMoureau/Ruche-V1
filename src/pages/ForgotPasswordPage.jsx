@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { apiFetch } from "../lib/api";
+import { apiFetch, getApiErrorMessage, getApiPayloadMessage } from "../lib/api";
 import { useLanguage } from "../context/LanguageContext";
 
 export default function ForgotPasswordPage() {
@@ -18,9 +18,9 @@ export default function ForgotPasswordPage() {
         method: "POST",
         body: { email },
       });
-      setMessage(data.message);
+      setMessage(getApiPayloadMessage(data, t));
     } catch (err) {
-      setError(err.message);
+      setError(getApiErrorMessage(err, t));
     }
   };
 

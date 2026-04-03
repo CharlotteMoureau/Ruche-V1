@@ -6,7 +6,10 @@ export async function requireAuth(req, res, next) {
   const token = auth.startsWith("Bearer ") ? auth.slice(7) : null;
 
   if (!token) {
-    return res.status(401).json({ error: "Authentification requise" });
+    return res.status(401).json({
+      error: "Authentication required",
+      code: "AUTH_REQUIRED",
+    });
   }
 
   try {
@@ -14,7 +17,10 @@ export async function requireAuth(req, res, next) {
     const user = await prisma.user.findUnique({ where: { id: payload.sub } });
 
     if (!user) {
-      return res.status(401).json({ error: "Utilisateur invalide" });
+      return res.status(401).json({
+        error: "Invalid user",
+        code: "AUTH_INVALID_USER",
+      });
     }
 
     req.user = {
@@ -23,14 +29,28 @@ export async function requireAuth(req, res, next) {
     };
 
     return next();
-  } catch {
-    return res.status(401).json({ error: "Session invalide ou expiree" });
+  } catch (error) {
+    if (
+      error?.name === "TokenExpiredError"
+      || error?.name === "JsonWebTokenError"
+      || error?.name === "NotBeforeError"
+    ) {
+      return res.status(401).json({
+        error: "Invalid or expired session",
+        code: "AUTH_SESSION_INVALID",
+      });
+    }
+
+    return next(error);
   }
 }
 
 export function requireAdmin(req, res, next) {
   if (!req.user?.isAdmin) {
-    return res.status(403).json({ error: "Acces reserve a l'administrateur" });
+    return res.status(403).json({
+      error: "Admin access required",
+      code: "AUTH_ADMIN_REQUIRED",
+    });
   }
   return next();
 }
