@@ -69,10 +69,7 @@ export default function LandingPage() {
             <>
               <Link to="/profile" className="cta-card">
                 <div className="cta-card-image">
-                  <img
-                    src="https://via.placeholder.com/400x200?text=Your+Profile"
-                    alt="Profile"
-                  />
+                  <img src="/Profile.jpg" alt="Profile" />
                 </div>
                 <div className="cta-card-content">{t("landing.goProfile")}</div>
               </Link>
@@ -88,10 +85,7 @@ export default function LandingPage() {
                 }}
               >
                 <div className="cta-card-image">
-                  <img
-                    src="https://via.placeholder.com/400x200?text=Create+a+Hive"
-                    alt="Create Hive"
-                  />
+                  <img src="/Hive.jpg" alt="Create Hive" />
                 </div>
                 <div className="cta-card-content">
                   {t("landing.createHive")}
@@ -104,10 +98,7 @@ export default function LandingPage() {
                 className="cta-card"
               >
                 <div className="cta-card-image">
-                  <img
-                    src="https://via.placeholder.com/400x200?text=Learn+About+Hive"
-                    alt="Learn More"
-                  />
+                  <img src="/Learn%20more.jpg" alt="Learn More" />
                 </div>
                 <div className="cta-card-content">{t("landing.learnMore")}</div>
               </a>
