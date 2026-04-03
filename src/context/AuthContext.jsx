@@ -53,6 +53,60 @@ export function AuthProvider({ children }) {
     };
   }, [token]);
 
+  const login = useMemo(
+    () => async (identifier, password) => {
+      const data = await apiFetch("/auth/login", {
+        method: "POST",
+        body: { identifier, password },
+      });
+
+      localStorage.setItem(TOKEN_STORAGE_KEY, data.token);
+      setToken(data.token);
+      setUser(data.user);
+      setIsAdmin(Boolean(data.isAdmin));
+      setIsLoading(false);
+    },
+    [],
+  );
+
+  const register = useMemo(
+    () => async (payload) => {
+      const data = await apiFetch("/auth/register", {
+        method: "POST",
+        body: payload,
+      });
+
+      localStorage.setItem(TOKEN_STORAGE_KEY, data.token);
+      setToken(data.token);
+      setUser(data.user);
+      setIsAdmin(Boolean(data.isAdmin));
+      setIsLoading(false);
+    },
+    [],
+  );
+
+  const logout = useMemo(
+    () => () => {
+      localStorage.removeItem(TOKEN_STORAGE_KEY);
+      setToken(null);
+      setUser(null);
+      setIsAdmin(false);
+      setIsLoading(false);
+    },
+    [],
+  );
+
+  const refreshMe = useMemo(
+    () => async () => {
+      if (!token) return null;
+      const data = await apiFetch("/auth/me?includeCollections=1", { token });
+      setUser(data.user);
+      setIsAdmin(Boolean(data.isAdmin));
+      return data;
+    },
+    [token],
+  );
+
   const value = useMemo(
     () => ({
       token,
@@ -60,43 +114,12 @@ export function AuthProvider({ children }) {
       isAdmin,
       isLoading,
       isAuthenticated: Boolean(user && token),
-      async login(identifier, password) {
-        const data = await apiFetch("/auth/login", {
-          method: "POST",
-          body: { identifier, password },
-        });
-
-        localStorage.setItem(TOKEN_STORAGE_KEY, data.token);
-        setToken(data.token);
-        setUser(data.user);
-        setIsAdmin(Boolean(data.isAdmin));
-      },
-      async register(payload) {
-        const data = await apiFetch("/auth/register", {
-          method: "POST",
-          body: payload,
-        });
-
-        localStorage.setItem(TOKEN_STORAGE_KEY, data.token);
-        setToken(data.token);
-        setUser(data.user);
-        setIsAdmin(Boolean(data.isAdmin));
-      },
-      logout() {
-        localStorage.removeItem(TOKEN_STORAGE_KEY);
-        setToken(null);
-        setUser(null);
-        setIsAdmin(false);
-      },
-      async refreshMe() {
-        if (!token) return;
-        const data = await apiFetch("/auth/me?includeCollections=1", { token });
-        setUser(data.user);
-        setIsAdmin(Boolean(data.isAdmin));
-        return data;
-      },
+      login,
+      register,
+      logout,
+      refreshMe,
     }),
-    [token, user, isAdmin, isLoading],
+    [token, user, isAdmin, isLoading, login, register, logout, refreshMe],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
