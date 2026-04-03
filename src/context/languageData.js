@@ -232,7 +232,7 @@ export const messages = {
       gdprPlaceholder: "Données, cookies, droits RGPD — lisez notre politique.",
       wip: "En cours de développement",
       wipPlaceholder:
-        "Collaboration temps réel, e-mails, forum — découvrez la feuille de route.",
+        "V1, V2, fonctionnalités à venir — découvrez la feuille de route.",
     },
     login: {
       title: "Connexion",
@@ -743,7 +743,7 @@ export const messages = {
       gdprPlaceholder: "Data, cookies, GDPR rights — read our privacy policy.",
       wip: "Work in Progress",
       wipPlaceholder:
-        "Real-time collaboration, emails, forum — discover the roadmap.",
+        "V1, V2, upcoming features — discover the roadmap.",
     },
     login: {
       title: "Log in",
@@ -1232,7 +1232,7 @@ export const messages = {
         "Gegevens, cookies, AVG-rechten — lees ons privacybeleid.",
       wip: "In Ontwikkeling",
       wipPlaceholder:
-        "Realtime samenwerking, e-mails, forum — ontdek de routekaart.",
+        "V1, V2, komende functies — ontdek de routekaart.",
     },
     login: {
       title: "Aanmelden",

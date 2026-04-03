@@ -52,7 +52,7 @@ export default function GdprPage() {
       <p className="gdpr-contact">
         {t("gdprPage.contact")}{" "}
         <a
-          href="https://www.peca.be/"
+          href="https://www.peca.be/contact"
           target="_blank"
           rel="noopener noreferrer"
         >
