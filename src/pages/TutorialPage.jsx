@@ -1,8 +1,8 @@
 import { useLanguage } from "../context/LanguageContext";
 import ReactMarkdown from "react-markdown";
-import manualEn from "../data/manual-en.js";
-import manualFr from "../data/manual-fr.js";
-import manualNl from "../data/manual-nl.js";
+import manualEn from "../../docs/user-manual.en.md?raw";
+import manualFr from "../../docs/user-manual.fr.md?raw";
+import manualNl from "../../docs/user-manual.nl.md?raw";
 
 export default function TutorialPage() {
   const { t, language } = useLanguage();
