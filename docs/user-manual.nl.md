@@ -10,6 +10,7 @@ La Ruche helpt u om een visueel bord met pedagogische kaarten op te bouwen. U ku
 
 - Open de toepassing in uw browser.
 - Verander indien nodig de taal van de interface in de voettekst.
+- U kunt ook `GDPR / Privacy` en `In Ontwikkeling` openen vanaf de landingspagina of via de voettekst.
 - Maak een account aan of meld u aan.
 
 ## Een account aanmaken
@@ -26,7 +27,7 @@ La Ruche helpt u om een visueel bord met pedagogische kaarten op te bouwen. U ku
 3. Vul uw wachtwoord in.
 4. Klik op de aanmeldknop.
 
-Bent u uw wachtwoord vergeten, gebruik dan `Wachtwoord vergeten?` en volg de link die u ontvangt.
+Bent u uw wachtwoord vergeten, gebruik dan `Wachtwoord vergeten?`. Als e-mailverzending is geconfigureerd, ontvangt u een resetlink. Zo niet, neem contact op met de projectbeheerder.
 
 ## Uw profiel
 
@@ -117,10 +118,10 @@ U kunt andere gebruikers per e-mail uitnodigen.
 
 Mogelijke rollen:
 
-- `Admin`: kan de samenwerking op de ruche beheren
-- `Editor`: kan de ruche wijzigen
-- `Commentaar`: kan bespreken maar het bord niet wijzigen
-- `Lezen`: kan alleen bekijken
+- `Beheerder`: kan de samenwerking op de ruche beheren
+- `Medewerker (kan bewerken)`: kan de ruche wijzigen
+- `Alleen reacties`: kan bespreken maar het bord niet wijzigen
+- `Alleen lezen`: kan alleen bekijken
 
 Om een ruche te delen:
 
@@ -170,11 +171,11 @@ Van daaruit kunnen zij:
 - Geef duidelijke titels aan uw ruches zodat u ze later gemakkelijk terugvindt.
 - Controleer uw inbox als u een gedeelde ruche verwacht.
 - Gebruik kaartnotities voor details op een enkele kaart en ruche-opmerkingen voor groepsbesprekingen.
-- Verander de taal via de voettekst als dat nodig is.
+- Verander de taal via de voettekst als dat nodig is, en gebruik de links `GDPR / Privacy` en `In Ontwikkeling`.
 
 ## Als er iets misloopt
 
 - Als u niet kunt aanmelden, controleer dan uw e-mailadres, gebruikersnaam en wachtwoord.
 - Als een pagina geblokkeerd lijkt, vernieuw de browser een keer.
-- Als u geen e-mail voor wachtwoordherstel ontvangt, controleer dan uw spammap.
+- Als u geen e-mail voor wachtwoordherstel ontvangt, controleer dan uw spammap en bevestig dat e-mailverzending in uw omgeving is ingeschakeld.
 - Als een uitnodiging niet verschijnt, open de inbox na enkele seconden opnieuw.

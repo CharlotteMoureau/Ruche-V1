@@ -10,6 +10,7 @@ La Ruche helps you build a visual board with educational cards. You can move car
 
 - Open the application in your browser.
 - If needed, change the interface language in the footer.
+- You can open `GDPR / Privacy` and `Work in Progress` from the landing page or footer.
 - Create an account or sign in.
 
 ## Create an account
@@ -26,7 +27,7 @@ La Ruche helps you build a visual board with educational cards. You can move car
 3. Enter your password.
 4. Click the sign-in button.
 
-If you forgot your password, use `Forgot password?` and follow the link you receive.
+If you forgot your password, use `Forgot password?`. If email delivery is configured, you will receive a reset link. If not, contact your project administrator.
 
 ## Your profile
 
@@ -117,10 +118,10 @@ You can invite other users by email.
 
 Possible access roles:
 
-- `Admin`: can manage collaboration on the hive
-- `Editor`: can modify the hive
-- `Comment`: can discuss but not edit the board
-- `Read`: can only view
+- `Administrator`: can manage collaboration on the hive
+- `Collaborator (can edit)`: can modify the hive
+- `Comment only`: can discuss but not edit the board
+- `Read only`: can only view
 
 To share a hive:
 
@@ -170,11 +171,11 @@ From there, they can:
 - Use clear hive titles so you can find them later.
 - Check your inbox when you expect a shared hive.
 - Use card notes for details on one card and hive comments for group discussion.
-- Change the language from the footer if needed.
+- Change the language from the footer if needed, and use the footer links for `GDPR / Privacy` and `Work in Progress`.
 
 ## If something goes wrong
 
 - If you cannot sign in, check your email address, username, and password.
 - If a page seems blocked, refresh the browser once.
-- If you do not receive a password reset email, check your spam folder.
+- If you do not receive a password reset email, check your spam folder and confirm that email sending is enabled for your environment.
 - If an invitation does not appear, open the inbox again after a few seconds.
