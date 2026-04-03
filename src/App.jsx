@@ -12,6 +12,8 @@ import ProfilePage from "./pages/ProfilePage";
 import InboxPage from "./pages/InboxPage";
 import RucheEditorPage from "./pages/RucheEditorPage";
 import AdminPage from "./pages/AdminPage";
+import GdprPage from "./pages/GdprPage";
+import WipPage from "./pages/WipPage";
 import { LanguageProvider } from "./context/LanguageContext";
 import Footer from "./components/Footer";
 import { useAuth } from "./context/AuthContext";
@@ -118,6 +120,8 @@ export default function App() {
               </ProtectedRoute>
             }
           />
+          <Route path="/gdpr" element={<GdprPage />} />
+          <Route path="/wip" element={<WipPage />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
         <Footer />

@@ -1,0 +1,203 @@
+@use "../base/variables" as *;
+
+// ── GDPR Page ──────────────────────────────────────────────────────────────
+
+.gdpr-page {
+  max-width: 780px;
+  margin: 0 auto;
+
+  h2 {
+    color: $bleu-fonce;
+    margin-bottom: 12px;
+  }
+
+  .gdpr-intro {
+    font-size: 1rem;
+    color: $gris;
+    line-height: 1.7;
+    margin-bottom: 32px;
+    border-left: 4px solid $turquoise;
+    padding-left: 14px;
+  }
+
+  .gdpr-sections {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+  }
+
+  .gdpr-section {
+    background: #fafaf8;
+    border: 1px solid #e8e4de;
+    border-radius: 8px;
+    padding: 20px 24px;
+
+    h3 {
+      font-size: 1rem;
+      color: $bleu-fonce;
+      margin: 0 0 8px 0;
+    }
+
+    p {
+      font-size: 0.92rem;
+      color: $gris;
+      line-height: 1.65;
+      margin: 0;
+    }
+  }
+
+  .gdpr-contact {
+    margin-top: 32px;
+    font-size: 0.92rem;
+    color: $gris;
+
+    a {
+      color: $bleu-clair;
+      text-decoration: underline;
+
+      &:hover {
+        color: $bleu-fonce;
+      }
+    }
+  }
+
+  .gdpr-back-link {
+    display: inline-block;
+    margin-top: 28px;
+    color: $bleu-clair;
+    text-decoration: none;
+    font-size: 0.9rem;
+
+    &:hover {
+      color: $bleu-fonce;
+      text-decoration: underline;
+    }
+  }
+}
+
+// ── WIP Page ───────────────────────────────────────────────────────────────
+
+.wip-page {
+  max-width: 780px;
+  margin: 0 auto;
+
+  h2 {
+    color: $bleu-fonce;
+    margin-bottom: 12px;
+  }
+
+  .wip-intro {
+    font-size: 1rem;
+    color: $gris;
+    line-height: 1.7;
+    margin-bottom: 32px;
+    border-left: 4px solid $orange;
+    padding-left: 14px;
+  }
+
+  .wip-section-heading {
+    font-size: 1.05rem;
+    color: $bleu-fonce;
+    margin: 32px 0 14px;
+    padding-bottom: 6px;
+    border-bottom: 2px solid rgba($bleu-fonce, 0.12);
+  }
+
+  // — History ——————————————————————————————————————————
+
+  .wip-history {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .wip-version-card {
+    display: flex;
+    gap: 18px;
+    background: #fafaf8;
+    border: 1px solid #e8e4de;
+    border-radius: 8px;
+    padding: 20px 24px;
+    align-items: flex-start;
+
+    .wip-version-badge {
+      flex-shrink: 0;
+      font-size: 0.78rem;
+      font-weight: 700;
+      color: $blanc;
+      background: $bleu-fonce;
+      border-radius: 6px;
+      padding: 4px 10px;
+      letter-spacing: 0.04em;
+      margin-top: 2px;
+    }
+  }
+
+  // — Upcoming features ————————————————————————————————
+
+  .wip-features {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .wip-feature-card {
+    display: flex;
+    gap: 18px;
+    background: #fafaf8;
+    border: 1px solid #e8e4de;
+    border-radius: 8px;
+    padding: 20px 24px;
+    align-items: flex-start;
+
+    .wip-feature-icon {
+      font-size: 1.8rem;
+      line-height: 1;
+      flex-shrink: 0;
+    }
+  }
+
+  // — Shared body ——————————————————————————————————————
+
+  .wip-feature-body {
+    flex: 1;
+
+    h3,
+    h4 {
+      font-size: 1rem;
+      color: $bleu-fonce;
+      margin: 0 0 8px 0;
+    }
+
+    p {
+      font-size: 0.92rem;
+      color: $gris;
+      line-height: 1.65;
+      margin: 0 0 10px 0;
+    }
+
+    .wip-status {
+      display: inline-block;
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: $orange;
+      background: rgba($orange, 0.1);
+      border: 1px solid rgba($orange, 0.3);
+      border-radius: 12px;
+      padding: 2px 10px;
+    }
+  }
+
+  .wip-back-link {
+    display: inline-block;
+    margin-top: 28px;
+    color: $bleu-clair;
+    text-decoration: none;
+    font-size: 0.9rem;
+
+    &:hover {
+      color: $bleu-fonce;
+      text-decoration: underline;
+    }
+  }
+}

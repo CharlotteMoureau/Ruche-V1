@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import { useLanguage } from "../context/LanguageContext";
 
 export default function Footer() {
@@ -22,21 +23,28 @@ export default function Footer() {
           />
         </a>
       </div>
-      <label className="language-select-wrap">
-        <span>{t("language.label")}</span>
-        <select
-          id="language-select"
-          className="language-select"
-          value={language}
-          onChange={(event) => setLanguage(event.target.value)}
-        >
-          {supportedLanguages.map((langCode) => (
-            <option key={langCode} value={langCode}>
-              {t(`language.${langCode}`)}
-            </option>
-          ))}
-        </select>
-      </label>
+      <div className="footer-center">
+        <div className="footer-legal">
+          <Link to="/gdpr">{t("landing.gdpr")}</Link>
+          <span aria-hidden="true">·</span>
+          <Link to="/wip">{t("landing.wip")}</Link>
+        </div>
+        <label className="language-select-wrap">
+          <span>{t("language.label")}</span>
+          <select
+            id="language-select"
+            className="language-select"
+            value={language}
+            onChange={(event) => setLanguage(event.target.value)}
+          >
+            {supportedLanguages.map((langCode) => (
+              <option key={langCode} value={langCode}>
+                {t(`language.${langCode}`)}
+              </option>
+            ))}
+          </select>
+        </label>
+      </div>
       <div className="unif">
         <a href="https://web.umons.ac.be/" target="_blank">
           <img src="/data/logos/umons.png" alt="logo UMons" />

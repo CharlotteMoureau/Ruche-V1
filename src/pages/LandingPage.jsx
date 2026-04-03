@@ -142,14 +142,14 @@ export default function LandingPage() {
 
       <section className="page-shell">
         <section className="landing-footer-info">
-          <div className="landing-gdpr">
+          <Link to="/gdpr" className="landing-info-card landing-gdpr">
             <h4>{t("landing.gdpr")}</h4>
             <p>{t("landing.gdprPlaceholder")}</p>
-          </div>
-          <div className="landing-wip">
+          </Link>
+          <Link to="/wip" className="landing-info-card landing-wip">
             <h4>{t("landing.wip")}</h4>
             <p>{t("landing.wipPlaceholder")}</p>
-          </div>
+          </Link>
         </section>
       </section>
 

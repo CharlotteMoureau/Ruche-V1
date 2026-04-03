@@ -277,6 +277,23 @@
   border: 1px solid #e8e4de;
 }
 
+.landing-info-card {
+  display: block;
+  text-decoration: none;
+  transition: border-color 0.18s, background 0.18s, box-shadow 0.18s;
+
+  &:hover {
+    background: linear-gradient(165deg, rgba($jaune, 0.12) 0%, $blanc 100%);
+    border-color: rgba($bleu-fonce, 0.3);
+    box-shadow: 0 2px 10px rgba($bleu-fonce, 0.08);
+
+    h4 {
+      color: $bleu-clair;
+      text-decoration: underline;
+    }
+  }
+}
+
 @media (max-width: 900px) {
   .site-header {
     flex-direction: column;
