@@ -1,0 +1,279 @@
+@use "../base/variables" as *;
+
+.cta-grid,
+.meta-grid {
+  display: grid;
+  gap: 16px;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.cta-card {
+  display: flex;
+  flex-direction: column;
+  padding: 0;
+  border: 1px solid #ddd;
+  border-left: 5px solid rgba($turquoise, 0.65);
+  border-radius: 12px;
+  text-decoration: none;
+  font-weight: 700;
+  color: #111;
+  background: #fffaf2;
+  overflow: hidden;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+
+  &:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+  }
+}
+
+.cta-card-interactive {
+  cursor: pointer;
+}
+
+.cta-card-image {
+  width: 100%;
+  height: 200px;
+  overflow: hidden;
+  background: #f0eee9;
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+}
+
+.cta-card-content {
+  padding: 20px;
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  color: #111;
+}
+
+.list-grid {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 8px;
+
+  li {
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+  }
+}
+
+.inline-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.button-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  color: #222;
+  background: $jaune;
+  border-radius: 8px;
+  padding: 8px 12px;
+}
+
+/* Unified interaction style for all filled action buttons */
+:where(
+    .site-nav button,
+    .form-grid > button,
+    .button-link,
+    .inline-actions button,
+    .list-grid button,
+    .editor-topbar button,
+    .toolbar button,
+    .modal-box .btn,
+    .comment-reply-actions button,
+    .comments-new button,
+    .card-note-actions button,
+    .danger-btn,
+    .toolbar-leave-btn,
+    .toolbar-collaborator-remove
+  ) {
+  transition:
+    background-color 180ms ease,
+    transform 180ms ease,
+    box-shadow 180ms ease,
+    filter 180ms ease;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.12);
+  font-family: "Roboto", sans-serif;
+  font-size: 1rem;
+  font-weight: 500;
+  line-height: 1.2;
+}
+
+:where(
+    .site-nav button,
+    .form-grid > button,
+    .button-link,
+    .inline-actions button,
+    .list-grid button,
+    .editor-topbar button,
+    .toolbar button,
+    .modal-box .btn,
+    .comment-reply-actions button,
+    .comments-new button,
+    .card-note-actions button,
+    .danger-btn,
+    .toolbar-leave-btn,
+    .toolbar-collaborator-remove
+  ):focus-visible {
+  outline: 3px solid $bleu-fonce;
+  outline-offset: 2px;
+}
+
+:where(
+    .site-nav button,
+    .form-grid > button,
+    .inline-actions button,
+    .list-grid button,
+    .editor-topbar button,
+    .toolbar button,
+    .modal-box .btn,
+    .comment-reply-actions button,
+    .comments-new button,
+    .card-note-actions button,
+    .danger-btn,
+    .toolbar-leave-btn,
+    .toolbar-collaborator-remove
+  ):not(:disabled):hover,
+:where(
+    .button-link,
+    .danger-btn
+  ):hover {
+  transform: translateY(-1px);
+  filter: brightness(0.95);
+  box-shadow: 0 8px 14px rgba(0, 0, 0, 0.16);
+}
+
+:where(
+    .site-nav button,
+    .form-grid > button,
+    .inline-actions button,
+    .list-grid button,
+    .editor-topbar button,
+    .toolbar button,
+    .modal-box .btn,
+    .comment-reply-actions button,
+    .comments-new button,
+    .card-note-actions button,
+    .danger-btn,
+    .toolbar-leave-btn,
+    .toolbar-collaborator-remove
+  ):not(:disabled):active,
+:where(
+    .button-link,
+    .danger-btn
+  ):active {
+  transform: translateY(0);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.14);
+}
+
+.inline-actions button,
+.list-grid button,
+.editor-topbar button {
+  border: 0;
+  border-radius: 8px;
+  padding: 8px 12px;
+  cursor: pointer;
+  background: $jaune;
+  color: #222;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :where(
+      .site-nav button,
+      .form-grid > button,
+      .button-link,
+      .inline-actions button,
+      .list-grid button,
+      .editor-topbar button,
+      .toolbar button,
+      .modal-box .btn,
+      .comment-reply-actions button,
+      .comments-new button,
+      .card-note-actions button,
+      .danger-btn,
+      .toolbar-leave-btn,
+      .toolbar-collaborator-remove
+    ) {
+    transition: none;
+  }
+
+  :where(
+      .site-nav button,
+      .form-grid > button,
+      .inline-actions button,
+      .list-grid button,
+      .editor-topbar button,
+      .toolbar button,
+      .modal-box .btn,
+      .comment-reply-actions button,
+      .comments-new button,
+      .card-note-actions button,
+      .danger-btn,
+      .toolbar-leave-btn,
+      .toolbar-collaborator-remove
+    ):not(:disabled):hover,
+  :where(
+      .button-link,
+      .danger-btn
+    ):hover {
+    transform: none;
+    filter: none;
+  }
+}
+
+a.button-link-open,
+button.button-link-open {
+  background: $jaune;
+}
+
+a.button-link-duplicate,
+button.button-link-duplicate {
+  background: $jaune;
+}
+
+a.button-link-delete,
+button.button-link-delete {
+  background: $rose;
+  color: #fff;
+}
+
+button.danger-btn,
+a.danger-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 0;
+  border-radius: 8px;
+  padding: 8px 12px;
+  cursor: pointer;
+  background: $rose;
+  color: #fff;
+}
+
+a.button-link-download,
+button.button-link-download {
+  background: $jaune;
+}

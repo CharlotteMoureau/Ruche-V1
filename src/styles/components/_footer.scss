@@ -1,0 +1,109 @@
+@use "../base/variables" as *;
+
+footer {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 1400;
+    height: 80px;
+    display: flex !important;
+    justify-content: space-between;
+    align-items: center;
+    background: #faf9f6;
+    border-top: 1px solid #ddd;
+    padding: 0 8px;
+
+    img {
+        height: 50px;
+        padding: 10px;
+    }
+
+    .administration,
+    .unif {
+        display: flex;
+        align-items: center;
+        flex: 1;
+    }
+
+    .administration {
+        justify-content: flex-start;
+    }
+
+    .unif {
+        justify-content: flex-end;
+    }
+
+    .footer-center {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 4px;
+        flex: 0 0 auto;
+    }
+
+    .language-select-wrap {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        white-space: nowrap;
+
+        span {
+            font-size: 14px;
+            color: #333;
+        }
+
+        select {
+            padding: 6px 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            background-color: white;
+            cursor: pointer;
+            font-size: 14px;
+        }
+    }
+}
+
+body.ios footer {
+    height: 60px;
+
+    img {
+        height: 37.5px;
+        padding: 7.5px;
+    }
+
+    .language-select-wrap {
+        gap: 6px;
+
+        span {
+            font-size: 12px;
+        }
+
+        select {
+            padding: 4px 6px;
+            font-size: 12px;
+        }
+    }
+}
+
+.footer-legal {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 12px;
+
+    a {
+        color: $gris;
+        text-decoration: none;
+
+        &:hover {
+            color: $bleu-fonce;
+            text-decoration: underline;
+        }
+    }
+
+    span {
+        color: #aaa;
+    }
+}

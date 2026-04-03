@@ -1,0 +1,136 @@
+@use "../base/variables" as *;
+
+.admin-page {
+  max-width: 1300px;
+
+  h3 {
+    margin: 24px 0 12px;
+    display: flex;
+    width: fit-content;
+    align-items: center;
+    gap: 10px;
+    padding: 6px 12px;
+    border-left: 4px solid $orange;
+    border-radius: 8px;
+    background: linear-gradient(90deg, rgba(239, 125, 0, 0.12) 0%, #fff 85%);
+    color: #4a2b05;
+    font-size: clamp(1.1rem, 1.3vw, 1.3rem);
+    letter-spacing: 0.01em;
+  }
+}
+
+.admin-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+  flex-wrap: wrap;
+}
+
+.admin-search {
+  flex: 1 1 220px;
+  padding: 8px 12px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  min-width: 0;
+}
+
+.admin-table-wrap {
+  overflow-x: auto;
+  margin-bottom: 10px;
+  border: 1px solid #e2ded8;
+  border-radius: 10px;
+}
+
+.admin-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+
+  thead tr {
+    background: #f5f2ed;
+  }
+
+  th {
+    padding: 10px 12px;
+    text-align: left;
+    font-weight: 700;
+    white-space: nowrap;
+    border-bottom: 2px solid #e2ded8;
+    color: #444;
+  }
+
+  .admin-sort-btn {
+    border: 0;
+    background: transparent;
+    padding: 0;
+    font: inherit;
+    font-weight: 700;
+    color: inherit;
+    cursor: pointer;
+    text-align: left;
+
+    &:hover {
+      color: #2f2f2f;
+      text-decoration: underline;
+      text-underline-offset: 2px;
+    }
+  }
+
+  td {
+    padding: 9px 12px;
+    vertical-align: middle;
+    border-bottom: 1px solid #eeebe6;
+  }
+
+  tbody tr:last-child td {
+    border-bottom: none;
+  }
+
+  tbody tr:hover > td {
+    background: #fdf9f4;
+  }
+
+  .admin-num {
+    text-align: center;
+    color: #555;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .admin-date {
+    white-space: nowrap;
+    color: #666;
+    font-size: 0.82rem;
+  }
+}
+
+.admin-edit-row td {
+  background: #fffaf3;
+  padding: 14px 16px;
+
+  .admin-inline-form {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 14px;
+    align-items: flex-end;
+
+    label {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      min-width: 160px;
+
+      input,
+      select {
+        padding: 8px 10px;
+        border: 1px solid #ccc;
+        border-radius: 8px;
+        font-size: 0.875rem;
+        background: #fff;
+      }
+    }
+  }
+}

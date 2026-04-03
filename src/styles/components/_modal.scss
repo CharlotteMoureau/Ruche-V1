@@ -1,0 +1,636 @@
+@use "sass:color";
+@use "../base/variables" as *;
+
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+}
+
+.modal-box {
+  background: white;
+  padding: 2rem;
+  border-radius: 1rem;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
+  text-align: center;
+  max-width: 400px;
+  width: 90%;
+  position: relative;
+  z-index: 10000; 
+}
+
+
+.modal-box h2 {
+  margin-bottom: 1rem;
+  font-size: 1.4rem;
+  color: #333;
+}
+
+.modal-box input {
+  width: 100%;
+  padding: 0.6rem 0.8rem;
+  font-size: 1rem;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  margin-bottom: 5px;
+  outline: none;
+}
+
+.modal-box input:focus {
+  border-color: #666;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.modal-box .btn {
+  flex: 1;
+  padding: 0.6rem;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 600;
+  background-color: $jaune;
+  color: #222;
+  transition: background 0.2s;
+}
+
+.modal-box .btn:hover {
+  background-color: color.adjust($jaune, $lightness: -10%);
+}
+
+.modal-box .btn.secondary {
+  background-color: $jaune;
+  color: #222;
+}
+
+.modal-box .btn.secondary:hover {
+  background-color: color.adjust($jaune, $lightness: -10%);
+}
+
+.modal-box .btn.danger {
+  background-color: $rose;
+  color: #fff;
+}
+
+.modal-box .btn.danger:hover {
+  background-color: color.adjust($rose, $lightness: -10%);
+}
+
+.counter-text {
+  font-size: 0.9rem;
+  color: #666;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: scale(0.95); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+.char-count {
+  text-align: right;
+  font-size: 0.85rem;
+  color: #666;
+  margin-bottom: 10px;
+}
+
+.modal-error {
+  margin: 0.35rem 0 0.5rem;
+  color: $rose;
+  font-size: 0.85rem;
+  text-align: left;
+}
+
+.color-picker-label {
+  font-size: 0.85rem;
+  color: #555;
+  margin-bottom: 0.4rem;
+}
+
+.color-picker {
+  display: flex;
+  gap: 0.6rem;
+  justify-content: center;
+  margin-bottom: 1rem;
+
+  .color-swatch {
+    position: relative;
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    border: none;
+    cursor: pointer;
+    transition: transform 0.15s;
+    outline: 3px solid transparent;
+    outline-offset: 2px;
+
+    &:hover {
+      transform: scale(1.2);
+    }
+
+    &.selected {
+      outline-color: #333;
+    }
+
+    &[data-label]::after {
+      content: attr(data-label);
+      position: absolute;
+      bottom: calc(100% + 6px);
+      left: 50%;
+      transform: translateX(-50%);
+      background: #333;
+      color: #fff;
+      font-size: 0.72rem;
+      white-space: normal;
+      max-width: 180px;
+      text-align: center;
+      padding: 4px 8px;
+      border-radius: 4px;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.15s;
+      z-index: 10001;
+    }
+
+    &[data-label]:hover::after {
+      opacity: 1;
+    }
+  }
+}
+
+.popup-warning {
+  position: fixed;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: #ffcc00;
+  color: #333;
+  padding: 12px 24px;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+  font-weight: bold;
+  z-index: 1000;
+  animation: fadeInOut 3s ease forwards;
+}
+
+@keyframes fadeInOut {
+  0% {
+    opacity: 0;
+    transform: translateX(-50%) translateY(-20px);
+  }
+  10% {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+  90% {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+  100% {
+    opacity: 0;
+    transform: translateX(-50%) translateY(-20px);
+  }
+}
+
+// ── Comments modal ─────────────────────────────────────────────────────────
+
+.comments-modal {
+  max-width: 560px;
+  width: 94%;
+  max-height: 85vh;
+  display: flex;
+  flex-direction: column;
+  text-align: left;
+  padding: 1.5rem;
+  position: relative;
+
+  h2 {
+    margin: 0 0 1rem;
+    font-size: 1.25rem;
+    padding-right: 2rem;
+  }
+}
+
+.modal-close-btn {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  line-height: 1;
+  cursor: pointer;
+  color: #666;
+  padding: 0 0.25rem;
+
+  &:hover { color: #333; }
+}
+
+.comments-scroll {
+  flex: 1;
+  overflow-y: auto;
+  padding-right: 4px;
+  margin-bottom: 1rem;
+}
+
+.comments-empty {
+  color: #888;
+  font-style: italic;
+  text-align: center;
+  padding: 1rem 0;
+}
+
+.comment-thread {
+  margin-bottom: 0.75rem;
+}
+
+.comment-item {
+  background: #f9f7f4;
+  border: 1px solid #e0dcd5;
+  border-radius: 8px;
+  padding: 0.6rem 0.75rem;
+
+  &--reply {
+    margin-left: 1.5rem;
+    margin-top: 0.4rem;
+    background: #f3f0ea;
+    border-left: 3px solid $jaune;
+  }
+}
+
+.comment-header {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+  margin-bottom: 0.25rem;
+
+  strong {
+    font-size: 0.9rem;
+  }
+}
+
+.comment-date {
+  font-size: 0.75rem;
+  color: #999;
+}
+
+.comment-message {
+  margin: 0 0 0.4rem;
+  font-size: 0.9rem;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.comment-actions {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.comment-action-btn {
+  border: 0;
+  border-radius: 8px;
+  padding: 0.35rem 0.75rem;
+  font-size: 0.82rem;
+  font-weight: 600;
+  line-height: 1.2;
+  background: $jaune;
+  color: #222;
+  cursor: pointer;
+  text-decoration: none;
+
+  &:hover {
+    background: color.adjust($jaune, $lightness: -8%);
+  }
+
+  &:focus-visible {
+    outline: 3px solid $bleu-fonce;
+    outline-offset: 2px;
+  }
+
+  &--danger {
+    background: $rose;
+    color: #fff;
+
+    &:hover {
+      background: color.adjust($rose, $lightness: -8%);
+    }
+  }
+}
+
+.comment-reply-form {
+  margin-left: 1.5rem;
+  margin-top: 0.4rem;
+
+  textarea {
+    width: 100%;
+    box-sizing: border-box;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    padding: 0.4rem 0.6rem;
+    font-size: 0.88rem;
+    resize: vertical;
+    font-family: inherit;
+
+    &:focus { outline: none; border-color: $turquoise; }
+  }
+}
+
+.comment-reply-actions {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.4rem;
+  flex-wrap: wrap;
+
+  button {
+    padding: 0.4rem 0.8rem;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 0.82rem;
+    font-weight: 600;
+    background: $jaune;
+    color: #222;
+
+    &.secondary {
+      background: $jaune;
+      color: #222;
+    }
+  }
+}
+
+.comments-new {
+  display: flex;
+  gap: 0.5rem;
+  align-items: flex-end;
+  border-top: 1px solid #eee;
+  padding-top: 0.9rem;
+  flex-shrink: 0;
+
+  textarea {
+    flex: 1;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    padding: 0.4rem 0.6rem;
+    font-size: 0.9rem;
+    resize: vertical;
+    font-family: inherit;
+
+    &:focus { outline: none; border-color: $turquoise; }
+  }
+
+  button {
+    padding: 0.5rem 1rem;
+    border: none;
+    border-radius: 8px;
+    background: $jaune;
+    color: #222;
+    font-weight: 600;
+    cursor: pointer;
+    white-space: nowrap;
+    align-self: flex-end;
+  }
+}
+
+// ── Toolbar comments badge ──────────────────────────────────────────────────
+
+.toolbar-comments-btn {
+  position: relative;
+}
+
+.toolbar-action-btn.is-locked,
+.toolbar-comments-btn.is-locked {
+  opacity: 0.58;
+  cursor: not-allowed;
+}
+
+.toolbar-comments-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: $rose;
+  color: #fff;
+  font-size: 0.7rem;
+  font-weight: 700;
+  border-radius: 999px;
+  min-width: 1.1em;
+  height: 1.1em;
+  padding: 0.7em 0.5em;
+  margin-left: 0.35em;
+  vertical-align: middle;
+  line-height: 1;
+}
+
+.toolbar-invite-modal {
+  text-align: left;
+  max-width: 620px;
+  width: 94%;
+  max-height: 85vh;
+  overflow-y: auto;
+
+  h2 {
+    margin-top: 0;
+    padding-right: 2rem;
+  }
+}
+
+.toolbar-invite-grid {
+  margin-top: 0.5rem;
+
+  button[disabled] {
+    opacity: 0.7;
+    cursor: wait;
+  }
+}
+
+.toolbar-role-toggle {
+  min-height: 40px;
+  border: 1px solid #cfc7bc;
+  border-radius: 999px;
+  padding: 8px 36px 8px 12px;
+  background-color: #fff;
+  color: #273043;
+  font-weight: 600;
+  line-height: 1.1;
+  cursor: pointer;
+  -webkit-appearance: none;
+  appearance: none;
+  background-image:
+    linear-gradient(45deg, transparent 50%, #6f6556 50%),
+    linear-gradient(135deg, #6f6556 50%, transparent 50%);
+  background-position:
+    calc(100% - 18px) calc(50% - 3px),
+    calc(100% - 12px) calc(50% - 3px);
+  background-size: 6px 6px, 6px 6px;
+  background-repeat: no-repeat;
+
+  &:focus-visible {
+    outline: 3px solid rgba(47, 127, 146, 0.28);
+    outline-offset: 1px;
+    border-color: #8ca9b1;
+  }
+}
+
+.toolbar-collaborators-section {
+  margin-top: 1rem;
+  padding-top: 0.9rem;
+  border-top: 1px solid #eee;
+
+  h3 {
+    margin: 0 0 0.6rem;
+    font-size: 1rem;
+    color: #333;
+  }
+}
+
+.toolbar-modal-warning {
+  margin: 0.35rem 0 0;
+}
+
+.toolbar-leave-section {
+  margin-top: 0.9rem;
+  padding-top: 0.9rem;
+  border-top: 1px solid #eee;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.toolbar-leave-btn {
+  border: 0;
+  border-radius: 8px;
+  padding: 8px 12px;
+  cursor: pointer;
+  background: $rose;
+  color: #fff;
+  font-weight: 600;
+
+  &:disabled {
+    opacity: 0.7;
+    cursor: wait;
+  }
+}
+
+.toolbar-collaborators-list {
+  li {
+    align-items: center;
+  }
+
+  .toolbar-collaborator-remove {
+    background: $rose;
+    color: #fff;
+  }
+
+  select[disabled],
+  button[disabled] {
+    opacity: 0.65;
+    cursor: wait;
+  }
+}
+
+@media (min-width: 768px) and (max-width: 1200px) and (pointer: coarse) {
+  .toolbar-collaborators-list .inline-actions .toolbar-role-toggle {
+    min-width: 170px;
+    min-height: 42px;
+    padding-right: 38px;
+  }
+}
+
+// ── Card comment modal ─────────────────────────────────────────────────────
+
+.card-note-modal {
+  max-width: 620px;
+
+  .card-note-card-title {
+    margin: 0 0 0.65rem;
+    font-weight: 700;
+    color: #3a3a3a;
+  }
+
+  .card-note-meta {
+    margin-top: 0.65rem;
+    padding-top: 0.55rem;
+    border-top: 1px dashed #ddd2c7;
+
+    p {
+      margin: 0.1rem 0;
+      font-size: 0.82rem;
+      color: #666;
+    }
+  }
+
+  .card-note-thread {
+    margin-bottom: 0.75rem;
+  }
+
+  .card-note-item {
+    background: #fff9ef;
+    border-color: #e7dccf;
+  }
+
+  .card-note-editor {
+    margin-top: 0.6rem;
+
+    textarea {
+      min-height: 7.25rem;
+    }
+  }
+
+  .card-note-actions {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    margin-top: 0.75rem;
+
+    .card-note-save-btn {
+      color: $bleu-fonce;
+      font-weight: 700;
+    }
+  }
+}
+
+@media (max-width: 640px) {
+  .comments-new {
+    flex-direction: column;
+    align-items: stretch;
+
+    button {
+      align-self: flex-end;
+    }
+  }
+
+  .card-note-modal .card-note-actions {
+    justify-content: flex-start;
+  }
+}
+
+.unified-prompt-modal {
+  max-width: 460px;
+  text-align: left;
+
+  h2 {
+    margin: 0 0 0.8rem;
+  }
+}
+
+.unified-prompt-message {
+  margin: 0 0 0.8rem;
+  color: #444;
+}
+
+.unified-prompt-form {
+  margin: 0;
+
+  .modal-actions {
+    margin-bottom: 0;
+  }
+}

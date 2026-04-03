@@ -1,0 +1,84 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+enum CollaboratorRole {
+  ADMIN
+  EDITOR
+  COMMENT
+  READ
+}
+
+model User {
+  id             String               @id @default(cuid())
+  username       String               @unique
+  email          String               @unique
+  passwordHash   String
+  firstName      String?
+  lastName       String?
+  roleLabel      String
+  roleOtherText  String?
+  createdAt      DateTime             @default(now())
+  updatedAt      DateTime             @updatedAt
+  hives          Hive[]               @relation("HiveOwner")
+  collaborations HiveCollaborator[]
+  comments       HiveComment[]
+  resetTokens    PasswordResetToken[]
+}
+
+model Hive {
+  id            String             @id @default(cuid())
+  title         String
+  kind          String             @default("STANDARD")
+  boardData     Json
+  boardSnapshot Json?
+  boardPreviewImage String?
+  ownerId       String
+  owner         User               @relation("HiveOwner", fields: [ownerId], references: [id], onDelete: Cascade)
+  collaborators HiveCollaborator[]
+  comments      HiveComment[]
+  createdAt     DateTime           @default(now())
+  updatedAt     DateTime           @updatedAt
+}
+
+model HiveCollaborator {
+  id       String           @id @default(cuid())
+  hiveId   String
+  userId   String
+  role     CollaboratorRole
+  invitedAt DateTime        @default(now())
+  hive     Hive             @relation(fields: [hiveId], references: [id], onDelete: Cascade)
+  user     User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([hiveId, userId])
+}
+
+model HiveComment {
+  id        String        @id @default(cuid())
+  hiveId    String
+  authorId  String
+  message   String
+  parentId  String?
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+  hive      Hive          @relation(fields: [hiveId], references: [id], onDelete: Cascade)
+  author    User          @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  parent    HiveComment?  @relation("CommentReplies", fields: [parentId], references: [id], onDelete: Cascade)
+  replies   HiveComment[] @relation("CommentReplies")
+}
+
+model PasswordResetToken {
+  id         String   @id @default(cuid())
+  tokenHash  String   @unique
+  userId     String
+  expiresAt  DateTime
+  usedAt     DateTime?
+  createdAt  DateTime @default(now())
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}

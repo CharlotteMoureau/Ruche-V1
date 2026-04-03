@@ -1,104 +1,24 @@
-@use "./variables" as *;
-@use "./titre" as *;
-@use "./hex" as *;
-@use "./cardlibrary" as *;
-@use "./hiveboard" as *;
-@use "./footer" as *;
-@use "./reset" as *;
-@use "./modal" as *;
-@use "./freespacecard" as *;
+@use "./base/variables" as *;
+@use "./base/reset" as *;
+@use "./base/base" as *;
 
-body {
-  margin: 0;
-  font-family: "roboto", sans-serif;
-  background-color: #faf9f6;
-  color: #333;
-}
+@use "./layout/layout" as *;
+@use "./layout/editor" as *;
 
-.app {
-  display: flex;
-  flex-direction: row;
-  height: calc(100vh - 180px);
-  margin-top: 10px;
-  margin-bottom: 10px;
+@use "./components/forms" as *;
+@use "./components/actions" as *;
+@use "./components/titre" as *;
+@use "./components/hex" as *;
+@use "./components/cardlibrary" as *;
+@use "./components/hiveboard" as *;
+@use "./components/hivepreview" as *;
+@use "./components/modal" as *;
+@use "./components/freespacecard" as *;
+@use "./components/loader" as *;
+@use "./components/footer" as *;
 
-  @media (max-width: 768px) {
-    flex-direction: column;
-  }
-}
-
-/* ----------------------- */
-/* Bloquer smartphone      */
-/* ----------------------- */
-@media (max-width: 767px) {
-  body>* {
-    display: none !important;
-    /* masque tout le contenu */
-  }
-
-  body::before {
-    content: "⚠️ Ce site n'est pas accessible sur smartphone. Veuillez utiliser une tablette en mode paysage ou un écran plus grand.";
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    width: 100%;
-    height: 100vh;
-    box-sizing: border-box;
-    background-color: #fff;
-    color: #333;
-    font-size: 1rem;
-    font-family: sans-serif;
-    text-align: center;
-    padding: 20px;
-  }
-}
-
-/* ----------------------- */
-/* Tablette portrait       */
-/* ----------------------- */
-@media (min-width: 768px) and (max-width: 1024px) and (orientation: portrait) {
-  body>* {
-    display: none !important;
-    /* masque tout le contenu en portrait */
-  }
-
-  body::before {
-    content: "⚠️ Veuillez utiliser la tablette en mode paysage pour accéder au site.";
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    width: 100%;
-    height: 100vh;
-    box-sizing: border-box;
-    background-color: #fff;
-    color: #333;
-    font-size: 1rem;
-    font-family: sans-serif;
-    text-align: center;
-    padding: 20px;
-  }
-}
-
-/* ----------------------- */
-/* Tablette paysage / PC   */
-/* ----------------------- */
-@media (min-width: 768px) and (orientation: landscape),
-(min-width: 1025px) {
-  body>* {
-    display: block !important;
-    /* contenu visible */
-  }
-
-  body::before {
-    display: none;
-  }
-}
-
-body.ios {
-  overflow: hidden;
-  -webkit-overflow-scrolling: none;
-
-  .app {
-    height: calc(100dvh - 160px);
-  }
-}
+@use "./pages/admin" as *;
+@use "./pages/profile" as *;
+@use "./pages/inbox" as *;
+@use "./pages/landing" as *;
+@use "./pages/gdpr-wip" as *;

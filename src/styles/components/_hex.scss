@@ -1,10 +1,10 @@
-@use "./variables" as *;
+@use "../base/variables" as *;
 
 .hex-card {
   color: white;
 
   .hex {
-    width: 200px;
+    width: var(--board-card-size, 200px);
     aspect-ratio: 1;
     perspective: 800px;
 
@@ -129,23 +129,36 @@
   display: none !important;
 }
 
-.long-def {
-  overflow-y: scroll;
-  scrollbar-width: thin !important;
-  scrollbar-color: rgba(0, 0, 0, 0.1) transparent;
+.capture-mode.capture-mode-back .hex-inner {
+  transform: rotateY(180deg) !important;
+}
 
-  &::-webkit-scrollbar {
-    width: 4px;
-    cursor: pointer;
-  }
+.capture-mode.capture-mode-back .hex-front {
+  display: none !important;
+}
 
-  &::-webkit-scrollbar-track {
-    background: transparent;
-  }
+.capture-mode.capture-mode-back .hex-back {
+  display: flex !important;
+}
 
-  &::-webkit-scrollbar-thumb {
-    background-color: rgba(0, 0, 0, 0.1);
-    border-radius: 10px;
+/* Tablet: make .hex-back the scroll container for long back text.
+   The hex shape is visually clipped by the SVG clipPath on <foreignObject>,
+   so overriding overflow: hidden here does not break the hex outline. */
+@media (min-width: 768px) and (max-width: 1200px) and (pointer: coarse) {
+  .draggable-card .hex-back:has(.long-def) {
+    overflow-y: auto !important;
+    -webkit-overflow-scrolling: touch;
+    touch-action: pan-y;
+    overscroll-behavior: contain;
+    /* Start content from the top so the user can scroll down into the hex */
+    justify-content: flex-start;
+    /* Push content below the tapered top of the hex shape (flat edge ≈ 25% of height) */
+    padding-top: 26%;
+    /* Hide scrollbar visually — scrolling still works */
+    scrollbar-width: none;
+    &::-webkit-scrollbar {
+      display: none;
+    }
   }
 }
 
@@ -171,7 +184,30 @@
 }
 
 .draggable-card.selected::before {
-  opacity: 0.9;
+  opacity: 0;
+}
+
+.draggable-card.selected .hex {
+  overflow: visible;
+}
+
+.draggable-card.selected .hex-shape {
+  stroke: $bleu-fonce;
+  stroke-width: 3;
+  stroke-dasharray: none;
+}
+
+.draggable-card.selected .hex.reco-enseignant .hex-shape,
+.draggable-card.selected .hex.reco-equipe .hex-shape {
+  stroke: $bleu-fonce;
+  stroke-width: 3;
+  stroke-dasharray: none;
+}
+
+.draggable-card.selected .free-space-card .hex-shape {
+  stroke: $bleu-fonce;
+  stroke-width: 3;
+  stroke-dasharray: none;
 }
 
 .draggable-card.dragging {
@@ -256,17 +292,20 @@ body.ios {
     width: 180px;
     height: 180px;
     -webkit-perspective: 800px;
+    perspective: 800px;
   }
 
   .hex-inner {
     min-width: 180px;
     min-height: 180px;
     -webkit-transform-style: preserve-3d;
+    transform-style: preserve-3d;
   }
 
   .hex-front,
   .hex-back {
     -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
 
     img {
       height: 50px !important;

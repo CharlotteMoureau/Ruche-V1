@@ -1,0 +1,302 @@
+[
+  {
+    "id": "I",
+    "title": "Immersion",
+    "definition": "Students are immersed and captivated by the cultural and artistic encounters, practices and/or knowledge they experience. They are attentive and curious.",
+    "category": "aims"
+  },
+  {
+    "id": "II",
+    "title": "Vocabulary",
+    "definition": "Students learn new terms related to the cultural and artistic fields covered.",
+    "category": "aims"
+  },
+  {
+    "id": "III",
+    "title": "Discoveries",
+    "definition": "Students discover characters, works, places, events and/or artistic or cultural trends through their experiences.",
+    "category": "aims"
+  },
+  {
+    "id": "IV",
+    "title": "Sensory appeal",
+    "definition": "Students use a range of senses to appreciate and examine artistic works, objects and cultural sites.",
+    "category": "aims"
+  },
+  {
+    "id": "V",
+    "title": "Expressions",
+    "definition": "Students use and combine artistic and/or cultural tools and media to express their feelings, emotions, ideas, etc.",
+    "category": "aims"
+  },
+  {
+    "id": "VI",
+    "title": "Experimentation",
+    "definition": "Students explore techniques, tools and materials. They take the initiative and/or reasonable risks as part of a learning-by-experimentation approach.",
+    "category": "aims"
+  },
+  {
+    "id": "VII",
+    "title": "Questions",
+    "definition": "Students explore the origins of the work and/or artistic practice, its place in history (historic and contemporary) and its relationship with traditions (local, cultural, etc).",
+    "category": "aims"
+  },
+  {
+    "id": "VIII",
+    "title": "Distinction",
+    "definition": "Students use one or several criteria (sensory/emotional, technical, historical, cultural, etc.) to differentiate cultural and artistic practices or creations.",
+    "category": "aims"
+  },
+  {
+    "id": "IX",
+    "title": "Listening to each other",
+    "definition": "The students are attentive and receptive to each other's experiences.",
+    "category": "aims"
+  },
+  {
+    "id": "X",
+    "title": "Collective creation",
+    "definition": "Students organise themselves by sharing and coordinating roles and tasks within a group to create a joint work.",
+    "category": "aims"
+  },
+  {
+    "id": "XI",
+    "title": "Memories (records)",
+    "definition": "Students treasure their memories of their cultural and artistic experiences.",
+    "category": "aims"
+  },
+  {
+    "id": "XII",
+    "title": "Search for meaning",
+    "definition": "Students seek to make links and construct meaning (for example through a story or an explanation) based on their past and present cultural and artistic experiences.",
+    "category": "aims"
+  },
+  {
+    "id": "XIII",
+    "title": "Sharing",
+    "definition": "Students share the artistic processes and/or creations in which they have taken part with other members of the educational community.",
+    "category": "aims"
+  },
+  {
+    "id": "XIV",
+    "title": "Transfer",
+    "definition": "Students identify and transfer what they have learnt from the experience to other academic and/or cross-curricular subjects.",
+    "category": "aims"
+  },
+  {
+    "id": "1",
+    "title": "Pathway",
+    "definition": "I am designing my intervention in line with the students' PECA, respecting the principles of diversity and progressive learning.",
+    "category": "teacher-conditions"
+  },
+  {
+    "id": "2",
+    "title": "Encountering/Practising/Understanding",
+    "definition": "I combine at least two of the three components of the PECA in a complementary way.",
+    "category": "teacher-conditions"
+  },
+  {
+    "id": "3",
+    "title": "Objectives",
+    "definition": "I define the objectives of the intervention beforehand and present them to Students. In partnerships, objectives are set jointly.",
+    "category": "teacher-conditions"
+  },
+  {
+    "id": "4",
+    "title": "Space",
+    "definition": "I look for a suitable space for the intervention (in the school and/or the cultural and artistic venue)",
+    "category": "teacher-conditions"
+  },
+  {
+    "id": "5",
+    "title": "Equipment",
+    "definition": "I provide functional, high-quality equipment for the students.",
+    "category": "teacher-conditions"
+  },
+  {
+    "id": "6",
+    "title": "Budget",
+    "definition": "Together with the school management, I draw up a budget for the event to enable all the students to take part, and apply for any subsidies/grants from the FW-B, etc.",
+    "category": "teacher-conditions"
+  },
+  {
+    "id": "7",
+    "title": "Duration",
+    "definition": "I am planning a duration suitable to the attention-span of the students, both in terms of the intervention as a whole and during the individual sessions.",
+    "category": "teacher-conditions"
+  },
+  {
+    "id": "8",
+    "title": "Process",
+    "definition": "I value the process as much as the final creation (show, exhibition, etc).",
+    "category": "teacher-conditions"
+  },
+  {
+    "id": "9",
+    "title": "Respect & trust",
+    "definition": "I show respect for and trust in my students and partners, and I value everyone's contribution.",
+    "category": "teacher-conditions"
+  },
+  {
+    "id": "10",
+    "title": "Self-assessment",
+    "definition": "I give students time and the appropriate tools to take a step back, in particular using their own memories and records to encourage discussion and critical thinking.",
+    "category": "teacher-conditions"
+  },
+  {
+    "id": "11",
+    "title": "Reflexivity",
+    "definition": "I draw up an assessment of the work carried out in relation to the objectives set.",
+    "category": "teacher-conditions"
+  },
+  {
+    "id": "12",
+    "title": "Levels of difficulty",
+    "definition": "I plan tasks with an appropriate level of difficulty that allows each student to flourish.",
+    "category": "teacher-recommendations"
+  },
+  {
+    "id": "13",
+    "title": "Interdisciplinarity",
+    "definition": "I involve or connect the work with other school subjects.",
+    "category": "teacher-recommendations"
+  },
+  {
+    "id": "14",
+    "title": "Students' background",
+    "definition": "I make links with the students' (potential) interests, current events and/or the reality of their situations (in particular the socio-cultural history of the students' families).",
+    "category": "teacher-recommendations"
+  },
+  {
+    "id": "15",
+    "title": "Local resources",
+    "definition": "I contact local people and/or resources (cultural operators, non-profit organisations, etc.) to set up activities in and/or outside the school (visits to regional cultural and artistic sites, heritage sites, etc).",
+    "category": "teacher-recommendations"
+  },
+  {
+    "id": "16",
+    "title": "Family involvement",
+    "definition": "I plan moments and tools to involve families during the process and/or at the end of the intervention.",
+    "category": "teacher-recommendations"
+  },
+  {
+    "id": "17",
+    "title": "Collaboration",
+    "definition": "In the case of partnerships, the partners take into account the specific details of the different aspects (classroom, artistic and cultural). They agree on the \"conditions\" cells and define everyone's roles and responsibilities.",
+    "category": "teacher-recommendations"
+  },
+  {
+    "id": "18",
+    "title": "Project",
+    "definition": "I include the intervention in the project educational material.",
+    "category": "teacher-recommendations"
+  },
+  {
+    "id": "19",
+    "title": "Communication",
+    "definition": "I explain the intervention, its stages and/or expected results to management, colleagues, families and/or other colleagues from other institutions.",
+    "category": "teacher-recommendations"
+  },
+  {
+    "id": "20",
+    "title": "Performances",
+    "definition": "I ask the students about their opinions on cultural and/or artistic performances, artists, works and/or heritage sites.",
+    "category": "teacher-recommendations"
+  },
+  {
+    "id": "21",
+    "title": "Participation",
+    "definition": "I take part in the tasks carried out by the students, as a learner, model and/or co-creator.",
+    "category": "teacher-recommendations"
+  },
+  {
+    "id": "22",
+    "title": "Team spirit",
+    "definition": "I encourage group work / collaboration, cooperation and team spirit among students.",
+    "category": "teacher-recommendations"
+  },
+  {
+    "id": "23",
+    "title": "Flexibility",
+    "definition": "I am flexible enough to respond to students' needs and respond to their feedback.",
+    "category": "teacher-recommendations"
+  },
+  {
+    "id": "24",
+    "title": "Right to make mistakes",
+    "definition": "I encourage risk-taking, letting go and the right to make mistakes in the creative process.",
+    "category": "teacher-recommendations"
+  },
+  {
+    "id": "P",
+    "title": "Planning",
+    "definition": "In association with the partners involved, the educational team plans the integration of the various interventions into the students' PECA, along with the implementation and coordination of the various interventions from a complementary perspective. We are including PECA in the school's management plan.",
+    "category": "team-conditions"
+  },
+  {
+    "id": "R",
+    "title": "PECA resource people",
+    "definition": "The educational team calls on the resource people for the PECA (teaching assistants, cultural coordinators, inspectors, school coordinators, cultural operators, etc.).",
+    "category": "team-conditions"
+  },
+  {
+    "id": "E",
+    "title": "Evaluation",
+    "definition": "In association with the partners, where applicable, the educational team assesses the integration of the different interventions into the students' Pathways, along with the implementation, diversity and coordination of the various interventions with a view to improvement, for example by comparing completed Hives.",
+    "category": "team-conditions"
+  },
+  {
+    "id": "VA",
+    "title": "Promotion",
+    "definition": "The educational team regularly uses and runs one or more \"arts and culture\" areas within the school (works by students and artists displayed, information on academies, posters of local exhibitions or shows, quotes from artists displayed, etc).",
+    "category": "team-recommendations"
+  },
+  {
+    "id": "a.",
+    "title": "Audiovisual",
+    "definition": "Viewing, analysis, critique, scripting, production, editing...",
+    "category": "domain"
+  },
+  {
+    "id": "b.",
+    "title": "Music",
+    "definition": "Listening, choral singing, polyrhythm, sound creation, DIY instrument-making, orchestral practices...",
+    "category": "domain"
+  },
+  {
+    "id": "c.",
+    "title": "French language and literature",
+    "definition": "Reading, creative writing, slam, storytelling, narration...",
+    "category": "domain"
+  },
+  {
+    "id": "d.",
+    "title": "Visual and plastic arts",
+    "definition": "Painting, sculpture, photography, interactive installation, augmented reality, web art...",
+    "category": "domain"
+  },
+  {
+    "id": "e.",
+    "title": "Theatre",
+    "definition": "Diction, eloquence, acting, improvisation, community theatre, puppetry...",
+    "category": "domain"
+  },
+  {
+    "id": "f.",
+    "title": "Fairground, circus and street arts",
+    "definition": "Juggling, acrobatics, automaton manipulation, clowning, magic, street art...",
+    "category": "domain"
+  },
+  {
+    "id": "g.",
+    "title": "Cultural heritage",
+    "definition": "Historic sites and monuments, tales and legends, traditional songs and crafts...",
+    "category": "domain"
+  },
+  {
+    "id": "h.",
+    "title": "Dance",
+    "definition": "Choreography, interpretation, physical expression, mime...",
+    "category": "domain"
+  }
+]

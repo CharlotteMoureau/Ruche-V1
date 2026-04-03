@@ -1,7 +1,7 @@
-@use "./variables" as *;
+@use "../base/variables" as *;
 
 .free-space-card {
-  width: 200px;
+  width: var(--board-card-size, 200px);
   aspect-ratio: 1;
   perspective: 800px;
   stroke: $vert;
@@ -69,8 +69,13 @@
 }
 
 /* ----------------------- */
-/* Firefox spécifique       */
+/* Variantes de couleur     */
 /* ----------------------- */
+.free-space-card.free-card--pink      { stroke: $rose;       color: $rose; }
+.free-space-card.free-card--purple    { stroke: $mauve;      color: $mauve; }
+.free-space-card.free-card--turquoise { stroke: $turquoise;  color: $turquoise; }
+.free-space-card.free-card--orange    { stroke: $orange;     color: $orange; }
+
 @-moz-document url-prefix() {
   .free-space-card {
     perspective: none !important;

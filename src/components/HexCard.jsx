@@ -43,7 +43,7 @@ export default function HexCard({ card, position, onlyFront }) {
             <div className="hex-front">
               <span>{card.id}</span>
               <h4>{card.title}</h4>
-              <img src={`./data/icons/${card.id}.png`} alt={card.title} />
+              <img src={`/data/icons/${card.id}.png`} alt={card.title} />
             </div>
             {!onlyFront && (
               <div className="hex-back">

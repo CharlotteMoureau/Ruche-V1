@@ -1,0 +1,22 @@
+body {
+  margin: 0;
+  font-family: "Roboto", sans-serif;
+  background-color: #faf9f6;
+  color: #333;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+#root {
+  min-height: 100vh;
+  min-height: 100dvh;
+  padding-bottom: var(--app-footer-height, 80px);
+}
+
+body.ios #root {
+  padding-bottom: var(--app-footer-height, 60px);
+}
