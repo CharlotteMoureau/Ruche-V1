@@ -48,7 +48,7 @@ Frontend :
 - Sass
 - Font Awesome
 - Framer Motion
-- dom-to-image-more, html-to-image, html2canvas, canvg, JSZip pour les captures et exports
+- dom-to-image-more et JSZip pour les captures et exports
 
 Backend :
 
