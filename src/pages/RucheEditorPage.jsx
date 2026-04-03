@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faArrowLeft, faFloppyDisk } from "@fortawesome/free-solid-svg-icons";
-import { ApiError, apiFetch } from "../lib/api";
+import { ApiError, apiFetch, getApiErrorMessage } from "../lib/api";
 import { useAuth } from "../context/AuthContext";
 import RucheWorkspace from "../components/RucheWorkspace";
 import Toolbar from "../components/Toolbar";
@@ -30,6 +30,29 @@ function formatDateTime(value, locale) {
 
 function totalCommentCount(comments = []) {
   return comments.reduce((sum, c) => sum + 1 + (c.replies?.length || 0), 0);
+}
+
+function replaceSavedSnapshotBoardData(
+  snapshot,
+  boardData,
+  fallbackTitle,
+  fallbackKind,
+) {
+  let parsedSnapshot = null;
+
+  if (snapshot) {
+    try {
+      parsedSnapshot = JSON.parse(snapshot);
+    } catch {
+      parsedSnapshot = null;
+    }
+  }
+
+  return JSON.stringify({
+    title: parsedSnapshot?.title ?? fallbackTitle,
+    hiveKind: parsedSnapshot?.hiveKind ?? fallbackKind,
+    boardData,
+  });
 }
 
 export default function RucheEditorPage() {
@@ -173,6 +196,13 @@ export default function RucheEditorPage() {
     setTabletSaveFeedbackStatus("");
   }, [isTabletEditorMode]);
 
+  const showApiError = useCallback(
+    (err, fallbackPath = "common.unexpectedError") => {
+      setError(getApiErrorMessage(err, t, fallbackPath));
+    },
+    [t],
+  );
+
   const currentSnapshot = useMemo(
     () => JSON.stringify({ title, hiveKind, boardData }),
     [title, hiveKind, boardData],
@@ -229,7 +259,9 @@ export default function RucheEditorPage() {
           }),
         );
       } catch (err) {
-        if (mounted) setError(err.message);
+        if (mounted) {
+          setError(getApiErrorMessage(err, t));
+        }
       }
     }
 
@@ -237,7 +269,7 @@ export default function RucheEditorPage() {
     return () => {
       mounted = false;
     };
-  }, [id, isNew, token]);
+  }, [id, isNew, t, token]);
 
   useEffect(() => {
     if (isNew) return;
@@ -487,7 +519,7 @@ export default function RucheEditorPage() {
         if (err instanceof ApiError && err.status === 409) {
           setShowConflictModal(true);
         }
-        setError(err.message);
+        showApiError(err);
         showTabletSaveFeedback("error", 3200);
         return false;
       } finally {
@@ -501,6 +533,7 @@ export default function RucheEditorPage() {
       id,
       isNew,
       navigate,
+      showApiError,
       showTabletSaveFeedback,
       token,
       user?.email,
@@ -589,7 +622,7 @@ export default function RucheEditorPage() {
       navigate(`/hives/${newHive.id}`, { replace: true });
       showTabletSaveFeedback("success", 2200);
     } catch (err) {
-      setError(err.message);
+      showApiError(err);
       setPendingNewTitle("");
       showTabletSaveFeedback("error", 3200);
     } finally {
@@ -622,7 +655,7 @@ export default function RucheEditorPage() {
       navigate(`/hives/${created.id}`, { replace: true });
       showTabletSaveFeedback("success", 2200);
     } catch (err) {
-      setError(err.message);
+      showApiError(err);
       showTabletSaveFeedback("error", 3200);
     } finally {
       setIsSaving(false);
@@ -668,9 +701,55 @@ export default function RucheEditorPage() {
       await reloadHiveFromServer();
       setError("");
     } catch (err) {
-      setError(err.message);
+      showApiError(err);
     }
   };
+
+  const persistCardNote = useCallback(
+    async ({ cardId, message, nextBoardData }) => {
+      if (isNew || !id) return null;
+
+      try {
+        const encodedCardId = encodeURIComponent(String(cardId));
+        const updated = await apiFetch(
+          `/hives/${id}/cards/${encodedCardId}/note`,
+          {
+            method: message ? "PUT" : "DELETE",
+            token,
+            body: message ? { message } : undefined,
+          },
+        );
+
+        const resolvedBoardData = updated?.boardData || nextBoardData;
+        setBoardData(resolvedBoardData);
+        setBaseUpdatedAt(updated?.updatedAt || null);
+        setSavedSnapshot((previousSnapshot) =>
+          replaceSavedSnapshotBoardData(
+            previousSnapshot,
+            resolvedBoardData,
+            hive?.title || title,
+            hive?.kind || hiveKind,
+          ),
+        );
+        setHive((prev) =>
+          prev
+            ? {
+                ...prev,
+                boardData: resolvedBoardData,
+                updatedAt: updated?.updatedAt || prev.updatedAt,
+              }
+            : prev,
+        );
+        setError("");
+
+        return updated;
+      } catch (err) {
+        showApiError(err);
+        throw err;
+      }
+    },
+    [hive?.kind, hive?.title, hiveKind, id, isNew, showApiError, title, token],
+  );
 
   const runSavedHiveAction = (action) => {
     if (!action) return;
@@ -805,7 +884,7 @@ export default function RucheEditorPage() {
       }));
       setCommentText("");
     } catch (err) {
-      setError(err.message);
+      showApiError(err);
     }
   };
 
@@ -831,7 +910,7 @@ export default function RucheEditorPage() {
       setReplyText("");
       setReplyingTo(null);
     } catch (err) {
-      setError(err.message);
+      showApiError(err);
     }
   };
 
@@ -841,73 +920,83 @@ export default function RucheEditorPage() {
     const value = editingTarget.value.trim();
     if (!value) return;
 
-    const updated = await apiFetch(
-      `/hives/${id}/comments/${editingTarget.comment.id}`,
-      {
-        method: "PATCH",
-        token,
-        body: { message: value },
-      },
-    );
+    try {
+      const updated = await apiFetch(
+        `/hives/${id}/comments/${editingTarget.comment.id}`,
+        {
+          method: "PATCH",
+          token,
+          body: { message: value },
+        },
+      );
 
-    setHive((prev) => {
-      if (!editingTarget.parentId) {
+      setHive((prev) => {
+        if (!editingTarget.parentId) {
+          return {
+            ...prev,
+            comments: (prev?.comments || []).map((c) =>
+              c.id === updated.id
+                ? { ...updated, replies: c.replies || [] }
+                : c,
+            ),
+          };
+        }
         return {
           ...prev,
           comments: (prev?.comments || []).map((c) =>
-            c.id === updated.id ? { ...updated, replies: c.replies || [] } : c,
+            c.id === editingTarget.parentId
+              ? {
+                  ...c,
+                  replies: (c.replies || []).map((r) =>
+                    r.id === updated.id ? updated : r,
+                  ),
+                }
+              : c,
           ),
         };
-      }
-      return {
-        ...prev,
-        comments: (prev?.comments || []).map((c) =>
-          c.id === editingTarget.parentId
-            ? {
-                ...c,
-                replies: (c.replies || []).map((r) =>
-                  r.id === updated.id ? updated : r,
-                ),
-              }
-            : c,
-        ),
-      };
-    });
-    setEditingTarget(null);
+      });
+      setEditingTarget(null);
+    } catch (err) {
+      showApiError(err);
+    }
   };
 
   const deleteComment = async () => {
     if (!deleteTarget?.comment) return;
 
-    await apiFetch(`/hives/${id}/comments/${deleteTarget.comment.id}`, {
-      method: "DELETE",
-      token,
-    });
+    try {
+      await apiFetch(`/hives/${id}/comments/${deleteTarget.comment.id}`, {
+        method: "DELETE",
+        token,
+      });
 
-    setHive((prev) => {
-      if (!deleteTarget.parentId) {
+      setHive((prev) => {
+        if (!deleteTarget.parentId) {
+          return {
+            ...prev,
+            comments: (prev?.comments || []).filter(
+              (c) => c.id !== deleteTarget.comment.id,
+            ),
+          };
+        }
         return {
           ...prev,
-          comments: (prev?.comments || []).filter(
-            (c) => c.id !== deleteTarget.comment.id,
+          comments: (prev?.comments || []).map((c) =>
+            c.id === deleteTarget.parentId
+              ? {
+                  ...c,
+                  replies: (c.replies || []).filter(
+                    (r) => r.id !== deleteTarget.comment.id,
+                  ),
+                }
+              : c,
           ),
         };
-      }
-      return {
-        ...prev,
-        comments: (prev?.comments || []).map((c) =>
-          c.id === deleteTarget.parentId
-            ? {
-                ...c,
-                replies: (c.replies || []).filter(
-                  (r) => r.id !== deleteTarget.comment.id,
-                ),
-              }
-            : c,
-        ),
-      };
-    });
-    setDeleteTarget(null);
+      });
+      setDeleteTarget(null);
+    } catch (err) {
+      showApiError(err);
+    }
   };
 
   const openEditCommentModal = (comment, parentId = null) => {
@@ -1194,6 +1283,7 @@ export default function RucheEditorPage() {
           resetSignal={resetSignal}
           canEdit={canEdit}
           canNote={canComment}
+          onPersistCardNote={persistCardNote}
           requireSaveBeforeNote={requiresSavedHivePrompt}
           onRequireSaveBeforeNote={handleRequireSaveBeforeCardNote}
           requestedNoteCardId={requestedNoteCardId}

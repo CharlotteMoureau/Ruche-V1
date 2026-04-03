@@ -151,6 +151,7 @@ export default function RucheWorkspace({
   onStateChange,
   canEdit = true,
   canNote = false,
+  onPersistCardNote,
   requireSaveBeforeNote = false,
   requestedNoteCardId = null,
   onRequestedNoteHandled,
@@ -763,7 +764,7 @@ export default function RucheWorkspace({
     handleCloseCardNoteModal();
   };
 
-  const handleSaveCardNote = () => {
+  const handleSaveCardNote = async () => {
     if (!canNote || !noteModalCardId) return;
 
     const message = noteDraft.trim();
@@ -776,44 +777,90 @@ export default function RucheWorkspace({
       email: user?.email || null,
     };
 
-    setBoardCards((prev) =>
-      prev.map((card) => {
-        if (card.id !== noteModalCardId) return card;
+    const previousBoardCards = boardCards;
+    const nextBoardCards = boardCards.map((card) => {
+      if (card.id !== noteModalCardId) return card;
 
-        const existingComment = getCardComment(card);
-        const isNewComment = !existingComment?.message;
+      const existingComment = getCardComment(card);
+      const isNewComment = !existingComment?.message;
 
-        return {
-          ...card,
-          comment: {
-            message,
-            createdAt: existingComment?.createdAt || now,
-            createdBy: existingComment?.createdBy || actor,
-            updatedAt: now,
-            updatedBy: isNewComment
-              ? existingComment?.createdBy || actor
-              : actor,
-          },
-        };
-      }),
-    );
+      return {
+        ...card,
+        comment: {
+          message,
+          createdAt: existingComment?.createdAt || now,
+          createdBy: existingComment?.createdBy || actor,
+          updatedAt: now,
+          updatedBy: isNewComment ? existingComment?.createdBy || actor : actor,
+        },
+      };
+    });
+
+    setBoardCards(nextBoardCards);
 
     setNoteDraft(message);
     setIsEditingCardNote(false);
+
+    if (!onPersistCardNote) return;
+
+    try {
+      await onPersistCardNote({
+        cardId: noteModalCardId,
+        message,
+        nextBoardData: {
+          availableCards,
+          boardCards: nextBoardCards,
+          userCards,
+        },
+      });
+    } catch {
+      const activeCard = previousBoardCards.find(
+        (card) => card.id === noteModalCardId,
+      );
+      const existingComment = getCardComment(activeCard);
+
+      setBoardCards(previousBoardCards);
+      setNoteDraft(existingComment?.message || "");
+      setIsEditingCardNote(true);
+    }
   };
 
-  const handleDeleteCardNote = () => {
+  const handleDeleteCardNote = async () => {
     if (!canNote || !noteModalCardId) return;
 
-    setBoardCards((prev) =>
-      prev.map((card) => {
-        if (card.id !== noteModalCardId) return card;
-        return stripCardComment(card);
-      }),
-    );
+    const previousBoardCards = boardCards;
+    const nextBoardCards = boardCards.map((card) => {
+      if (card.id !== noteModalCardId) return card;
+      return stripCardComment(card);
+    });
+
+    setBoardCards(nextBoardCards);
 
     setNoteDraft("");
     setIsEditingCardNote(true);
+
+    if (!onPersistCardNote) return;
+
+    try {
+      await onPersistCardNote({
+        cardId: noteModalCardId,
+        message: null,
+        nextBoardData: {
+          availableCards,
+          boardCards: nextBoardCards,
+          userCards,
+        },
+      });
+    } catch {
+      const activeCard = previousBoardCards.find(
+        (card) => card.id === noteModalCardId,
+      );
+      const existingComment = getCardComment(activeCard);
+
+      setBoardCards(previousBoardCards);
+      setNoteDraft(existingComment?.message || "");
+      setIsEditingCardNote(!existingComment?.message);
+    }
   };
 
   const confirmPendingCardReturn = () => {

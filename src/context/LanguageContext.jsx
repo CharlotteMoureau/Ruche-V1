@@ -170,6 +170,32 @@ const messages = {
       PROFILE_PASSWORD_INCORRECT: "Mot de passe incorrect.",
       PROFILE_PASSWORD_CHANGE_FIELDS_REQUIRED:
         "Veuillez renseigner le mot de passe actuel et confirmer le nouveau mot de passe.",
+      HIVE_NOT_FOUND: "Ruche introuvable.",
+      HIVE_ACCESS_DENIED: "Accès refusé.",
+      HIVE_INVALID_DATA: "Données de ruche invalides.",
+      HIVE_EDIT_FORBIDDEN:
+        "Vous n'avez pas l'autorisation de modifier cette ruche.",
+      HIVE_RENAME_FORBIDDEN:
+        "Vous n'avez pas l'autorisation de renommer cette ruche.",
+      HIVE_VERSION_INVALID: "Version de ruche invalide.",
+      HIVE_VERSION_REQUIRED:
+        "Version de ruche manquante. Rechargez la ruche avant d'enregistrer.",
+      HIVE_VERSION_CONFLICT:
+        "Cette ruche a été modifiée par un autre collaborateur. Rechargez-la avant d'enregistrer.",
+      HIVE_CARD_NOTE_INVALID: "Note de carte invalide.",
+      HIVE_CARD_NOTE_FORBIDDEN:
+        "Vous n'avez pas l'autorisation d'ajouter des notes sur cette ruche.",
+      HIVE_CARD_NOTE_CARD_NOT_FOUND:
+        "Cette carte est introuvable dans la ruche.",
+      HIVE_COMMENT_INVALID: "Commentaire invalide.",
+      HIVE_COMMENT_FORBIDDEN:
+        "Vous n'avez pas l'autorisation de commenter cette ruche.",
+      HIVE_COMMENT_PARENT_NOT_FOUND: "Commentaire parent introuvable.",
+      HIVE_COMMENT_NOT_FOUND: "Commentaire introuvable.",
+      HIVE_COMMENT_EDIT_OWN_ONLY:
+        "Vous ne pouvez modifier que vos propres commentaires.",
+      HIVE_COMMENT_DELETE_OWN_ONLY:
+        "Vous ne pouvez supprimer que vos propres commentaires.",
     },
     apiMessages: {
       MSG_PASSWORD_RESET_EMAIL_SENT:
@@ -604,6 +630,26 @@ const messages = {
       PROFILE_PASSWORD_INCORRECT: "Incorrect password.",
       PROFILE_PASSWORD_CHANGE_FIELDS_REQUIRED:
         "Please provide your current password and confirm the new password.",
+      HIVE_NOT_FOUND: "Hive not found.",
+      HIVE_ACCESS_DENIED: "Access denied.",
+      HIVE_INVALID_DATA: "Invalid hive data.",
+      HIVE_EDIT_FORBIDDEN: "You are not allowed to edit this hive.",
+      HIVE_RENAME_FORBIDDEN: "You are not allowed to rename this hive.",
+      HIVE_VERSION_INVALID: "Invalid hive version.",
+      HIVE_VERSION_REQUIRED:
+        "Missing hive version. Reload the hive before saving.",
+      HIVE_VERSION_CONFLICT:
+        "This hive was modified by another collaborator. Reload it before saving.",
+      HIVE_CARD_NOTE_INVALID: "Invalid card note.",
+      HIVE_CARD_NOTE_FORBIDDEN:
+        "You are not allowed to add notes on this hive.",
+      HIVE_CARD_NOTE_CARD_NOT_FOUND: "This card was not found in the hive.",
+      HIVE_COMMENT_INVALID: "Invalid comment.",
+      HIVE_COMMENT_FORBIDDEN: "You are not allowed to comment on this hive.",
+      HIVE_COMMENT_PARENT_NOT_FOUND: "Parent comment not found.",
+      HIVE_COMMENT_NOT_FOUND: "Comment not found.",
+      HIVE_COMMENT_EDIT_OWN_ONLY: "You can only edit your own comments.",
+      HIVE_COMMENT_DELETE_OWN_ONLY: "You can only delete your own comments.",
     },
     apiMessages: {
       MSG_PASSWORD_RESET_EMAIL_SENT:
@@ -1022,6 +1068,29 @@ const messages = {
       PROFILE_PASSWORD_INCORRECT: "Onjuist wachtwoord.",
       PROFILE_PASSWORD_CHANGE_FIELDS_REQUIRED:
         "Vul je huidige wachtwoord in en bevestig het nieuwe wachtwoord.",
+      HIVE_NOT_FOUND: "Bijenkorf niet gevonden.",
+      HIVE_ACCESS_DENIED: "Toegang geweigerd.",
+      HIVE_INVALID_DATA: "Ongeldige bijenkorfgegevens.",
+      HIVE_EDIT_FORBIDDEN: "Je mag deze bijenkorf niet bewerken.",
+      HIVE_RENAME_FORBIDDEN: "Je mag deze bijenkorf niet hernoemen.",
+      HIVE_VERSION_INVALID: "Ongeldige bijenkorfversie.",
+      HIVE_VERSION_REQUIRED:
+        "Ontbrekende bijenkorfversie. Herlaad de bijenkorf voor je opslaat.",
+      HIVE_VERSION_CONFLICT:
+        "Deze bijenkorf is aangepast door een andere medewerker. Herlaad voor je opslaat.",
+      HIVE_CARD_NOTE_INVALID: "Ongeldige kaartnotitie.",
+      HIVE_CARD_NOTE_FORBIDDEN:
+        "Je mag geen notities toevoegen aan deze bijenkorf.",
+      HIVE_CARD_NOTE_CARD_NOT_FOUND:
+        "Deze kaart werd niet gevonden in de bijenkorf.",
+      HIVE_COMMENT_INVALID: "Ongeldige opmerking.",
+      HIVE_COMMENT_FORBIDDEN: "Je mag niet reageren in deze bijenkorf.",
+      HIVE_COMMENT_PARENT_NOT_FOUND: "Bovenliggende opmerking niet gevonden.",
+      HIVE_COMMENT_NOT_FOUND: "Opmerking niet gevonden.",
+      HIVE_COMMENT_EDIT_OWN_ONLY:
+        "Je kunt alleen je eigen opmerkingen bewerken.",
+      HIVE_COMMENT_DELETE_OWN_ONLY:
+        "Je kunt alleen je eigen opmerkingen verwijderen.",
     },
     apiMessages: {
       MSG_PASSWORD_RESET_EMAIL_SENT:
