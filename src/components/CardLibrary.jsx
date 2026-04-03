@@ -65,7 +65,12 @@ export default function CardLibrary({
     }
 
     onFreeSpaceClick();
-  }, [isTabletEditorMode, onFreeSpaceClick, onToggleFreeCardSelection, userCards]);
+  }, [
+    isTabletEditorMode,
+    onFreeSpaceClick,
+    onToggleFreeCardSelection,
+    userCards,
+  ]);
 
   return (
     <aside className="card-library">
@@ -186,7 +191,11 @@ export default function CardLibrary({
 
       {/* Popup warning */}
       {showPopup && (
-        <div className="popup-warning">
+        <div
+          className="card-library__popup-warning"
+          role="status"
+          aria-live="polite"
+        >
           <FontAwesomeIcon icon={faExclamationTriangle} />{" "}
           {t("cardLibrary.maxFreeCardsReached")}
         </div>

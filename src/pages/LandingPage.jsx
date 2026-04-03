@@ -127,17 +127,12 @@ export default function LandingPage() {
           )}
         </div>
 
-        <a
-          href=""
-          target="_blank"
-          rel="noopener noreferrer"
-          className="landing-tutorial cta-card"
-        >
+        <Link to="/tutorial" className="landing-tutorial cta-card">
           <div className="cta-card-content landing-tutorial-content">
             <h3>{t("landing.tutorial")}</h3>
             <p>{t("landing.tutorialPlaceholder")}</p>
           </div>
-        </a>
+        </Link>
       </section>
 
       <section className="page-shell">

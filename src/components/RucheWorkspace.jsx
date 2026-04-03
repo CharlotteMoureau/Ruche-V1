@@ -308,6 +308,15 @@ export default function RucheWorkspace({
 
       const key = String(event.key || "").toLowerCase();
       const hasModifier = event.ctrlKey || event.metaKey;
+
+      if (key === "a" && hasModifier) {
+        event.preventDefault();
+        if (boardCards.length > 0) {
+          setSelectedCardIds(new Set(boardCards.map((card) => card.id)));
+        }
+        return;
+      }
+
       if (!hasModifier) return;
 
       if (key === "z" && !event.shiftKey) {
@@ -327,7 +336,7 @@ export default function RucheWorkspace({
     return () => {
       window.removeEventListener("keydown", handleKeyDown);
     };
-  }, [canEdit, handleRedo, handleUndo]);
+  }, [canEdit, handleRedo, handleUndo, boardCards]);
 
   useEffect(() => {
     setBoardCards((previousBoardCards) => {
@@ -496,7 +505,7 @@ export default function RucheWorkspace({
 
   const toggleFreeCardSelection = useCallback(() => {
     if (!canEdit || !isTabletEditorMode) return;
-    if (userCards >= 10) return;
+    if (userCards.length >= 10) return;
     setIsFreeCardSelected((prev) => !prev);
   }, [canEdit, isTabletEditorMode, userCards]);
 

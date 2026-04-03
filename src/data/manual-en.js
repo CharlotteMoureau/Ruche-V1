@@ -1,4 +1,4 @@
-# La Ruche User Manual
+export default `# La Ruche User Manual
 
 This guide is written for everyday users. You do not need technical knowledge to use La Ruche.
 
@@ -10,24 +10,24 @@ La Ruche helps you build a visual board with educational cards. You can move car
 
 - Open the application in your browser.
 - If needed, change the interface language in the footer.
-- You can open `GDPR / Privacy` and `Work in Progress` from the landing page or footer.
+- You can open \`GDPR / Privacy\` and \`Work in Progress\` from the landing page or footer.
 - Create an account or sign in.
 
 ## Create an account
 
-1. Click `Create account`.
+1. Click \`Create account\`.
 2. Fill in your username, email address, first name, last name, role, and password.
 3. Click the confirmation button.
 4. After registration, you are sent to your profile.
 
 ## Sign in
 
-1. Click `Sign in`.
+1. Click \`Sign in\`.
 2. Enter your username or email address.
 3. Enter your password.
 4. Click the sign-in button.
 
-If you forgot your password, use `Forgot password?`. If email delivery is configured, you will receive a reset link. If not, contact your project administrator.
+If you forgot your password, use \`Forgot password?\`. If email delivery is configured, you will receive a reset link. If not, contact your project administrator.
 
 ## Your profile
 
@@ -47,7 +47,7 @@ From this page, you can:
 ## Create a new hive
 
 1. Go to your profile.
-2. Click `Create a new Hive`.
+2. Click \`Create a new Hive\`.
 3. Enter a title.
 4. If your role allows it, you may also choose the hive type.
 5. The editor opens.
@@ -154,10 +154,10 @@ You can invite other users by email.
 
 Possible access roles:
 
-- `Administrator`: can manage collaboration on the hive
-- `Collaborator (can edit)`: can modify the hive
-- `Comment only`: can discuss but not edit the board
-- `Read only`: can only view
+- \`Administrator\`: can manage collaboration on the hive
+- \`Collaborator (can edit)\`: can modify the hive
+- \`Comment only\`: can discuss but not edit the board
+- \`Read only\`: can only view
 
 To share a hive:
 
@@ -171,7 +171,7 @@ To share a hive:
 
 If someone shares a hive with you:
 
-1. Open `Inbox`.
+1. Open \`Inbox\`.
 2. Review the invitation.
 3. Accept or decline.
 
@@ -207,7 +207,7 @@ From there, they can:
 - Use clear hive titles so you can find them later.
 - Check your inbox when you expect a shared hive.
 - Use card notes for details on one card and hive comments for group discussion.
-- Change the language from the footer if needed, and use the footer links for `GDPR / Privacy` and `Work in Progress`.
+- Change the language from the footer if needed, and use the footer links for \`GDPR / Privacy\` and \`Work in Progress\`.
 
 ## If something goes wrong
 
@@ -215,3 +215,4 @@ From there, they can:
 - If a page seems blocked, refresh the browser once.
 - If you do not receive a password reset email, check your spam folder and confirm that email sending is enabled for your environment.
 - If an invitation does not appear, open the inbox again after a few seconds.
+`;

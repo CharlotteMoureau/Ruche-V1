@@ -1,4 +1,4 @@
-# Gebruikershandleiding La Ruche
+export default `# Gebruikershandleiding La Ruche
 
 Deze handleiding is geschreven voor gewone gebruikers. U hebt geen technische kennis nodig om La Ruche te gebruiken.
 
@@ -10,24 +10,24 @@ La Ruche helpt u om een visueel bord met pedagogische kaarten op te bouwen. U ku
 
 - Open de toepassing in uw browser.
 - Verander indien nodig de taal van de interface in de voettekst.
-- U kunt ook `GDPR / Privacy` en `In Ontwikkeling` openen vanaf de landingspagina of via de voettekst.
+- U kunt ook \`GDPR / Privacy\` en \`In Ontwikkeling\` openen vanaf de landingspagina of via de voettekst.
 - Maak een account aan of meld u aan.
 
 ## Een account aanmaken
 
-1. Klik op `Account aanmaken`.
+1. Klik op \`Account aanmaken\`.
 2. Vul uw gebruikersnaam, e-mailadres, voornaam, familienaam, rol en wachtwoord in.
 3. Klik op de bevestigingsknop.
 4. Na de registratie komt u op uw profielpagina terecht.
 
 ## Aanmelden
 
-1. Klik op `Aanmelden`.
+1. Klik op \`Aanmelden\`.
 2. Vul uw gebruikersnaam of e-mailadres in.
 3. Vul uw wachtwoord in.
 4. Klik op de aanmeldknop.
 
-Bent u uw wachtwoord vergeten, gebruik dan `Wachtwoord vergeten?`. Als e-mailverzending is geconfigureerd, ontvangt u een resetlink. Zo niet, neem contact op met de projectbeheerder.
+Bent u uw wachtwoord vergeten, gebruik dan \`Wachtwoord vergeten?\`. Als e-mailverzending is geconfigureerd, ontvangt u een resetlink. Zo niet, neem contact op met de projectbeheerder.
 
 ## Uw profiel
 
@@ -47,7 +47,7 @@ Vanaf deze pagina kunt u:
 ## Een nieuwe ruche maken
 
 1. Open uw profiel.
-2. Klik op `Nieuwe Ruche maken`.
+2. Klik op \`Nieuwe Ruche maken\`.
 3. Geef een titel in.
 4. Als uw rol het toelaat, kunt u ook het type ruche kiezen.
 5. De editor wordt geopend.
@@ -154,10 +154,10 @@ U kunt andere gebruikers per e-mail uitnodigen.
 
 Mogelijke rollen:
 
-- `Beheerder`: kan de samenwerking op de ruche beheren
-- `Medewerker (kan bewerken)`: kan de ruche wijzigen
-- `Alleen reacties`: kan bespreken maar het bord niet wijzigen
-- `Alleen lezen`: kan alleen bekijken
+- \`Beheerder\`: kan de samenwerking op de ruche beheren
+- \`Medewerker (kan bewerken)\`: kan de ruche wijzigen
+- \`Alleen reacties\`: kan bespreken maar het bord niet wijzigen
+- \`Alleen lezen\`: kan alleen bekijken
 
 Om een ruche te delen:
 
@@ -171,7 +171,7 @@ Om een ruche te delen:
 
 Als iemand een ruche met u deelt:
 
-1. Open `Inbox`.
+1. Open \`Inbox\`.
 2. Bekijk de uitnodiging.
 3. Aanvaard of weiger.
 
@@ -207,7 +207,7 @@ Van daaruit kunnen zij:
 - Geef duidelijke titels aan uw ruches zodat u ze later gemakkelijk terugvindt.
 - Controleer uw inbox als u een gedeelde ruche verwacht.
 - Gebruik kaartnotities voor details op een enkele kaart en ruche-opmerkingen voor groepsbesprekingen.
-- Verander de taal via de voettekst als dat nodig is, en gebruik de links `GDPR / Privacy` en `In Ontwikkeling`.
+- Verander de taal via de voettekst als dat nodig is, en gebruik de links \`GDPR / Privacy\` en \`In Ontwikkeling\`.
 
 ## Als er iets misloopt
 
@@ -215,3 +215,4 @@ Van daaruit kunnen zij:
 - Als een pagina geblokkeerd lijkt, vernieuw de browser een keer.
 - Als u geen e-mail voor wachtwoordherstel ontvangt, controleer dan uw spammap en bevestig dat e-mailverzending in uw omgeving is ingeschakeld.
 - Als een uitnodiging niet verschijnt, open de inbox na enkele seconden opnieuw.
+`;

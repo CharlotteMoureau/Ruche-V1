@@ -227,7 +227,7 @@ export const messages = {
       signIn: "Se connecter",
       createAccount: "Créer un compte",
       tutorial: "Tutoriel",
-      tutorialPlaceholder: "Contenu du tutoriel à venir...",
+      tutorialPlaceholder: "Guide complet et vidéo d'explication",
       gdpr: "RGPD / Confidentialité",
       gdprPlaceholder: "Données, cookies, droits RGPD — lisez notre politique.",
       wip: "En cours de développement",
@@ -638,6 +638,9 @@ export const messages = {
       status: "En cours de développement",
       back: "Retour à l’accueil",
     },
+    tutorial: {
+      title: "Tutoriel",
+    },
     passwordField: {
       showPassword: "Afficher le mot de passe",
     },
@@ -735,7 +738,7 @@ export const messages = {
       signIn: "Log in",
       createAccount: "Create account",
       tutorial: "Tutorial",
-      tutorialPlaceholder: "Tutorial content coming soon...",
+      tutorialPlaceholder: "Complete guide and video tutorial",
       gdpr: "GDPR / Privacy",
       gdprPlaceholder: "Data, cookies, GDPR rights — read our privacy policy.",
       wip: "Work in Progress",
@@ -1122,6 +1125,9 @@ export const messages = {
       status: "Status: In development",
       back: "Back to home",
     },
+    tutorial: {
+      title: "Tutorial"
+    },
     passwordField: { showPassword: "Show password" },
   },
   nl: {
@@ -1220,7 +1226,7 @@ export const messages = {
       signIn: "Aanmelden",
       createAccount: "Account aanmaken",
       tutorial: "Tutorial",
-      tutorialPlaceholder: "Tutorial-inhoud komt binnenkort...",
+      tutorialPlaceholder: "Volledige gids en videotutorial",
       gdpr: "GDPR / Privacy",
       gdprPlaceholder:
         "Gegevens, cookies, AVG-rechten — lees ons privacybeleid.",
@@ -1622,6 +1628,10 @@ export const messages = {
         "Een communityruimte om bugs te melden, updates te volgen en pedagogische praktijken uit te wisselen.",
       status: "In ontwikkeling",
       back: "Terug naar home",
+    },
+    tutorial: {
+      title: "Handleiding",
+      tutorialPlaceholder: "Volledige gids en videotutorial",
     },
     passwordField: { showPassword: "Wachtwoord tonen" },
   },

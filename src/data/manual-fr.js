@@ -1,4 +1,4 @@
-# Manuel utilisateur La Ruche
+export default `# Manuel utilisateur La Ruche
 
 Ce guide est écrit pour des utilisatrices et utilisateurs non techniques. Vous n'avez pas besoin de connaissances informatiques pour utiliser La Ruche.
 
@@ -10,24 +10,24 @@ La Ruche permet de construire une planche visuelle avec des cartes pédagogiques
 
 - Ouvrez l'application dans votre navigateur.
 - Si nécessaire, changez la langue de l'interface dans le pied de page.
-- Vous pouvez aussi ouvrir `RGPD / Confidentialité` et `En cours de développement` depuis l'accueil ou le pied de page.
+- Vous pouvez aussi ouvrir \`RGPD / Confidentialité\` et \`En cours de développement\` depuis l'accueil ou le pied de page.
 - Créez un compte ou connectez-vous.
 
 ## Créer un compte
 
-1. Cliquez sur `Créer un compte`.
+1. Cliquez sur \`Créer un compte\`.
 2. Renseignez votre nom d'utilisateur, votre adresse email, votre prénom, votre nom, votre rôle et votre mot de passe.
 3. Cliquez sur le bouton de confirmation.
 4. Après l'inscription, vous arrivez sur votre profil.
 
 ## Se connecter
 
-1. Cliquez sur `Connexion`.
+1. Cliquez sur \`Connexion\`.
 2. Entrez votre nom d'utilisateur ou votre email.
 3. Entrez votre mot de passe.
 4. Cliquez sur le bouton de connexion.
 
-Si vous avez oublié votre mot de passe, utilisez `Mot de passe oublié ?`. Si l'envoi d'emails est configuré, vous recevrez un lien de réinitialisation. Sinon, contactez l'administrateur du projet.
+Si vous avez oublié votre mot de passe, utilisez \`Mot de passe oublié ?\`. Si l'envoi d'emails est configuré, vous recevrez un lien de réinitialisation. Sinon, contactez l'administrateur du projet.
 
 ## Votre profil
 
@@ -47,7 +47,7 @@ Depuis cette page, vous pouvez :
 ## Créer une nouvelle ruche
 
 1. Ouvrez votre profil.
-2. Cliquez sur `Créer une nouvelle Ruche`.
+2. Cliquez sur \`Créer une nouvelle Ruche\`.
 3. Saisissez un titre.
 4. Si votre rôle le permet, vous pouvez aussi choisir le type de ruche.
 5. L'éditeur s'ouvre.
@@ -154,10 +154,10 @@ Vous pouvez inviter d'autres utilisateurs par email.
 
 Rôles possibles :
 
-- `Administrateur` : peut gérer la collaboration sur la ruche
-- `Collaborateur (peut éditer)` : peut modifier la ruche
-- `Commentaire uniquement` : peut discuter sans modifier le plateau
-- `Lecture seule` : peut seulement consulter
+- \`Administrateur\` : peut gérer la collaboration sur la ruche
+- \`Collaborateur (peut éditer)\` : peut modifier la ruche
+- \`Commentaire uniquement\` : peut discuter sans modifier le plateau
+- \`Lecture seule\` : peut seulement consulter
 
 Pour partager une ruche :
 
@@ -171,7 +171,7 @@ Pour partager une ruche :
 
 Si une personne partage une ruche avec vous :
 
-1. Ouvrez la `Boîte de réception`.
+1. Ouvrez la \`Boîte de réception\`.
 2. Consultez l'invitation.
 3. Acceptez ou refusez.
 
@@ -207,7 +207,7 @@ Depuis cet espace, ils peuvent :
 - Donnez des titres clairs a vos ruches pour les retrouver plus facilement.
 - Consultez votre boîte de réception si vous attendez une ruche partagée.
 - Utilisez les notes sur carte pour un détail précis et les commentaires de ruche pour la discussion de groupe.
-- Changez la langue depuis le pied de page si nécessaire, et utilisez les liens `RGPD / Confidentialité` et `En cours de développement`.
+- Changez la langue depuis le pied de page si nécessaire, et utilisez les liens \`RGPD / Confidentialité\` et \`En cours de développement\`.
 
 ## Si quelque chose ne fonctionne pas
 
@@ -215,3 +215,4 @@ Depuis cet espace, ils peuvent :
 - Si une page semble bloquée, rechargez le navigateur une fois.
 - Si vous ne recevez pas l'email de réinitialisation, vérifiez vos courriers indésirables et que l'envoi d'emails est bien activé dans votre environnement.
 - Si une invitation n'apparaît pas, rouvrez la boîte de réception après quelques secondes.
+`;

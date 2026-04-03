@@ -201,3 +201,93 @@
     }
   }
 }
+
+// ── Tutorial Page ──────────────────────────────────────────────────────────
+
+.tutorial-page {
+  max-width: 900px;
+  margin: 0 auto;
+
+  h2 {
+    color: $bleu-fonce;
+    margin-bottom: 20px;
+  }
+
+  .tutorial-video-container {
+    margin-bottom: 40px;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba($bleu-fonce, 0.08);
+
+    iframe {
+      display: block;
+      margin: 0;
+    }
+  }
+
+  .tutorial-content {
+    &.markdown-content {
+      h2 {
+        font-size: 1.3rem;
+        color: $bleu-fonce;
+        margin: 32px 0 14px;
+        padding-bottom: 6px;
+        border-bottom: 2px solid rgba($bleu-fonce, 0.12);
+      }
+
+      h3 {
+        font-size: 1.1rem;
+        color: $bleu-fonce;
+        margin: 24px 0 12px;
+      }
+
+      h4 {
+        font-size: 1rem;
+        color: $bleu-fonce;
+        margin: 20px 0 10px;
+      }
+
+      p {
+        font-size: 0.95rem;
+        color: $gris;
+        line-height: 1.7;
+        margin-bottom: 14px;
+      }
+
+      ul,
+      ol {
+        margin-left: 24px;
+        margin-bottom: 16px;
+        list-style: revert;
+
+        li {
+          font-size: 0.95rem;
+          color: $gris;
+          line-height: 1.65;
+          margin-bottom: 8px;
+        }
+      }
+
+      ul {
+        list-style-type: disc;
+      }
+
+      ol {
+        list-style-type: decimal;
+      }
+
+      strong {
+        font-weight: 600;
+        color: $bleu-fonce;
+      }
+
+      code {
+        background: rgba(0, 0, 0, 0.03);
+        padding: 2px 6px;
+        border-radius: 4px;
+        font-family: "Courier New", monospace;
+        font-size: 0.9rem;
+      }
+    }
+  }
+}

@@ -171,6 +171,43 @@
   font-size: 0.95rem;
 }
 
+.card-library__popup-warning {
+  position: sticky;
+  bottom: 8px;
+  margin-top: 12px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: $jaune;
+  color: #333;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.16);
+  z-index: 10;
+  animation: cardLibraryWarningFade 4.8s ease forwards;
+}
+
+@keyframes cardLibraryWarningFade {
+  0% {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  10% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  85% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+}
+
 @media (min-width: 768px) and (max-width: 1200px) and (orientation: landscape) and (pointer: coarse) {
   .card-library .card-category .card-list {
     grid-template-columns: repeat(auto-fill, minmax(132px, 1fr));

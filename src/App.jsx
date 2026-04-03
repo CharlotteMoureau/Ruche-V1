@@ -14,6 +14,7 @@ import RucheEditorPage from "./pages/RucheEditorPage";
 import AdminPage from "./pages/AdminPage";
 import GdprPage from "./pages/GdprPage";
 import WipPage from "./pages/WipPage";
+import TutorialPage from "./pages/TutorialPage";
 import { LanguageProvider } from "./context/LanguageContext";
 import Footer from "./components/Footer";
 import { useAuth } from "./context/AuthContext";
@@ -122,6 +123,7 @@ export default function App() {
           />
           <Route path="/gdpr" element={<GdprPage />} />
           <Route path="/wip" element={<WipPage />} />
+          <Route path="/tutorial" element={<TutorialPage />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
         <Footer />
