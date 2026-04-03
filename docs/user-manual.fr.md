@@ -4,7 +4,7 @@ Ce guide est écrit pour des utilisatrices et utilisateurs non techniques. Vous 
 
 ## À quoi sert La Ruche
 
-La Ruche permet de construire une planche visuelle avec des cartes pédagogiques. Vous pouvez déplacer les cartes, ajouter vos propres cartes, enregistrer votre travail et partager une ruche avec d'autres personnes.
+La Ruche est un outil collaboratif conçu pour accompagner les acteurs du Parcours d'Education Culturelle et Artistique (PECA) dans la création et la mise en place d’expériences culturelles et artistiques de qualité. Elle s’adresse à tous les acteurs du PECA et favorise la réflexion, l’échange, la documentation et l’évaluation tout au long du parcours. Accessible à tous, elle invite à oser, expérimenter et enrichir les pratiques éducatives et culturelles, seul ou en équipe. Vous pouvez déplacer les cartes, ajouter vos propres cartes, enregistrer votre travail et partager une ruche avec d'autres personnes.
 
 ## Avant de commencer
 

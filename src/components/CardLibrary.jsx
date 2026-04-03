@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import LibraryCard from "./LibraryCard";
 import FreeHexCard from "./FreeSpaceCard";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -9,6 +9,7 @@ export default function CardLibrary({
   cards,
   onFreeSpaceClick,
   userCards,
+  canEdit = true,
   isTabletEditorMode = false,
   selectedCount = 0,
   onClearSelected,
@@ -21,8 +22,9 @@ export default function CardLibrary({
   const { cardCategories, t } = useLanguage();
   const categories = cardCategories;
 
-  const [showPopup, setShowPopup] = useState(false);
+  const [warningMessage, setWarningMessage] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
+  const warningTimeoutRef = useRef(null);
 
   const normalizedSearch = searchTerm.trim().toLowerCase();
 
@@ -52,10 +54,37 @@ export default function CardLibrary({
 
   const hasAnySearchResult = filteredCards.length > 0 || freeCardMatchesSearch;
 
+  const showWarning = useCallback((message) => {
+    if (warningTimeoutRef.current) {
+      clearTimeout(warningTimeoutRef.current);
+    }
+
+    setWarningMessage(message);
+    warningTimeoutRef.current = setTimeout(() => {
+      setWarningMessage("");
+      warningTimeoutRef.current = null;
+    }, 5000);
+  }, []);
+
+  useEffect(() => {
+    return () => {
+      if (!warningTimeoutRef.current) return;
+      clearTimeout(warningTimeoutRef.current);
+    };
+  }, []);
+
+  const handleUnavailableEdit = useCallback(() => {
+    showWarning(t("cardLibrary.editNotAllowed"));
+  }, [showWarning, t]);
+
   const handleFreeSpaceClick = useCallback(() => {
+    if (!canEdit) {
+      handleUnavailableEdit();
+      return;
+    }
+
     if (userCards >= 10) {
-      setShowPopup(true);
-      setTimeout(() => setShowPopup(false), 5000);
+      showWarning(t("cardLibrary.maxFreeCardsReached"));
       return;
     }
 
@@ -66,9 +95,13 @@ export default function CardLibrary({
 
     onFreeSpaceClick();
   }, [
+    canEdit,
+    handleUnavailableEdit,
     isTabletEditorMode,
     onFreeSpaceClick,
     onToggleFreeCardSelection,
+    showWarning,
+    t,
     userCards,
   ]);
 
@@ -100,7 +133,7 @@ export default function CardLibrary({
         </div>
       </div>
 
-      {isTabletEditorMode ? (
+      {isTabletEditorMode && canEdit ? (
         <div className="card-library__select-toolbar">
           <p className="card-library__select-help">
             {selectedCount > 0
@@ -148,6 +181,7 @@ export default function CardLibrary({
                 <div
                   className={`library-card free-space ${isFreeCardSelected ? "library-card--selected" : ""}`.trim()}
                   onClick={handleFreeSpaceClick}
+                  style={{ cursor: canEdit ? "pointer" : "not-allowed" }}
                 >
                   <FreeHexCard
                     card={{
@@ -173,9 +207,11 @@ export default function CardLibrary({
                   card={card}
                   searchTerm={normalizedSearch}
                   isSearchActive={Boolean(normalizedSearch)}
+                  canEdit={canEdit}
                   isTabletSelectable={isTabletEditorMode}
                   isSelected={selectedLibraryCardIds?.has(card.id)}
                   onToggleSelect={onToggleLibraryCardSelection}
+                  onUnavailableInteraction={handleUnavailableEdit}
                 />
               ))}
             </div>
@@ -190,14 +226,13 @@ export default function CardLibrary({
       ) : null}
 
       {/* Popup warning */}
-      {showPopup && (
+      {warningMessage && (
         <div
           className="card-library__popup-warning"
           role="status"
           aria-live="polite"
         >
-          <FontAwesomeIcon icon={faExclamationTriangle} />{" "}
-          {t("cardLibrary.maxFreeCardsReached")}
+          <FontAwesomeIcon icon={faExclamationTriangle} /> {warningMessage}
         </div>
       )}
     </aside>

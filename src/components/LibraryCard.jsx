@@ -58,20 +58,22 @@ function LibraryCard({
   card,
   searchTerm = "",
   isSearchActive = false,
+  canEdit = true,
   isTabletSelectable = false,
   isSelected = false,
   onToggleSelect,
+  onUnavailableInteraction,
 }) {
   const [{ isDragging }, drag, preview] = useDrag(
     () => ({
       type: "CARD",
       item: { card, fromLibrary: true },
-      canDrag: !isTabletSelectable,
+      canDrag: canEdit && !isTabletSelectable,
       collect: (monitor) => ({
         isDragging: !!monitor.isDragging(),
       }),
     }),
-    [card, isTabletSelectable],
+    [canEdit, card, isTabletSelectable],
   );
 
   useEffect(() => {
@@ -88,13 +90,20 @@ function LibraryCard({
       } ${isSelected ? "library-card--selected" : ""}`}
       style={{
         opacity: isDragging ? 0.4 : 1,
-        cursor: isTabletSelectable
-          ? "pointer"
-          : isDragging
-            ? "grabbing"
-            : "grab",
+        cursor: !canEdit
+          ? "not-allowed"
+          : isTabletSelectable
+            ? "pointer"
+            : isDragging
+              ? "grabbing"
+              : "grab",
+      }}
+      onPointerDown={() => {
+        if (canEdit) return;
+        onUnavailableInteraction?.();
       }}
       onClick={() => {
+        if (!canEdit) return;
         if (!isTabletSelectable) return;
         onToggleSelect?.(card.id);
       }}

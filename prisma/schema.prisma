@@ -24,8 +24,8 @@ model User {
   lastName       String?
   roleLabel      String
   roleOtherText  String?
-  createdAt      DateTime             @default(now())
-  updatedAt      DateTime             @updatedAt
+  createdAt      DateTime             @default(now()) @db.Timestamptz(3)
+  updatedAt      DateTime             @updatedAt @db.Timestamptz(3)
   hives          Hive[]               @relation("HiveOwner")
   collaborations HiveCollaborator[]
   comments       HiveComment[]
@@ -43,8 +43,8 @@ model Hive {
   owner         User               @relation("HiveOwner", fields: [ownerId], references: [id], onDelete: Cascade)
   collaborators HiveCollaborator[]
   comments      HiveComment[]
-  createdAt     DateTime           @default(now())
-  updatedAt     DateTime           @updatedAt
+  createdAt     DateTime           @default(now()) @db.Timestamptz(3)
+  updatedAt     DateTime           @updatedAt @db.Timestamptz(3)
 }
 
 model HiveCollaborator {
@@ -52,7 +52,7 @@ model HiveCollaborator {
   hiveId   String
   userId   String
   role     CollaboratorRole
-  invitedAt DateTime        @default(now())
+  invitedAt DateTime        @default(now()) @db.Timestamptz(3)
   hive     Hive             @relation(fields: [hiveId], references: [id], onDelete: Cascade)
   user     User             @relation(fields: [userId], references: [id], onDelete: Cascade)
 
@@ -65,8 +65,8 @@ model HiveComment {
   authorId  String
   message   String
   parentId  String?
-  createdAt DateTime      @default(now())
-  updatedAt DateTime      @updatedAt
+  createdAt DateTime      @default(now()) @db.Timestamptz(3)
+  updatedAt DateTime      @updatedAt @db.Timestamptz(3)
   hive      Hive          @relation(fields: [hiveId], references: [id], onDelete: Cascade)
   author    User          @relation(fields: [authorId], references: [id], onDelete: Cascade)
   parent    HiveComment?  @relation("CommentReplies", fields: [parentId], references: [id], onDelete: Cascade)
@@ -77,8 +77,8 @@ model PasswordResetToken {
   id         String   @id @default(cuid())
   tokenHash  String   @unique
   userId     String
-  expiresAt  DateTime
-  usedAt     DateTime?
-  createdAt  DateTime @default(now())
+  expiresAt  DateTime @db.Timestamptz(3)
+  usedAt     DateTime? @db.Timestamptz(3)
+  createdAt  DateTime @default(now()) @db.Timestamptz(3)
   user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }

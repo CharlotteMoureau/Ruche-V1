@@ -100,6 +100,38 @@
   }
 }
 
+.hive-board__warning.card-library__popup-warning {
+  position: absolute;
+  top: 12px;
+  left: 50%;
+  bottom: auto;
+  transform: translateX(-50%);
+  width: min(calc(100% - 24px), 520px);
+  margin-top: 0;
+  z-index: 1450;
+  pointer-events: none;
+  animation: hiveBoardWarningFade 4.8s ease forwards;
+}
+
+@keyframes hiveBoardWarningFade {
+  0% {
+    opacity: 0;
+    transform: translateX(-50%) translateY(-8px);
+  }
+  10% {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+  85% {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+  100% {
+    opacity: 0;
+    transform: translateX(-50%) translateY(-6px);
+  }
+}
+
 .hive-board__viewport-area {
   flex: 1;
   min-height: 0;

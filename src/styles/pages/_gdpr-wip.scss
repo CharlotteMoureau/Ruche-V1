@@ -227,14 +227,6 @@
 
   .tutorial-content {
     &.markdown-content {
-      h2 {
-        font-size: 1.3rem;
-        color: $bleu-fonce;
-        margin: 32px 0 14px;
-        padding-bottom: 6px;
-        border-bottom: 2px solid rgba($bleu-fonce, 0.12);
-      }
-
       h3 {
         font-size: 1.1rem;
         color: $bleu-fonce;
@@ -247,6 +239,18 @@
         margin: 20px 0 10px;
       }
 
+      h5 {
+        font-size: 0.95rem;
+        color: $bleu-fonce;
+        margin: 16px 0 8px;
+      }
+
+      h6 {
+        font-size: 0.9rem;
+        color: rgba($bleu-fonce, 0.85);
+        margin: 14px 0 8px;
+      }
+
       p {
         font-size: 0.95rem;
         color: $gris;
@@ -256,7 +260,7 @@
 
       ul,
       ol {
-        margin-left: 24px;
+        margin: 0 0 16px 24px;
         margin-bottom: 16px;
         list-style: revert;
 

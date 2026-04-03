@@ -466,6 +466,7 @@ export const messages = {
     },
     workspace: {
       cardNoteTitle: "Note de carte",
+      editNotAllowed: "Vous ne pouvez pas modifier cette ruche.",
       showLibrary: "Afficher la bibliothèque",
       hideLibrary: "Masquer la bibliothèque",
       closeLibrary: "Fermer la bibliothèque",
@@ -557,6 +558,7 @@ export const messages = {
       title: "Cartes disponibles",
       remaining: "restantes",
       freeCardTitle: "À vous de jouer !",
+      editNotAllowed: "Vous ne pouvez pas modifier cette ruche.",
       maxFreeCardsReached:
         "Vous avez déjà atteint le maximum de 10 cartes libres !",
       searchLabel: "Rechercher une carte",
@@ -968,6 +970,7 @@ export const messages = {
     },
     workspace: {
       cardNoteTitle: "Card note",
+      editNotAllowed: "You cannot edit this hive.",
       showLibrary: "Show library",
       hideLibrary: "Hide library",
       closeLibrary: "Close library",
@@ -1055,6 +1058,7 @@ export const messages = {
       title: "Available cards",
       remaining: "remaining",
       freeCardTitle: "Your turn!",
+      editNotAllowed: "You cannot edit this hive.",
       maxFreeCardsReached: "You already reached the maximum of 10 free cards!",
       searchLabel: "Search a card",
       searchPlaceholder: "Search...",
@@ -1467,6 +1471,7 @@ export const messages = {
     },
     workspace: {
       cardNoteTitle: "Kaartnotitie",
+      editNotAllowed: "U kunt deze ruche niet bewerken.",
       showLibrary: "Bibliotheek tonen",
       hideLibrary: "Bibliotheek verbergen",
       closeLibrary: "Bibliotheek sluiten",
@@ -1558,6 +1563,7 @@ export const messages = {
       title: "Beschikbare kaarten",
       remaining: "over",
       freeCardTitle: "Jij bent aan zet!",
+      editNotAllowed: "U kunt deze ruche niet bewerken.",
       maxFreeCardsReached:
         "Je hebt al het maximum van 10 vrije kaarten bereikt!",
       searchLabel: "Een kaart zoeken",

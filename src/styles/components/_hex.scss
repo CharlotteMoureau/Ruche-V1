@@ -80,11 +80,39 @@
         transform: rotateY(180deg);
         overflow: hidden;
 
+        .hex-back-content {
+          width: 100%;
+          height: 100%;
+          display: flex;
+          flex-direction: column;
+          justify-content: center;
+          align-items: center;
+        }
+
         p {
           font-size: 0.45rem;
           line-height: 0.9;
           text-align: center;
           padding: 15px 0;
+        }
+
+        .scrollable-back {
+          justify-content: flex-start;
+          overflow-y: auto;
+          -webkit-overflow-scrolling: touch;
+          touch-action: pan-y;
+          overscroll-behavior: contain;
+          padding-top: 26%;
+          padding-bottom: 18%;
+          scrollbar-width: none;
+
+          &::-webkit-scrollbar {
+            display: none;
+          }
+
+          p.long-def {
+            padding: 0;
+          }
         }
       }
     }
@@ -139,27 +167,6 @@
 
 .capture-mode.capture-mode-back .hex-back {
   display: flex !important;
-}
-
-/* Tablet: make .hex-back the scroll container for long back text.
-   The hex shape is visually clipped by the SVG clipPath on <foreignObject>,
-   so overriding overflow: hidden here does not break the hex outline. */
-@media (min-width: 768px) and (max-width: 1200px) and (pointer: coarse) {
-  .draggable-card .hex-back:has(.long-def) {
-    overflow-y: auto !important;
-    -webkit-overflow-scrolling: touch;
-    touch-action: pan-y;
-    overscroll-behavior: contain;
-    /* Start content from the top so the user can scroll down into the hex */
-    justify-content: flex-start;
-    /* Push content below the tapered top of the hex shape (flat edge ≈ 25% of height) */
-    padding-top: 26%;
-    /* Hide scrollbar visually — scrolling still works */
-    scrollbar-width: none;
-    &::-webkit-scrollbar {
-      display: none;
-    }
-  }
 }
 
 .draggable-card {

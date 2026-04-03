@@ -34,6 +34,8 @@ const EXPORT_COMMENT_STYLE = {
   padding: "16px 18px",
 };
 
+const BOARD_CAPTURE_PADDING = 96;
+
 function applyStyles(element, styles) {
   Object.assign(element.style, styles);
   return element;
@@ -358,20 +360,178 @@ async function dataUrlToBlob(dataUrl) {
   return response.blob();
 }
 
+function createZipEntryDate(date = new Date()) {
+  return new Date(
+    Date.UTC(
+      date.getFullYear(),
+      date.getMonth(),
+      date.getDate(),
+      date.getHours(),
+      date.getMinutes(),
+      date.getSeconds(),
+      date.getMilliseconds(),
+    ),
+  );
+}
+
 async function createZipFromImages(files) {
   const zip = new JSZip();
+  const entryDate = createZipEntryDate();
 
   await Promise.all(
     files.map(async (file) => {
-      zip.file(file.name, await dataUrlToBlob(file.dataUrl));
+      zip.file(file.name, await dataUrlToBlob(file.dataUrl), {
+        date: entryDate,
+      });
     }),
   );
 
   return zip.generateAsync({ type: "blob" });
 }
 
-async function captureBoardImages(board) {
+function resolveBoardCaptureNode(board) {
   if (!board) {
+    return null;
+  }
+
+  if (board.classList?.contains("hive-board__canvas")) {
+    return board;
+  }
+
+  return board.querySelector(".hive-board__canvas") || board;
+}
+
+function getCaptureDimensions(node) {
+  const rect = node.getBoundingClientRect();
+  const width = Math.max(
+    Math.ceil(rect.width),
+    node.scrollWidth || 0,
+    node.clientWidth || 0,
+    node.offsetWidth || 0,
+  );
+  const height = Math.max(
+    Math.ceil(rect.height),
+    node.scrollHeight || 0,
+    node.clientHeight || 0,
+    node.offsetHeight || 0,
+  );
+
+  return {
+    width,
+    height,
+  };
+}
+
+function getRenderedBoardBounds(node) {
+  const nodeRect = node.getBoundingClientRect();
+  const cards = [...node.querySelectorAll(".draggable-card")];
+
+  if (!cards.length) {
+    return null;
+  }
+
+  return cards.reduce((bounds, card) => {
+    const rect = card.getBoundingClientRect();
+    const nextBounds = {
+      left: Math.max(0, rect.left - nodeRect.left),
+      top: Math.max(0, rect.top - nodeRect.top),
+      right: Math.max(0, rect.right - nodeRect.left),
+      bottom: Math.max(0, rect.bottom - nodeRect.top),
+    };
+
+    if (!bounds) {
+      return nextBounds;
+    }
+
+    return {
+      left: Math.min(bounds.left, nextBounds.left),
+      top: Math.min(bounds.top, nextBounds.top),
+      right: Math.max(bounds.right, nextBounds.right),
+      bottom: Math.max(bounds.bottom, nextBounds.bottom),
+    };
+  }, null);
+}
+
+function getCaptureRegion(node) {
+  const { width: nodeWidth, height: nodeHeight } = getCaptureDimensions(node);
+  const contentBounds = getRenderedBoardBounds(node);
+
+  if (!contentBounds) {
+    return {
+      left: 0,
+      top: 0,
+      width: nodeWidth,
+      height: nodeHeight,
+      nodeWidth,
+      nodeHeight,
+    };
+  }
+
+  const left = Math.max(0, Math.floor(contentBounds.left - BOARD_CAPTURE_PADDING));
+  const top = Math.max(0, Math.floor(contentBounds.top - BOARD_CAPTURE_PADDING));
+  const right = Math.min(
+    nodeWidth,
+    Math.ceil(contentBounds.right + BOARD_CAPTURE_PADDING),
+  );
+  const bottom = Math.min(
+    nodeHeight,
+    Math.ceil(contentBounds.bottom + BOARD_CAPTURE_PADDING),
+  );
+
+  return {
+    left,
+    top,
+    width: Math.max(1, right - left),
+    height: Math.max(1, bottom - top),
+    nodeWidth,
+    nodeHeight,
+  };
+}
+
+async function captureNodeImage(node, options = {}) {
+  const region = getCaptureRegion(node);
+  const stage = createElement("div", { styles: EXPORT_STAGE_STYLE });
+  const frame = createElement("div", {
+    styles: {
+      position: "relative",
+      width: `${region.width}px`,
+      height: `${region.height}px`,
+      overflow: "hidden",
+    },
+  });
+  const clone = node.cloneNode(true);
+
+  applyStyles(clone, {
+    position: "absolute",
+    left: `-${region.left}px`,
+    top: `-${region.top}px`,
+    width: `${region.nodeWidth}px`,
+    height: `${region.nodeHeight}px`,
+    maxWidth: "none",
+    margin: "0",
+  });
+
+  frame.appendChild(clone);
+  stage.appendChild(frame);
+  document.body.appendChild(stage);
+
+  try {
+    await waitForCaptureFrame();
+    return await domtoimage.toPng(frame, {
+      cacheBust: true,
+      width: region.width,
+      height: region.height,
+      ...options,
+    });
+  } finally {
+    stage.remove();
+  }
+}
+
+async function captureBoardImages(board) {
+  const captureNode = resolveBoardCaptureNode(board);
+
+  if (!captureNode) {
     throw new Error("Board not found");
   }
 
@@ -380,16 +540,12 @@ async function captureBoardImages(board) {
   try {
     await waitForCaptureFrame();
 
-    const frontDataUrl = await domtoimage.toPng(board, {
-      cacheBust: true,
-    });
+    const frontDataUrl = await captureNodeImage(captureNode);
 
     document.body.classList.add("capture-mode-back");
     await waitForCaptureFrame();
 
-    const backDataUrl = await domtoimage.toPng(board, {
-      cacheBust: true,
-    });
+    const backDataUrl = await captureNodeImage(captureNode);
 
     return {
       frontDataUrl,

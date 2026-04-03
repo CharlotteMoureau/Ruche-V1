@@ -1,7 +1,11 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useDrop } from "react-dnd";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faRotateLeft, faRotateRight } from "@fortawesome/free-solid-svg-icons";
+import {
+  faExclamationTriangle,
+  faRotateLeft,
+  faRotateRight,
+} from "@fortawesome/free-solid-svg-icons";
 import DraggableCard from "./DraggableCard";
 import { useLanguage } from "../context/LanguageContext";
 import {
@@ -60,6 +64,7 @@ export default function HiveBoard({
   const wheelZoomTargetRef = useRef(BOARD_DEFAULT_ZOOM);
   const wheelZoomAnchorRef = useRef(null);
   const wheelZoomFrameRef = useRef(null);
+  const warningTimeoutRef = useRef(null);
   const [viewportSize, setViewportSize] = useState({ width: 0, height: 0 });
   const [zoom, setZoom] = useState(
     isCompactLayout ? BOARD_COMPACT_DEFAULT_ZOOM : BOARD_DEFAULT_ZOOM,
@@ -68,6 +73,7 @@ export default function HiveBoard({
   const [activeAutoPlaceSignal, setActiveAutoPlaceSignal] =
     useState(autoPlaceSignal);
   const [isPanning, setIsPanning] = useState(false);
+  const [warningMessage, setWarningMessage] = useState("");
   const selectedCards = cards.filter((card) => selectedCardIds.has(card.id));
   const selectedCount = selectedCardIds.size;
   const defaultZoom = isCompactLayout
@@ -159,9 +165,30 @@ export default function HiveBoard({
       if (wheelZoomFrameRef.current) {
         cancelAnimationFrame(wheelZoomFrameRef.current);
       }
+
+      if (warningTimeoutRef.current) {
+        clearTimeout(warningTimeoutRef.current);
+      }
     },
     [],
   );
+
+  const showWarning = useCallback((message) => {
+    if (warningTimeoutRef.current) {
+      clearTimeout(warningTimeoutRef.current);
+    }
+
+    setWarningMessage(message);
+    warningTimeoutRef.current = setTimeout(() => {
+      setWarningMessage("");
+      warningTimeoutRef.current = null;
+    }, 5000);
+  }, []);
+
+  const handleUnavailableEdit = useCallback(() => {
+    if (tabletUsageBlocked) return;
+    showWarning(t("workspace.editNotAllowed"));
+  }, [showWarning, t, tabletUsageBlocked]);
   const scaledBoardWidth = BOARD_CANVAS_WIDTH * zoom;
   const scaledBoardHeight = BOARD_CANVAS_HEIGHT * zoom;
   const shellWidth = Math.max(viewportSize.width, scaledBoardWidth);
@@ -807,6 +834,16 @@ export default function HiveBoard({
         </div>
       </header>
       <div className="hive-board__viewport-area">
+        {warningMessage ? (
+          <div
+            className="card-library__popup-warning hive-board__warning"
+            role="status"
+            aria-live="polite"
+          >
+            <FontAwesomeIcon icon={faExclamationTriangle} />
+            <span>{warningMessage}</span>
+          </div>
+        ) : null}
         {isTabletEditorMode ? (
           <div className="hive-board__history-tablet">{historyControls}</div>
         ) : null}
@@ -852,7 +889,8 @@ export default function HiveBoard({
                     onToggleSelection={onToggleCardSelection}
                     onClearSelection={onClearSelection}
                     selectionMode={isTabletEditorMode && boardSelectionMode}
-                    dragDisabled={tabletUsageBlocked}
+                    dragDisabled={tabletUsageBlocked || !canEdit}
+                    onUnavailableInteraction={handleUnavailableEdit}
                   />
                 );
               })}

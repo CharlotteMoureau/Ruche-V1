@@ -20,6 +20,7 @@ export default function DraggableBoardCard({
   onClearSelection,
   selectionMode = false,
   dragDisabled = false,
+  onUnavailableInteraction,
   children,
 }) {
   const {
@@ -45,6 +46,7 @@ export default function DraggableBoardCard({
     onClearSelection,
     selectionMode,
     dragDisabled,
+    onUnavailableInteraction,
   });
 
   return (
@@ -58,14 +60,18 @@ export default function DraggableBoardCard({
         zIndex: isDragging || isSelected ? 1100 : 1000,
         width: `${BOARD_CARD_SIZE}px`,
         height: `${BOARD_CARD_SIZE}px`,
-        cursor: isDragging ? "grabbing" : "grab",
+        cursor: dragDisabled ? "not-allowed" : isDragging ? "grabbing" : "grab",
         opacity: isDraggingOverLibrary ? 0 : 1,
         userSelect: "none",
         WebkitUserSelect: "none",
         WebkitTouchCallout: "none",
       }}
-      onMouseDown={handleMouseDown}
-      onTouchStart={handleTouchStart}
+      onMouseDown={(event) => {
+        handleMouseDown(event);
+      }}
+      onTouchStart={(event) => {
+        handleTouchStart(event);
+      }}
     >
       {children}
     </div>

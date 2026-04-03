@@ -4,7 +4,7 @@ Deze handleiding is geschreven voor gewone gebruikers. U hebt geen technische ke
 
 ## Waarvoor dient La Ruche
 
-La Ruche helpt u om een visueel bord met pedagogische kaarten op te bouwen. U kunt kaarten verplaatsen, eigen kaarten toevoegen, uw werk opslaan en een ruche delen met andere personen.
+La Ruche is een samenwerkingsinstrument dat is ontwikkeld om alle betrokkenen bij het Parcours voor Culturele en Artistieke Educatie (PECA) te ondersteunen bij het creëren en realiseren van kwalitatieve culturele en artistieke ervaringen. Het richt zich tot alle PECA-actoren en stimuleert reflectie, uitwisseling, documentatie en evaluatie tijdens het hele traject. Toegankelijk voor iedereen nodigt het uit om te durven, te experimenteren en educatieve en culturele praktijken te verrijken, alleen of in teamverband. U kunt kaarten verplaatsen, eigen kaarten toevoegen, uw werk opslaan en een ruche delen met andere personen.
 
 ## Voor u begint
 

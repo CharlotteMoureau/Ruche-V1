@@ -946,6 +946,7 @@ export default function RucheWorkspace({
               setShowModal(true);
             }}
             userCards={userCards.length}
+            canEdit={canEdit}
             isTabletEditorMode={isTabletEditorMode}
             selectedCount={selectedLibraryCount}
             onClearSelected={clearLibrarySelection}

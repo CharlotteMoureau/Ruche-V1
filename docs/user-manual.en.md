@@ -4,7 +4,7 @@ This guide is written for everyday users. You do not need technical knowledge to
 
 ## What La Ruche is for
 
-La Ruche helps you build a visual board with educational cards. You can move cards, add your own cards, save your work, and share a hive with other people.
+La Ruche is a collaborative tool designed to support everyone involved in the Cultural and Artistic Education Pathway (PECA) in creating and implementing high-quality cultural and artistic experiences. It is intended for all PECA stakeholders and encourages reflection, exchange, documentation, and evaluation throughout the entire process. Accessible to everyone, it invites users to try things out, experiment, and enrich educational and cultural practices, alone or in a team. You can move cards, add your own cards, save your work, and share a hive with other people.
 
 ## Before you start
 

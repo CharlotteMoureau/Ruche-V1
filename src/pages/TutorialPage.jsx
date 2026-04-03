@@ -34,15 +34,11 @@ export default function TutorialPage() {
       <div className="tutorial-content markdown-content">
         <ReactMarkdown
           components={{
-            ul: ({ children }) => (
-              <ul style={{ marginLeft: "20px" }}>{children}</ul>
-            ),
-            ol: ({ children }) => (
-              <ol style={{ marginLeft: "20px" }}>{children}</ol>
-            ),
-            li: ({ children }) => (
-              <li style={{ marginBottom: "8px" }}>{children}</li>
-            ),
+            h1: ({ children }) => <h2>{children}</h2>,
+            h2: ({ children }) => <h3>{children}</h3>,
+            h3: ({ children }) => <h4>{children}</h4>,
+            h4: ({ children }) => <h5>{children}</h5>,
+            h5: ({ children }) => <h6>{children}</h6>,
           }}
         >
           {String(currentManual)}

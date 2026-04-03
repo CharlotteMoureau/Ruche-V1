@@ -69,6 +69,7 @@ export function useDraggableCard({
   onClearSelection,
   selectionMode = false,
   dragDisabled = false,
+  onUnavailableInteraction,
 }) {
   const DRAG_ACTIVATION_THRESHOLD = 2;
   const [isDragging, setIsDragging] = useState(false);
@@ -256,7 +257,12 @@ export function useDraggableCard({
   }, [card, isSelected, onClearSelection, selectedCards]);
 
   const handleMouseDown = useCallback((event) => {
-    if (dragDisabled) return;
+    if (dragDisabled) {
+      event.preventDefault();
+      event.stopPropagation();
+      onUnavailableInteraction?.();
+      return;
+    }
     if (event.button !== 0) return;
     if (Date.now() < ignoreMouseUntilRef.current) return;
 
@@ -283,6 +289,7 @@ export function useDraggableCard({
     card.id,
     dragDisabled,
     isSelected,
+    onUnavailableInteraction,
     onToggleSelection,
     selectionMode,
     startDrag,
@@ -302,7 +309,12 @@ export function useDraggableCard({
   }, [finalizeDrag]);
 
   const handleTouchStart = useCallback((event) => {
-    if (dragDisabled) return;
+    if (dragDisabled) {
+      event.preventDefault();
+      event.stopPropagation();
+      onUnavailableInteraction?.();
+      return;
+    }
     ignoreMouseUntilRef.current = Date.now() + 700;
 
     if (shouldAllowNativeTextScroll(event.target)) {
@@ -329,6 +341,7 @@ export function useDraggableCard({
     card.id,
     dragDisabled,
     isSelected,
+    onUnavailableInteraction,
     onToggleSelection,
     selectionMode,
     shouldAllowNativeTextScroll,

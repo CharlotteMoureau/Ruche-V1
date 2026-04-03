@@ -47,9 +47,13 @@ export default function HexCard({ card, position, onlyFront }) {
             </div>
             {!onlyFront && (
               <div className="hex-back">
-                <p className={isLongText ? "long-def" : ""}>
-                  {card.definition}
-                </p>
+                <div
+                  className={`hex-back-content ${isLongText ? "scrollable-back" : ""}`}
+                >
+                  <p className={isLongText ? "long-def" : ""}>
+                    {card.definition}
+                  </p>
+                </div>
               </div>
             )}
           </div>

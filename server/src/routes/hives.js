@@ -70,9 +70,9 @@ async function ensureInvitationsTable() {
           "inviteeId" TEXT NOT NULL,
           "role" TEXT NOT NULL,
           "status" TEXT NOT NULL DEFAULT 'PENDING',
-          "createdAt" TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-          "updatedAt" TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-          "respondedAt" TIMESTAMP,
+          "createdAt" TIMESTAMPTZ(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+          "updatedAt" TIMESTAMPTZ(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+          "respondedAt" TIMESTAMPTZ(3),
           CONSTRAINT "HiveInvitation_hiveId_fkey" FOREIGN KEY ("hiveId") REFERENCES "Hive" ("id") ON DELETE CASCADE ON UPDATE CASCADE,
           CONSTRAINT "HiveInvitation_inviterId_fkey" FOREIGN KEY ("inviterId") REFERENCES "User" ("id") ON DELETE CASCADE ON UPDATE CASCADE,
           CONSTRAINT "HiveInvitation_inviteeId_fkey" FOREIGN KEY ("inviteeId") REFERENCES "User" ("id") ON DELETE CASCADE ON UPDATE CASCADE
