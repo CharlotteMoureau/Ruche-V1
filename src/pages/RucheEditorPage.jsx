@@ -207,7 +207,8 @@ export default function RucheEditorPage() {
     () => JSON.stringify({ title, hiveKind, boardData }),
     [title, hiveKind, boardData],
   );
-  const isDirty = Boolean(savedSnapshot) && currentSnapshot !== savedSnapshot;
+  const isDirty =
+    canEdit && Boolean(savedSnapshot) && currentSnapshot !== savedSnapshot;
   const otherActiveEditors = useMemo(
     () =>
       activeEditors.filter(
