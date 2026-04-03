@@ -159,10 +159,19 @@ export function useDraggableCard({
   const finalizeDrag = useCallback((endPointer) => {
     if (!dragStateRef.current) return;
 
-    const { cards, currentDelta, lastPointerClient, isActive } =
+    const {
+      cards,
+      currentDelta,
+      lastPointerClient,
+      isActive,
+      toggleSelectionOnRelease,
+    } =
       dragStateRef.current;
 
     if (!isActive) {
+      if (toggleSelectionOnRelease) {
+        onToggleSelection(card.id);
+      }
       dragStateRef.current = null;
       setIsDraggingOverLibrary(false);
       emitBoardDragState({ dragging: false, overLibrary: false });
@@ -217,9 +226,11 @@ export function useDraggableCard({
     onMoveCards,
     onReturnCardsToLibrary,
     onReturnToLibrary,
+    onToggleSelection,
   ]);
 
-  const startDrag = useCallback((clientX, clientY) => {
+  const startDrag = useCallback((clientX, clientY, options = {}) => {
+    const { toggleSelectionOnRelease = false } = options;
     const dragCards = isSelected && selectedCards.length > 1 ? selectedCards : [card];
 
     if (!isSelected && selectedCards.length) {
@@ -232,6 +243,7 @@ export function useDraggableCard({
       currentDelta: { x: 0, y: 0 },
       isActive: false,
       isOverLibrary: false,
+      toggleSelectionOnRelease,
       cards: dragCards.map((dragCard) => ({
         card: dragCard,
         startPosition: dragCard.position,
@@ -248,12 +260,13 @@ export function useDraggableCard({
     if (event.button !== 0) return;
     if (Date.now() < ignoreMouseUntilRef.current) return;
 
-    event.preventDefault();
     event.stopPropagation();
 
     if (selectionMode) {
       if (isSelected) {
-        startDrag(event.clientX, event.clientY);
+        startDrag(event.clientX, event.clientY, {
+          toggleSelectionOnRelease: true,
+        });
       } else {
         onToggleSelection(card.id);
       }
@@ -298,12 +311,13 @@ export function useDraggableCard({
 
     const touch = event.touches[0];
 
-    event.preventDefault();
     event.stopPropagation();
 
     if (selectionMode) {
       if (isSelected) {
-        startDrag(touch.clientX, touch.clientY);
+        startDrag(touch.clientX, touch.clientY, {
+          toggleSelectionOnRelease: true,
+        });
       } else {
         onToggleSelection(card.id);
       }
@@ -327,7 +341,6 @@ export function useDraggableCard({
 
     if (!dragStateRef.current) return;
 
-    event.preventDefault();
     event.stopPropagation();
 
     updateDraggedCards(touch.clientX, touch.clientY);
