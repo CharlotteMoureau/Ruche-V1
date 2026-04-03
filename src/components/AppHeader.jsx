@@ -76,10 +76,15 @@ export default function AppHeader() {
     try {
       const data = await apiFetch("/hives/invitations/count", { token });
       setPendingInvitesCount(Number(data?.count || 0));
-    } catch {
+    } catch (error) {
+      if (error?.status === 401) {
+        setPendingInvitesCount(0);
+        logout();
+        return;
+      }
       setPendingInvitesCount(0);
     }
-  }, [isAuthenticated, isAdmin, token]);
+  }, [isAuthenticated, isAdmin, logout, token]);
 
   useEffect(() => {
     if (!isAuthenticated || isAdmin || !token) {

@@ -175,11 +175,16 @@ authRouter.get("/me", requireAuth, async (req, res) => {
     },
   });
 
-  return res.json({
-    user: sanitizeUser(user),
-    isAdmin: req.user.isAdmin,
-    ownedHives: user.hives,
-    sharedHives: user.collaborations.map((c) => ({
+  if (!user) {
+    return res.status(401).json({
+      error: "Invalid user",
+      code: "AUTH_INVALID_USER",
+    });
+  }
+
+  const sharedHives = user.collaborations
+    .filter((c) => c?.hive)
+    .map((c) => ({
       id: c.hive.id,
       title: c.hive.title,
       kind: c.hive.kind,
@@ -187,7 +192,13 @@ authRouter.get("/me", requireAuth, async (req, res) => {
       updatedAt: c.hive.updatedAt,
       owner: c.hive.owner,
       collaboratorRole: c.role,
-    })),
+    }));
+
+  return res.json({
+    user: sanitizeUser(user),
+    isAdmin: req.user.isAdmin,
+    ownedHives: user.hives,
+    sharedHives,
   });
 });
 
