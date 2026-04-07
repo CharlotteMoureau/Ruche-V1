@@ -1636,6 +1636,10 @@ export default function RucheEditorPage() {
           if (!nextTitle) return;
           setTitle(nextTitle);
           setShowHeaderTitleModal(false);
+          if (!isNew && canManageHive && hive && nextTitle !== hive.title.trim()) {
+            setPendingNewTitle(nextTitle);
+            setRenameOrDuplicateAction("pending");
+          }
         }}
       />
     </section>
