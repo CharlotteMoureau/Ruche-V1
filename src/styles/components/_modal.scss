@@ -262,19 +262,18 @@
 }
 
 .comment-action-btn {
+  background: none;
   border: 0;
-  border-radius: 8px;
-  padding: 0.35rem 0.75rem;
-  font-size: 0.82rem;
+  padding: 0;
+  font-size: 0.78rem;
   font-weight: 600;
   line-height: 1.2;
-  background: $jaune;
-  color: #222;
+  color: $bleu-clair;
   cursor: pointer;
-  text-decoration: none;
+  text-decoration: underline;
 
   &:hover {
-    background: color.adjust($jaune, $lightness: -8%);
+    color: $bleu-fonce;
   }
 
   &:focus-visible {
@@ -283,11 +282,10 @@
   }
 
   &--danger {
-    background: $rose;
-    color: #fff;
+    color: $rose;
 
     &:hover {
-      background: color.adjust($rose, $lightness: -8%);
+      color: color.adjust($rose, $lightness: -10%);
     }
   }
 }
