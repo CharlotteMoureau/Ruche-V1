@@ -487,6 +487,8 @@ export const messages = {
       noCardNote: "Aucune note pour cette carte.",
       cardNoteReadOnlyHint:
         "Vous pouvez consulter cette note, mais pas la modifier.",
+      cardNoteSaveFirst:
+        "Sauvegardez votre ruche pour accéder aux notes de carte.",
       addCardNotePlaceholder: "Ajouter une note à cette carte...",
       editCardNotePlaceholder: "Modifier la note de cette carte...",
       add: "Ajouter",
@@ -990,6 +992,7 @@ export const messages = {
       updatedBy: "Last edited on {date} by {user}",
       noCardNote: "No note for this card.",
       cardNoteReadOnlyHint: "You can view this note, but you cannot edit it.",
+      cardNoteSaveFirst: "Save your hive to access card notes.",
       addCardNotePlaceholder: "Add a note to this card...",
       editCardNotePlaceholder: "Edit this card note...",
       add: "Add",
@@ -1492,6 +1495,8 @@ export const messages = {
       noCardNote: "Geen notitie voor deze kaart.",
       cardNoteReadOnlyHint:
         "Je kunt deze notitie bekijken, maar niet bewerken.",
+      cardNoteSaveFirst:
+        "Sla je bijenkorf op om toegang te krijgen tot kaartnotities.",
       addCardNotePlaceholder: "Voeg een notitie toe aan deze kaart...",
       editCardNotePlaceholder: "Bewerk de notitie van deze kaart...",
       add: "Toevoegen",

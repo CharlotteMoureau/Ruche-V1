@@ -1206,7 +1206,11 @@ export default function RucheWorkspace({
               </>
             ) : (
               <p className="comments-empty">
-                {t("workspace.cardNoteReadOnlyHint")}
+                {t(
+                  requireSaveBeforeNote
+                    ? "workspace.cardNoteSaveFirst"
+                    : "workspace.cardNoteReadOnlyHint",
+                )}
               </p>
             )}
           </div>
