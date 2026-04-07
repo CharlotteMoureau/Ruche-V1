@@ -189,18 +189,6 @@ De export kan bevatten:
 
 Dat is handig om een afgewerkt bord te delen of te archiveren.
 
-## Beheerpagina
-
-Beheerders hebben een extra beheerpagina.
-
-Van daaruit kunnen zij:
-
-- Gebruikers zoeken
-- Ruches zoeken
-- Bepaalde gebruikersgegevens aanpassen
-- Ruches hernoemen
-- Gebruikers of ruches verwijderen
-
 ## Eenvoudige tips
 
 - Sla op voor u de pagina sluit.

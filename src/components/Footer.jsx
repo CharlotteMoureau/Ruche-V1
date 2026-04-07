@@ -27,6 +27,10 @@ export default function Footer() {
         <div className="footer-legal">
           <Link to="/gdpr">{t("landing.gdpr")}</Link>
           <span aria-hidden="true">·</span>
+          <Link to="https://www.peca.be/contact" target="_blank">
+            {t("landing.contact")}
+          </Link>
+          <span aria-hidden="true">·</span>
           <Link to="/wip">{t("landing.wip")}</Link>
         </div>
         <label className="language-select-wrap">

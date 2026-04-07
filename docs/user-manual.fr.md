@@ -189,18 +189,6 @@ Les exports peuvent inclure :
 
 Cela est utile pour partager ou archiver une planche finalisée.
 
-## Espace administrateur
-
-Les administrateurs disposent d'une page supplémentaire.
-
-Depuis cet espace, ils peuvent :
-
-- Rechercher des utilisateurs
-- Rechercher des ruches
-- Modifier certaines informations utilisateur
-- Renommer des ruches
-- Supprimer des utilisateurs ou des ruches
-
 ## Conseils simples
 
 - Enregistrez avant de fermer la page.

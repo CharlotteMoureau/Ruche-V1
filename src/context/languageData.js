@@ -233,6 +233,7 @@ export const messages = {
       wip: "En cours de développement",
       wipPlaceholder:
         "V1, V2, fonctionnalités à venir — découvrez la feuille de route.",
+      contact: "Contact",
     },
     login: {
       title: "Connexion",
@@ -745,6 +746,7 @@ export const messages = {
       gdprPlaceholder: "Data, cookies, GDPR rights — read our privacy policy.",
       wip: "Work in Progress",
       wipPlaceholder: "V1, V2, upcoming features — discover the roadmap.",
+      contact: "Contact",
     },
     login: {
       title: "Log in",
@@ -1243,6 +1245,7 @@ export const messages = {
         "Gegevens, cookies, AVG-rechten — lees ons privacybeleid.",
       wip: "In Ontwikkeling",
       wipPlaceholder: "V1, V2, komende functies — ontdek de routekaart.",
+      contact: "Contact",
     },
     login: {
       title: "Aanmelden",

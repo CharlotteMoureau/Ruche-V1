@@ -189,18 +189,6 @@ Exports can include:
 
 This is useful for sharing or archiving a finished board.
 
-## Admin area
-
-Admin users have an extra administration page.
-
-From there, they can:
-
-- Search users
-- Search hives
-- Edit some user details
-- Rename hives
-- Delete users or hives
-
 ## Simple tips
 
 - Save before closing the page.
