@@ -889,6 +889,7 @@ export default function HiveBoard({
                     onToggleSelection={onToggleCardSelection}
                     onClearSelection={onClearSelection}
                     selectionMode={isTabletEditorMode && boardSelectionMode}
+                    isTabletEditorMode={isTabletEditorMode}
                     dragDisabled={tabletUsageBlocked || !canEdit}
                     onUnavailableInteraction={handleUnavailableEdit}
                   />

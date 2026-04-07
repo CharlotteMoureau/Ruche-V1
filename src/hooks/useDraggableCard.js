@@ -68,6 +68,7 @@ export function useDraggableCard({
   onToggleSelection,
   onClearSelection,
   selectionMode = false,
+  isTabletEditorMode = false,
   dragDisabled = false,
   onUnavailableInteraction,
 }) {
@@ -232,9 +233,16 @@ export function useDraggableCard({
 
   const startDrag = useCallback((clientX, clientY, options = {}) => {
     const { toggleSelectionOnRelease = false } = options;
-    const dragCards = isSelected && selectedCards.length > 1 ? selectedCards : [card];
+    const shouldDragSelection =
+      isSelected &&
+      selectedCards.length > 1 &&
+      (!isTabletEditorMode || selectionMode);
+    const dragCards = shouldDragSelection ? selectedCards : [card];
 
-    if (!isSelected && selectedCards.length) {
+    if (
+      selectedCards.length &&
+      (!isSelected || (isTabletEditorMode && !selectionMode))
+    ) {
       onClearSelection();
     }
 
@@ -254,7 +262,14 @@ export function useDraggableCard({
 
     setIsDragging(false);
     setIsDraggingOverLibrary(false);
-  }, [card, isSelected, onClearSelection, selectedCards]);
+  }, [
+    card,
+    isSelected,
+    isTabletEditorMode,
+    onClearSelection,
+    selectedCards,
+    selectionMode,
+  ]);
 
   const handleMouseDown = useCallback((event) => {
     if (dragDisabled) {

@@ -19,6 +19,7 @@ export default function DraggableBoardCard({
   onToggleSelection,
   onClearSelection,
   selectionMode = false,
+  isTabletEditorMode = false,
   dragDisabled = false,
   onUnavailableInteraction,
   children,
@@ -45,6 +46,7 @@ export default function DraggableBoardCard({
     onToggleSelection,
     onClearSelection,
     selectionMode,
+    isTabletEditorMode,
     dragDisabled,
     onUnavailableInteraction,
   });
