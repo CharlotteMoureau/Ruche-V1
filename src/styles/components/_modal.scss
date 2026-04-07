@@ -20,7 +20,7 @@
   max-width: 400px;
   width: 90%;
   position: relative;
-  z-index: 10000; 
+  z-index: 10000;
 }
 
 
@@ -91,8 +91,15 @@
 }
 
 @keyframes fadeIn {
-  from { opacity: 0; transform: scale(0.95); }
-  to { opacity: 1; transform: scale(1); }
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
 }
 
 .char-count {
@@ -197,7 +204,9 @@
   color: #666;
   padding: 0 0.25rem;
 
-  &:hover { color: #333; }
+  &:hover {
+    color: #333;
+  }
 }
 
 .comments-scroll {
@@ -304,7 +313,10 @@
     resize: vertical;
     font-family: inherit;
 
-    &:focus { outline: none; border-color: $turquoise; }
+    &:focus {
+      outline: none;
+      border-color: $turquoise;
+    }
   }
 }
 
@@ -348,7 +360,10 @@
     resize: vertical;
     font-family: inherit;
 
-    &:focus { outline: none; border-color: $turquoise; }
+    &:focus {
+      outline: none;
+      border-color: $turquoise;
+    }
   }
 
   button {

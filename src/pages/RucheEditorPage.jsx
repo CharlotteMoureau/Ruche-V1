@@ -1485,7 +1485,7 @@ export default function RucheEditorPage() {
                         </button>
                         <button
                           type="button"
-                          className="btn secondary"
+                          className="secondary"
                           onClick={() => {
                             setReplyingTo(null);
                             setReplyText("");
