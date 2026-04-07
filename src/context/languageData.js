@@ -568,7 +568,7 @@ export const messages = {
       clearSelection: "Effacer la sélection",
       selectedCount: "{count} carte(s) sélectionnée(s)",
       tapToSelectHelp:
-        "Touchez les cartes à ajouter, puis ouvrez le plateau pour les placer.",
+        "Touchez les cartes à ajouter, puis envoyez-les plateau pour les placer.",
       goToBoard: "Envoyer au plateau ({count})",
     },
     addCardModal: {
@@ -744,8 +744,7 @@ export const messages = {
       gdpr: "GDPR / Privacy",
       gdprPlaceholder: "Data, cookies, GDPR rights — read our privacy policy.",
       wip: "Work in Progress",
-      wipPlaceholder:
-        "V1, V2, upcoming features — discover the roadmap.",
+      wipPlaceholder: "V1, V2, upcoming features — discover the roadmap.",
     },
     login: {
       title: "Log in",
@@ -1067,7 +1066,7 @@ export const messages = {
       clearSelection: "Clear selection",
       selectedCount: "{count} card(s) selected",
       tapToSelectHelp:
-        "Tap cards to add them, then go back to the board to place them.",
+        "Tap cards to add them, then send them to the board to place them.",
       goToBoard: "Go to board ({count})",
     },
     addCardModal: {
@@ -1138,7 +1137,7 @@ export const messages = {
       back: "Back to home",
     },
     tutorial: {
-      title: "Tutorial"
+      title: "Tutorial",
     },
     passwordField: { showPassword: "Show password" },
   },
@@ -1243,8 +1242,7 @@ export const messages = {
       gdprPlaceholder:
         "Gegevens, cookies, AVG-rechten — lees ons privacybeleid.",
       wip: "In Ontwikkeling",
-      wipPlaceholder:
-        "V1, V2, komende functies — ontdek de routekaart.",
+      wipPlaceholder: "V1, V2, komende functies — ontdek de routekaart.",
     },
     login: {
       title: "Aanmelden",
@@ -1573,7 +1571,7 @@ export const messages = {
       clearSelection: "Selectie wissen",
       selectedCount: "{count} kaart(en) geselecteerd",
       tapToSelectHelp:
-        "Tik op kaarten om ze toe te voegen en ga daarna naar het bord om ze te plaatsen.",
+        "Tik op kaarten om ze toe te voegen en stuur ze naar het bord om ze te plaatsen.",
       goToBoard: "Naar bord ({count})",
     },
     addCardModal: {
@@ -1650,4 +1648,3 @@ export const messages = {
     passwordField: { showPassword: "Wachtwoord tonen" },
   },
 };
-
