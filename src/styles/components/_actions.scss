@@ -94,22 +94,20 @@
 }
 
 /* Unified interaction style for all filled action buttons */
-:where(
-    .site-nav button,
-    .form-grid > button,
-    .button-link,
-    .inline-actions button,
-    .list-grid button,
-    .editor-topbar button,
-    .toolbar button,
-    .modal-box .btn,
-    .comment-reply-actions button,
-    .comments-new button,
-    .card-note-actions button,
-    .danger-btn,
-    .toolbar-leave-btn,
-    .toolbar-collaborator-remove
-  ) {
+:where(.site-nav button,
+  .form-grid > button,
+  .button-link,
+  .inline-actions button,
+  .list-grid button,
+  .editor-topbar button,
+  .toolbar button,
+  .modal-box .btn,
+  .comment-reply-actions button,
+  .comments-new button,
+  .card-note-actions button,
+  .danger-btn,
+  .toolbar-leave-btn,
+  .toolbar-collaborator-remove) {
   transition:
     background-color 180ms ease,
     transform 180ms ease,
@@ -122,69 +120,59 @@
   line-height: 1.2;
 }
 
-:where(
-    .site-nav button,
-    .form-grid > button,
-    .button-link,
-    .inline-actions button,
-    .list-grid button,
-    .editor-topbar button,
-    .toolbar button,
-    .modal-box .btn,
-    .comment-reply-actions button,
-    .comments-new button,
-    .card-note-actions button,
-    .danger-btn,
-    .toolbar-leave-btn,
-    .toolbar-collaborator-remove
-  ):focus-visible {
+:where(.site-nav button,
+  .form-grid > button,
+  .button-link,
+  .inline-actions button,
+  .list-grid button,
+  .editor-topbar button,
+  .toolbar button,
+  .modal-box .btn,
+  .comment-reply-actions button,
+  .comments-new button,
+  .card-note-actions button,
+  .danger-btn,
+  .toolbar-leave-btn,
+  .toolbar-collaborator-remove):focus-visible {
   outline: 3px solid $bleu-fonce;
   outline-offset: 2px;
 }
 
-:where(
-    .site-nav button,
-    .form-grid > button,
-    .inline-actions button,
-    .list-grid button,
-    .editor-topbar button,
-    .toolbar button,
-    .modal-box .btn,
-    .comment-reply-actions button,
-    .comments-new button,
-    .card-note-actions button,
-    .danger-btn,
-    .toolbar-leave-btn,
-    .toolbar-collaborator-remove
-  ):not(:disabled):hover,
-:where(
-    .button-link,
-    .danger-btn
-  ):hover {
+:where(.site-nav button,
+  .form-grid > button,
+  .inline-actions button,
+  .list-grid button,
+  .editor-topbar button,
+  .toolbar button,
+  .modal-box .btn,
+  .comment-reply-actions button,
+  .comments-new button,
+  .card-note-actions button,
+  .danger-btn,
+  .toolbar-leave-btn,
+  .toolbar-collaborator-remove):not(:disabled):hover,
+:where(.button-link,
+  .danger-btn):hover {
   transform: translateY(-1px);
   filter: brightness(0.95);
   box-shadow: 0 8px 14px rgba(0, 0, 0, 0.16);
 }
 
-:where(
-    .site-nav button,
-    .form-grid > button,
-    .inline-actions button,
-    .list-grid button,
-    .editor-topbar button,
-    .toolbar button,
-    .modal-box .btn,
-    .comment-reply-actions button,
-    .comments-new button,
-    .card-note-actions button,
-    .danger-btn,
-    .toolbar-leave-btn,
-    .toolbar-collaborator-remove
-  ):not(:disabled):active,
-:where(
-    .button-link,
-    .danger-btn
-  ):active {
+:where(.site-nav button,
+  .form-grid > button,
+  .inline-actions button,
+  .list-grid button,
+  .editor-topbar button,
+  .toolbar button,
+  .modal-box .btn,
+  .comment-reply-actions button,
+  .comments-new button,
+  .card-note-actions button,
+  .danger-btn,
+  .toolbar-leave-btn,
+  .toolbar-collaborator-remove):not(:disabled):active,
+:where(.button-link,
+  .danger-btn):active {
   transform: translateY(0);
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.14);
 }
@@ -201,44 +189,39 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  :where(
-      .site-nav button,
-      .form-grid > button,
-      .button-link,
-      .inline-actions button,
-      .list-grid button,
-      .editor-topbar button,
-      .toolbar button,
-      .modal-box .btn,
-      .comment-reply-actions button,
-      .comments-new button,
-      .card-note-actions button,
-      .danger-btn,
-      .toolbar-leave-btn,
-      .toolbar-collaborator-remove
-    ) {
+
+  :where(.site-nav button,
+    .form-grid > button,
+    .button-link,
+    .inline-actions button,
+    .list-grid button,
+    .editor-topbar button,
+    .toolbar button,
+    .modal-box .btn,
+    .comment-reply-actions button,
+    .comments-new button,
+    .card-note-actions button,
+    .danger-btn,
+    .toolbar-leave-btn,
+    .toolbar-collaborator-remove) {
     transition: none;
   }
 
-  :where(
-      .site-nav button,
-      .form-grid > button,
-      .inline-actions button,
-      .list-grid button,
-      .editor-topbar button,
-      .toolbar button,
-      .modal-box .btn,
-      .comment-reply-actions button,
-      .comments-new button,
-      .card-note-actions button,
-      .danger-btn,
-      .toolbar-leave-btn,
-      .toolbar-collaborator-remove
-    ):not(:disabled):hover,
-  :where(
-      .button-link,
-      .danger-btn
-    ):hover {
+  :where(.site-nav button,
+    .form-grid > button,
+    .inline-actions button,
+    .list-grid button,
+    .editor-topbar button,
+    .toolbar button,
+    .modal-box .btn,
+    .comment-reply-actions button,
+    .comments-new button,
+    .card-note-actions button,
+    .danger-btn,
+    .toolbar-leave-btn,
+    .toolbar-collaborator-remove):not(:disabled):hover,
+  :where(.button-link,
+    .danger-btn):hover {
     transform: none;
     filter: none;
   }

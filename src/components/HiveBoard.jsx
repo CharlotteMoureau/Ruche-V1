@@ -386,13 +386,13 @@ export default function HiveBoard({
 
         const fallbackOffset = viewportRect
           ? {
-              x: viewportRect.left + viewportRect.width / 2,
-              y: viewportRect.top + viewportRect.height / 2,
-            }
+            x: viewportRect.left + viewportRect.width / 2,
+            y: viewportRect.top + viewportRect.height / 2,
+          }
           : {
-              x: boardRect.left + boardRect.width / 2,
-              y: boardRect.top + boardRect.height / 2,
-            };
+            x: boardRect.left + boardRect.width / 2,
+            y: boardRect.top + boardRect.height / 2,
+          };
         const effectiveOffset =
           isInsideBoard && isInsideViewport ? offset : fallbackOffset;
 
@@ -851,92 +851,92 @@ export default function HiveBoard({
           ref={handleViewportRef}
           className={`hive-board__viewport ${isPanning ? "is-panning" : ""} ${isDefaultZoom ? "is-default-zoom" : ""}`}
         >
-        <div
-          className="hive-board__canvas-shell"
-          style={{
-            width: `${shellWidth}px`,
-            height: `${shellHeight}px`,
-          }}
-        >
           <div
-            ref={boardRef}
-            className="hive-board__canvas"
+            className="hive-board__canvas-shell"
             style={{
-              width: `${scaledBoardWidth}px`,
-              height: `${scaledBoardHeight}px`,
+              width: `${shellWidth}px`,
+              height: `${shellHeight}px`,
             }}
           >
             <div
-              className="hive-board__canvas-content"
-              style={canvasContentStyle}
-              onMouseDown={handleBoardMouseDown}
-              onPointerDown={handleCanvasPointerDown}
-              onTouchStart={handleBoardMouseDown}
+              ref={boardRef}
+              className="hive-board__canvas"
+              style={{
+                width: `${scaledBoardWidth}px`,
+                height: `${scaledBoardHeight}px`,
+              }}
             >
-              {cards.map((card) => {
-                return (
-                  <DraggableCard
-                    key={card.id}
-                    card={card}
-                    isSelected={selectedCardIds.has(card.id)}
-                    selectedCards={selectedCards}
-                    zoom={zoom}
-                    onMoveCard={onMoveCard}
-                    onMoveCards={onMoveCards}
-                    onReturnToLibrary={onReturnToLibrary}
-                    onReturnCardsToLibrary={onReturnCardsToLibrary}
-                    onDragStart={onCardDragStart}
-                    onToggleSelection={onToggleCardSelection}
-                    onClearSelection={onClearSelection}
-                    selectionMode={isTabletEditorMode && boardSelectionMode}
-                    isTabletEditorMode={isTabletEditorMode}
-                    dragDisabled={tabletUsageBlocked || !canEdit}
-                    onUnavailableInteraction={handleUnavailableEdit}
-                  />
-                );
-              })}
-              <div className="hive-board__note-layer">
+              <div
+                className="hive-board__canvas-content"
+                style={canvasContentStyle}
+                onMouseDown={handleBoardMouseDown}
+                onPointerDown={handleCanvasPointerDown}
+                onTouchStart={handleBoardMouseDown}
+              >
                 {cards.map((card) => {
-                  const hasNote = Boolean(card?.comment?.message?.trim());
-
                   return (
-                    <button
-                      key={`${card.id}-note-indicator`}
-                      type="button"
-                      className={`card-note-indicator ${hasNote ? "has-note" : ""} ${noteLocked ? "is-locked" : ""}`.trim()}
-                      style={{
-                        left: card.position.x + BOARD_NOTE_OFFSET.x,
-                        top: card.position.y + BOARD_NOTE_OFFSET.y,
-                      }}
-                      aria-label={t("workspace.cardNoteTitle")}
-                      aria-disabled={noteLocked}
-                      onMouseDown={(event) => {
-                        event.preventDefault();
-                        event.stopPropagation();
-                      }}
-                      onTouchStart={(event) => {
-                        event.stopPropagation();
-                      }}
-                      onClick={(event) => handleNoteOpen(event, card)}
-                    >
-                      <svg
-                        viewBox="0 0 24 24"
-                        aria-hidden="true"
-                        focusable="false"
-                      >
-                        <path
-                          d="M4 4h16v11H8l-4 4V4zm2 2v8.17L7.17 13H18V6H6z"
-                          fill="currentColor"
-                        />
-                      </svg>
-                    </button>
+                    <DraggableCard
+                      key={card.id}
+                      card={card}
+                      isSelected={selectedCardIds.has(card.id)}
+                      selectedCards={selectedCards}
+                      zoom={zoom}
+                      onMoveCard={onMoveCard}
+                      onMoveCards={onMoveCards}
+                      onReturnToLibrary={onReturnToLibrary}
+                      onReturnCardsToLibrary={onReturnCardsToLibrary}
+                      onDragStart={onCardDragStart}
+                      onToggleSelection={onToggleCardSelection}
+                      onClearSelection={onClearSelection}
+                      selectionMode={isTabletEditorMode && boardSelectionMode}
+                      isTabletEditorMode={isTabletEditorMode}
+                      dragDisabled={tabletUsageBlocked || !canEdit}
+                      onUnavailableInteraction={handleUnavailableEdit}
+                    />
                   );
                 })}
+                <div className="hive-board__note-layer">
+                  {cards.map((card) => {
+                    const hasNote = Boolean(card?.comment?.message?.trim());
+
+                    return (
+                      <button
+                        key={`${card.id}-note-indicator`}
+                        type="button"
+                        className={`card-note-indicator ${hasNote ? "has-note" : ""} ${noteLocked ? "is-locked" : ""}`.trim()}
+                        style={{
+                          left: card.position.x + BOARD_NOTE_OFFSET.x,
+                          top: card.position.y + BOARD_NOTE_OFFSET.y,
+                        }}
+                        aria-label={t("workspace.cardNoteTitle")}
+                        aria-disabled={noteLocked}
+                        onMouseDown={(event) => {
+                          event.preventDefault();
+                          event.stopPropagation();
+                        }}
+                        onTouchStart={(event) => {
+                          event.stopPropagation();
+                        }}
+                        onClick={(event) => handleNoteOpen(event, card)}
+                      >
+                        <svg
+                          viewBox="0 0 24 24"
+                          aria-hidden="true"
+                          focusable="false"
+                        >
+                          <path
+                            d="M4 4h16v11H8l-4 4V4zm2 2v8.17L7.17 13H18V6H6z"
+                            fill="currentColor"
+                          />
+                        </svg>
+                      </button>
+                    );
+                  })}
+                </div>
               </div>
             </div>
           </div>
         </div>
-      </div>
       </div>
     </main>
   );
