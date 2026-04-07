@@ -35,6 +35,9 @@ const EXPORT_COMMENT_STYLE = {
 };
 
 const BOARD_CAPTURE_PADDING = 96;
+const DEFAULT_EXPORT_SCALE = 3;
+const MAX_EXPORT_CANVAS_DIMENSION = 12000;
+const MAX_EXPORT_CANVAS_PIXELS = 60_000_000;
 
 function applyStyles(element, styles) {
   Object.assign(element.style, styles);
@@ -57,6 +60,49 @@ function createElement(tagName, options = {}) {
   }
 
   return element;
+}
+
+function getBoundedExportScale(width, height, preferredScale = DEFAULT_EXPORT_SCALE) {
+  if (width <= 0 || height <= 0) {
+    return 1;
+  }
+
+  const dimensionScale = Math.min(
+    MAX_EXPORT_CANVAS_DIMENSION / width,
+    MAX_EXPORT_CANVAS_DIMENSION / height,
+  );
+  const areaScale = Math.sqrt(MAX_EXPORT_CANVAS_PIXELS / (width * height));
+  const boundedScale = Math.min(preferredScale, dimensionScale, areaScale);
+
+  if (!Number.isFinite(boundedScale)) {
+    return 1;
+  }
+
+  return Math.max(1, Number(boundedScale.toFixed(2)));
+}
+
+function getCanvasFitScale(width, height) {
+  if (width <= 0 || height <= 0) {
+    return 1;
+  }
+
+  const dimensionScale = Math.min(
+    1,
+    MAX_EXPORT_CANVAS_DIMENSION / width,
+    MAX_EXPORT_CANVAS_DIMENSION / height,
+  );
+  const areaScale = Math.min(
+    1,
+    Math.sqrt(MAX_EXPORT_CANVAS_PIXELS / (width * height)),
+  );
+
+  const boundedScale = Math.min(dimensionScale, areaScale);
+
+  if (!Number.isFinite(boundedScale)) {
+    return 1;
+  }
+
+  return Math.max(0.01, Number(boundedScale.toFixed(4)));
 }
 
 function formatExportDateTime(value, formatter) {
@@ -346,9 +392,11 @@ async function captureDetachedNode(node) {
 
   try {
     await waitForCaptureFrame();
+    const { width, height } = getCaptureDimensions(node);
     return await domtoimage.toPng(node, {
       cacheBust: true,
       bgcolor: "#f5efe2",
+      scale: getBoundedExportScale(width, height),
     });
   } finally {
     stage.remove();
@@ -490,6 +538,7 @@ function getCaptureRegion(node) {
 
 async function captureNodeImage(node, options = {}) {
   const region = getCaptureRegion(node);
+  const scale = getBoundedExportScale(region.width, region.height);
   const stage = createElement("div", { styles: EXPORT_STAGE_STYLE });
   const frame = createElement("div", {
     styles: {
@@ -521,6 +570,7 @@ async function captureNodeImage(node, options = {}) {
       cacheBust: true,
       width: region.width,
       height: region.height,
+      scale,
       ...options,
     });
   } finally {
@@ -583,17 +633,37 @@ export async function mergeFrontAndBackCapture(
   ]);
 
   const spacing = 24;
+  const mergedWidth = Math.max(frontImage.width, backImage.width);
+  const mergedHeight = frontImage.height + backImage.height + spacing;
+  const fitScale = getCanvasFitScale(mergedWidth, mergedHeight);
+  const canvasWidth = Math.max(1, Math.round(mergedWidth * fitScale));
+  const canvasHeight = Math.max(1, Math.round(mergedHeight * fitScale));
+  const scaledSpacing = Math.round(spacing * fitScale);
   const canvas = document.createElement("canvas");
-  canvas.width = Math.max(frontImage.width, backImage.width);
-  canvas.height = frontImage.height + backImage.height + spacing;
+  canvas.width = canvasWidth;
+  canvas.height = canvasHeight;
 
   const context = canvas.getContext("2d");
   if (!context) {
     throw new Error(mergeErrorMessage);
   }
 
-  context.drawImage(frontImage, 0, 0);
-  context.drawImage(backImage, 0, frontImage.height + spacing);
+  context.imageSmoothingEnabled = true;
+  context.imageSmoothingQuality = "high";
+  context.drawImage(
+    frontImage,
+    0,
+    0,
+    Math.round(frontImage.width * fitScale),
+    Math.round(frontImage.height * fitScale),
+  );
+  context.drawImage(
+    backImage,
+    0,
+    Math.round(frontImage.height * fitScale) + scaledSpacing,
+    Math.round(backImage.width * fitScale),
+    Math.round(backImage.height * fitScale),
+  );
 
   return canvas.toDataURL("image/png");
 }
