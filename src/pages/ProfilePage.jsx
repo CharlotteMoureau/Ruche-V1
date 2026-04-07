@@ -1,6 +1,20 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { createRoot } from "react-dom/client";
 import { Link, useNavigate } from "react-router-dom";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import {
+  faCopy,
+  faPlus,
+  faXmark,
+  faArrowUpRightFromSquare,
+  faDownload,
+  faTrash,
+  faChevronLeft,
+  faChevronRight,
+  faFloppyDisk,
+  faGear,
+  faHouse,
+} from "@fortawesome/free-solid-svg-icons";
 import { useAuth } from "../context/AuthContext";
 import { apiFetch } from "../lib/api";
 import UnifiedPromptModal from "../components/UnifiedPromptModal";
@@ -816,26 +830,26 @@ export default function ProfilePage() {
               id="profile-tab-hives"
               type="button"
               role="tab"
-              className={`profile-tab ${
-                activeProfileTab === PROFILE_TAB_HIVES ? "is-active" : ""
-              }`}
+              className={`profile-tab ${activeProfileTab === PROFILE_TAB_HIVES ? "is-active" : ""
+                }`}
               aria-selected={activeProfileTab === PROFILE_TAB_HIVES}
               aria-controls="profile-panel-hives"
               onClick={() => setActiveProfileTab(PROFILE_TAB_HIVES)}
             >
+              <FontAwesomeIcon icon={faHouse} />
               {t("profile.hivesTab")}
             </button>
             <button
               id="profile-tab-settings"
               type="button"
               role="tab"
-              className={`profile-tab ${
-                activeProfileTab === PROFILE_TAB_SETTINGS ? "is-active" : ""
-              }`}
+              className={`profile-tab ${activeProfileTab === PROFILE_TAB_SETTINGS ? "is-active" : ""
+                }`}
               aria-selected={activeProfileTab === PROFILE_TAB_SETTINGS}
               aria-controls="profile-panel-settings"
               onClick={() => setActiveProfileTab(PROFILE_TAB_SETTINGS)}
             >
+              <FontAwesomeIcon icon={faGear} />
               {t("profile.settingsTab")}
             </button>
           </div>
@@ -853,6 +867,7 @@ export default function ProfilePage() {
                   className="button-link"
                   onClick={handleCreateHiveClick}
                 >
+                  <FontAwesomeIcon icon={faPlus} />
                   {t("profile.createNewHive")}
                 </button>
               </div>
@@ -889,6 +904,7 @@ export default function ProfilePage() {
                               setOwnedPage(1);
                             }}
                           >
+                            <FontAwesomeIcon icon={faXmark} />
                             {t("profile.clearSearch")}
                           </button>
                         ) : null}
@@ -943,6 +959,7 @@ export default function ProfilePage() {
                               className="button-link button-link-open"
                               to={`/hives/${hive.id}`}
                             >
+                              <FontAwesomeIcon icon={faArrowUpRightFromSquare} />
                               {t("profile.open")}
                             </Link>
                             <button
@@ -951,6 +968,7 @@ export default function ProfilePage() {
                               onClick={() => openDuplicateHiveModal(hive.id)}
                               disabled={duplicatingHiveId === hive.id}
                             >
+                              <FontAwesomeIcon icon={faCopy} />
                               {duplicatingHiveId === hive.id
                                 ? t("profile.duplicating")
                                 : t("profile.duplicate")}
@@ -963,6 +981,7 @@ export default function ProfilePage() {
                               }
                               disabled={downloadingHiveId === hive.id}
                             >
+                              <FontAwesomeIcon icon={faDownload} />
                               {downloadingHiveId === hive.id
                                 ? t("profile.downloading")
                                 : t("profile.download")}
@@ -972,6 +991,7 @@ export default function ProfilePage() {
                               className="button-link button-link-delete"
                               onClick={() => setConfirmDeleteHiveId(hive.id)}
                             >
+                              <FontAwesomeIcon icon={faTrash} />
                               {t("common.delete")}
                             </button>
                           </div>
@@ -990,6 +1010,7 @@ export default function ProfilePage() {
                         }
                         disabled={ownedPage === 1}
                       >
+                        <FontAwesomeIcon icon={faChevronLeft} />
                         {t("common.previous")}
                       </button>
                       <span>
@@ -1005,6 +1026,7 @@ export default function ProfilePage() {
                         disabled={ownedPage === ownedTotalPages}
                       >
                         {t("common.next")}
+                        <FontAwesomeIcon icon={faChevronRight} />
                       </button>
                     </div>
                   ) : null}
@@ -1043,6 +1065,7 @@ export default function ProfilePage() {
                               setSharedPage(1);
                             }}
                           >
+                            <FontAwesomeIcon icon={faXmark} />
                             {t("profile.clearSearch")}
                           </button>
                         ) : null}
@@ -1104,6 +1127,7 @@ export default function ProfilePage() {
                               className="button-link button-link-open"
                               to={`/hives/${hive.id}`}
                             >
+                              <FontAwesomeIcon icon={faArrowUpRightFromSquare} />
                               {t("profile.open")}
                             </Link>
                             <button
@@ -1114,6 +1138,7 @@ export default function ProfilePage() {
                               }
                               disabled={downloadingHiveId === hive.id}
                             >
+                              <FontAwesomeIcon icon={faDownload} />
                               {downloadingHiveId === hive.id
                                 ? t("profile.downloading")
                                 : t("profile.download")}
@@ -1124,6 +1149,7 @@ export default function ProfilePage() {
                                 className="button-link button-link-delete"
                                 onClick={() => setConfirmDeleteHiveId(hive.id)}
                               >
+                                <FontAwesomeIcon icon={faTrash} />
                                 {t("common.delete")}
                               </button>
                             ) : null}
@@ -1143,6 +1169,7 @@ export default function ProfilePage() {
                         }
                         disabled={sharedPage === 1}
                       >
+                        <FontAwesomeIcon icon={faChevronLeft} />
                         {t("common.previous")}
                       </button>
                       <span>
@@ -1158,6 +1185,7 @@ export default function ProfilePage() {
                         disabled={sharedPage === sharedTotalPages}
                       >
                         {t("common.next")}
+                        <FontAwesomeIcon icon={faChevronRight} />
                       </button>
                     </div>
                   ) : null}
@@ -1250,6 +1278,7 @@ export default function ProfilePage() {
 
                   <div className="inline-actions">
                     <button type="submit" disabled={isUpdatingRole}>
+                      <FontAwesomeIcon icon={faFloppyDisk} />
                       {isUpdatingRole
                         ? t("profile.updatingRole")
                         : t("profile.updateRole")}
@@ -1313,6 +1342,7 @@ export default function ProfilePage() {
 
                   <div className="inline-actions">
                     <button type="submit" disabled={isUpdatingPassword}>
+                      <FontAwesomeIcon icon={faFloppyDisk} />
                       {isUpdatingPassword
                         ? t("profile.updatingPassword")
                         : t("profile.updatePassword")}
@@ -1329,6 +1359,7 @@ export default function ProfilePage() {
                   className="danger-btn"
                   onClick={openDeleteModal}
                 >
+                  <FontAwesomeIcon icon={faTrash} />
                   {t("profile.deleteProfileTitle")}
                 </button>
               </section>
@@ -1392,6 +1423,7 @@ export default function ProfilePage() {
                       onClick={closeDeleteModal}
                       disabled={isDeleting}
                     >
+                      <FontAwesomeIcon icon={faXmark} />
                       {t("common.cancel")}
                     </button>
                     <button
@@ -1399,6 +1431,7 @@ export default function ProfilePage() {
                       className="danger-btn"
                       disabled={isDeleting}
                     >
+                      <FontAwesomeIcon icon={faTrash} />
                       {isDeleting
                         ? t("profile.deleting")
                         : t("profile.deleteProfileTitle")}

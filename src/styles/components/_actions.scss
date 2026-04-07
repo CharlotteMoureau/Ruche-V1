@@ -86,11 +86,30 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  gap: 6px;
   text-decoration: none;
   color: #222;
   background: $jaune;
   border-radius: 8px;
   padding: 8px 12px;
+}
+
+/* Icon + text gap for all filled action buttons */
+:where(.site-nav button,
+  .form-grid > button,
+  .inline-actions button,
+  .list-grid button,
+  .editor-topbar button,
+  .toolbar button,
+  .modal-box .btn,
+  .danger-btn,
+  .profile-tab,
+  .toolbar-leave-btn,
+  .toolbar-collaborator-remove) {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
 }
 
 /* Unified interaction style for all filled action buttons */
