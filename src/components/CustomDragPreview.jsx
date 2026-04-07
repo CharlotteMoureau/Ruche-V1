@@ -1,5 +1,6 @@
 import { useDragLayer } from "react-dnd";
 import HexCard from "./HexCard";
+import FreeHexCard from "./FreeSpaceCard";
 import { BOARD_CARD_SIZE } from "../lib/board";
 
 const layerStyles = {
@@ -29,7 +30,11 @@ export default function CustomDragPreview({ zoom = 1 }) {
           transformOrigin: "center center",
         }}
       >
-        <HexCard card={item.card} onlyFront />
+        {item.card?.category === "free" ? (
+          <FreeHexCard card={item.card} />
+        ) : (
+          <HexCard card={item.card} onlyFront />
+        )}
       </div>
     </div>
   );

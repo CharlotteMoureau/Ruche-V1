@@ -4,6 +4,7 @@ import { HTML5Backend } from "react-dnd-html5-backend";
 import CardLibrary from "./CardLibrary";
 import HiveBoard from "./HiveBoard";
 import HexCard from "./HexCard";
+import FreeHexCard from "./FreeSpaceCard";
 import cardsFr from "../data/cards.json";
 import cardsEn from "../data/cards_en.json";
 import cardsNl from "../data/cards_nl.json";
@@ -888,9 +889,9 @@ export default function RucheWorkspace({
     const defaultPosition = pendingFreeCardAnchor
       ? clampBoardPosition(pendingFreeCardAnchor)
       : {
-          x: 300 + Math.random() * 50,
-          y: 200 + Math.random() * 50,
-        };
+        x: 300 + Math.random() * 50,
+        y: 200 + Math.random() * 50,
+      };
 
     const newCard = {
       id: Date.now() + Math.floor(Math.random() * 1000),
@@ -1027,7 +1028,11 @@ export default function RucheWorkspace({
             }}
             aria-hidden="true"
           >
-            <HexCard card={boardDragPreview.card} onlyFront />
+            {boardDragPreview.card?.category === "free" ? (
+              <FreeHexCard card={boardDragPreview.card} />
+            ) : (
+              <HexCard card={boardDragPreview.card} onlyFront />
+            )}
           </div>
         ) : null}
       </div>
