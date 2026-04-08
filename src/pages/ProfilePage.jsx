@@ -28,13 +28,14 @@ import cardsFr from "../data/cards.json";
 import cardsEn from "../data/cards_en.json";
 import cardsNl from "../data/cards_nl.json";
 import {
+  captureBoardPreviewImage,
   captureHiveExportBundle,
   triggerDownload,
   waitForCaptureFrame,
 } from "../lib/snapshot";
 import { HIVE_KINDS, resolveDefaultHiveKind } from "../lib/hives";
 
-const HIVES_PER_PAGE = 5;
+const HIVES_PER_PAGE = 3;
 const CARD_SIZE = 200;
 const BOARD_PADDING = 60;
 const PROFILE_TAB_HIVES = "hives";
@@ -150,6 +151,12 @@ function localizeBoardCards(boardCards, cardsData) {
 
 function getBoardCards(boardData) {
   return Array.isArray(boardData?.boardCards) ? boardData.boardCards : [];
+}
+
+function isWebpPreviewDataUrl(value) {
+  return (
+    typeof value === "string" && value.startsWith("data:image/webp;base64,")
+  );
 }
 
 function getHiveDateValue(hive) {
@@ -565,6 +572,37 @@ export default function ProfilePage() {
       const sourceHive = await apiFetch(`/hives/${duplicateDraft.hiveId}`, {
         token,
       });
+
+      let boardPreviewImage = sourceHive.boardPreviewImage;
+
+      if (!isWebpPreviewDataUrl(boardPreviewImage)) {
+        const stage = document.createElement("div");
+        stage.className = "profile-capture-stage";
+        document.body.appendChild(stage);
+
+        const root = createRoot(stage);
+
+        try {
+          root.render(<ProfileCaptureBoard boardData={sourceHive.boardData} />);
+          await waitForCaptureFrame();
+          await waitForCaptureFrame();
+
+          const board = stage.querySelector(".hive-board");
+          if (board) {
+            boardPreviewImage = await captureBoardPreviewImage(board, {
+              maxWidth: 800,
+              maxHeight: 450,
+              sourceScale: 2,
+              quality: 0.76,
+              maxBytes: 170 * 1024,
+            });
+          }
+        } finally {
+          root.unmount();
+          stage.remove();
+        }
+      }
+
       await apiFetch("/hives", {
         method: "POST",
         token,
@@ -572,6 +610,7 @@ export default function ProfilePage() {
           title: trimmedTitle,
           kind: sourceHive.kind,
           boardData: sourceHive.boardData,
+          boardPreviewImage,
         },
       });
       const data = await refreshMe();

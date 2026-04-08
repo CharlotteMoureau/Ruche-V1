@@ -497,6 +497,7 @@ hivesRouter.get("/:id", async (req, res) => {
     title: hive.title,
     kind: hive.kind,
     boardData: hive.boardData,
+    boardPreviewImage: hive.boardPreviewImage,
     owner: hive.owner,
     createdAt: hive.createdAt,
     updatedAt: hive.updatedAt,
