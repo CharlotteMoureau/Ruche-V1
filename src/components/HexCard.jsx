@@ -1,5 +1,8 @@
+import { useEffect, useRef, useState } from "react";
+
 export default function HexCard({ card, position, onlyFront }) {
-  if (!card) return null;
+  const backContentRef = useRef(null);
+  const [needsScroll, setNeedsScroll] = useState(false);
 
   const style = position
     ? { position: "absolute", left: position.x, top: position.y }
@@ -12,7 +15,39 @@ export default function HexCard({ card, position, onlyFront }) {
     extraClass = "reco-equipe";
   }
 
-  const isLongText = card.definition && card.definition.length > 200;
+  useEffect(() => {
+    if (!card || onlyFront) return;
+
+    const contentElement = backContentRef.current;
+    if (!contentElement) return;
+
+    const checkOverflow = () => {
+      setNeedsScroll(
+        contentElement.scrollHeight > contentElement.clientHeight + 1,
+      );
+    };
+
+    checkOverflow();
+    const rafId = window.requestAnimationFrame(checkOverflow);
+
+    let resizeObserver;
+    if (typeof ResizeObserver !== "undefined") {
+      resizeObserver = new ResizeObserver(checkOverflow);
+      resizeObserver.observe(contentElement);
+    }
+
+    window.addEventListener("resize", checkOverflow);
+
+    return () => {
+      window.cancelAnimationFrame(rafId);
+      if (resizeObserver) {
+        resizeObserver.disconnect();
+      }
+      window.removeEventListener("resize", checkOverflow);
+    };
+  }, [card, card?.definition, onlyFront]);
+
+  if (!card) return null;
 
   return (
     <div id="hex" className={`hex-card ${card.category}`} style={style}>
@@ -48,9 +83,10 @@ export default function HexCard({ card, position, onlyFront }) {
             {!onlyFront && (
               <div className="hex-back">
                 <div
-                  className={`hex-back-content ${isLongText ? "scrollable-back" : ""}`}
+                  ref={backContentRef}
+                  className={`hex-back-content ${needsScroll ? "scrollable-back" : ""}`}
                 >
-                  <p className={isLongText ? "long-def" : ""}>
+                  <p className={needsScroll ? "long-def" : ""}>
                     {card.definition}
                   </p>
                 </div>

@@ -91,7 +91,7 @@
 
         p {
           font-size: 0.45rem;
-          line-height: 0.9;
+          line-height: 1.25;
           text-align: center;
           padding: 15px 0;
         }
@@ -104,10 +104,22 @@
           overscroll-behavior: contain;
           padding-top: 26%;
           padding-bottom: 18%;
-          scrollbar-width: none;
+          scrollbar-width: thin;
+          scrollbar-color: rgba(0, 0, 0, 0.35) transparent;
 
           &::-webkit-scrollbar {
-            display: none;
+            width: 4px;
+          }
+
+          &::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 2px;
+          }
+
+          &::-webkit-scrollbar-thumb {
+            background: rgba(0, 0, 0, 0.35);
+            border-radius: 2px;
+            border: 1px solid rgba(255, 255, 255, 0.55);
           }
 
           p.long-def {
@@ -326,7 +338,7 @@ body.ios {
   .hex-back p {
     font-size: 1rem !important;
     margin: 15px;
-    line-height: 1;
+    line-height: 1.3;
     overflow-y: scroll;
   }
 }
