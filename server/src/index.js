@@ -11,11 +11,19 @@ const env = globalThis.process?.env || {};
 const port = Number(env.PORT || env.API_PORT || 4010);
 const host = env.API_HOST || "0.0.0.0";
 const appUrl = env.APP_URL || "http://127.0.0.1:5173";
+const corsAllowedOrigins = [
+  appUrl,
+  ...(env.CORS_ALLOWED_ORIGINS || "")
+    .split(",")
+    .map((origin) => origin.trim())
+    .filter(Boolean),
+];
+const allowedOriginSet = new Set(corsAllowedOrigins);
 const localhostOriginPattern = /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/i;
 
 function isAllowedOrigin(origin) {
   if (!origin) return true;
-  if (origin === appUrl) return true;
+  if (allowedOriginSet.has(origin)) return true;
   if (origin === "http://127.0.0.1:5173") return true;
   if (origin === "http://localhost:5173") return true;
   if (origin === "http://127.0.0.1:5174") return true;
