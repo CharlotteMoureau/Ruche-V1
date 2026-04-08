@@ -15,6 +15,7 @@ import {
   resolveDefaultHiveKind,
 } from "../lib/hives";
 import { useTabletViewport } from "../hooks/useTabletViewport";
+import { captureBoardPreviewImage } from "../lib/snapshot";
 
 function formatDateTime(value, locale) {
   if (!value) return "-";
@@ -68,8 +69,8 @@ export default function RucheEditorPage() {
   const duplicateSource = location.state?.duplicateSource || null;
   const requestedHiveKind = normalizeHiveKind(
     location.state?.hiveKind ||
-    duplicateSource?.kind ||
-    resolveDefaultHiveKind(user?.roleLabel),
+      duplicateSource?.kind ||
+      resolveDefaultHiveKind(user?.roleLabel),
   );
   const initialHiveKind = isNew ? requestedHiveKind : HIVE_KINDS.STANDARD;
   const initialNewTitle =
@@ -135,24 +136,24 @@ export default function RucheEditorPage() {
     : isNew
       ? true
       : Boolean(
-        hive?.canEdit ||
-        isOwner ||
-        isAdmin ||
-        collaboratorRole === "ADMIN" ||
-        hasEditorRole,
-      );
+          hive?.canEdit ||
+          isOwner ||
+          isAdmin ||
+          collaboratorRole === "ADMIN" ||
+          hasEditorRole,
+        );
   const canComment = adminReadOnly
     ? false
     : isNew
       ? false
       : Boolean(
-        hive?.canComment ||
-        isOwner ||
-        isAdmin ||
-        collaboratorRole === "ADMIN" ||
-        hasEditorRole ||
-        collaboratorRole === "COMMENT",
-      );
+          hive?.canComment ||
+          isOwner ||
+          isAdmin ||
+          collaboratorRole === "ADMIN" ||
+          hasEditorRole ||
+          collaboratorRole === "COMMENT",
+        );
   const workspaceLoadKey = isNew
     ? "new-hive"
     : `${id}:${hive ? "loaded" : "init"}`;
@@ -162,24 +163,21 @@ export default function RucheEditorPage() {
     !isDuplicateFlow || title.trim() !== duplicateSource.title.trim();
   const requiresSavedHivePrompt = isNew;
 
-  const showTabletSaveFeedback = useCallback(
-    (status, autoHideMs = 0) => {
-      if (saveFeedbackTimeoutRef.current) {
-        clearTimeout(saveFeedbackTimeoutRef.current);
+  const showTabletSaveFeedback = useCallback((status, autoHideMs = 0) => {
+    if (saveFeedbackTimeoutRef.current) {
+      clearTimeout(saveFeedbackTimeoutRef.current);
+      saveFeedbackTimeoutRef.current = null;
+    }
+
+    setTabletSaveFeedbackStatus(status);
+
+    if (autoHideMs > 0) {
+      saveFeedbackTimeoutRef.current = setTimeout(() => {
+        setTabletSaveFeedbackStatus("");
         saveFeedbackTimeoutRef.current = null;
-      }
-
-      setTabletSaveFeedbackStatus(status);
-
-      if (autoHideMs > 0) {
-        saveFeedbackTimeoutRef.current = setTimeout(() => {
-          setTabletSaveFeedbackStatus("");
-          saveFeedbackTimeoutRef.current = null;
-        }, autoHideMs);
-      }
-    },
-    [],
-  );
+      }, autoHideMs);
+    }
+  }, []);
 
   useEffect(() => {
     return () => {
@@ -426,6 +424,22 @@ export default function RucheEditorPage() {
 
   const performSaveHive = useCallback(
     async (titleToSave, { skipNavigateAfterCreate = false } = {}) => {
+      let boardPreviewImage;
+      try {
+        const boardNode = document.querySelector(".hive-board");
+        if (boardNode) {
+          boardPreviewImage = await captureBoardPreviewImage(boardNode, {
+            maxWidth: 800,
+            maxHeight: 450,
+            sourceScale: 2,
+            quality: 0.76,
+            maxBytes: 170 * 1024,
+          });
+        }
+      } catch {
+        boardPreviewImage = undefined;
+      }
+
       setIsSaving(true);
       showTabletSaveFeedback("saving");
       try {
@@ -437,6 +451,7 @@ export default function RucheEditorPage() {
               title: titleToSave,
               kind: hiveKind,
               boardData,
+              boardPreviewImage,
             },
           });
           const normalizedCreatedKind = normalizeHiveKind(
@@ -484,6 +499,7 @@ export default function RucheEditorPage() {
             title: titleToSave,
             kind: hiveKind,
             boardData,
+            boardPreviewImage,
             expectedUpdatedAt,
           },
         });
@@ -499,12 +515,12 @@ export default function RucheEditorPage() {
         setHive((prev) =>
           prev
             ? {
-              ...prev,
-              title: titleToSave,
-              kind: hiveKind,
-              boardData,
-              updatedAt: updated?.updatedAt || prev.updatedAt,
-            }
+                ...prev,
+                title: titleToSave,
+                kind: hiveKind,
+                boardData,
+                updatedAt: updated?.updatedAt || prev.updatedAt,
+              }
             : prev,
         );
         showTabletSaveFeedback("success", 2200);
@@ -728,10 +744,10 @@ export default function RucheEditorPage() {
         setHive((prev) =>
           prev
             ? {
-              ...prev,
-              boardData: resolvedBoardData,
-              updatedAt: updated?.updatedAt || prev.updatedAt,
-            }
+                ...prev,
+                boardData: resolvedBoardData,
+                updatedAt: updated?.updatedAt || prev.updatedAt,
+              }
             : prev,
         );
         setError("");
@@ -940,11 +956,11 @@ export default function RucheEditorPage() {
           comments: (prev?.comments || []).map((c) =>
             c.id === editingTarget.parentId
               ? {
-                ...c,
-                replies: (c.replies || []).map((r) =>
-                  r.id === updated.id ? updated : r,
-                ),
-              }
+                  ...c,
+                  replies: (c.replies || []).map((r) =>
+                    r.id === updated.id ? updated : r,
+                  ),
+                }
               : c,
           ),
         };
@@ -978,11 +994,11 @@ export default function RucheEditorPage() {
           comments: (prev?.comments || []).map((c) =>
             c.id === deleteTarget.parentId
               ? {
-                ...c,
-                replies: (c.replies || []).filter(
-                  (r) => r.id !== deleteTarget.comment.id,
-                ),
-              }
+                  ...c,
+                  replies: (c.replies || []).filter(
+                    (r) => r.id !== deleteTarget.comment.id,
+                  ),
+                }
               : c,
           ),
         };
@@ -1201,8 +1217,7 @@ export default function RucheEditorPage() {
               </button>
             ) : null}
 
-            {!isTabletEditorMode &&
-              tabletSaveFeedbackStatus === "success" ? (
+            {!isTabletEditorMode && tabletSaveFeedbackStatus === "success" ? (
               <p
                 className="editor-save-feedback editor-save-feedback--inline is-success"
                 role="status"
@@ -1636,7 +1651,12 @@ export default function RucheEditorPage() {
           if (!nextTitle) return;
           setTitle(nextTitle);
           setShowHeaderTitleModal(false);
-          if (!isNew && canManageHive && hive && nextTitle !== hive.title.trim()) {
+          if (
+            !isNew &&
+            canManageHive &&
+            hive &&
+            nextTitle !== hive.title.trim()
+          ) {
             setPendingNewTitle(nextTitle);
             setRenameOrDuplicateAction("pending");
           }

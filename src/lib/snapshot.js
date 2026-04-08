@@ -674,6 +674,65 @@ export async function captureBoardFrontAndBack(board, mergeErrorMessage) {
   return mergeFrontAndBackCapture(frontDataUrl, backDataUrl, mergeErrorMessage);
 }
 
+export async function captureBoardPreviewImage(board, options = {}) {
+  const maxWidth = Number(options.maxWidth) > 0 ? Number(options.maxWidth) : 800;
+  const maxHeight = Number(options.maxHeight) > 0 ? Number(options.maxHeight) : 450;
+  const sourceScale = Number.isFinite(Number(options.sourceScale))
+    ? Math.min(3, Math.max(1, Number(options.sourceScale)))
+    : 2;
+  const quality = Number.isFinite(Number(options.quality))
+    ? Math.min(1, Math.max(0.1, Number(options.quality)))
+    : 0.76;
+  const maxBytes = Number(options.maxBytes) > 0 ? Number(options.maxBytes) : 170 * 1024;
+
+  function getDataUrlBytes(dataUrl) {
+    const payload = String(dataUrl || "").split(",")[1] || "";
+    return Math.floor((payload.length * 3) / 4);
+  }
+
+  function encodeWithinBudget(canvas) {
+    let candidateQuality = quality;
+    let dataUrl = canvas.toDataURL("image/webp", candidateQuality);
+
+    while (getDataUrlBytes(dataUrl) > maxBytes && candidateQuality > 0.45) {
+      candidateQuality = Number((candidateQuality - 0.06).toFixed(2));
+      dataUrl = canvas.toDataURL("image/webp", candidateQuality);
+    }
+
+    return dataUrl;
+  }
+
+  document.body.classList.add("capture-mode");
+
+  try {
+    await waitForCaptureFrame();
+
+    const sourceDataUrl = await captureNodeImage(board, { scale: sourceScale });
+    const image = await loadImage(sourceDataUrl);
+
+    const fitScale = Math.min(maxWidth / image.width, maxHeight / image.height, 1);
+    const width = Math.max(1, Math.round(image.width * fitScale));
+    const height = Math.max(1, Math.round(image.height * fitScale));
+
+    const canvas = document.createElement("canvas");
+    canvas.width = width;
+    canvas.height = height;
+
+    const context = canvas.getContext("2d");
+    if (!context) {
+      throw new Error("Unable to render board preview");
+    }
+
+    context.imageSmoothingEnabled = true;
+    context.imageSmoothingQuality = "high";
+    context.drawImage(image, 0, 0, width, height);
+
+    return encodeWithinBudget(canvas);
+  } finally {
+    document.body.classList.remove("capture-mode");
+  }
+}
+
 export async function captureHiveExportBundle({
   board,
   title,

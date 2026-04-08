@@ -21,6 +21,7 @@ import UnifiedPromptModal from "../components/UnifiedPromptModal";
 import PageLoader from "../components/PageLoader";
 import HexCard from "../components/HexCard";
 import FreeHexCard from "../components/FreeSpaceCard";
+import HivePreview from "../components/HivePreview";
 import PasswordField from "../components/PasswordField";
 import { useLanguage } from "../context/LanguageContext";
 import cardsFr from "../data/cards.json";
@@ -290,6 +291,7 @@ export default function ProfilePage() {
   const [creatingHive, setCreatingHive] = useState(false);
   const [newHiveTitle, setNewHiveTitle] = useState("");
   const [duplicatingHiveId, setDuplicatingHiveId] = useState(null);
+  const [deletingHiveId, setDeletingHiveId] = useState(null);
   const [downloadingHiveId, setDownloadingHiveId] = useState(null);
   const [confirmDeleteHiveId, setConfirmDeleteHiveId] = useState(null);
   const [duplicateDraft, setDuplicateDraft] = useState({
@@ -514,13 +516,23 @@ export default function ProfilePage() {
   const deleteHive = async () => {
     if (!confirmDeleteHiveId) return;
 
-    await apiFetch(`/hives/${confirmDeleteHiveId}`, {
-      method: "DELETE",
-      token,
-    });
-    const data = await refreshMe();
-    setProfile(data);
-    setConfirmDeleteHiveId(null);
+    const hiveId = confirmDeleteHiveId;
+
+    try {
+      setError("");
+      setDeletingHiveId(hiveId);
+      await apiFetch(`/hives/${hiveId}`, {
+        method: "DELETE",
+        token,
+      });
+      const data = await refreshMe();
+      setProfile(data);
+      setConfirmDeleteHiveId(null);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setDeletingHiveId(null);
+    }
   };
 
   const openDuplicateHiveModal = (hiveId) => {
@@ -955,6 +967,13 @@ export default function ProfilePage() {
                             <br />
                             {t("profile.updatedAt")} :{" "}
                             {formatDateTime(hive.updatedAt, dateLocale)}
+                            <div className="hive-preview" aria-hidden="true">
+                              <HivePreview
+                                previewImage={hive.boardPreviewImage}
+                                snapshot={hive.boardSnapshot}
+                                emptyLabel={t("profile.emptyHive")}
+                              />
+                            </div>
                           </div>
                           <div className="inline-actions">
                             <Link
@@ -994,9 +1013,12 @@ export default function ProfilePage() {
                               type="button"
                               className="button-link button-link-delete"
                               onClick={() => setConfirmDeleteHiveId(hive.id)}
+                              disabled={Boolean(deletingHiveId)}
                             >
                               <FontAwesomeIcon icon={faTrash} />
-                              {t("common.delete")}
+                              {deletingHiveId === hive.id
+                                ? t("profile.deleting")
+                                : t("common.delete")}
                             </button>
                           </div>
                         </li>
@@ -1125,6 +1147,13 @@ export default function ProfilePage() {
                             <br />
                             {t("profile.updatedAt")} :{" "}
                             {formatDateTime(hive.updatedAt, dateLocale)}
+                            <div className="hive-preview" aria-hidden="true">
+                              <HivePreview
+                                previewImage={hive.boardPreviewImage}
+                                snapshot={hive.boardSnapshot}
+                                emptyLabel={t("profile.emptyHive")}
+                              />
+                            </div>
                           </div>
                           <div className="inline-actions">
                             <Link
@@ -1154,9 +1183,12 @@ export default function ProfilePage() {
                                 type="button"
                                 className="button-link button-link-delete"
                                 onClick={() => setConfirmDeleteHiveId(hive.id)}
+                                disabled={Boolean(deletingHiveId)}
                               >
                                 <FontAwesomeIcon icon={faTrash} />
-                                {t("common.delete")}
+                                {deletingHiveId === hive.id
+                                  ? t("profile.deleting")
+                                  : t("common.delete")}
                               </button>
                             ) : null}
                           </div>
@@ -1470,9 +1502,15 @@ export default function ProfilePage() {
         isOpen={Boolean(confirmDeleteHiveId)}
         title={t("profile.modalDeleteHiveTitle")}
         message={t("profile.modalDeleteHiveMessage")}
-        confirmLabel={t("common.delete")}
+        confirmLabel={
+          deletingHiveId ? t("profile.deleting") : t("common.delete")
+        }
         confirmClassName="danger"
-        onCancel={() => setConfirmDeleteHiveId(null)}
+        confirmDisabled={Boolean(deletingHiveId)}
+        onCancel={() => {
+          if (deletingHiveId) return;
+          setConfirmDeleteHiveId(null);
+        }}
         onConfirm={deleteHive}
       />
 
@@ -1486,10 +1524,17 @@ export default function ProfilePage() {
         onValueChange={(value) =>
           setDuplicateDraft((prev) => ({ ...prev, nextTitle: value }))
         }
-        confirmLabel={t("profile.modalDuplicateConfirm")}
-        confirmDisabled={!duplicateDraft.nextTitle.trim()}
-        onCancel={() =>
-          setDuplicateDraft({ hiveId: null, sourceTitle: "", nextTitle: "" })
+        confirmDisabled={
+          !duplicateDraft.nextTitle.trim() || Boolean(duplicatingHiveId)
+        }
+        onCancel={() => {
+          if (duplicatingHiveId) return;
+          setDuplicateDraft({ hiveId: null, sourceTitle: "", nextTitle: "" });
+        }}
+        confirmLabel={
+          duplicatingHiveId
+            ? t("profile.duplicating")
+            : t("profile.modalDuplicateConfirm")
         }
         onConfirm={duplicateHiveFromProfile}
       />

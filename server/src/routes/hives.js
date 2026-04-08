@@ -12,6 +12,7 @@ hivesRouter.use(requireAuth);
 const hiveInputSchema = z.object({
   title: z.string().trim().min(1).max(100),
   boardData: z.any(),
+  boardPreviewImage: z.string().trim().max(260_000).optional(),
   kind: z.string().trim().optional(),
   expectedUpdatedAt: z.string().trim().optional(),
 });
@@ -113,6 +114,19 @@ function buildBoardSnapshot(boardData) {
       x: toFiniteNumber(card.position?.x),
       y: toFiniteNumber(card.position?.y),
     }));
+}
+
+function sanitizePreviewImage(value) {
+  if (typeof value !== "string") return null;
+
+  const trimmed = value.trim();
+  if (!trimmed) return null;
+
+  if (!trimmed.startsWith("data:image/webp;base64,")) {
+    return null;
+  }
+
+  return trimmed;
 }
 
 function updateBoardCard(boardData, cardId, updater) {
@@ -446,6 +460,7 @@ hivesRouter.post("/", async (req, res) => {
       kind: finalKind,
       boardData: parsed.data.boardData,
       boardSnapshot: buildBoardSnapshot(parsed.data.boardData),
+      boardPreviewImage: sanitizePreviewImage(parsed.data.boardPreviewImage),
       ownerId: req.user.id,
     },
   });
@@ -659,6 +674,9 @@ hivesRouter.put("/:id", async (req, res) => {
       kind: normalizeHiveKind(parsed.data.kind || hive.kind),
       boardData: parsed.data.boardData,
       boardSnapshot: buildBoardSnapshot(parsed.data.boardData),
+      boardPreviewImage:
+        sanitizePreviewImage(parsed.data.boardPreviewImage) ||
+        hive.boardPreviewImage,
     },
   });
 
