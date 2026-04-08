@@ -33,7 +33,7 @@ import {
 } from "../lib/snapshot";
 import { HIVE_KINDS, resolveDefaultHiveKind } from "../lib/hives";
 
-const HIVES_PER_PAGE = 3;
+const HIVES_PER_PAGE = 5;
 const CARD_SIZE = 200;
 const BOARD_PADDING = 60;
 const PROFILE_TAB_HIVES = "hives";
@@ -830,8 +830,9 @@ export default function ProfilePage() {
               id="profile-tab-hives"
               type="button"
               role="tab"
-              className={`profile-tab ${activeProfileTab === PROFILE_TAB_HIVES ? "is-active" : ""
-                }`}
+              className={`profile-tab ${
+                activeProfileTab === PROFILE_TAB_HIVES ? "is-active" : ""
+              }`}
               aria-selected={activeProfileTab === PROFILE_TAB_HIVES}
               aria-controls="profile-panel-hives"
               onClick={() => setActiveProfileTab(PROFILE_TAB_HIVES)}
@@ -843,8 +844,9 @@ export default function ProfilePage() {
               id="profile-tab-settings"
               type="button"
               role="tab"
-              className={`profile-tab ${activeProfileTab === PROFILE_TAB_SETTINGS ? "is-active" : ""
-                }`}
+              className={`profile-tab ${
+                activeProfileTab === PROFILE_TAB_SETTINGS ? "is-active" : ""
+              }`}
               aria-selected={activeProfileTab === PROFILE_TAB_SETTINGS}
               aria-controls="profile-panel-settings"
               onClick={() => setActiveProfileTab(PROFILE_TAB_SETTINGS)}
@@ -959,7 +961,9 @@ export default function ProfilePage() {
                               className="button-link button-link-open"
                               to={`/hives/${hive.id}`}
                             >
-                              <FontAwesomeIcon icon={faArrowUpRightFromSquare} />
+                              <FontAwesomeIcon
+                                icon={faArrowUpRightFromSquare}
+                              />
                               {t("profile.open")}
                             </Link>
                             <button
@@ -1127,7 +1131,9 @@ export default function ProfilePage() {
                               className="button-link button-link-open"
                               to={`/hives/${hive.id}`}
                             >
-                              <FontAwesomeIcon icon={faArrowUpRightFromSquare} />
+                              <FontAwesomeIcon
+                                icon={faArrowUpRightFromSquare}
+                              />
                               {t("profile.open")}
                             </Link>
                             <button
@@ -1290,6 +1296,8 @@ export default function ProfilePage() {
                 <form onSubmit={updatePassword} className="form-grid">
                   <PasswordField
                     label={t("profile.currentPassword")}
+                    id="profile-current-password"
+                    name="currentPassword"
                     value={passwordForm.currentPassword}
                     onChange={(event) =>
                       setPasswordForm((prev) => ({
@@ -1304,6 +1312,8 @@ export default function ProfilePage() {
 
                   <PasswordField
                     label={t("profile.newPassword")}
+                    id="profile-new-password"
+                    name="newPassword"
                     value={passwordForm.newPassword}
                     onChange={(event) =>
                       setPasswordForm((prev) => ({
@@ -1318,6 +1328,8 @@ export default function ProfilePage() {
 
                   <PasswordField
                     label={t("profile.newPasswordConfirm")}
+                    id="profile-new-password-confirm"
+                    name="newPasswordConfirm"
                     value={passwordForm.newPasswordConfirm}
                     onChange={(event) =>
                       setPasswordForm((prev) => ({
@@ -1395,6 +1407,8 @@ export default function ProfilePage() {
                 <form onSubmit={deleteProfile} className="form-grid">
                   <PasswordField
                     label={t("register.password")}
+                    id="profile-delete-password"
+                    name="deletePassword"
                     value={deletePassword}
                     onChange={(event) => setDeletePassword(event.target.value)}
                     required
@@ -1406,6 +1420,8 @@ export default function ProfilePage() {
 
                   <PasswordField
                     label={t("profile.confirmPassword")}
+                    id="profile-delete-password-confirm"
+                    name="deletePasswordConfirm"
                     value={deletePasswordConfirm}
                     onChange={(event) =>
                       setDeletePasswordConfirm(event.target.value)
