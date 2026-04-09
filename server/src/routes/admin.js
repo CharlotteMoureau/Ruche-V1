@@ -148,7 +148,7 @@ adminRouter.get("/hives", async (_req, res) => {
 });
 
 const updateHiveSchema = z.object({
-  title: z.string().trim().min(1).max(120).optional(),
+  title: z.string().trim().min(1).max(100).optional(),
   boardData: z.any().optional(),
 });
 

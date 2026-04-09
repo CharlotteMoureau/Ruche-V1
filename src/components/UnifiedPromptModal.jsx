@@ -10,6 +10,7 @@ export default function UnifiedPromptModal({
   onValueChange,
   inputLabel,
   inputPlaceholder,
+  inputMaxLength,
   confirmLabel,
   cancelLabel,
   confirmDisabled = false,
@@ -27,6 +28,12 @@ export default function UnifiedPromptModal({
   const inputRef = useRef(null);
   const confirmRef = useRef(null);
   const isConfirmDisabled = confirmDisabled || busy;
+  const resolvedInputMaxLength =
+    typeof inputMaxLength === "number" ? inputMaxLength : 100;
+  const charactersLeft = Math.max(
+    0,
+    resolvedInputMaxLength - String(value || "").length,
+  );
   const resolvedConfirmLabel = confirmLabel || t("common.confirm");
   const resolvedConfirmText =
     busy && confirmLoadingLabel ? confirmLoadingLabel : resolvedConfirmLabel;
@@ -104,9 +111,17 @@ export default function UnifiedPromptModal({
                   }
                 }}
                 placeholder={inputPlaceholder}
-                maxLength={100}
+                maxLength={resolvedInputMaxLength}
                 disabled={busy}
               />
+              {typeof inputMaxLength === "number" ? (
+                <span
+                  className={`input-limit-hint${charactersLeft === 0 ? " is-at-limit" : ""}`}
+                  aria-live="polite"
+                >
+                  {t("common.charactersLeft", { count: charactersLeft })}
+                </span>
+              ) : null}
             </label>
           ) : null}
 

@@ -17,6 +17,33 @@ const hiveInputSchema = z.object({
   expectedUpdatedAt: z.string().trim().optional(),
 });
 
+function getHiveInputValidationResponse(error) {
+  const titleTooLong = error?.issues?.some(
+    (issue) =>
+      issue.path?.[0] === "title" &&
+      issue.code === "too_big" &&
+      issue.maximum === 100,
+  );
+
+  if (titleTooLong) {
+    return {
+      status: 400,
+      body: {
+        error: "Hive title must be 100 characters or fewer",
+        code: "HIVE_TITLE_TOO_LONG",
+      },
+    };
+  }
+
+  return {
+    status: 400,
+    body: {
+      error: "Invalid hive data",
+      code: "HIVE_INVALID_DATA",
+    },
+  };
+}
+
 const cardNoteSchema = z.object({
   message: z.string().trim().min(1).max(1200),
 });
@@ -436,7 +463,8 @@ hivesRouter.post("/invitations/:invitationId/decline", async (req, res) => {
 hivesRouter.post("/", async (req, res) => {
   const parsed = hiveInputSchema.safeParse(req.body);
   if (!parsed.success) {
-    return res.status(400).json({ error: "Invalid hive data" });
+    const validation = getHiveInputValidationResponse(parsed.error);
+    return res.status(validation.status).json(validation.body);
   }
 
   const isDcoUser = req.user.roleLabel === "Délégué au Contrat d'Objectifs";
@@ -623,7 +651,8 @@ hivesRouter.delete("/:id/presence", async (req, res) => {
 hivesRouter.put("/:id", async (req, res) => {
   const parsed = hiveInputSchema.safeParse(req.body);
   if (!parsed.success) {
-    return res.status(400).json({ error: "Invalid hive data", code: "HIVE_INVALID_DATA" });
+    const validation = getHiveInputValidationResponse(parsed.error);
+    return res.status(validation.status).json(validation.body);
   }
 
   const hive = await getHiveOr404(req.params.id);
@@ -863,7 +892,7 @@ hivesRouter.delete("/:id/collaborators/:userId", async (req, res) => {
 });
 
 const commentSchema = z.object({
-  message: z.string().trim().min(1).max(1200),
+  message: z.string().trim().min(1).max(500),
   parentId: z.string().optional(),
 });
 

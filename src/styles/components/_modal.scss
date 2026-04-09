@@ -320,6 +320,20 @@
   }
 }
 
+.input-limit-hint {
+  display: block;
+  margin-top: 0.35rem;
+  font-size: 0.78rem;
+  line-height: 1.2;
+  color: #6b655d;
+  text-align: right;
+
+  &.is-at-limit {
+    color: $rose;
+    font-weight: 700;
+  }
+}
+
 .comment-reply-actions {
   display: flex;
   gap: 0.5rem;
@@ -344,7 +358,8 @@
 }
 
 .comments-new {
-  display: flex;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
   gap: 0.5rem;
   align-items: flex-end;
   border-top: 1px solid #eee;
@@ -352,7 +367,8 @@
   flex-shrink: 0;
 
   textarea {
-    flex: 1;
+    width: 100%;
+    min-width: 0;
     border: 1px solid #ccc;
     border-radius: 6px;
     padding: 0.4rem 0.6rem;
@@ -364,6 +380,11 @@
       outline: none;
       border-color: $turquoise;
     }
+  }
+
+  .input-limit-hint {
+    grid-column: 1 / -1;
+    margin-top: -0.1rem;
   }
 
   button {
@@ -560,6 +581,10 @@
     textarea {
       min-height: 7.25rem;
     }
+
+    .input-limit-hint {
+      margin-bottom: 0;
+    }
   }
 
   .card-note-actions {
@@ -579,8 +604,12 @@
 
 @media (max-width: 640px) {
   .comments-new {
-    flex-direction: column;
+    grid-template-columns: 1fr;
     align-items: stretch;
+
+    .input-limit-hint {
+      text-align: left;
+    }
 
     button {
       align-self: flex-end;
@@ -608,6 +637,10 @@
 
 .unified-prompt-form {
   margin: 0;
+
+  .input-limit-hint {
+    margin-bottom: 0;
+  }
 
   .modal-actions {
     margin-bottom: 0;

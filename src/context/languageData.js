@@ -140,6 +140,7 @@ export const messages = {
       page: "Page",
       previous: "Précédent",
       next: "Suivant",
+      charactersLeft: "{count} caractères restants",
       unknownUser: "Utilisateur inconnu",
       yes: "Oui",
       no: "Non",
@@ -169,6 +170,8 @@ export const messages = {
       HIVE_NOT_FOUND: "Ruche introuvable.",
       HIVE_ACCESS_DENIED: "Accès refusé.",
       HIVE_INVALID_DATA: "Données de ruche invalides.",
+      HIVE_TITLE_TOO_LONG:
+        "Le titre de la ruche doit contenir au maximum 100 caracteres.",
       HIVE_EDIT_FORBIDDEN:
         "Vous n'avez pas l'autorisation de modifier cette ruche.",
       HIVE_RENAME_FORBIDDEN:
@@ -246,6 +249,7 @@ export const messages = {
       register: "Inscription",
     },
     register: {
+      charactersLeft: "{count} caractères restants",
       title: "Créer un compte",
       requiredNotice: "Tous les champs sont obligatoires.",
       username: "Nom d'utilisateur (unique)",
@@ -295,8 +299,8 @@ export const messages = {
       open: "Ouvrir",
       renameHive: "Renommer la ruche",
       duplicate: "Dupliquer",
-      duplicating: "Duplication...",
-      renaming: "Renommage...",
+      duplicating: "La ruche est dupliquée...",
+      renaming: "La ruche est renommée...",
       deleteProfileTitle: "Supprimer mon profil",
       deleteProfileDesc:
         "Cette action est irréversible et supprimera vos données.",
@@ -325,7 +329,7 @@ export const messages = {
         "Veuillez renseigner les deux champs de mot de passe.",
       passwordMismatch: "Les mots de passe ne correspondent pas.",
       duplicateNeedTitle: "Veuillez renseigner un titre pour la copie.",
-      duplicateRenameRequired: "Renommez la copie avec un titre different.",
+      duplicateRenameRequired: "Renommez la copie avec un titre différent.",
       copySuffix: "copie",
       emptyHive: "ruche vide",
       download: "Télécharger",
@@ -387,6 +391,7 @@ export const messages = {
       hiveCount: "Ruches",
       collabs: "Collabs",
       comments: "Commentaires",
+      charactersLeft: "{count} caractères restants",
       createdAt: "Créé le",
       updatedAt: "Dernière édition",
       actions: "Actions",
@@ -398,7 +403,7 @@ export const messages = {
       specify: "Précisez",
       deleteUser: "Supprimer l'utilisateur",
       deleteHive: "Supprimer la ruche",
-      irreversible: "Cette action est irreversible. Voulez-vous continuer ?",
+      irreversible: "Cette action est irréversible. Voulez-vous continuer ?",
       confirmDeleteFinal: "Confirmation finale",
       doubleConfirmMessage:
         "Êtes-vous vraiment sûr(e) de vouloir supprimer cet élément ?",
@@ -673,6 +678,7 @@ export const messages = {
       page: "Page",
       previous: "Previous",
       next: "Next",
+      charactersLeft: "{count} characters left",
       unknownUser: "Unknown user",
       yes: "Yes",
       no: "No",
@@ -702,6 +708,7 @@ export const messages = {
       HIVE_NOT_FOUND: "Hive not found.",
       HIVE_ACCESS_DENIED: "Access denied.",
       HIVE_INVALID_DATA: "Invalid hive data.",
+      HIVE_TITLE_TOO_LONG: "Hive title must be 100 characters or fewer.",
       HIVE_EDIT_FORBIDDEN: "You are not allowed to edit this hive.",
       HIVE_RENAME_FORBIDDEN: "You are not allowed to rename this hive.",
       HIVE_VERSION_INVALID: "Invalid hive version.",
@@ -772,6 +779,7 @@ export const messages = {
       register: "Sign up",
     },
     register: {
+      charactersLeft: "{count} tekens over",
       title: "Create account",
       requiredNotice: "All fields are mandatory.",
       username: "Username (unique)",
@@ -1181,6 +1189,7 @@ export const messages = {
       page: "Pagina",
       previous: "Vorige",
       next: "Volgende",
+      charactersLeft: "{count} tekens over",
       unknownUser: "Onbekende gebruiker",
       yes: "Ja",
       no: "Nee",
@@ -1210,6 +1219,8 @@ export const messages = {
       HIVE_NOT_FOUND: "Bijenkorf niet gevonden.",
       HIVE_ACCESS_DENIED: "Toegang geweigerd.",
       HIVE_INVALID_DATA: "Ongeldige bijenkorfgegevens.",
+      HIVE_TITLE_TOO_LONG:
+        "De titel van de bijenkorf mag maximaal 100 tekens bevatten.",
       HIVE_EDIT_FORBIDDEN: "Je mag deze bijenkorf niet bewerken.",
       HIVE_RENAME_FORBIDDEN: "Je mag deze bijenkorf niet hernoemen.",
       HIVE_VERSION_INVALID: "Ongeldige bijenkorfversie.",

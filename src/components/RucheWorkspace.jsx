@@ -19,6 +19,7 @@ import { BOARD_CARD_SIZE, clampBoardPosition } from "../lib/board";
 
 const COMPACT_EDITOR_MEDIA_QUERY = "(max-width: 1200px)";
 const HISTORY_LIMIT = 30;
+const CARD_NOTE_MAX_LENGTH = 500;
 const FREE_LIBRARY_SELECTION_CARD = {
   id: "__free-library-selection__",
   category: "free",
@@ -1180,9 +1181,17 @@ export default function RucheWorkspace({
                           : "workspace.addCardNotePlaceholder",
                       )}
                       rows={4}
-                      maxLength={1200}
+                      maxLength={CARD_NOTE_MAX_LENGTH}
                       autoFocus
                     />
+                    <p
+                      className={`input-limit-hint${noteDraft.length >= CARD_NOTE_MAX_LENGTH ? " is-at-limit" : ""}`}
+                      aria-live="polite"
+                    >
+                      {t("common.charactersLeft", {
+                        count: Math.max(0, CARD_NOTE_MAX_LENGTH - noteDraft.length),
+                      })}
+                    </p>
                   </div>
                 ) : null}
 

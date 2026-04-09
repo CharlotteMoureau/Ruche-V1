@@ -17,6 +17,9 @@ import {
 import { useTabletViewport } from "../hooks/useTabletViewport";
 import { captureBoardPreviewImage } from "../lib/snapshot";
 
+const HIVE_TITLE_MAX_LENGTH = 100;
+const HIVE_COMMENT_MAX_LENGTH = 500;
+
 function formatDateTime(value, locale) {
   if (!value) return "-";
 
@@ -1496,8 +1499,20 @@ export default function RucheEditorPage() {
                         }
                         placeholder={t("editor.replyPlaceholder")}
                         rows={2}
+                        maxLength={HIVE_COMMENT_MAX_LENGTH}
                         autoFocus
                       />
+                      <p
+                        className={`input-limit-hint${replyText.length >= HIVE_COMMENT_MAX_LENGTH ? " is-at-limit" : ""}`}
+                        aria-live="polite"
+                      >
+                        {t("common.charactersLeft", {
+                          count: Math.max(
+                            0,
+                            HIVE_COMMENT_MAX_LENGTH - replyText.length,
+                          ),
+                        })}
+                      </p>
                       <div className="comment-reply-actions">
                         <button
                           type="button"
@@ -1534,7 +1549,19 @@ export default function RucheEditorPage() {
                   onKeyDown={(event) => handleEnterSubmit(event, submitComment)}
                   placeholder={t("editor.addCommentPlaceholder")}
                   rows={2}
+                  maxLength={HIVE_COMMENT_MAX_LENGTH}
                 />
+                <p
+                  className={`input-limit-hint${commentText.length >= HIVE_COMMENT_MAX_LENGTH ? " is-at-limit" : ""}`}
+                  aria-live="polite"
+                >
+                  {t("common.charactersLeft", {
+                    count: Math.max(
+                      0,
+                      HIVE_COMMENT_MAX_LENGTH - commentText.length,
+                    ),
+                  })}
+                </p>
                 <button type="button" onClick={submitComment}>
                   {t("editor.send")}
                 </button>
@@ -1612,6 +1639,7 @@ export default function RucheEditorPage() {
         title={t("editor.editCommentTitle")}
         inputLabel={t("editor.newMessage")}
         value={editingTarget?.value || ""}
+        inputMaxLength={HIVE_COMMENT_MAX_LENGTH}
         onValueChange={(value) =>
           setEditingTarget((prev) => (prev ? { ...prev, value } : prev))
         }
@@ -1665,6 +1693,7 @@ export default function RucheEditorPage() {
         title={t("editor.hiveTitleLabel")}
         inputLabel={t("editor.hiveTitleLabel")}
         value={headerTitleDraft}
+        inputMaxLength={HIVE_TITLE_MAX_LENGTH}
         onValueChange={setHeaderTitleDraft}
         confirmLabel={t("common.save")}
         confirmDisabled={!headerTitleDraft.trim()}

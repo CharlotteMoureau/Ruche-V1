@@ -17,7 +17,7 @@ import {
   faHouse,
 } from "@fortawesome/free-solid-svg-icons";
 import { useAuth } from "../context/AuthContext";
-import { apiFetch } from "../lib/api";
+import { apiFetch, getApiErrorMessage } from "../lib/api";
 import UnifiedPromptModal from "../components/UnifiedPromptModal";
 import PageLoader from "../components/PageLoader";
 import HexCard from "../components/HexCard";
@@ -37,6 +37,7 @@ import {
 import { HIVE_KINDS, resolveDefaultHiveKind } from "../lib/hives";
 
 const HIVES_PER_PAGE = 3;
+const HIVE_TITLE_MAX_LENGTH = 100;
 const CARD_SIZE = 200;
 const BOARD_PADDING = 60;
 const PROFILE_TAB_HIVES = "hives";
@@ -209,6 +210,18 @@ function getCollaboratorRoleLabel(role, t) {
   if (normalizedRole === "READ") return t("toolbar.roleRead");
 
   return role || "";
+}
+
+function buildDuplicateTitle(sourceTitle, copySuffix) {
+  const suffix = ` (${copySuffix})`;
+  const baseTitle = String(sourceTitle || "").trim() || "Ruche";
+
+  if (baseTitle.length + suffix.length <= HIVE_TITLE_MAX_LENGTH) {
+    return `${baseTitle}${suffix}`;
+  }
+
+  const maxBaseLength = Math.max(1, HIVE_TITLE_MAX_LENGTH - suffix.length);
+  return `${baseTitle.slice(0, maxBaseLength).trimEnd()}${suffix}`;
 }
 
 function getCaptureBoardSize(boardCards) {
@@ -560,7 +573,7 @@ export default function ProfilePage() {
     setDuplicateDraft({
       hiveId,
       sourceTitle,
-      nextTitle: `${sourceTitle} (${t("profile.copySuffix")})`,
+      nextTitle: buildDuplicateTitle(sourceTitle, t("profile.copySuffix")),
     });
   };
 
@@ -648,6 +661,11 @@ export default function ProfilePage() {
       return;
     }
 
+    if (trimmedTitle.length > HIVE_TITLE_MAX_LENGTH) {
+      setError(t("apiErrors.HIVE_TITLE_TOO_LONG"));
+      return;
+    }
+
     if (trimmedTitle === renameOrDuplicateDraft.sourceTitle.trim()) {
       setError(t("profile.duplicateRenameRequired"));
       return;
@@ -711,7 +729,7 @@ export default function ProfilePage() {
         nextTitle: "",
       });
     } catch (err) {
-      setError(err.message);
+      setError(getApiErrorMessage(err, t));
     } finally {
       setDuplicatingHiveId(null);
     }
@@ -723,6 +741,11 @@ export default function ProfilePage() {
     const trimmedTitle = duplicateDraft.nextTitle.trim();
     if (!trimmedTitle) {
       setError(t("profile.duplicateNeedTitle"));
+      return;
+    }
+
+    if (trimmedTitle.length > HIVE_TITLE_MAX_LENGTH) {
+      setError(t("apiErrors.HIVE_TITLE_TOO_LONG"));
       return;
     }
 
@@ -782,7 +805,7 @@ export default function ProfilePage() {
       setProfile(data);
       setDuplicateDraft({ hiveId: null, sourceTitle: "", nextTitle: "" });
     } catch (err) {
-      setError(err.message);
+      setError(getApiErrorMessage(err, t));
     } finally {
       setDuplicatingHiveId(null);
     }
@@ -1740,6 +1763,7 @@ export default function ProfilePage() {
         title={t("editor.hiveTitleLabel")}
         inputLabel={t("editor.hiveTitleLabel")}
         value={renameDraft.nextTitle}
+        inputMaxLength={HIVE_TITLE_MAX_LENGTH}
         onValueChange={(value) =>
           setRenameDraft((prev) => ({ ...prev, nextTitle: value }))
         }
@@ -1808,6 +1832,7 @@ export default function ProfilePage() {
         message={t("profile.modalDuplicateMessage")}
         inputLabel={t("profile.modalDuplicateInput")}
         value={duplicateDraft.nextTitle}
+        inputMaxLength={HIVE_TITLE_MAX_LENGTH}
         onValueChange={(value) =>
           setDuplicateDraft((prev) => ({ ...prev, nextTitle: value }))
         }
@@ -1848,6 +1873,7 @@ export default function ProfilePage() {
         inputLabel={t("profile.modalCreateInput")}
         inputPlaceholder={t("profile.modalCreatePlaceholder")}
         value={newHiveTitle}
+        inputMaxLength={HIVE_TITLE_MAX_LENGTH}
         onValueChange={setNewHiveTitle}
         confirmLabel={t("common.confirm")}
         confirmDisabled={!newHiveTitle.trim()}
