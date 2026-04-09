@@ -71,6 +71,9 @@ model HiveComment {
   author    User          @relation(fields: [authorId], references: [id], onDelete: Cascade)
   parent    HiveComment?  @relation("CommentReplies", fields: [parentId], references: [id], onDelete: Cascade)
   replies   HiveComment[] @relation("CommentReplies")
+
+  @@index([hiveId, parentId, createdAt])
+  @@index([hiveId, createdAt])
 }
 
 model PasswordResetToken {

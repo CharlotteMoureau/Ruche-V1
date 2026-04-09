@@ -191,6 +191,10 @@ export const messages = {
         "Vous n'avez pas l'autorisation de commenter cette ruche.",
       HIVE_COMMENT_PARENT_NOT_FOUND: "Commentaire parent introuvable.",
       HIVE_COMMENT_NOT_FOUND: "Commentaire introuvable.",
+      HIVE_COMMENT_LIMIT_REACHED:
+        "Le nombre maximum de commentaires a été atteint pour cette ruche.",
+      HIVE_COMMENT_RATE_LIMIT:
+        "Vous commentez trop vite. Veuillez réessayer dans un instant.",
       HIVE_COMMENT_EDIT_OWN_ONLY:
         "Vous ne pouvez modifier que vos propres commentaires.",
       HIVE_COMMENT_DELETE_OWN_ONLY:
@@ -443,7 +447,12 @@ export const messages = {
       delete: "Supprimer",
       replyPlaceholder: "Écrire une réponse...",
       send: "Envoyer",
+      sending: "Envoi en cours...",
       addCommentPlaceholder: "Ajouter un commentaire...",
+      loadOlderComments: "Charger les commentaires plus anciens",
+      loadingOlderComments: "Chargement des anciens commentaires...",
+      commentsMaxReached:
+        "Nombre maximum de commentaires atteint pour cette ruche.",
       unsavedTitle: "Modifications non enregistrées",
       unsavedMessage:
         "Votre ruche contient des modifications non enregistrées. Quitter sans sauvegarder ?",
@@ -724,6 +733,10 @@ export const messages = {
       HIVE_COMMENT_FORBIDDEN: "You are not allowed to comment on this hive.",
       HIVE_COMMENT_PARENT_NOT_FOUND: "Parent comment not found.",
       HIVE_COMMENT_NOT_FOUND: "Comment not found.",
+      HIVE_COMMENT_LIMIT_REACHED:
+        "The maximum number of comments has been reached for this hive.",
+      HIVE_COMMENT_RATE_LIMIT:
+        "You are commenting too quickly. Please try again in a moment.",
       HIVE_COMMENT_EDIT_OWN_ONLY: "You can only edit your own comments.",
       HIVE_COMMENT_DELETE_OWN_ONLY: "You can only delete your own comments.",
     },
@@ -966,7 +979,11 @@ export const messages = {
       delete: "Delete",
       replyPlaceholder: "Write a reply...",
       send: "Send",
+      sending: "Sending...",
       addCommentPlaceholder: "Add a comment...",
+      loadOlderComments: "Load older comments",
+      loadingOlderComments: "Loading older comments...",
+      commentsMaxReached: "Maximum number of comments reached for this hive.",
       unsavedTitle: "Unsaved changes",
       unsavedMessage: "Your hive has unsaved changes. Leave without saving?",
       saveFirstTitle: "Save the hive first",
@@ -1237,6 +1254,10 @@ export const messages = {
       HIVE_COMMENT_FORBIDDEN: "Je mag niet reageren in deze bijenkorf.",
       HIVE_COMMENT_PARENT_NOT_FOUND: "Bovenliggende opmerking niet gevonden.",
       HIVE_COMMENT_NOT_FOUND: "Opmerking niet gevonden.",
+      HIVE_COMMENT_LIMIT_REACHED:
+        "Het maximumaantal opmerkingen voor deze bijenkorf is bereikt.",
+      HIVE_COMMENT_RATE_LIMIT:
+        "Je reageert te snel. Probeer het over een ogenblik opnieuw.",
       HIVE_COMMENT_EDIT_OWN_ONLY:
         "Je kunt alleen je eigen opmerkingen bewerken.",
       HIVE_COMMENT_DELETE_OWN_ONLY:
@@ -1480,7 +1501,12 @@ export const messages = {
       delete: "Verwijderen",
       replyPlaceholder: "Schrijf een antwoord...",
       send: "Verzenden",
+      sending: "Verzenden...",
       addCommentPlaceholder: "Reactie toevoegen...",
+      loadOlderComments: "Oudere reacties laden",
+      loadingOlderComments: "Oudere reacties laden...",
+      commentsMaxReached:
+        "Maximaal aantal reacties bereikt voor deze bijenkorf.",
       unsavedTitle: "Niet-opgeslagen wijzigingen",
       unsavedMessage:
         "Je bijenkorf bevat niet-opgeslagen wijzigingen. Verlaten zonder op te slaan?",

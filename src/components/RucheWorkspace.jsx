@@ -160,6 +160,7 @@ export default function RucheWorkspace({
   isTabletEditorMode = false,
   tabletUsageBlocked = false,
   activeEditorsLabel = "",
+  shortcutsBlocked = false,
 }) {
   const { user } = useAuth();
   const { language, t, dateLocale } = useLanguage();
@@ -312,7 +313,14 @@ export default function RucheWorkspace({
     };
 
     const handleKeyDown = (event) => {
-      if (!canEdit || isTypingTarget(event.target)) return;
+      if (
+        !canEdit ||
+        isTypingTarget(event.target) ||
+        noteModalCardId ||
+        showModal ||
+        shortcutsBlocked
+      )
+        return;
 
       const key = String(event.key || "").toLowerCase();
       const hasModifier = event.ctrlKey || event.metaKey;
@@ -344,7 +352,15 @@ export default function RucheWorkspace({
     return () => {
       window.removeEventListener("keydown", handleKeyDown);
     };
-  }, [canEdit, handleRedo, handleUndo, boardCards]);
+  }, [
+    canEdit,
+    handleRedo,
+    handleUndo,
+    boardCards,
+    noteModalCardId,
+    showModal,
+    shortcutsBlocked,
+  ]);
 
   useEffect(() => {
     setBoardCards((previousBoardCards) => {
@@ -1189,7 +1205,10 @@ export default function RucheWorkspace({
                       aria-live="polite"
                     >
                       {t("common.charactersLeft", {
-                        count: Math.max(0, CARD_NOTE_MAX_LENGTH - noteDraft.length),
+                        count: Math.max(
+                          0,
+                          CARD_NOTE_MAX_LENGTH - noteDraft.length,
+                        ),
                       })}
                     </p>
                   </div>

@@ -1,4 +1,5 @@
 import { randomUUID } from "node:crypto";
+import process from "node:process";
 import { Router } from "express";
 import { z } from "zod";
 import { HIVE_KINDS, normalizeHiveKind } from "../lib/hives.js";
@@ -51,8 +52,14 @@ const cardNoteSchema = z.object({
 const COLLABORATOR_ROLES = ["ADMIN", "EDITOR", "COMMENT", "READ", "EDIT"];
 const collaboratorRoleSchema = z.enum(COLLABORATOR_ROLES);
 const PRESENCE_TTL_MS = 30_000;
+const COMMENT_PAGE_LIMIT_DEFAULT = 30;
+const COMMENT_PAGE_LIMIT_MAX = 100;
+const COMMENT_RATE_WINDOW_MS = Number(process.env.HIVE_COMMENT_RATE_WINDOW_MS || 60_000);
+const COMMENT_RATE_MAX = Number(process.env.HIVE_COMMENT_RATE_MAX || 20);
+const MAX_COMMENTS_PER_HIVE = Number(process.env.HIVE_MAX_COMMENTS || 100);
 
 const hivePresence = new Map();
+const commentRateBuckets = new Map();
 
 let invitationsTableReadyPromise = null;
 
@@ -193,6 +200,92 @@ function buildUserActor(user) {
     username: user?.username || null,
     email: user?.email || null,
   };
+}
+
+function mapComment(comment) {
+  return {
+    id: comment.id,
+    message: comment.message,
+    createdAt: comment.createdAt,
+    updatedAt: comment.updatedAt,
+    author: comment.author,
+    replies: (comment.replies || []).map((reply) => ({
+      id: reply.id,
+      message: reply.message,
+      createdAt: reply.createdAt,
+      updatedAt: reply.updatedAt,
+      author: reply.author,
+      parentId: reply.parentId,
+    })),
+  };
+}
+
+function parseCommentPageLimit(value) {
+  const parsed = Number(value);
+  if (!Number.isFinite(parsed)) return COMMENT_PAGE_LIMIT_DEFAULT;
+  return Math.min(
+    COMMENT_PAGE_LIMIT_MAX,
+    Math.max(1, Math.trunc(parsed)),
+  );
+}
+
+async function fetchHiveCommentsPage(hiveId, { limit, cursor }) {
+  const pageLimit = parseCommentPageLimit(limit);
+  const findManyArgs = {
+    where: { hiveId, parentId: null },
+    include: {
+      author: { select: { id: true, username: true, email: true } },
+      replies: {
+        include: {
+          author: { select: { id: true, username: true, email: true } },
+        },
+        orderBy: { createdAt: "asc" },
+      },
+    },
+    orderBy: [{ createdAt: "desc" }, { id: "desc" }],
+    take: pageLimit + 1,
+  };
+
+  if (cursor) {
+    findManyArgs.cursor = { id: cursor };
+    findManyArgs.skip = 1;
+  }
+
+  const [rows, totalCommentCount] = await Promise.all([
+    prisma.hiveComment.findMany(findManyArgs),
+    prisma.hiveComment.count({ where: { hiveId } }),
+  ]);
+
+  const hasMore = rows.length > pageLimit;
+  const pageRows = hasMore ? rows.slice(0, pageLimit) : rows;
+  const nextCursor = hasMore ? pageRows[pageRows.length - 1]?.id || null : null;
+
+  return {
+    comments: pageRows.map(mapComment),
+    pagination: {
+      limit: pageLimit,
+      hasMore,
+      nextCursor,
+      totalCommentCount,
+    },
+  };
+}
+
+function isCommentRateLimited(hiveId, userId) {
+  const key = `${hiveId}:${userId}`;
+  const now = Date.now();
+  const windowStart = now - COMMENT_RATE_WINDOW_MS;
+  const previous = commentRateBuckets.get(key) || [];
+  const fresh = previous.filter((timestamp) => timestamp >= windowStart);
+
+  if (fresh.length >= COMMENT_RATE_MAX) {
+    commentRateBuckets.set(key, fresh);
+    return true;
+  }
+
+  fresh.push(now);
+  commentRateBuckets.set(key, fresh);
+  return false;
 }
 
 async function getHiveOr404(id) {
@@ -506,18 +599,9 @@ hivesRouter.get("/:id", async (req, res) => {
     return res.status(403).json({ error: "Access denied", code: "HIVE_ACCESS_DENIED" });
   }
 
-  const comments = await prisma.hiveComment.findMany({
-    where: { hiveId: hive.id, parentId: null },
-    include: {
-      author: { select: { id: true, username: true, email: true } },
-      replies: {
-        include: {
-          author: { select: { id: true, username: true, email: true } },
-        },
-        orderBy: { createdAt: "asc" },
-      },
-    },
-    orderBy: { createdAt: "desc" },
+  const commentsPage = await fetchHiveCommentsPage(hive.id, {
+    limit: req.query.commentsLimit,
+    cursor: req.query.commentsCursor,
   });
 
   return res.json({
@@ -537,22 +621,27 @@ hivesRouter.get("/:id", async (req, res) => {
       email: c.user.email,
       role: c.role,
     })),
-    comments: comments.map((comment) => ({
-      id: comment.id,
-      message: comment.message,
-      createdAt: comment.createdAt,
-      updatedAt: comment.updatedAt,
-      author: comment.author,
-      replies: comment.replies.map((reply) => ({
-        id: reply.id,
-        message: reply.message,
-        createdAt: reply.createdAt,
-        updatedAt: reply.updatedAt,
-        author: reply.author,
-        parentId: reply.parentId,
-      })),
-    })),
+    comments: commentsPage.comments,
+    commentsPagination: commentsPage.pagination,
   });
+});
+
+hivesRouter.get("/:id/comments", async (req, res) => {
+  const hive = await getHiveOr404(req.params.id);
+  if (!hive) {
+    return res.status(404).json({ error: "Hive not found", code: "HIVE_NOT_FOUND" });
+  }
+
+  if (!canReadHive(hive, req.user)) {
+    return res.status(403).json({ error: "Access denied", code: "HIVE_ACCESS_DENIED" });
+  }
+
+  const page = await fetchHiveCommentsPage(hive.id, {
+    limit: req.query.limit,
+    cursor: req.query.cursor,
+  });
+
+  return res.json(page);
 });
 
 hivesRouter.get("/:id/invitations", async (req, res) => {
@@ -1016,6 +1105,21 @@ hivesRouter.post("/:id/comments", async (req, res) => {
     return res.status(403).json({
       error: "You are not allowed to comment on this hive",
       code: "HIVE_COMMENT_FORBIDDEN",
+    });
+  }
+
+  if (isCommentRateLimited(hive.id, req.user.id)) {
+    return res.status(429).json({
+      error: "Too many comment actions. Please wait and try again.",
+      code: "HIVE_COMMENT_RATE_LIMIT",
+    });
+  }
+
+  const commentCount = await prisma.hiveComment.count({ where: { hiveId: hive.id } });
+  if (commentCount >= MAX_COMMENTS_PER_HIVE) {
+    return res.status(400).json({
+      error: "Maximum number of comments reached for this hive",
+      code: "HIVE_COMMENT_LIMIT_REACHED",
     });
   }
 

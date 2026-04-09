@@ -49,15 +49,17 @@ export default function HexCard({ card, position, onlyFront }) {
 
   if (!card) return null;
 
+  const clipId = `hc-${card.id}`;
+
   return (
-    <div id="hex" className={`hex-card ${card.category}`} style={style}>
+    <div className={`hex-card ${card.category}`} style={style}>
       <svg
         className={`hex ${extraClass}`}
         viewBox="0 0 100 100"
         xmlns="http://www.w3.org/2000/svg"
       >
         <defs>
-          <clipPath id="hexClip" clipPathUnits="objectBoundingBox">
+          <clipPath id={clipId} clipPathUnits="objectBoundingBox">
             <polygon points="0.5,0 0.93,0.25 0.93,0.75 0.5,1 0.07,0.75 0.07,0.25" />
           </clipPath>
         </defs>
@@ -72,7 +74,7 @@ export default function HexCard({ card, position, onlyFront }) {
           y="0"
           width="100"
           height="100"
-          clipPath="url(#hexClip)"
+          clipPath={`url(#${clipId})`}
         >
           <div className="hex-inner">
             <div className="hex-front">

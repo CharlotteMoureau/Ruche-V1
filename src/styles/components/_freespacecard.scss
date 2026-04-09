@@ -4,6 +4,7 @@
   width: var(--board-card-size, 200px);
   aspect-ratio: 1;
   perspective: 800px;
+  overflow: visible;
   stroke: $vert;
   stroke-width: 4;
   stroke-dasharray: 10 5;

@@ -19,6 +19,8 @@ import { captureBoardPreviewImage } from "../lib/snapshot";
 
 const HIVE_TITLE_MAX_LENGTH = 100;
 const HIVE_COMMENT_MAX_LENGTH = 500;
+const COMMENTS_PAGE_SIZE = 10;
+const MAX_COMMENTS_PER_HIVE = 100;
 
 function formatDateTime(value, locale) {
   if (!value) return "-";
@@ -32,8 +34,21 @@ function formatDateTime(value, locale) {
   }).format(date);
 }
 
-function totalCommentCount(comments = []) {
-  return comments.reduce((sum, c) => sum + 1 + (c.replies?.length || 0), 0);
+function mergeCommentPages(newestPage = [], existing = []) {
+  const existingById = new Map(existing.map((item) => [item.id, item]));
+  const merged = [];
+
+  newestPage.forEach((comment) => {
+    const existingComment = existingById.get(comment.id);
+    merged.push(existingComment ? { ...existingComment, ...comment } : comment);
+    existingById.delete(comment.id);
+  });
+
+  existingById.forEach((comment) => {
+    merged.push(comment);
+  });
+
+  return merged;
 }
 
 function replaceSavedSnapshotBoardData(
@@ -104,6 +119,13 @@ export default function RucheEditorPage() {
   const [replyingTo, setReplyingTo] = useState(null);
   const [replyText, setReplyText] = useState("");
   const [isCommentActionLoading, setIsCommentActionLoading] = useState(false);
+  const [isSendingComment, setIsSendingComment] = useState(false);
+  const [isSendingReply, setIsSendingReply] = useState(false);
+  const [comments, setComments] = useState([]);
+  const [commentsNextCursor, setCommentsNextCursor] = useState(null);
+  const [hasMoreComments, setHasMoreComments] = useState(false);
+  const [isLoadingMoreComments, setIsLoadingMoreComments] = useState(false);
+  const [totalCommentCount, setTotalCommentCount] = useState(0);
   const commentsEndRef = useRef(null);
   const saveFeedbackTimeoutRef = useRef(null);
   const [showLeaveDirtyModal, setShowLeaveDirtyModal] = useState(false);
@@ -240,9 +262,18 @@ export default function RucheEditorPage() {
 
     async function load() {
       try {
-        const data = await apiFetch(`/hives/${id}`, { token });
+        const data = await apiFetch(
+          `/hives/${id}?commentsLimit=${COMMENTS_PAGE_SIZE}`,
+          { token },
+        );
         if (!mounted) return;
         setHive(data);
+        setComments(Array.isArray(data.comments) ? data.comments : []);
+        setHasMoreComments(Boolean(data.commentsPagination?.hasMore));
+        setCommentsNextCursor(data.commentsPagination?.nextCursor || null);
+        setTotalCommentCount(
+          Number(data.commentsPagination?.totalCommentCount) || 0,
+        );
         setTitle(data.title);
         setHiveKind(normalizeHiveKind(data.kind));
         setBoardData(data.boardData);
@@ -268,13 +299,35 @@ export default function RucheEditorPage() {
   }, [id, isNew, t, token]);
 
   useEffect(() => {
+    if (!isNew) return;
+    setComments([]);
+    setHasMoreComments(false);
+    setCommentsNextCursor(null);
+    setTotalCommentCount(0);
+  }, [isNew]);
+
+  useEffect(() => {
     if (isNew) return;
 
     const intervalId = setInterval(async () => {
       try {
-        const data = await apiFetch(`/hives/${id}`, { token });
+        const data = await apiFetch(
+          `/hives/${id}?commentsLimit=${COMMENTS_PAGE_SIZE}`,
+          { token },
+        );
 
         setHive(data);
+        setComments((prev) =>
+          mergeCommentPages(
+            Array.isArray(data.comments) ? data.comments : [],
+            prev,
+          ),
+        );
+        setHasMoreComments(Boolean(data.commentsPagination?.hasMore));
+        setCommentsNextCursor(data.commentsPagination?.nextCursor || null);
+        setTotalCommentCount(
+          Number(data.commentsPagination?.totalCommentCount) || 0,
+        );
         const nextSnapshot = JSON.stringify({
           title: data.title,
           hiveKind: normalizeHiveKind(data.kind),
@@ -411,8 +464,19 @@ export default function RucheEditorPage() {
   const reloadHiveFromServer = useCallback(async () => {
     if (isNew || !id) return;
 
-    const data = await apiFetch(`/hives/${id}`, { token });
+    const data = await apiFetch(
+      `/hives/${id}?commentsLimit=${COMMENTS_PAGE_SIZE}`,
+      {
+        token,
+      },
+    );
     setHive(data);
+    setComments(Array.isArray(data.comments) ? data.comments : []);
+    setHasMoreComments(Boolean(data.commentsPagination?.hasMore));
+    setCommentsNextCursor(data.commentsPagination?.nextCursor || null);
+    setTotalCommentCount(
+      Number(data.commentsPagination?.totalCommentCount) || 0,
+    );
     setTitle(data.title);
     setHiveKind(normalizeHiveKind(data.kind));
     setBoardData(data.boardData);
@@ -425,6 +489,44 @@ export default function RucheEditorPage() {
       }),
     );
   }, [id, isNew, token]);
+
+  const loadOlderComments = useCallback(async () => {
+    if (
+      !id ||
+      !hasMoreComments ||
+      !commentsNextCursor ||
+      isLoadingMoreComments
+    ) {
+      return;
+    }
+
+    try {
+      setIsLoadingMoreComments(true);
+      const page = await apiFetch(
+        `/hives/${id}/comments?limit=${COMMENTS_PAGE_SIZE}&cursor=${encodeURIComponent(commentsNextCursor)}`,
+        { token },
+      );
+
+      const nextPageComments = Array.isArray(page?.comments)
+        ? page.comments
+        : [];
+      setComments((prev) => [...prev, ...nextPageComments]);
+      setHasMoreComments(Boolean(page?.pagination?.hasMore));
+      setCommentsNextCursor(page?.pagination?.nextCursor || null);
+      setTotalCommentCount(Number(page?.pagination?.totalCommentCount) || 0);
+    } catch (err) {
+      showApiError(err);
+    } finally {
+      setIsLoadingMoreComments(false);
+    }
+  }, [
+    commentsNextCursor,
+    hasMoreComments,
+    id,
+    isLoadingMoreComments,
+    showApiError,
+    token,
+  ]);
 
   const performSaveHive = useCallback(
     async (titleToSave, { skipNavigateAfterCreate = false } = {}) => {
@@ -482,6 +584,10 @@ export default function RucheEditorPage() {
             canEdit: true,
             canComment: true,
           });
+          setComments([]);
+          setHasMoreComments(false);
+          setCommentsNextCursor(null);
+          setTotalCommentCount(0);
           if (!skipNavigateAfterCreate) {
             navigate(`/hives/${created.id}`, { replace: true });
           }
@@ -884,8 +990,18 @@ export default function RucheEditorPage() {
 
   const submitComment = async () => {
     const text = commentText.trim();
-    if (!text) return;
+    if (!text || isSendingComment) return;
+    
+    if (totalCommentCount >= MAX_COMMENTS_PER_HIVE) {
+      showApiError({
+        code: "HIVE_COMMENT_LIMIT_REACHED",
+        message: t("apiErrors.HIVE_COMMENT_LIMIT_REACHED"),
+      });
+      return;
+    }
+    
     try {
+      setIsSendingComment(true);
       const comment = await apiFetch(`/hives/${id}/comments`, {
         method: "POST",
         token,
@@ -894,18 +1010,32 @@ export default function RucheEditorPage() {
 
       setHive((prev) => ({
         ...prev,
-        comments: [{ ...comment, replies: [] }, ...(prev?.comments || [])],
+        comments: prev?.comments || [],
       }));
+      setComments((prev) => [{ ...comment, replies: [] }, ...prev]);
+      setTotalCommentCount((prev) => prev + 1);
       setCommentText("");
     } catch (err) {
       showApiError(err);
+    } finally {
+      setIsSendingComment(false);
     }
   };
 
   const submitReply = async (parentId) => {
     const text = replyText.trim();
-    if (!text) return;
+    if (!text || isSendingReply) return;
+    
+    if (totalCommentCount >= MAX_COMMENTS_PER_HIVE) {
+      showApiError({
+        code: "HIVE_COMMENT_LIMIT_REACHED",
+        message: t("apiErrors.HIVE_COMMENT_LIMIT_REACHED"),
+      });
+      return;
+    }
+    
     try {
+      setIsSendingReply(true);
       const reply = await apiFetch(`/hives/${id}/comments`, {
         method: "POST",
         token,
@@ -913,18 +1043,20 @@ export default function RucheEditorPage() {
       });
 
       const resolvedParentId = reply.parentId;
-      setHive((prev) => ({
-        ...prev,
-        comments: (prev?.comments || []).map((c) =>
+      setComments((prev) =>
+        prev.map((c) =>
           c.id === resolvedParentId
             ? { ...c, replies: [...(c.replies || []), reply] }
             : c,
         ),
-      }));
+      );
+      setTotalCommentCount((prev) => prev + 1);
       setReplyText("");
       setReplyingTo(null);
     } catch (err) {
       showApiError(err);
+    } finally {
+      setIsSendingReply(false);
     }
   };
 
@@ -945,30 +1077,22 @@ export default function RucheEditorPage() {
         },
       );
 
-      setHive((prev) => {
+      setComments((prev) => {
         if (!editingTarget.parentId) {
-          return {
-            ...prev,
-            comments: (prev?.comments || []).map((c) =>
-              c.id === updated.id
-                ? { ...updated, replies: c.replies || [] }
-                : c,
-            ),
-          };
+          return prev.map((c) =>
+            c.id === updated.id ? { ...updated, replies: c.replies || [] } : c,
+          );
         }
-        return {
-          ...prev,
-          comments: (prev?.comments || []).map((c) =>
-            c.id === editingTarget.parentId
-              ? {
-                  ...c,
-                  replies: (c.replies || []).map((r) =>
-                    r.id === updated.id ? updated : r,
-                  ),
-                }
-              : c,
-          ),
-        };
+        return prev.map((c) =>
+          c.id === editingTarget.parentId
+            ? {
+                ...c,
+                replies: (c.replies || []).map((r) =>
+                  r.id === updated.id ? updated : r,
+                ),
+              }
+            : c,
+        );
       });
       setEditingTarget(null);
     } catch (err) {
@@ -988,28 +1112,20 @@ export default function RucheEditorPage() {
         token,
       });
 
-      setHive((prev) => {
+      setComments((prev) => {
         if (!deleteTarget.parentId) {
-          return {
-            ...prev,
-            comments: (prev?.comments || []).filter(
-              (c) => c.id !== deleteTarget.comment.id,
-            ),
-          };
+          return prev.filter((c) => c.id !== deleteTarget.comment.id);
         }
-        return {
-          ...prev,
-          comments: (prev?.comments || []).map((c) =>
-            c.id === deleteTarget.parentId
-              ? {
-                  ...c,
-                  replies: (c.replies || []).filter(
-                    (r) => r.id !== deleteTarget.comment.id,
-                  ),
-                }
-              : c,
-          ),
-        };
+        return prev.map((c) =>
+          c.id === deleteTarget.parentId
+            ? {
+                ...c,
+                replies: (c.replies || []).filter(
+                  (r) => r.id !== deleteTarget.comment.id,
+                ),
+              }
+            : c,
+        );
       });
       setDeleteTarget(null);
     } catch (err) {
@@ -1050,8 +1166,7 @@ export default function RucheEditorPage() {
     submitAction();
   };
 
-  const comments = hive?.comments || [];
-  const commentCount = totalCommentCount(comments);
+  const commentCount = totalCommentCount;
   const isHiveLoading = !isNew && !hive && !error;
   const exportOptions = {
     title,
@@ -1311,6 +1426,7 @@ export default function RucheEditorPage() {
           tabletUsageBlocked={isTabletPortrait || isPhone}
           activeEditorsLabel={activeEditorsLabel}
           onStateChange={setBoardData}
+          shortcutsBlocked={showCommentsModal}
         />
       )}
 
@@ -1517,8 +1633,11 @@ export default function RucheEditorPage() {
                         <button
                           type="button"
                           onClick={() => submitReply(comment.id)}
+                          disabled={isSendingReply}
                         >
-                          {t("editor.send")}
+                          {isSendingReply
+                            ? t("editor.sending")
+                            : t("editor.send")}
                         </button>
                         <button
                           type="button"
@@ -1535,11 +1654,30 @@ export default function RucheEditorPage() {
                   )}
                 </div>
               ))}
+              {hasMoreComments ? (
+                <div className="comments-load-more">
+                  <button
+                    type="button"
+                    className="secondary"
+                    onClick={loadOlderComments}
+                    disabled={isLoadingMoreComments}
+                  >
+                    {isLoadingMoreComments
+                      ? t("editor.loadingOlderComments")
+                      : t("editor.loadOlderComments")}
+                  </button>
+                </div>
+              ) : null}
               <div ref={commentsEndRef} />
             </div>
 
             {canComment && (
               <div className="comments-new">
+                {totalCommentCount >= MAX_COMMENTS_PER_HIVE && (
+                  <p className="comments-max-reached-warning">
+                    {t("editor.commentsMaxReached")}
+                  </p>
+                )}
                 <textarea
                   id="new-comment-text"
                   name="commentText"
@@ -1550,6 +1688,7 @@ export default function RucheEditorPage() {
                   placeholder={t("editor.addCommentPlaceholder")}
                   rows={2}
                   maxLength={HIVE_COMMENT_MAX_LENGTH}
+                  disabled={totalCommentCount >= MAX_COMMENTS_PER_HIVE}
                 />
                 <p
                   className={`input-limit-hint${commentText.length >= HIVE_COMMENT_MAX_LENGTH ? " is-at-limit" : ""}`}
@@ -1562,8 +1701,12 @@ export default function RucheEditorPage() {
                     ),
                   })}
                 </p>
-                <button type="button" onClick={submitComment}>
-                  {t("editor.send")}
+                <button
+                  type="button"
+                  onClick={submitComment}
+                  disabled={isSendingComment || totalCommentCount >= MAX_COMMENTS_PER_HIVE}
+                >
+                  {isSendingComment ? t("editor.sending") : t("editor.send")}
                 </button>
               </div>
             )}

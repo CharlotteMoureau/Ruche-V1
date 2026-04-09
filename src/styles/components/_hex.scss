@@ -21,6 +21,11 @@
       transition: all 0.3s ease;
     }
 
+    &.reco-enseignant,
+    &.reco-equipe {
+      overflow: visible;
+    }
+
     &.reco-enseignant .hex-shape {
       stroke: $orange;
       stroke-width: 4;
