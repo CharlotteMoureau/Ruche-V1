@@ -128,6 +128,7 @@ export default function RucheEditorPage() {
   const [totalCommentCount, setTotalCommentCount] = useState(0);
   const commentsEndRef = useRef(null);
   const saveFeedbackTimeoutRef = useRef(null);
+  const shouldSyncWorkspaceNormalizationRef = useRef(false);
   const [showLeaveDirtyModal, setShowLeaveDirtyModal] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState(null);
   const [editingTarget, setEditingTarget] = useState(null);
@@ -285,6 +286,7 @@ export default function RucheEditorPage() {
             boardData: data.boardData,
           }),
         );
+        shouldSyncWorkspaceNormalizationRef.current = true;
       } catch (err) {
         if (mounted) {
           setError(getApiErrorMessage(err, t));
@@ -340,6 +342,7 @@ export default function RucheEditorPage() {
           setBoardData(data.boardData);
           setBaseUpdatedAt(data.updatedAt || null);
           setSavedSnapshot(nextSnapshot);
+          shouldSyncWorkspaceNormalizationRef.current = true;
         }
       } catch {
         // Ignore transient refresh errors and keep local editing state.
@@ -488,7 +491,26 @@ export default function RucheEditorPage() {
         boardData: data.boardData,
       }),
     );
+    shouldSyncWorkspaceNormalizationRef.current = true;
   }, [id, isNew, token]);
+
+  const handleWorkspaceStateChange = useCallback(
+    (nextBoardData) => {
+      setBoardData(nextBoardData);
+
+      if (!shouldSyncWorkspaceNormalizationRef.current) return;
+      shouldSyncWorkspaceNormalizationRef.current = false;
+      setSavedSnapshot((previousSnapshot) =>
+        replaceSavedSnapshotBoardData(
+          previousSnapshot,
+          nextBoardData,
+          hive?.title || title,
+          normalizeHiveKind(hive?.kind || hiveKind),
+        ),
+      );
+    },
+    [hive?.kind, hive?.title, hiveKind, title],
+  );
 
   const loadOlderComments = useCallback(async () => {
     if (
@@ -991,7 +1013,7 @@ export default function RucheEditorPage() {
   const submitComment = async () => {
     const text = commentText.trim();
     if (!text || isSendingComment) return;
-    
+
     if (totalCommentCount >= MAX_COMMENTS_PER_HIVE) {
       showApiError({
         code: "HIVE_COMMENT_LIMIT_REACHED",
@@ -999,7 +1021,7 @@ export default function RucheEditorPage() {
       });
       return;
     }
-    
+
     try {
       setIsSendingComment(true);
       const comment = await apiFetch(`/hives/${id}/comments`, {
@@ -1025,7 +1047,7 @@ export default function RucheEditorPage() {
   const submitReply = async (parentId) => {
     const text = replyText.trim();
     if (!text || isSendingReply) return;
-    
+
     if (totalCommentCount >= MAX_COMMENTS_PER_HIVE) {
       showApiError({
         code: "HIVE_COMMENT_LIMIT_REACHED",
@@ -1033,7 +1055,7 @@ export default function RucheEditorPage() {
       });
       return;
     }
-    
+
     try {
       setIsSendingReply(true);
       const reply = await apiFetch(`/hives/${id}/comments`, {
@@ -1425,7 +1447,7 @@ export default function RucheEditorPage() {
           isTabletEditorMode={isTabletEditorMode}
           tabletUsageBlocked={isTabletPortrait || isPhone}
           activeEditorsLabel={activeEditorsLabel}
-          onStateChange={setBoardData}
+          onStateChange={handleWorkspaceStateChange}
           shortcutsBlocked={showCommentsModal}
         />
       )}
@@ -1704,7 +1726,10 @@ export default function RucheEditorPage() {
                 <button
                   type="button"
                   onClick={submitComment}
-                  disabled={isSendingComment || totalCommentCount >= MAX_COMMENTS_PER_HIVE}
+                  disabled={
+                    isSendingComment ||
+                    totalCommentCount >= MAX_COMMENTS_PER_HIVE
+                  }
                 >
                   {isSendingComment ? t("editor.sending") : t("editor.send")}
                 </button>
