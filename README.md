@@ -1,21 +1,26 @@
 # 🐝 La Ruche – Application pédagogique modulaire (PECA)
 
-La Ruche est une application web conçue comme une structure modulaire en alvéoles, développée pour le PECA (Parcours d'Education Culturelle et Artistique) en Fédération Wallonie-Bruxelles.
+La Ruche est une application web conçue comme une structure modulaire en alvéoles, développée pour le PECA (Parcours d'Éducation Culturelle et Artistique) en Fédération Wallonie-Bruxelles.
 
-Elle aide les équipes éducatives à explorer, organiser, commenter et partager des planches pédagogiques composées de cartes hexagonales.
+Elle aide les équipes éducatives et les opérateurs culturels à explorer, organiser, commenter et partager des planches pédagogiques composées de cartes hexagonales.
 
 🏛️ Cet outil est développé par le Service de Pilotage du PECA, en adaptation d'un outil initialement conçu par les universités de Mons, Liège et Namur.
 
-Ce dépôt ne correspond plus au prototype V1 d'origine. V1 était essentiellement un éditeur de planches frontend uniquement. L'application actuelle est maintenant un produit complet avec authentification, sauvegarde, collaboration, contenu multilingue, export et administration.
+Ce dépôt Github ne correspond plus au prototype V1 d'origine. La V1 était essentiellement un éditeur de planches frontend uniquement. L'application actuelle est maintenant un produit complet avec authentification, sauvegarde, collaboration, contenu multilingue, export et administration.
 
 ## 🌐 Application en ligne
 
-https://la-ruche.netlify.app/
+[https://laruchepeca.be](https://laruchepeca.be)
+
+- Base de données hébergée sur Supabase
+- Serveur hébergé sur Render
+- SMTP géré via Mailer Send
 
 ## 📘 Manuels utilisateurs
 
 - Français: [docs/user-manual.fr.md](docs/user-manual.fr.md)
 - Nederlands: [docs/user-manual.nl.md](docs/user-manual.nl.md)
+- English: [docs/user-manual.en.md](docs/user-manual.en.md)
 
 ### 🎯 Objectif pédagogique
 
