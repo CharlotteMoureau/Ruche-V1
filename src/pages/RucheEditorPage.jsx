@@ -100,6 +100,7 @@ export default function RucheEditorPage() {
   const [commentText, setCommentText] = useState("");
   const [replyingTo, setReplyingTo] = useState(null);
   const [replyText, setReplyText] = useState("");
+  const [isCommentActionLoading, setIsCommentActionLoading] = useState(false);
   const commentsEndRef = useRef(null);
   const saveFeedbackTimeoutRef = useRef(null);
   const [showLeaveDirtyModal, setShowLeaveDirtyModal] = useState(false);
@@ -925,12 +926,13 @@ export default function RucheEditorPage() {
   };
 
   const editComment = async () => {
-    if (!editingTarget?.comment) return;
+    if (!editingTarget?.comment || isCommentActionLoading) return;
 
     const value = editingTarget.value.trim();
     if (!value) return;
 
     try {
+      setIsCommentActionLoading(true);
       const updated = await apiFetch(
         `/hives/${id}/comments/${editingTarget.comment.id}`,
         {
@@ -968,13 +970,16 @@ export default function RucheEditorPage() {
       setEditingTarget(null);
     } catch (err) {
       showApiError(err);
+    } finally {
+      setIsCommentActionLoading(false);
     }
   };
 
   const deleteComment = async () => {
-    if (!deleteTarget?.comment) return;
+    if (!deleteTarget?.comment || isCommentActionLoading) return;
 
     try {
+      setIsCommentActionLoading(true);
       await apiFetch(`/hives/${id}/comments/${deleteTarget.comment.id}`, {
         method: "DELETE",
         token,
@@ -1006,6 +1011,8 @@ export default function RucheEditorPage() {
       setDeleteTarget(null);
     } catch (err) {
       showApiError(err);
+    } finally {
+      setIsCommentActionLoading(false);
     }
   };
 
@@ -1554,6 +1561,9 @@ export default function RucheEditorPage() {
         cancelLabel={t("common.cancel")}
         confirmLabel={t("editor.conflictReload")}
         extraActionLabel={t("editor.createCopy")}
+        busy={isSaving}
+        confirmLoadingLabel={t("editor.saving")}
+        extraActionLoadingLabel={t("editor.saving")}
         confirmDisabled={isSaving}
         onExtraAction={handleCreateCopyAfterConflict}
         onCancel={() => setShowConflictModal(false)}
@@ -1569,6 +1579,8 @@ export default function RucheEditorPage() {
         extraActionClassName="danger"
         onExtraAction={leaveWithoutSaving}
         confirmLabel={t("editor.saveAndLeave")}
+        busy={isSaving}
+        confirmLoadingLabel={t("editor.saving")}
         confirmDisabled={isSaving}
         onCancel={cancelLeave}
         onConfirm={saveAndLeave}
@@ -1587,6 +1599,8 @@ export default function RucheEditorPage() {
         })}
         cancelLabel={t("common.cancel")}
         confirmLabel={t("editor.saveHive")}
+        busy={isSaving}
+        confirmLoadingLabel={t("editor.saving")}
         confirmDisabled={isSaving}
         onCancel={() => setSaveRequiredAction(null)}
         onConfirm={handleSaveRequiredConfirm}
@@ -1602,7 +1616,11 @@ export default function RucheEditorPage() {
           setEditingTarget((prev) => (prev ? { ...prev, value } : prev))
         }
         confirmLabel={t("common.save")}
-        confirmDisabled={!editingTarget?.value?.trim()}
+        busy={isCommentActionLoading}
+        confirmLoadingLabel={t("editor.updatingComment")}
+        confirmDisabled={
+          !editingTarget?.value?.trim() || Boolean(isCommentActionLoading)
+        }
         onCancel={() => setEditingTarget(null)}
         onConfirm={editComment}
       />
@@ -1612,6 +1630,8 @@ export default function RucheEditorPage() {
         title={t("editor.deleteCommentTitle")}
         message={t("workspace.irreversible")}
         confirmLabel={t("common.delete")}
+        busy={isCommentActionLoading}
+        confirmLoadingLabel={t("editor.deletingComment")}
         confirmClassName="danger"
         onCancel={() => setDeleteTarget(null)}
         onConfirm={deleteComment}
@@ -1627,6 +1647,9 @@ export default function RucheEditorPage() {
         })}
         confirmLabel={t("editor.renameOnly")}
         extraActionLabel={t("editor.createCopy")}
+        busy={isSaving}
+        confirmLoadingLabel={t("editor.saving")}
+        extraActionLoadingLabel={t("editor.saving")}
         confirmDisabled={isSaving}
         onCancel={() => {
           setRenameOrDuplicateAction(null);

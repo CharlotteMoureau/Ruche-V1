@@ -18,7 +18,7 @@ import { filterCardsForHiveKind } from "../lib/hives";
 import { BOARD_CARD_SIZE, clampBoardPosition } from "../lib/board";
 
 const COMPACT_EDITOR_MEDIA_QUERY = "(max-width: 1200px)";
-const HISTORY_LIMIT = 3;
+const HISTORY_LIMIT = 30;
 const FREE_LIBRARY_SELECTION_CARD = {
   id: "__free-library-selection__",
   category: "free",
@@ -191,6 +191,7 @@ export default function RucheWorkspace({
   const [noteDraft, setNoteDraft] = useState("");
   const [pendingReturnCardIds, setPendingReturnCardIds] = useState([]);
   const [showDeleteCardNoteModal, setShowDeleteCardNoteModal] = useState(false);
+  const [isDeletingCardNote, setIsDeletingCardNote] = useState(false);
   const [isEditingCardNote, setIsEditingCardNote] = useState(false);
   const [isCompactLayout, setIsCompactLayout] = useState(() => {
     if (typeof window === "undefined") return false;
@@ -213,6 +214,8 @@ export default function RucheWorkspace({
   const [isBoardDragActive, setIsBoardDragActive] = useState(false);
   const [isLibraryDropHover, setIsLibraryDropHover] = useState(false);
   const [boardDragPreview, setBoardDragPreview] = useState(null);
+  const [isHistoryLimitNoticeVisible, setIsHistoryLimitNoticeVisible] =
+    useState(false);
 
   const snapshotState = useMemo(
     () => ({
@@ -227,6 +230,9 @@ export default function RucheWorkspace({
   const pushUndoSnapshot = useCallback((snapshot) => {
     setUndoStack((prev) => {
       const next = [...prev, cloneBoardState(snapshot)];
+      if (next.length > HISTORY_LIMIT) {
+        setIsHistoryLimitNoticeVisible(true);
+      }
       return next.slice(-HISTORY_LIMIT);
     });
     setRedoStack([]);
@@ -367,6 +373,18 @@ export default function RucheWorkspace({
       userCards,
     });
   }, [availableCards, boardCards, userCards, onStateChange]);
+
+  useEffect(() => {
+    if (!isHistoryLimitNoticeVisible) return undefined;
+
+    const timeoutId = window.setTimeout(() => {
+      setIsHistoryLimitNoticeVisible(false);
+    }, 3000);
+
+    return () => {
+      window.clearTimeout(timeoutId);
+    };
+  }, [isHistoryLimitNoticeVisible]);
 
   useEffect(() => {
     if (!noteModalCardId) return;
@@ -836,7 +854,7 @@ export default function RucheWorkspace({
   };
 
   const handleDeleteCardNote = async () => {
-    if (!canNote || !noteModalCardId) return;
+    if (!canNote || !noteModalCardId || isDeletingCardNote) return;
 
     const previousBoardCards = boardCards;
     const nextBoardCards = boardCards.map((card) => {
@@ -852,6 +870,7 @@ export default function RucheWorkspace({
     if (!onPersistCardNote) return;
 
     try {
+      setIsDeletingCardNote(true);
       await onPersistCardNote({
         cardId: noteModalCardId,
         message: null,
@@ -870,6 +889,9 @@ export default function RucheWorkspace({
       setBoardCards(previousBoardCards);
       setNoteDraft(existingComment?.message || "");
       setIsEditingCardNote(!existingComment?.message);
+    } finally {
+      setShowDeleteCardNoteModal(false);
+      setIsDeletingCardNote(false);
     }
   };
 
@@ -889,9 +911,9 @@ export default function RucheWorkspace({
     const defaultPosition = pendingFreeCardAnchor
       ? clampBoardPosition(pendingFreeCardAnchor)
       : {
-        x: 300 + Math.random() * 50,
-        y: 200 + Math.random() * 50,
-      };
+          x: 300 + Math.random() * 50,
+          y: 200 + Math.random() * 50,
+        };
 
     const newCard = {
       id: Date.now() + Math.floor(Math.random() * 1000),
@@ -1003,6 +1025,15 @@ export default function RucheWorkspace({
           />
           {activeEditorsLabel ? (
             <p className="editor-active-badge">{activeEditorsLabel}</p>
+          ) : null}
+          {isHistoryLimitNoticeVisible ? (
+            <p
+              className="editor-history-limit-badge"
+              role="status"
+              aria-live="polite"
+            >
+              {t("workspace.historyLimitReached", { count: HISTORY_LIMIT })}
+            </p>
           ) : null}
           {tabletUsageBlocked ? (
             <div
@@ -1235,12 +1266,11 @@ export default function RucheWorkspace({
         title={t("workspace.deleteCardNoteTitle")}
         message={t("workspace.irreversible")}
         confirmLabel={t("common.delete")}
+        busy={isDeletingCardNote}
+        confirmLoadingLabel={t("workspace.deletingCardNote")}
         confirmClassName="danger"
         onCancel={() => setShowDeleteCardNoteModal(false)}
-        onConfirm={() => {
-          setShowDeleteCardNoteModal(false);
-          handleDeleteCardNote();
-        }}
+        onConfirm={handleDeleteCardNote}
       />
     </DndProvider>
   );

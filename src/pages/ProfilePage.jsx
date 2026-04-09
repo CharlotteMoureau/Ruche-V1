@@ -1767,6 +1767,9 @@ export default function ProfilePage() {
         })}
         confirmLabel={t("editor.renameOnly")}
         extraActionLabel={t("editor.createCopy")}
+        busy={Boolean(renamingHiveId) || Boolean(duplicatingHiveId)}
+        confirmLoadingLabel={t("profile.renaming")}
+        extraActionLoadingLabel={t("profile.duplicating")}
         confirmDisabled={Boolean(renamingHiveId) || Boolean(duplicatingHiveId)}
         onCancel={() => {
           if (renamingHiveId || duplicatingHiveId) return;
@@ -1787,6 +1790,8 @@ export default function ProfilePage() {
         confirmLabel={
           deletingHiveId ? t("profile.deleting") : t("common.delete")
         }
+        busy={Boolean(deletingHiveId)}
+        confirmLoadingLabel={t("profile.deleting")}
         confirmClassName="danger"
         confirmDisabled={Boolean(deletingHiveId)}
         onCancel={() => {
@@ -1806,6 +1811,8 @@ export default function ProfilePage() {
         onValueChange={(value) =>
           setDuplicateDraft((prev) => ({ ...prev, nextTitle: value }))
         }
+        busy={Boolean(duplicatingHiveId)}
+        confirmLoadingLabel={t("profile.duplicating")}
         confirmDisabled={
           !duplicateDraft.nextTitle.trim() || Boolean(duplicatingHiveId)
         }

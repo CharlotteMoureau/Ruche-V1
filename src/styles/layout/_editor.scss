@@ -176,6 +176,23 @@ body.editor-route #root {
   box-shadow: 0 8px 18px rgba(0, 0, 0, 0.16);
 }
 
+.editor-history-limit-badge {
+  position: absolute;
+  right: 16px;
+  bottom: 64px;
+  z-index: 1700;
+  margin: 0;
+  max-width: min(72vw, 560px);
+  border-radius: 10px;
+  border: 1px solid #d6b27a;
+  background: rgba(255, 246, 230, 0.98);
+  color: #4f2e00;
+  padding: 8px 12px;
+  font-size: 0.82rem;
+  font-weight: 700;
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.16);
+}
+
 .editor-save-feedback {
   position: fixed;
   right: 16px;
@@ -224,6 +241,12 @@ body.editor-route #root {
 }
 
 @media (max-width: 768px) {
+  .editor-history-limit-badge {
+    right: 12px;
+    bottom: 60px;
+    max-width: min(92vw, 560px);
+  }
+
   .editor-save-feedback {
     border-radius: 999px;
     padding: 8px 12px;

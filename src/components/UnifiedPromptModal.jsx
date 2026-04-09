@@ -13,6 +13,9 @@ export default function UnifiedPromptModal({
   confirmLabel,
   cancelLabel,
   confirmDisabled = false,
+  busy = false,
+  confirmLoadingLabel,
+  extraActionLoadingLabel,
   confirmClassName = "",
   onConfirm,
   onCancel,
@@ -23,8 +26,15 @@ export default function UnifiedPromptModal({
   const { t } = useLanguage();
   const inputRef = useRef(null);
   const confirmRef = useRef(null);
+  const isConfirmDisabled = confirmDisabled || busy;
   const resolvedConfirmLabel = confirmLabel || t("common.confirm");
+  const resolvedConfirmText =
+    busy && confirmLoadingLabel ? confirmLoadingLabel : resolvedConfirmLabel;
   const resolvedCancelLabel = cancelLabel || t("common.cancel");
+  const resolvedExtraActionText =
+    busy && extraActionLoadingLabel
+      ? extraActionLoadingLabel
+      : extraActionLabel;
 
   useEffect(() => {
     if (!isOpen) return;
@@ -44,16 +54,20 @@ export default function UnifiedPromptModal({
   if (!isOpen) return null;
 
   const handleOverlayClick = (event) => {
+    if (busy) return;
+
     if (event.target === event.currentTarget) {
       onCancel?.();
     }
   };
 
   const handleKeyDown = (event) => {
+    if (busy) return;
+
     if (event.key === "Escape") {
       onCancel?.();
     }
-    if (event.key === "Enter" && !confirmDisabled) {
+    if (event.key === "Enter" && !isConfirmDisabled) {
       onConfirm?.();
     }
   };
@@ -84,19 +98,25 @@ export default function UnifiedPromptModal({
                 value={value}
                 onChange={(event) => onValueChange?.(event.target.value)}
                 onKeyDown={(event) => {
-                  if (event.key === "Enter" && !confirmDisabled) {
+                  if (event.key === "Enter" && !isConfirmDisabled) {
                     event.preventDefault();
                     onConfirm?.();
                   }
                 }}
                 placeholder={inputPlaceholder}
                 maxLength={100}
+                disabled={busy}
               />
             </label>
           ) : null}
 
           <div className="modal-actions">
-            <button type="button" className="btn secondary" onClick={onCancel}>
+            <button
+              type="button"
+              className="btn secondary"
+              onClick={onCancel}
+              disabled={busy}
+            >
               {resolvedCancelLabel}
             </button>
             {onExtraAction && extraActionLabel ? (
@@ -104,21 +124,22 @@ export default function UnifiedPromptModal({
                 type="button"
                 className={`btn ${extraActionClassName}`.trim()}
                 onClick={onExtraAction}
+                disabled={busy}
               >
-                {extraActionLabel}
+                {resolvedExtraActionText}
               </button>
             ) : null}
             <button
               ref={confirmRef}
               type="button"
               className={`btn ${confirmClassName}`.trim()}
-              disabled={confirmDisabled}
+              disabled={isConfirmDisabled}
               onClick={() => {
-                if (confirmDisabled) return;
+                if (isConfirmDisabled) return;
                 onConfirm?.();
               }}
             >
-              {resolvedConfirmLabel}
+              {resolvedConfirmText}
             </button>
           </div>
         </div>

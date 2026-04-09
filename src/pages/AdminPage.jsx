@@ -49,6 +49,9 @@ export default function AdminPage() {
   const [removeCollabTarget, setRemoveCollabTarget] = useState(null);
   // Delete comment confirm
   const [deleteCommentTarget, setDeleteCommentTarget] = useState(null);
+  const [isDeletingTarget, setIsDeletingTarget] = useState(false);
+  const [isRemovingCollaborator, setIsRemovingCollaborator] = useState(false);
+  const [isDeletingComment, setIsDeletingComment] = useState(false);
 
   const userSortField = userSort.split("_")[0];
   const userSortDir = userSort.split("_")[1];
@@ -228,18 +231,24 @@ export default function AdminPage() {
   };
 
   const confirmDeleteTarget = async () => {
+    if (isDeletingTarget) return;
     if (!deleteTarget.type || !deleteTarget.id) return;
     if (!doubleConfirm) {
       setDoubleConfirm(true);
       return;
     }
-    if (deleteTarget.type === "user") {
-      await removeUser(deleteTarget.id);
-    } else if (deleteTarget.type === "hive") {
-      await removeHive(deleteTarget.id);
+    setIsDeletingTarget(true);
+    try {
+      if (deleteTarget.type === "user") {
+        await removeUser(deleteTarget.id);
+      } else if (deleteTarget.type === "hive") {
+        await removeHive(deleteTarget.id);
+      }
+      setDeleteTarget({ type: null, id: null });
+      setDoubleConfirm(false);
+    } finally {
+      setIsDeletingTarget(false);
     }
-    setDeleteTarget({ type: null, id: null });
-    setDoubleConfirm(false);
   };
 
   const saveUser = async () => {
@@ -278,8 +287,9 @@ export default function AdminPage() {
   };
 
   const removeCollaborator = async () => {
-    if (!removeCollabTarget) return;
+    if (!removeCollabTarget || isRemovingCollaborator) return;
     try {
+      setIsRemovingCollaborator(true);
       await apiFetch(
         `/admin/hives/${removeCollabTarget.hiveId}/collaborators/${removeCollabTarget.userId}`,
         { method: "DELETE", token },
@@ -288,12 +298,15 @@ export default function AdminPage() {
       await loadHiveDetails(expandedHiveId);
     } catch (err) {
       setError(err.message);
+    } finally {
+      setIsRemovingCollaborator(false);
     }
   };
 
   const deleteComment = async () => {
-    if (!deleteCommentTarget) return;
+    if (!deleteCommentTarget || isDeletingComment) return;
     try {
+      setIsDeletingComment(true);
       await apiFetch(
         `/admin/hives/${deleteCommentTarget.hiveId}/comments/${deleteCommentTarget.commentId}`,
         { method: "DELETE", token },
@@ -303,6 +316,8 @@ export default function AdminPage() {
       await load();
     } catch (err) {
       setError(err.message);
+    } finally {
+      setIsDeletingComment(false);
     }
   };
 
@@ -1025,6 +1040,8 @@ export default function AdminPage() {
             : t("admin.irreversible")
         }
         confirmLabel={doubleConfirm ? t("common.confirm") : t("common.delete")}
+        busy={isDeletingTarget}
+        confirmLoadingLabel={t("admin.deleting")}
         confirmClassName="danger"
         onCancel={() => {
           setDeleteTarget({ type: null, id: null });
@@ -1038,6 +1055,8 @@ export default function AdminPage() {
         title={t("admin.confirmRemoveCollaborator")}
         message={t("admin.confirmRemoveMessage")}
         confirmLabel={t("admin.removeCollaborator")}
+        busy={isRemovingCollaborator}
+        confirmLoadingLabel={t("admin.removingCollaborator")}
         confirmClassName="danger"
         onCancel={() => setRemoveCollabTarget(null)}
         onConfirm={removeCollaborator}
@@ -1048,6 +1067,8 @@ export default function AdminPage() {
         title={t("admin.confirmDeleteComment")}
         message={t("admin.irreversible")}
         confirmLabel={t("common.delete")}
+        busy={isDeletingComment}
+        confirmLoadingLabel={t("admin.deletingComment")}
         confirmClassName="danger"
         onCancel={() => setDeleteCommentTarget(null)}
         onConfirm={deleteComment}

@@ -46,6 +46,7 @@ export default function Toolbar({
   const [inviteLoading, setInviteLoading] = useState(false);
   const [manageLoadingId, setManageLoadingId] = useState(null);
   const [leaveLoading, setLeaveLoading] = useState(false);
+  const [exportLoading, setExportLoading] = useState(false);
   const [showLeaveConfirmModal, setShowLeaveConfirmModal] = useState(false);
   const [exportErrorMessage, setExportErrorMessage] = useState("");
   const lastHandledExportSignalRef = useRef(0);
@@ -119,10 +120,13 @@ export default function Toolbar({
   };
 
   const handleExport = useCallback(async () => {
+    if (exportLoading) return;
+
     const board = document.querySelector(".hive-board");
     if (!board) return;
 
     try {
+      setExportLoading(true);
       if (exportOptions) {
         const { blob, fileName } = await captureHiveExportBundle({
           board,
@@ -144,8 +148,10 @@ export default function Toolbar({
           message: err?.message || "unknown",
         }),
       );
+    } finally {
+      setExportLoading(false);
     }
-  }, [exportOptions, t]);
+  }, [exportLoading, exportOptions, t]);
 
   useEffect(() => {
     if (!exportSignal) return;
@@ -262,8 +268,9 @@ export default function Toolbar({
             <FontAwesomeIcon icon={faArrowsRotate} /> {t("toolbar.reset")}
           </button>
         ) : null}
-        <button onClick={handleExport}>
-          <FontAwesomeIcon icon={faDownload} /> {t("toolbar.export")}
+        <button onClick={handleExport} disabled={exportLoading}>
+          <FontAwesomeIcon icon={faDownload} />
+          {exportLoading ? t("toolbar.exporting") : t("toolbar.export")}
         </button>
         {shouldShowCollaboratorsButton ? (
           <button
@@ -478,6 +485,8 @@ export default function Toolbar({
         title={t("toolbar.confirmLeaveTitle")}
         message={t("toolbar.confirmLeaveMessage")}
         confirmLabel={t("toolbar.confirmLeave")}
+        busy={leaveLoading}
+        confirmLoadingLabel={t("toolbar.leaving")}
         confirmClassName="danger"
         onCancel={() => setShowLeaveConfirmModal(false)}
         onConfirm={async () => {

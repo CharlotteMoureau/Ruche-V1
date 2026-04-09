@@ -296,6 +296,7 @@ export const messages = {
       renameHive: "Renommer la ruche",
       duplicate: "Dupliquer",
       duplicating: "Duplication...",
+      renaming: "Renommage...",
       deleteProfileTitle: "Supprimer mon profil",
       deleteProfileDesc:
         "Cette action est irréversible et supprimera vos données.",
@@ -412,6 +413,9 @@ export const messages = {
       confirmRemoveMessage:
         "Voulez-vous retirer ce collaborateur de la ruche ?",
       confirmDeleteComment: "Supprimer ce commentaire ?",
+      deleting: "Suppression...",
+      removingCollaborator: "Retrait...",
+      deletingComment: "Suppression du commentaire...",
     },
     editor: {
       newHiveTitle: "Nouvelle Ruche",
@@ -447,6 +451,8 @@ export const messages = {
       editCommentTitle: "Modifier le commentaire",
       newMessage: "Nouveau message",
       deleteCommentTitle: "Supprimer le commentaire",
+      updatingComment: "Mise à jour du commentaire...",
+      deletingComment: "Suppression du commentaire...",
       saveTitleError: "Veuillez renseigner un titre avant d'enregistrer.",
       duplicateRenameError: "Renommez la copie avant de l'enregistrer.",
       saveStatusSaving: "Enregistrement en cours...",
@@ -500,7 +506,10 @@ export const messages = {
       deleteMultipleCardNoteMessage:
         "Certaines cartes contiennent des notes. Les remettre dans la bibliothèque supprimera ces notes. Continuer ?",
       deleteCardNoteTitle: "Supprimer la note de carte",
+      deletingCardNote: "Suppression de la note...",
       irreversible: "Cette action est irréversible. Voulez-vous continuer ?",
+      historyLimitReached:
+        "Historique limite atteint ({count} actions). Les actions les plus anciennes sont oubliées.",
       tabletOnlyMessage:
         "L'éditeur est optimisé pour tablette en mode paysage. Passez en paysage sur tablette pour continuer.",
     },
@@ -511,6 +520,7 @@ export const messages = {
         "Voulez-vous vraiment réinitialiser la ruche ? Cette action supprimera toutes les cartes du plateau.",
       confirmReset: "Réinitialiser",
       export: "Exporter",
+      exporting: "Export en cours...",
       collaborators: "Collaborateurs",
       comments: "Commentaires",
       manageCollaborators: "Gestion des collaborateurs",
@@ -810,6 +820,7 @@ export const messages = {
       renameHive: "Rename hive",
       duplicate: "Duplicate",
       duplicating: "Duplicating...",
+      renaming: "Renaming...",
       deleteProfileTitle: "Delete my profile",
       deleteProfileDesc:
         "This action is irreversible and will delete your data.",
@@ -923,6 +934,9 @@ export const messages = {
       confirmRemoveMessage:
         "Do you want to remove this collaborator from the hive?",
       confirmDeleteComment: "Delete this comment?",
+      deleting: "Deleting...",
+      removingCollaborator: "Removing...",
+      deletingComment: "Deleting comment...",
     },
     editor: {
       newHiveTitle: "New Hive",
@@ -955,6 +969,8 @@ export const messages = {
       editCommentTitle: "Edit comment",
       newMessage: "New message",
       deleteCommentTitle: "Delete comment",
+      updatingComment: "Updating comment...",
+      deletingComment: "Deleting comment...",
       saveTitleError: "Please provide a title before saving.",
       duplicateRenameError: "Rename the copy before saving.",
       saveStatusSaving: "Saving hive...",
@@ -1006,7 +1022,10 @@ export const messages = {
       deleteMultipleCardNoteMessage:
         "Some cards contain notes. Returning them to the library will delete those notes. Continue?",
       deleteCardNoteTitle: "Delete card note",
+      deletingCardNote: "Deleting note...",
       irreversible: "This action is irreversible. Continue?",
+      historyLimitReached:
+        "History limit reached ({count} actions). The oldest actions are discarded.",
       tabletOnlyMessage:
         "The editor is optimized for tablet landscape mode. Switch to landscape on a tablet to continue.",
     },
@@ -1017,6 +1036,7 @@ export const messages = {
         "Are you sure you want to reset the hive? This will remove all cards from the board.",
       confirmReset: "Reset",
       export: "Export",
+      exporting: "Exporting...",
       collaborators: "Collaborators",
       comments: "Comments",
       manageCollaborators: "Manage collaborators",
@@ -1312,6 +1332,7 @@ export const messages = {
       renameHive: "Bijenkorf hernoemen",
       duplicate: "Dupliceren",
       duplicating: "Bezig met dupliceren...",
+      renaming: "Bezig met hernoemen...",
       deleteProfileTitle: "Mijn profiel verwijderen",
       deleteProfileDesc:
         "Deze actie is onomkeerbaar en verwijdert je gegevens.",
@@ -1424,6 +1445,9 @@ export const messages = {
       confirmRemoveMessage:
         "Wil je deze medewerker uit de bijenkorf verwijderen?",
       confirmDeleteComment: "Reactie verwijderen?",
+      deleting: "Bezig met verwijderen...",
+      removingCollaborator: "Bezig met verwijderen...",
+      deletingComment: "Reactie verwijderen...",
     },
     editor: {
       newHiveTitle: "Nieuwe Bijenkorf",
@@ -1458,6 +1482,8 @@ export const messages = {
       editCommentTitle: "Reactie bewerken",
       newMessage: "Nieuw bericht",
       deleteCommentTitle: "Reactie verwijderen",
+      updatingComment: "Reactie bijwerken...",
+      deletingComment: "Reactie verwijderen...",
       saveTitleError: "Vul een titel in voor je opslaat.",
       duplicateRenameError: "Hernoem de kopie voor je opslaat.",
       saveStatusSaving: "Bijenkorf wordt opgeslagen...",
@@ -1511,7 +1537,10 @@ export const messages = {
       deleteMultipleCardNoteMessage:
         "Sommige kaarten bevatten notities. Terugplaatsen in de bibliotheek verwijdert die notities. Doorgaan?",
       deleteCardNoteTitle: "Kaartnotitie verwijderen",
+      deletingCardNote: "Notitie verwijderen...",
       irreversible: "Deze actie is onomkeerbaar. Wil je doorgaan?",
+      historyLimitReached:
+        "Geschiedenislimiet bereikt ({count} acties). De oudste acties worden verwijderd.",
       tabletOnlyMessage:
         "De editor is geoptimaliseerd voor tablet in landschapsmodus. Draai je tablet naar landschap om verder te gaan.",
     },
@@ -1522,6 +1551,7 @@ export const messages = {
         "Weet je zeker dat je de bijenkorf wilt resetten? Dit verwijdert alle kaarten van het bord.",
       confirmReset: "Resetten",
       export: "Exporteren",
+      exporting: "Bezig met exporteren...",
       collaborators: "Samenwerkers",
       comments: "Reacties",
       manageCollaborators: "Samenwerkers beheren",
