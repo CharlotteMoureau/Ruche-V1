@@ -510,10 +510,7 @@ hivesRouter.post("/invitations/:invitationId/accept", async (req, res) => {
     });
 
     await tx.$executeRaw`
-      UPDATE "HiveInvitation"
-      SET "status" = 'ACCEPTED',
-          "updatedAt" = CURRENT_TIMESTAMP,
-          "respondedAt" = CURRENT_TIMESTAMP
+      DELETE FROM "HiveInvitation"
       WHERE "id" = ${invitation.id}
     `;
   });
@@ -543,10 +540,7 @@ hivesRouter.post("/invitations/:invitationId/decline", async (req, res) => {
   }
 
   await prisma.$executeRaw`
-    UPDATE "HiveInvitation"
-    SET "status" = 'DECLINED',
-        "updatedAt" = CURRENT_TIMESTAMP,
-        "respondedAt" = CURRENT_TIMESTAMP
+    DELETE FROM "HiveInvitation"
     WHERE "id" = ${invitation.id}
   `;
 

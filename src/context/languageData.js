@@ -525,7 +525,7 @@ export const messages = {
       historyLimitReached:
         "Historique limite atteint ({count} actions). Les actions les plus anciennes sont oubliées.",
       tabletOnlyMessage:
-        "L'éditeur est optimisé pour tablette en mode paysage. Passez en paysage sur tablette pour continuer.",
+        "L'éditeur est optimisé pour ordinateur et tablette en mode paysage. Passez en paysage sur tablette pour continuer.",
     },
     toolbar: {
       reset: "Réinitialiser",
@@ -1052,7 +1052,7 @@ export const messages = {
       historyLimitReached:
         "History limit reached ({count} actions). The oldest actions are discarded.",
       tabletOnlyMessage:
-        "The editor is optimized for tablet landscape mode. Switch to landscape on a tablet to continue.",
+        "The editor is optimized for desktop and tablet landscape mode. Switch to landscape on a tablet to continue.",
     },
     toolbar: {
       reset: "Reset",
@@ -1579,7 +1579,7 @@ export const messages = {
       historyLimitReached:
         "Geschiedenislimiet bereikt ({count} acties). De oudste acties worden verwijderd.",
       tabletOnlyMessage:
-        "De editor is geoptimaliseerd voor tablet in landschapsmodus. Draai je tablet naar landschap om verder te gaan.",
+        "De editor is geoptimaliseerd voor desktop en tablet in landschapsmodus. Draai je tablet naar landschap om verder te gaan.",
     },
     toolbar: {
       reset: "Resetten",

@@ -107,3 +107,45 @@ body.ios footer {
         color: #aaa;
     }
 }
+
+@media (max-width: 767px) {
+    footer {
+        height: auto;
+        flex-direction: column;
+        gap: 2px;
+        padding: 6px 8px;
+
+        img {
+            height: 30px;
+            padding: 3px 6px;
+        }
+
+        .administration,
+        .unif {
+            flex: 0 0 auto;
+            justify-content: center;
+        }
+
+        .footer-center {
+            gap: 4px;
+        }
+
+        .footer-legal {
+            gap: 8px;
+            font-size: 11px;
+        }
+
+        .language-select-wrap {
+            gap: 6px;
+
+            span {
+                font-size: 12px;
+            }
+
+            select {
+                padding: 4px 6px;
+                font-size: 12px;
+            }
+        }
+    }
+}
