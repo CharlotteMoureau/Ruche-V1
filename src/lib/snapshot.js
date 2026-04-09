@@ -38,6 +38,7 @@ const BOARD_CAPTURE_PADDING = 96;
 const DEFAULT_EXPORT_SCALE = 3;
 const MAX_EXPORT_CANVAS_DIMENSION = 12000;
 const MAX_EXPORT_CANVAS_PIXELS = 60_000_000;
+const CHAT_EXPORT_CHUNK_SIZE = 10;
 
 function applyStyles(element, styles) {
   Object.assign(element.style, styles);
@@ -127,6 +128,79 @@ function getActorLabel(actor, fallbackLabel) {
 
 function hasMessage(value) {
   return Boolean(String(value || "").trim());
+}
+
+function getCommentEntryCount(comment) {
+  return 1 + (comment?.replies?.length || 0);
+}
+
+function splitCommentsForExport(comments, maxEntriesPerChunk = CHAT_EXPORT_CHUNK_SIZE) {
+  const safeLimit = Number(maxEntriesPerChunk) > 0 ? Number(maxEntriesPerChunk) : CHAT_EXPORT_CHUNK_SIZE;
+  const chunks = [];
+  let currentChunk = [];
+  let currentEntryCount = 0;
+
+  comments.forEach((comment) => {
+    const replies = comment?.replies || [];
+    const threadEntryCount = getCommentEntryCount(comment);
+
+    if (threadEntryCount > safeLimit) {
+      if (currentChunk.length) {
+        chunks.push(currentChunk);
+        currentChunk = [];
+        currentEntryCount = 0;
+      }
+
+      let replyStart = 0;
+      while (replyStart < replies.length) {
+        const maxRepliesInChunk = Math.max(1, safeLimit - 1);
+        const replySlice = replies.slice(replyStart, replyStart + maxRepliesInChunk);
+
+        chunks.push([
+          {
+            ...comment,
+            replies: replySlice,
+          },
+        ]);
+
+        replyStart += maxRepliesInChunk;
+      }
+
+      return;
+    }
+
+    if (currentEntryCount > 0 && currentEntryCount + threadEntryCount > safeLimit) {
+      chunks.push(currentChunk);
+      currentChunk = [];
+      currentEntryCount = 0;
+    }
+
+    currentChunk.push(comment);
+    currentEntryCount += threadEntryCount;
+  });
+
+  if (currentChunk.length || !chunks.length) {
+    chunks.push(currentChunk);
+  }
+
+  return chunks;
+}
+
+function chunkItems(items, maxItemsPerChunk = CHAT_EXPORT_CHUNK_SIZE) {
+  const safeLimit = Number(maxItemsPerChunk) > 0 ? Number(maxItemsPerChunk) : CHAT_EXPORT_CHUNK_SIZE;
+  const chunks = [];
+
+  for (let index = 0; index < items.length; index += safeLimit) {
+    chunks.push(items.slice(index, index + safeLimit));
+  }
+
+  return chunks.length ? chunks : [[]];
+}
+
+function getCardsWithNotes(boardCards = []) {
+  return sortCardsForExport(boardCards).filter((card) =>
+    hasMessage(card?.comment?.message),
+  );
 }
 
 function sortCardsForExport(cards) {
@@ -285,7 +359,7 @@ function createChatExportNode({
 }
 
 function createCardNotesExportNode({
-  boardCards,
+  boardCards = [],
   cardNotesTitle,
   noCardNotesMessage,
   cardLabel,
@@ -299,9 +373,7 @@ function createCardNotesExportNode({
   const panel = createElement("div", { styles: EXPORT_PANEL_STYLE });
   surface.appendChild(panel);
 
-  const cardsWithComments = sortCardsForExport(boardCards).filter((card) =>
-    hasMessage(card?.comment?.message),
-  );
+  const cardsWithComments = getCardsWithNotes(boardCards);
 
   if (!cardsWithComments.length) {
     panel.appendChild(createEmptyState(noCardNotesMessage));
@@ -753,42 +825,75 @@ export async function captureHiveExportBundle({
   formatUpdatedByText,
 }) {
   const { frontDataUrl, backDataUrl } = await captureBoardImages(board);
-  const chatDataUrl = await captureDetachedNode(
-    createChatExportNode({
-      comments,
-      chatTitle,
-      noCommentsMessage,
-      formatDateTime,
-      unknownUserLabel,
-    }),
+  const chatCommentChunks = splitCommentsForExport(comments, CHAT_EXPORT_CHUNK_SIZE);
+  const chatDataUrls = await Promise.all(
+    chatCommentChunks.map((commentChunk) =>
+      captureDetachedNode(
+        createChatExportNode({
+          comments: commentChunk,
+          chatTitle,
+          noCommentsMessage,
+          formatDateTime,
+          unknownUserLabel,
+        }),
+      ),
+    ),
   );
-  const cardCommentsDataUrl = await captureDetachedNode(
-    createCardNotesExportNode({
-      boardCards,
-      cardNotesTitle,
-      noCardNotesMessage,
-      cardLabel,
-      unknownUserLabel,
-      formatCreatedByText,
-      formatUpdatedByText,
-    }),
+  const cardNotesChunks = chunkItems(getCardsWithNotes(boardCards), CHAT_EXPORT_CHUNK_SIZE);
+  const cardCommentsDataUrls = await Promise.all(
+    cardNotesChunks.map((cardsChunk) =>
+      captureDetachedNode(
+        createCardNotesExportNode({
+          boardCards: cardsChunk,
+          cardNotesTitle,
+          noCardNotesMessage,
+          cardLabel,
+          unknownUserLabel,
+          formatCreatedByText,
+          formatUpdatedByText,
+        }),
+      ),
+    ),
   );
 
   const resolvedFrontBoardFileName =
     sanitizeSnapshotFileName(frontBoardFileName || "front-board") + ".png";
   const resolvedBackBoardFileName =
     sanitizeSnapshotFileName(backBoardFileName || "back-board") + ".png";
-  const resolvedChatFileName =
-    sanitizeSnapshotFileName(chatFileName || "hive-chat") + ".png";
-  const resolvedCardNotesFileName =
-    sanitizeSnapshotFileName(cardNotesFileName || "card-notes") + ".png";
+  const resolvedChatBaseFileName = sanitizeSnapshotFileName(chatFileName || "hive-chat");
+  const resolvedChatFileNames =
+    chatDataUrls.length > 1
+      ? chatDataUrls.map((_, index) => `${resolvedChatBaseFileName} (${index + 1}).png`)
+      : [`${resolvedChatBaseFileName}.png`];
+  const resolvedCardNotesBaseFileName = sanitizeSnapshotFileName(
+    cardNotesFileName || "card-notes",
+  );
+  const resolvedCardNotesFileNames =
+    cardCommentsDataUrls.length > 1
+      ? cardCommentsDataUrls.map(
+        (_, index) => `${resolvedCardNotesBaseFileName} (${index + 1}).png`,
+      )
+      : [`${resolvedCardNotesBaseFileName}.png`];
 
-  const zipBlob = await createZipFromImages([
-    { name: `01-${resolvedFrontBoardFileName}`, dataUrl: frontDataUrl },
-    { name: `02-${resolvedBackBoardFileName}`, dataUrl: backDataUrl },
-    { name: `03-${resolvedChatFileName}`, dataUrl: chatDataUrl },
-    { name: `04-${resolvedCardNotesFileName}`, dataUrl: cardCommentsDataUrl },
-  ]);
+  const zipFiles = [
+    { name: resolvedFrontBoardFileName, dataUrl: frontDataUrl },
+    { name: resolvedBackBoardFileName, dataUrl: backDataUrl },
+    ...chatDataUrls.map((dataUrl, index) => ({
+      name: resolvedChatFileNames[index],
+      dataUrl,
+    })),
+    ...cardCommentsDataUrls.map((dataUrl, index) => ({
+      name: resolvedCardNotesFileNames[index],
+      dataUrl,
+    })),
+  ];
+
+  const zipBlob = await createZipFromImages(
+    zipFiles.map((file, index) => ({
+      name: `${String(index + 1).padStart(2, "0")}-${file.name}`,
+      dataUrl: file.dataUrl,
+    })),
+  );
 
   return {
     blob: zipBlob,
