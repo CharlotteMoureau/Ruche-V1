@@ -1,6 +1,7 @@
 import "dotenv/config";
 import express from "express";
 import cors from "cors";
+import { startDatabaseCleanupScheduler } from "./lib/dbCleanup.js";
 import { authRouter } from "./routes/auth.js";
 import { usersRouter } from "./routes/users.js";
 import { hivesRouter } from "./routes/hives.js";
@@ -62,6 +63,8 @@ app.use((err, _req, res, next) => {
   console.error(err);
   res.status(500).json({ error: "Server error" });
 });
+
+startDatabaseCleanupScheduler();
 
 app.listen(port, host, () => {
   console.log(`API running on http://${host}:${port}`);

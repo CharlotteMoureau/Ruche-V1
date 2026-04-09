@@ -318,9 +318,8 @@ authRouter.post("/reset-password", async (req, res) => {
       where: { id: record.userId },
       data: { passwordHash: await bcrypt.hash(parsed.data.password, 12) },
     }),
-    prisma.passwordResetToken.update({
-      where: { id: record.id },
-      data: { usedAt: new Date() },
+    prisma.passwordResetToken.deleteMany({
+      where: { userId: record.userId },
     }),
   ]);
 
