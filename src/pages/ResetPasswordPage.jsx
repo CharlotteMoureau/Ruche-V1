@@ -14,13 +14,17 @@ export default function ResetPasswordPage() {
   const [passwordConfirm, setPasswordConfirm] = useState("");
   const [error, setError] = useState("");
   const [message, setMessage] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const onSubmit = async (event) => {
     event.preventDefault();
+    if (isSubmitting) return;
+
     setError("");
     setMessage("");
 
     try {
+      setIsSubmitting(true);
       const data = await apiFetch("/auth/reset-password", {
         method: "POST",
         body: { token, password, passwordConfirm },
@@ -29,6 +33,8 @@ export default function ResetPasswordPage() {
       setTimeout(() => navigate("/login"), 1000);
     } catch (err) {
       setError(getApiErrorMessage(err, t));
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -62,7 +68,11 @@ export default function ResetPasswordPage() {
         />
         {error ? <p className="form-error">{error}</p> : null}
         {message ? <p className="form-info">{message}</p> : null}
-        <button type="submit">{t("resetPassword.submit")}</button>
+        <button type="submit" disabled={isSubmitting}>
+          {isSubmitting
+            ? t("resetPassword.submitting")
+            : t("resetPassword.submit")}
+        </button>
       </form>
     </section>
   );

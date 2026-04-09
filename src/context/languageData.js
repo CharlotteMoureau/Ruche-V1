@@ -271,6 +271,7 @@ export const messages = {
       title: "Mot de passe oublié",
       email: "Email",
       submit: "Envoyer le lien",
+      submitting: "Envoi en cours...",
     },
     resetPassword: {
       invalidLink: "Lien invalide",
@@ -278,6 +279,7 @@ export const messages = {
       password: "Mot de passe",
       passwordConfirm: "Confirmer le mot de passe",
       submit: "Mettre à jour",
+      submitting: "Mise à jour en cours...",
     },
     protectedRoute: {
       loading: "Chargement...",
@@ -810,6 +812,7 @@ export const messages = {
       title: "Forgot password",
       email: "Email",
       submit: "Send link",
+      submitting: "Sending...",
     },
     resetPassword: {
       invalidLink: "Invalid link",
@@ -817,6 +820,7 @@ export const messages = {
       password: "Password",
       passwordConfirm: "Confirm password",
       submit: "Update",
+      submitting: "Updating...",
     },
     protectedRoute: { loading: "Loading..." },
     profile: {
@@ -1333,6 +1337,7 @@ export const messages = {
       title: "Wachtwoord vergeten",
       email: "E-mail",
       submit: "Link verzenden",
+      submitting: "Verzenden...",
     },
     resetPassword: {
       invalidLink: "Ongeldige link",
@@ -1340,6 +1345,7 @@ export const messages = {
       password: "Wachtwoord",
       passwordConfirm: "Bevestig wachtwoord",
       submit: "Bijwerken",
+      submitting: "Bijwerken...",
     },
     protectedRoute: { loading: "Laden..." },
     profile: {

@@ -7,13 +7,17 @@ export default function ForgotPasswordPage() {
   const [email, setEmail] = useState("");
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const onSubmit = async (event) => {
     event.preventDefault();
+    if (isSubmitting) return;
+
     setError("");
     setMessage("");
 
     try {
+      setIsSubmitting(true);
       const data = await apiFetch("/auth/forgot-password", {
         method: "POST",
         body: { email, locale: language },
@@ -21,6 +25,8 @@ export default function ForgotPasswordPage() {
       setMessage(getApiPayloadMessage(data, t));
     } catch (err) {
       setError(getApiErrorMessage(err, t));
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -41,7 +47,11 @@ export default function ForgotPasswordPage() {
         </label>
         {error ? <p className="form-error">{error}</p> : null}
         {message ? <p className="form-info">{message}</p> : null}
-        <button type="submit">{t("forgotPassword.submit")}</button>
+        <button type="submit" disabled={isSubmitting}>
+          {isSubmitting
+            ? t("forgotPassword.submitting")
+            : t("forgotPassword.submit")}
+        </button>
       </form>
     </section>
   );
