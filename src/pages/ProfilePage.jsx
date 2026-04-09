@@ -5,6 +5,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faCopy,
   faPlus,
+  faPen,
   faXmark,
   faArrowUpRightFromSquare,
   faDownload,
@@ -300,7 +301,18 @@ export default function ProfilePage() {
   const [duplicatingHiveId, setDuplicatingHiveId] = useState(null);
   const [deletingHiveId, setDeletingHiveId] = useState(null);
   const [downloadingHiveId, setDownloadingHiveId] = useState(null);
+  const [renamingHiveId, setRenamingHiveId] = useState(null);
   const [confirmDeleteHiveId, setConfirmDeleteHiveId] = useState(null);
+  const [renameDraft, setRenameDraft] = useState({
+    hiveId: null,
+    sourceTitle: "",
+    nextTitle: "",
+  });
+  const [renameOrDuplicateDraft, setRenameOrDuplicateDraft] = useState({
+    hiveId: null,
+    sourceTitle: "",
+    nextTitle: "",
+  });
   const [duplicateDraft, setDuplicateDraft] = useState({
     hiveId: null,
     sourceTitle: "",
@@ -550,6 +562,159 @@ export default function ProfilePage() {
       sourceTitle,
       nextTitle: `${sourceTitle} (${t("profile.copySuffix")})`,
     });
+  };
+
+  const openRenameHiveModal = (hive) => {
+    if (!hive?.id) return;
+
+    const sourceTitle = hive.title || "";
+    setRenameDraft({
+      hiveId: hive.id,
+      sourceTitle,
+      nextTitle: sourceTitle,
+    });
+  };
+
+  const confirmRenameDraftFromProfile = () => {
+    if (!renameDraft.hiveId) return;
+
+    const trimmedTitle = renameDraft.nextTitle.trim();
+    if (!trimmedTitle) {
+      setError(t("editor.saveTitleError"));
+      return;
+    }
+
+    if (trimmedTitle === renameDraft.sourceTitle.trim()) {
+      setRenameDraft({ hiveId: null, sourceTitle: "", nextTitle: "" });
+      return;
+    }
+
+    setRenameOrDuplicateDraft({
+      hiveId: renameDraft.hiveId,
+      sourceTitle: renameDraft.sourceTitle,
+      nextTitle: trimmedTitle,
+    });
+    setRenameDraft({ hiveId: null, sourceTitle: "", nextTitle: "" });
+  };
+
+  const renameExistingHiveFromProfile = async () => {
+    if (renamingHiveId || duplicatingHiveId) return;
+    if (!renameOrDuplicateDraft.hiveId) return;
+
+    const trimmedTitle = renameOrDuplicateDraft.nextTitle.trim();
+    if (!trimmedTitle) return;
+
+    const hiveId = renameOrDuplicateDraft.hiveId;
+
+    try {
+      setError("");
+      setRenamingHiveId(hiveId);
+
+      const sourceHive = await apiFetch(`/hives/${hiveId}`, { token });
+
+      await apiFetch(`/hives/${hiveId}`, {
+        method: "PUT",
+        token,
+        body: {
+          title: trimmedTitle,
+          kind: sourceHive?.kind,
+          boardData: sourceHive?.boardData,
+          boardPreviewImage: sourceHive?.boardPreviewImage,
+          expectedUpdatedAt: sourceHive?.updatedAt,
+        },
+      });
+
+      const data = await refreshMe();
+      setProfile(data);
+      setRenameOrDuplicateDraft({
+        hiveId: null,
+        sourceTitle: "",
+        nextTitle: "",
+      });
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setRenamingHiveId(null);
+    }
+  };
+
+  const createCopyFromRenameDraft = async () => {
+    if (renamingHiveId || duplicatingHiveId) return;
+    if (!renameOrDuplicateDraft.hiveId) return;
+
+    const trimmedTitle = renameOrDuplicateDraft.nextTitle.trim();
+    if (!trimmedTitle) {
+      setError(t("profile.duplicateNeedTitle"));
+      return;
+    }
+
+    if (trimmedTitle === renameOrDuplicateDraft.sourceTitle.trim()) {
+      setError(t("profile.duplicateRenameRequired"));
+      return;
+    }
+
+    try {
+      setError("");
+      setDuplicatingHiveId(renameOrDuplicateDraft.hiveId);
+      const sourceHive = await apiFetch(
+        `/hives/${renameOrDuplicateDraft.hiveId}`,
+        {
+          token,
+        },
+      );
+
+      let boardPreviewImage = sourceHive.boardPreviewImage;
+
+      if (!isWebpPreviewDataUrl(boardPreviewImage)) {
+        const stage = document.createElement("div");
+        stage.className = "profile-capture-stage";
+        document.body.appendChild(stage);
+
+        const root = createRoot(stage);
+
+        try {
+          root.render(<ProfileCaptureBoard boardData={sourceHive.boardData} />);
+          await waitForCaptureFrame();
+          await waitForCaptureFrame();
+
+          const board = stage.querySelector(".hive-board");
+          if (board) {
+            boardPreviewImage = await captureBoardPreviewImage(board, {
+              maxWidth: 800,
+              maxHeight: 450,
+              sourceScale: 2,
+              quality: 0.76,
+              maxBytes: 170 * 1024,
+            });
+          }
+        } finally {
+          root.unmount();
+          stage.remove();
+        }
+      }
+
+      await apiFetch("/hives", {
+        method: "POST",
+        token,
+        body: {
+          title: trimmedTitle,
+          kind: sourceHive.kind,
+          boardData: sourceHive.boardData,
+          boardPreviewImage,
+        },
+      });
+      const data = await refreshMe();
+      setProfile(data);
+      setRenameOrDuplicateDraft({
+        hiveId: null,
+        sourceTitle: "",
+        nextTitle: "",
+      });
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setDuplicatingHiveId(null);
+    }
   };
 
   const duplicateHiveFromProfile = async () => {
@@ -999,7 +1164,22 @@ export default function ProfilePage() {
                       {pagedOwnedHives.map((hive) => (
                         <li key={hive.id}>
                           <div className="hive-details">
-                            <strong>{hive.title}</strong>
+                            <div className="hive-title-row">
+                              <strong>{hive.title}</strong>
+                              <button
+                                type="button"
+                                className="hive-rename-trigger"
+                                onClick={() => openRenameHiveModal(hive)}
+                                aria-label={t("profile.renameHive")}
+                                title={t("profile.renameHive")}
+                                disabled={
+                                  Boolean(renamingHiveId) ||
+                                  Boolean(duplicatingHiveId)
+                                }
+                              >
+                                <FontAwesomeIcon icon={faPen} />
+                              </button>
+                            </div>
                             <br />
                             {t("profile.createdAt")} :{" "}
                             {formatDateTime(hive.createdAt, dateLocale)}
@@ -1172,14 +1352,31 @@ export default function ProfilePage() {
                       {pagedSharedHives.map((hive) => (
                         <li key={hive.id}>
                           <div className="hive-details">
-                            <strong>
-                              {hive.title} (
-                              {getCollaboratorRoleLabel(
-                                hive.collaboratorRole,
-                                t,
-                              )}
-                              )
-                            </strong>
+                            <div className="hive-title-row">
+                              <strong>
+                                {hive.title} (
+                                {getCollaboratorRoleLabel(
+                                  hive.collaboratorRole,
+                                  t,
+                                )}
+                                )
+                              </strong>
+                              {hive.collaboratorRole === "ADMIN" ? (
+                                <button
+                                  type="button"
+                                  className="hive-rename-trigger"
+                                  onClick={() => openRenameHiveModal(hive)}
+                                  aria-label={t("profile.renameHive")}
+                                  title={t("profile.renameHive")}
+                                  disabled={
+                                    Boolean(renamingHiveId) ||
+                                    Boolean(duplicatingHiveId)
+                                  }
+                                >
+                                  <FontAwesomeIcon icon={faPen} />
+                                </button>
+                              ) : null}
+                            </div>
                             <br />
                             {t("profile.createdAt")} :{" "}
                             {formatDateTime(hive.createdAt, dateLocale)}
@@ -1536,6 +1733,52 @@ export default function ProfilePage() {
           variant="profile"
         />
       ) : null}
+
+      <UnifiedPromptModal
+        isOpen={Boolean(renameDraft.hiveId)}
+        mode="prompt"
+        title={t("editor.hiveTitleLabel")}
+        inputLabel={t("editor.hiveTitleLabel")}
+        value={renameDraft.nextTitle}
+        onValueChange={(value) =>
+          setRenameDraft((prev) => ({ ...prev, nextTitle: value }))
+        }
+        confirmLabel={t("common.save")}
+        confirmDisabled={
+          !renameDraft.nextTitle.trim() ||
+          renameDraft.nextTitle.trim() === renameDraft.sourceTitle.trim() ||
+          Boolean(renamingHiveId) ||
+          Boolean(duplicatingHiveId)
+        }
+        onCancel={() => {
+          if (renamingHiveId || duplicatingHiveId) return;
+          setRenameDraft({ hiveId: null, sourceTitle: "", nextTitle: "" });
+        }}
+        onConfirm={confirmRenameDraftFromProfile}
+      />
+
+      <UnifiedPromptModal
+        isOpen={Boolean(renameOrDuplicateDraft.hiveId)}
+        mode="renameOrDuplicate"
+        title={t("editor.renameOrDuplicateTitle")}
+        message={t("editor.renameOrDuplicateMessage", {
+          oldTitle: renameOrDuplicateDraft.sourceTitle,
+          newTitle: renameOrDuplicateDraft.nextTitle,
+        })}
+        confirmLabel={t("editor.renameOnly")}
+        extraActionLabel={t("editor.createCopy")}
+        confirmDisabled={Boolean(renamingHiveId) || Boolean(duplicatingHiveId)}
+        onCancel={() => {
+          if (renamingHiveId || duplicatingHiveId) return;
+          setRenameOrDuplicateDraft({
+            hiveId: null,
+            sourceTitle: "",
+            nextTitle: "",
+          });
+        }}
+        onConfirm={renameExistingHiveFromProfile}
+        onExtraAction={createCopyFromRenameDraft}
+      />
 
       <UnifiedPromptModal
         isOpen={Boolean(confirmDeleteHiveId)}

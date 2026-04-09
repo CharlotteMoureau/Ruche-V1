@@ -1,13 +1,9 @@
 /* eslint-env node */
 
-import fs from "node:fs";
-import path from "node:path";
-import { fileURLToPath } from "node:url";
 import nodemailer from "nodemailer";
 
 const env = globalThis.process?.env || {};
 let transportPromise = null;
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 const RESET_EMAIL_COPY = {
   fr: {
@@ -103,24 +99,8 @@ function getSmtpConfig() {
   };
 }
 
-function getAppUrl() {
-  return (env.APP_URL || "http://127.0.0.1:5173").trim().replace(/\/+$/, "");
-}
-
-function getLogoSrc(fileName, mimeType) {
-  const filePath = path.resolve(__dirname, "..", "..", "..", "public", fileName);
-  try {
-    const bytes = fs.readFileSync(filePath);
-    return `data:${mimeType};base64,${bytes.toString("base64")}`;
-  } catch {
-    return `${getAppUrl()}/${fileName}`;
-  }
-}
-
 function buildResetPasswordHtml({ link, locale }) {
   const copy = getLocaleCopy(locale);
-  const hexagonLogo = getLogoSrc("hexagone.png", "image/png");
-  const beeLogo = getLogoSrc("abeille.png", "image/png");
   const year = new Date().getFullYear();
 
   return `
@@ -145,9 +125,7 @@ function buildResetPasswordHtml({ link, locale }) {
                   <table role="presentation" width="100%" cellspacing="0" cellpadding="0">
                     <tr>
                       <td align="left" style="vertical-align:middle;">
-                        <img src="${hexagonLogo}" alt="La Ruche" width="36" height="36" style="display:inline-block;border:0;vertical-align:middle;" />
-                        <span style="display:inline-block;margin-left:10px;color:#ffffff;font-size:22px;font-weight:700;vertical-align:middle;">La Ruche</span>
-                        <img src="${beeLogo}" alt="Bee" width="26" height="26" style="display:inline-block;margin-left:10px;border:0;vertical-align:middle;" />
+                        <span style="display:inline-block;color:#ffffff;font-size:22px;font-weight:700;vertical-align:middle;">La Ruche</span>
                       </td>
                     </tr>
                   </table>

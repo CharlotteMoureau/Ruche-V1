@@ -90,9 +90,16 @@
     }
   }
 
-  .hive-details > strong {
-    display: inline-block;
+  .hive-title-row {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
     margin-bottom: 8px;
+  }
+
+  .hive-details > strong,
+  .hive-title-row > strong {
+    display: inline-block;
     padding: 4px 10px;
     border-radius: 999px;
     background: rgba(49, 39, 131, 0.1);
@@ -100,6 +107,35 @@
     font-size: 1.03rem;
     font-weight: 800;
     line-height: 1.3;
+  }
+
+  .hive-rename-trigger {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 30px;
+    height: 30px;
+    padding: 0;
+    border: 1px solid rgba(49, 39, 131, 0.24);
+    border-radius: 999px;
+    background: #fff;
+    color: $bleu-fonce;
+    cursor: pointer;
+  }
+
+  .hive-rename-trigger:hover:not(:disabled) {
+    background: rgba(49, 39, 131, 0.08);
+    border-color: rgba(49, 39, 131, 0.5);
+  }
+
+  .hive-rename-trigger:focus-visible {
+    outline: 2px solid rgba(49, 39, 131, 0.35);
+    outline-offset: 1px;
+  }
+
+  .hive-rename-trigger:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
   }
 
   .inline-actions {
