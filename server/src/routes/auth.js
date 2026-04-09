@@ -35,13 +35,17 @@ authRouter.post("/register", async (req, res) => {
     const isPasswordMismatch = firstIssueMessage === "Passwords do not match";
     return res.status(400).json({
       error: firstIssueMessage || "Invalid data",
-      code: isPasswordMismatch ? "PASSWORDS_DO_NOT_MATCH" : "VALIDATION_INVALID_DATA",
+      code: isPasswordMismatch
+        ? "PASSWORDS_DO_NOT_MATCH"
+        : "VALIDATION_INVALID_DATA",
     });
   }
 
   const role = normalizeRole(parsed.data.role);
   if (!USER_ROLES.includes(role)) {
-    return res.status(400).json({ error: "Invalid role", code: "VALIDATION_INVALID_ROLE" });
+    return res
+      .status(400)
+      .json({ error: "Invalid role", code: "VALIDATION_INVALID_ROLE" });
   }
 
   if (role === "Autre" && !parsed.data.roleOtherText?.trim()) {
@@ -61,11 +65,15 @@ authRouter.post("/register", async (req, res) => {
   });
 
   if (existing?.username === parsed.data.username) {
-    return res.status(409).json({ error: "Username already in use", code: "AUTH_USERNAME_TAKEN" });
+    return res
+      .status(409)
+      .json({ error: "Username already in use", code: "AUTH_USERNAME_TAKEN" });
   }
 
   if (existing?.email === parsed.data.email.toLowerCase()) {
-    return res.status(409).json({ error: "Email already in use", code: "AUTH_EMAIL_TAKEN" });
+    return res
+      .status(409)
+      .json({ error: "Email already in use", code: "AUTH_EMAIL_TAKEN" });
   }
 
   const user = await prisma.user.create({
@@ -76,7 +84,8 @@ authRouter.post("/register", async (req, res) => {
       firstName: parsed.data.firstName,
       lastName: parsed.data.lastName,
       roleLabel: role,
-      roleOtherText: role === "Autre" ? parsed.data.roleOtherText?.trim() || null : null,
+      roleOtherText:
+        role === "Autre" ? parsed.data.roleOtherText?.trim() || null : null,
     },
   });
 
@@ -96,7 +105,9 @@ const loginSchema = z.object({
 authRouter.post("/login", async (req, res) => {
   const parsed = loginSchema.safeParse(req.body);
   if (!parsed.success) {
-    return res.status(400).json({ error: "Invalid credentials", code: "AUTH_INVALID_CREDENTIALS" });
+    return res
+      .status(400)
+      .json({ error: "Invalid credentials", code: "AUTH_INVALID_CREDENTIALS" });
   }
 
   const identifier = parsed.data.identifier.trim();
@@ -107,22 +118,30 @@ authRouter.post("/login", async (req, res) => {
   });
 
   if (!user) {
-    return res.status(401).json({ error: "Invalid credentials", code: "AUTH_INVALID_CREDENTIALS" });
+    return res
+      .status(401)
+      .json({ error: "Invalid credentials", code: "AUTH_INVALID_CREDENTIALS" });
   }
 
   if (!user.passwordHash || typeof user.passwordHash !== "string") {
-    return res.status(401).json({ error: "Invalid credentials", code: "AUTH_INVALID_CREDENTIALS" });
+    return res
+      .status(401)
+      .json({ error: "Invalid credentials", code: "AUTH_INVALID_CREDENTIALS" });
   }
 
   let ok = false;
   try {
     ok = await bcrypt.compare(parsed.data.password, user.passwordHash);
   } catch {
-    return res.status(401).json({ error: "Invalid credentials", code: "AUTH_INVALID_CREDENTIALS" });
+    return res
+      .status(401)
+      .json({ error: "Invalid credentials", code: "AUTH_INVALID_CREDENTIALS" });
   }
 
   if (!ok) {
-    return res.status(401).json({ error: "Invalid credentials", code: "AUTH_INVALID_CREDENTIALS" });
+    return res
+      .status(401)
+      .json({ error: "Invalid credentials", code: "AUTH_INVALID_CREDENTIALS" });
   }
 
   const token = signAccessToken(user);
@@ -210,15 +229,19 @@ authRouter.get("/me", requireAuth, async (req, res) => {
 
 const forgotSchema = z.object({
   email: z.string().email(),
+  locale: z.enum(["fr", "en", "nl"]).optional(),
 });
 
 authRouter.post("/forgot-password", async (req, res) => {
   const parsed = forgotSchema.safeParse(req.body);
   if (!parsed.success) {
-    return res.status(400).json({ error: "Invalid email", code: "AUTH_INVALID_EMAIL" });
+    return res
+      .status(400)
+      .json({ error: "Invalid email", code: "AUTH_INVALID_EMAIL" });
   }
 
   const email = parsed.data.email.toLowerCase();
+  const locale = parsed.data.locale || "fr";
   const user = await prisma.user.findUnique({ where: { email } });
   if (!user) {
     return res.json({
@@ -239,7 +262,7 @@ authRouter.post("/forgot-password", async (req, res) => {
   const appUrl = globalThis.process?.env.APP_URL || "http://127.0.0.1:5173";
   const link = `${appUrl}/reset-password?token=${token}`;
   try {
-    await sendResetPasswordEmail({ to: user.email, link });
+    await sendResetPasswordEmail({ to: user.email, link, locale });
   } catch (error) {
     console.error("Failed to send reset password email", error);
   }
@@ -268,7 +291,9 @@ authRouter.post("/reset-password", async (req, res) => {
     const isPasswordMismatch = firstIssueMessage === "Passwords do not match";
     return res.status(400).json({
       error: firstIssueMessage || "Invalid data",
-      code: isPasswordMismatch ? "PASSWORDS_DO_NOT_MATCH" : "VALIDATION_INVALID_DATA",
+      code: isPasswordMismatch
+        ? "PASSWORDS_DO_NOT_MATCH"
+        : "VALIDATION_INVALID_DATA",
     });
   }
 
@@ -299,5 +324,8 @@ authRouter.post("/reset-password", async (req, res) => {
     }),
   ]);
 
-  return res.json({ message: "Password updated", code: "MSG_PASSWORD_UPDATED" });
+  return res.json({
+    message: "Password updated",
+    code: "MSG_PASSWORD_UPDATED",
+  });
 });

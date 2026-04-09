@@ -3,7 +3,7 @@ import { apiFetch, getApiErrorMessage, getApiPayloadMessage } from "../lib/api";
 import { useLanguage } from "../context/LanguageContext";
 
 export default function ForgotPasswordPage() {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const [email, setEmail] = useState("");
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
@@ -16,7 +16,7 @@ export default function ForgotPasswordPage() {
     try {
       const data = await apiFetch("/auth/forgot-password", {
         method: "POST",
-        body: { email },
+        body: { email, locale: language },
       });
       setMessage(getApiPayloadMessage(data, t));
     } catch (err) {
