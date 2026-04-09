@@ -5,6 +5,14 @@ import nodemailer from "nodemailer";
 const env = globalThis.process?.env || {};
 let transportPromise = null;
 
+function getMailerSendConfig() {
+  const token = (env.MAILERSEND_API_TOKEN || env.MAILERSEND_API_KEY || "").trim();
+  return {
+    token,
+    endpoint: "https://api.mailersend.com/v1/email",
+  };
+}
+
 function getSmtpConfig() {
   const host = (env.SMTP_HOST || "").trim();
   const port = Number(env.SMTP_PORT || 587);
@@ -59,6 +67,39 @@ async function getTransport() {
   return transportPromise;
 }
 
+async function sendWithMailerSend({ to, from, subject, text, html }) {
+  const config = getMailerSendConfig();
+  if (!config.token) {
+    return false;
+  }
+
+  const fromName = (env.SMTP_FROM_NAME || "La Ruche").trim();
+  const response = await fetch(config.endpoint, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${config.token}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      from: {
+        email: from,
+        name: fromName,
+      },
+      to: [{ email: to }],
+      subject,
+      text,
+      html,
+    }),
+  });
+
+  if (!response.ok) {
+    const body = await response.text();
+    throw new Error(`MailerSend API error ${response.status}: ${body}`);
+  }
+
+  return true;
+}
+
 export async function sendResetPasswordEmail({ to, link }) {
   const from = (env.SMTP_FROM || "no-reply@ruche.local").trim();
   const subject = "Reset your password - La Ruche";
@@ -69,6 +110,11 @@ export async function sendResetPasswordEmail({ to, link }) {
     <p><a href="${link}">Reset my password</a></p>
     <p>If you did not request this, you can safely ignore this email.</p>
   `;
+
+  const sentByApi = await sendWithMailerSend({ to, from, subject, text, html });
+  if (sentByApi) {
+    return;
+  }
 
   const transport = await getTransport();
   if (!transport) {
