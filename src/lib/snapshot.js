@@ -763,13 +763,41 @@ export async function captureBoardPreviewImage(board, options = {}) {
     return Math.floor((payload.length * 3) / 4);
   }
 
+  function supportsCanvasMimeType(canvas, mimeType) {
+    try {
+      return canvas
+        .toDataURL(mimeType, quality)
+        .startsWith(`data:${mimeType};base64,`);
+    } catch {
+      return false;
+    }
+  }
+
+  function encodeCanvas(canvas, mimeType, candidateQuality) {
+    if (mimeType === "image/png") {
+      return canvas.toDataURL(mimeType);
+    }
+
+    return canvas.toDataURL(mimeType, candidateQuality);
+  }
+
   function encodeWithinBudget(canvas) {
+    const mimeType = supportsCanvasMimeType(canvas, "image/webp")
+      ? "image/webp"
+      : supportsCanvasMimeType(canvas, "image/jpeg")
+        ? "image/jpeg"
+        : "image/png";
     let candidateQuality = quality;
-    let dataUrl = canvas.toDataURL("image/webp", candidateQuality);
+
+    let dataUrl = encodeCanvas(canvas, mimeType, candidateQuality);
+
+    if (mimeType === "image/png") {
+      return dataUrl;
+    }
 
     while (getDataUrlBytes(dataUrl) > maxBytes && candidateQuality > 0.45) {
       candidateQuality = Number((candidateQuality - 0.06).toFixed(2));
-      dataUrl = canvas.toDataURL("image/webp", candidateQuality);
+      dataUrl = encodeCanvas(canvas, mimeType, candidateQuality);
     }
 
     return dataUrl;

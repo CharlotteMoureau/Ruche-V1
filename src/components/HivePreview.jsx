@@ -39,8 +39,25 @@ function getCategoryClass(category) {
   }
 }
 
+function shouldRenderPreviewImage(previewImage) {
+  if (typeof previewImage !== "string") {
+    return false;
+  }
+
+  const trimmed = previewImage.trim();
+  if (!trimmed) {
+    return false;
+  }
+
+  if (!trimmed.startsWith("data:")) {
+    return true;
+  }
+
+  return /^data:image\/(webp|jpeg|jpg|png);base64,/i.test(trimmed);
+}
+
 export default function HivePreview({ previewImage, snapshot, emptyLabel }) {
-  if (previewImage) {
+  if (shouldRenderPreviewImage(previewImage)) {
     return (
       <img
         src={previewImage}

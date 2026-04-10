@@ -156,7 +156,7 @@ function sanitizePreviewImage(value) {
   const trimmed = value.trim();
   if (!trimmed) return null;
 
-  if (!trimmed.startsWith("data:image/webp;base64,")) {
+  if (!/^data:image\/(webp|jpeg|jpg|png);base64,/i.test(trimmed)) {
     return null;
   }
 

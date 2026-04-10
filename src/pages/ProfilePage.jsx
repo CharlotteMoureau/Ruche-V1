@@ -155,9 +155,10 @@ function getBoardCards(boardData) {
   return Array.isArray(boardData?.boardCards) ? boardData.boardCards : [];
 }
 
-function isWebpPreviewDataUrl(value) {
+function isRasterPreviewDataUrl(value) {
   return (
-    typeof value === "string" && value.startsWith("data:image/webp;base64,")
+    typeof value === "string" &&
+    /^data:image\/(webp|jpeg|jpg|png);base64,/i.test(value.trim())
   );
 }
 
@@ -683,7 +684,7 @@ export default function ProfilePage() {
 
       let boardPreviewImage = sourceHive.boardPreviewImage;
 
-      if (!isWebpPreviewDataUrl(boardPreviewImage)) {
+      if (!isRasterPreviewDataUrl(boardPreviewImage)) {
         const stage = document.createElement("div");
         stage.className = "profile-capture-stage";
         document.body.appendChild(stage);
@@ -763,7 +764,7 @@ export default function ProfilePage() {
 
       let boardPreviewImage = sourceHive.boardPreviewImage;
 
-      if (!isWebpPreviewDataUrl(boardPreviewImage)) {
+      if (!isRasterPreviewDataUrl(boardPreviewImage)) {
         const stage = document.createElement("div");
         stage.className = "profile-capture-stage";
         document.body.appendChild(stage);
@@ -1069,9 +1070,8 @@ export default function ProfilePage() {
               id="profile-tab-hives"
               type="button"
               role="tab"
-              className={`profile-tab ${
-                activeProfileTab === PROFILE_TAB_HIVES ? "is-active" : ""
-              }`}
+              className={`profile-tab ${activeProfileTab === PROFILE_TAB_HIVES ? "is-active" : ""
+                }`}
               aria-selected={activeProfileTab === PROFILE_TAB_HIVES}
               aria-controls="profile-panel-hives"
               onClick={() => setActiveProfileTab(PROFILE_TAB_HIVES)}
@@ -1083,9 +1083,8 @@ export default function ProfilePage() {
               id="profile-tab-settings"
               type="button"
               role="tab"
-              className={`profile-tab ${
-                activeProfileTab === PROFILE_TAB_SETTINGS ? "is-active" : ""
-              }`}
+              className={`profile-tab ${activeProfileTab === PROFILE_TAB_SETTINGS ? "is-active" : ""
+                }`}
               aria-selected={activeProfileTab === PROFILE_TAB_SETTINGS}
               aria-controls="profile-panel-settings"
               onClick={() => setActiveProfileTab(PROFILE_TAB_SETTINGS)}
