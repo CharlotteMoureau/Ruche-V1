@@ -747,6 +747,7 @@ export async function captureBoardFrontAndBack(board, mergeErrorMessage) {
 }
 
 export async function captureBoardPreviewImage(board, options = {}) {
+  const captureNode = resolveBoardCaptureNode(board);
   const maxWidth = Number(options.maxWidth) > 0 ? Number(options.maxWidth) : 800;
   const maxHeight = Number(options.maxHeight) > 0 ? Number(options.maxHeight) : 450;
   const sourceScale = Number.isFinite(Number(options.sourceScale))
@@ -774,12 +775,18 @@ export async function captureBoardPreviewImage(board, options = {}) {
     return dataUrl;
   }
 
+  if (!captureNode) {
+    throw new Error("Board not found");
+  }
+
   document.body.classList.add("capture-mode");
 
   try {
     await waitForCaptureFrame();
 
-    const sourceDataUrl = await captureNodeImage(board, { scale: sourceScale });
+    const sourceDataUrl = await captureNodeImage(captureNode, {
+      scale: sourceScale,
+    });
     const image = await loadImage(sourceDataUrl);
 
     const fitScale = Math.min(maxWidth / image.width, maxHeight / image.height, 1);
