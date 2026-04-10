@@ -64,6 +64,21 @@ adminRouter.patch("/users/:id", async (req, res) => {
     }
   }
 
+  if (parsed.data.username) {
+    const existing = await prisma.user.findFirst({
+      where: {
+        username: {
+          equals: parsed.data.username,
+          mode: "insensitive",
+        },
+        NOT: { id: req.params.id },
+      },
+    });
+    if (existing) {
+      return res.status(409).json({ error: "Username already in use" });
+    }
+  }
+
   const updated = await prisma.user.update({
     where: { id: req.params.id },
     data: {

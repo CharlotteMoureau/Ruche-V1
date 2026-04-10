@@ -122,6 +122,14 @@
 }
 
 .site-header--tablet-editor {
+  .header-dropdown-toggle--icon,
+  .header-save-btn {
+    padding: 8px 12px;
+    min-height: 40px;
+    box-sizing: border-box;
+    line-height: 1.2;
+  }
+
   .site-header__tablet-leading {
     display: inline-flex;
     align-items: center;
@@ -135,8 +143,6 @@
   }
 
   .header-dropdown-toggle--icon {
-    padding: 8px 12px;
-    min-height: 40px;
     min-width: 42px;
     border-radius: 12px;
     justify-content: center;
@@ -173,7 +179,6 @@
 
   .header-save-btn {
     border: 0;
-    padding: 8px 12px;
     border-radius: 10px;
     background: $jaune;
     color: #222;

@@ -58,13 +58,21 @@ authRouter.post("/register", async (req, res) => {
   const existing = await prisma.user.findFirst({
     where: {
       OR: [
-        { username: parsed.data.username },
+        {
+          username: {
+            equals: parsed.data.username,
+            mode: "insensitive",
+          },
+        },
         { email: parsed.data.email.toLowerCase() },
       ],
     },
   });
 
-  if (existing?.username === parsed.data.username) {
+  if (
+    existing?.username
+    && existing.username.toLowerCase() === parsed.data.username.toLowerCase()
+  ) {
     return res
       .status(409)
       .json({ error: "Username already in use", code: "AUTH_USERNAME_TAKEN" });
@@ -113,7 +121,15 @@ authRouter.post("/login", async (req, res) => {
   const identifier = parsed.data.identifier.trim();
   const user = await prisma.user.findFirst({
     where: {
-      OR: [{ email: identifier.toLowerCase() }, { username: identifier }],
+      OR: [
+        { email: identifier.toLowerCase() },
+        {
+          username: {
+            equals: identifier,
+            mode: "insensitive",
+          },
+        },
+      ],
     },
   });
 
