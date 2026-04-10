@@ -4,6 +4,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faBars,
   faUser,
+  faHouse,
   faPen,
   faFloppyDisk,
   faArrowsRotate,
@@ -166,6 +167,16 @@ export default function AppHeader() {
                   <div className="header-dropdown-menu header-dropdown-menu--tablet">
                     <section className="header-tablet-menu-section">
                       <p className="header-tablet-menu-title">{t("header.hiveMenu")}</p>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          dispatchEditorAction("back-profile");
+                          setIsTabletMenuOpen(false);
+                        }}
+                      >
+                        <FontAwesomeIcon icon={faHouse} />
+                        {t("editor.backToProfile")}
+                      </button>
                       <button
                         type="button"
                         onClick={() => {
