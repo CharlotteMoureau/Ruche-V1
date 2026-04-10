@@ -431,7 +431,7 @@ export const messages = {
     editor: {
       newHiveTitle: "Nouvelle Ruche",
       newDcoHiveTitle: "Nouvelle Ruche DCO",
-      backToProfile: "Retour au profil",
+      backToProfile: "Mes ruches",
       hiveTitleLabel: "Titre de la Ruche",
       saveHive: "Enregistrer la ruche",
       saving: "Enregistrement...",
