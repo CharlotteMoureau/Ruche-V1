@@ -1,11 +1,9 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faBars,
   faUser,
-  faCaretDown,
-  faArrowLeft,
   faPen,
   faFloppyDisk,
   faArrowsRotate,
@@ -13,7 +11,6 @@ import {
   faUserPlus,
   faComments,
   faEnvelope,
-  faGear,
   faRightFromBracket,
 } from "@fortawesome/free-solid-svg-icons";
 import { useAuth } from "../context/AuthContext";
@@ -29,23 +26,21 @@ export default function AppHeader() {
   const { isTabletLandscape } = useTabletViewport();
   const [pendingInvitesCount, setPendingInvitesCount] = useState(0);
   const [editorHeaderState, setEditorHeaderState] = useState(null);
-  const [isHiveMenuOpen, setIsHiveMenuOpen] = useState(false);
-  const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
+  const [isTabletMenuOpen, setIsTabletMenuOpen] = useState(false);
   const navRef = useRef(null);
 
   useEffect(() => {
-    if (!isHiveMenuOpen && !isProfileMenuOpen) return;
+    if (!isTabletMenuOpen) return;
     const handleClickOutside = (event) => {
       if (navRef.current && !navRef.current.contains(event.target)) {
-        setIsHiveMenuOpen(false);
-        setIsProfileMenuOpen(false);
+        setIsTabletMenuOpen(false);
       }
     };
     document.addEventListener("pointerdown", handleClickOutside);
     return () => {
       document.removeEventListener("pointerdown", handleClickOutside);
     };
-  }, [isHiveMenuOpen, isProfileMenuOpen]);
+  }, [isTabletMenuOpen]);
 
   const isEditorRoute =
     location.pathname === "/hives/new" ||
@@ -54,10 +49,6 @@ export default function AppHeader() {
     isAuthenticated && isEditorRoute && isTabletLandscape;
   const shouldGuardHeaderNavigation = () =>
     isEditorRoute && Boolean(window.__RUCHE_EDITOR_IS_DIRTY);
-  const profileBadgeCount = useMemo(() => {
-    if (!isAdmin && pendingInvitesCount > 0) return pendingInvitesCount;
-    return 0;
-  }, [isAdmin, pendingInvitesCount]);
 
   const requestEditorLeave = (request) => {
     window.dispatchEvent(
@@ -138,8 +129,7 @@ export default function AppHeader() {
 
   useEffect(() => {
     if (useTabletEditorHeader) return;
-    setIsHiveMenuOpen(false);
-    setIsProfileMenuOpen(false);
+    setIsTabletMenuOpen(false);
   }, [useTabletEditorHeader]);
 
   const dispatchEditorAction = (type) => {
@@ -151,74 +141,47 @@ export default function AppHeader() {
   };
 
   const brandTarget = isAuthenticated && isAdmin ? "/admin" : "/";
+  const canUseTabletSaveButton = Boolean(editorHeaderState?.canReset);
 
   return (
-    <header className="site-header">
-      <Link to={brandTarget} className="brand-link">
-        <img src="/hexagone.png" alt="hexagone" />
-        <h1>La Ruche</h1>
-        <img src="/abeille.png" alt="abeille" />
-      </Link>
-
-      <nav className="site-nav" ref={navRef}>
-        {isAuthenticated ? (
-          useTabletEditorHeader ? (
-            <>
-              {!isAdmin ? (
-                <div className="header-dropdown-wrap">
-                  <button
-                    type="button"
-                    className="header-dropdown-toggle"
-                    onClick={() => {
-                      setIsHiveMenuOpen((open) => !open);
-                      setIsProfileMenuOpen(false);
-                    }}
-                  >
-                    <FontAwesomeIcon icon={faBars} />
-                    <span>{t("header.hiveMenu")}</span>
-                    <FontAwesomeIcon icon={faCaretDown} />
-                  </button>
-                  {isHiveMenuOpen ? (
-                    <div className="header-dropdown-menu">
-                      <button
-                        type="button"
-                        onClick={() => {
-                          dispatchEditorAction("back-profile");
-                          setIsHiveMenuOpen(false);
-                        }}
-                      >
-                        <FontAwesomeIcon icon={faArrowLeft} />
-                        {t("editor.backToProfile")}
-                      </button>
+    <header
+      className={`site-header${useTabletEditorHeader ? " site-header--tablet-editor" : ""}`}
+    >
+      {useTabletEditorHeader ? (
+        <>
+          <div className="site-header__tablet-leading">
+            <nav className="site-nav site-nav--tablet-editor" ref={navRef}>
+              <div className="header-dropdown-wrap">
+                <button
+                  type="button"
+                  className="header-dropdown-toggle header-dropdown-toggle--icon"
+                  aria-label={t("header.hiveMenu")}
+                  onClick={() => {
+                    setIsTabletMenuOpen((open) => !open);
+                  }}
+                >
+                  <FontAwesomeIcon icon={faBars} />
+                </button>
+                {isTabletMenuOpen ? (
+                  <div className="header-dropdown-menu header-dropdown-menu--tablet">
+                    <section className="header-tablet-menu-section">
+                      <p className="header-tablet-menu-title">{t("header.hiveMenu")}</p>
                       <button
                         type="button"
                         onClick={() => {
                           dispatchEditorAction("edit-title");
-                          setIsHiveMenuOpen(false);
+                          setIsTabletMenuOpen(false);
                         }}
                       >
                         <FontAwesomeIcon icon={faPen} />
                         {t("editor.hiveTitleLabel")}
-                      </button>
-                      <button
-                        type="button"
-                        disabled={Boolean(editorHeaderState?.isSaving)}
-                        onClick={() => {
-                          dispatchEditorAction("save");
-                          setIsHiveMenuOpen(false);
-                        }}
-                      >
-                        <FontAwesomeIcon icon={faFloppyDisk} />
-                        {editorHeaderState?.isSaving
-                          ? t("editor.saving")
-                          : t("editor.saveHive")}
                       </button>
                       {editorHeaderState?.canReset ? (
                         <button
                           type="button"
                           onClick={() => {
                             dispatchEditorAction("reset");
-                            setIsHiveMenuOpen(false);
+                            setIsTabletMenuOpen(false);
                           }}
                         >
                           <FontAwesomeIcon icon={faArrowsRotate} />
@@ -229,7 +192,7 @@ export default function AppHeader() {
                         type="button"
                         onClick={() => {
                           dispatchEditorAction("export");
-                          setIsHiveMenuOpen(false);
+                          setIsTabletMenuOpen(false);
                         }}
                       >
                         <FontAwesomeIcon icon={faDownload} />
@@ -239,7 +202,7 @@ export default function AppHeader() {
                         type="button"
                         onClick={() => {
                           dispatchEditorAction("collaborators");
-                          setIsHiveMenuOpen(false);
+                          setIsTabletMenuOpen(false);
                         }}
                       >
                         <FontAwesomeIcon icon={faUserPlus} />
@@ -249,7 +212,7 @@ export default function AppHeader() {
                         type="button"
                         onClick={() => {
                           dispatchEditorAction("comments");
-                          setIsHiveMenuOpen(false);
+                          setIsTabletMenuOpen(false);
                         }}
                       >
                         <FontAwesomeIcon icon={faComments} />
@@ -260,34 +223,16 @@ export default function AppHeader() {
                           </span>
                         ) : null}
                       </button>
-                    </div>
-                  ) : null}
-                </div>
-              ) : null}
+                    </section>
 
-              <div className="header-dropdown-wrap">
-                <button
-                  type="button"
-                  className="header-dropdown-toggle"
-                  onClick={() => {
-                    setIsProfileMenuOpen((open) => !open);
-                    setIsHiveMenuOpen(false);
-                  }}
-                >
-                  <FontAwesomeIcon icon={faUser} />
-                  <span>{t("header.accountMenu")}</span>
-                  <FontAwesomeIcon icon={faCaretDown} />
-                  {profileBadgeCount > 0 ? (
-                    <span className="inbox-badge">{profileBadgeCount}</span>
-                  ) : null}
-                </button>
-                {isProfileMenuOpen ? (
-                  <div className="header-dropdown-menu">
-                    {!isAdmin ? (
+                    <section className="header-tablet-menu-section">
+                      <p className="header-tablet-menu-title">
+                        {t("header.accountMenu")}
+                      </p>
                       <button
                         type="button"
                         onClick={() => {
-                          setIsProfileMenuOpen(false);
+                          setIsTabletMenuOpen(false);
                           if (shouldGuardHeaderNavigation()) {
                             requestEditorLeave({
                               type: "route",
@@ -301,12 +246,10 @@ export default function AppHeader() {
                         <FontAwesomeIcon icon={faUser} />
                         {t("header.profile")}
                       </button>
-                    ) : null}
-                    {!isAdmin ? (
                       <button
                         type="button"
                         onClick={() => {
-                          setIsProfileMenuOpen(false);
+                          setIsTabletMenuOpen(false);
                           if (shouldGuardHeaderNavigation()) {
                             requestEditorLeave({ type: "route", to: "/inbox" });
                             return;
@@ -317,110 +260,128 @@ export default function AppHeader() {
                         <FontAwesomeIcon icon={faEnvelope} />
                         {t("header.inbox")}
                         {pendingInvitesCount > 0 ? (
-                          <span className="inbox-badge">
-                            {pendingInvitesCount}
-                          </span>
+                          <span className="inbox-badge">{pendingInvitesCount}</span>
                         ) : null}
                       </button>
-                    ) : null}
-                    {isAdmin ? (
                       <button
                         type="button"
                         onClick={() => {
-                          setIsProfileMenuOpen(false);
-                          navigate("/admin");
+                          setIsTabletMenuOpen(false);
+                          if (shouldGuardHeaderNavigation()) {
+                            requestEditorLeave({ type: "logout" });
+                            return;
+                          }
+                          logout();
+                          navigate("/");
                         }}
                       >
-                        <FontAwesomeIcon icon={faGear} />
-                        {t("header.admin")}
+                        <FontAwesomeIcon icon={faRightFromBracket} />
+                        {t("header.logout")}
                       </button>
-                    ) : null}
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setIsProfileMenuOpen(false);
-                        if (shouldGuardHeaderNavigation()) {
-                          requestEditorLeave({ type: "logout" });
-                          return;
-                        }
-                        logout();
-                        navigate("/");
-                      }}
-                    >
-                      <FontAwesomeIcon icon={faRightFromBracket} />
-                      {t("header.logout")}
-                    </button>
+                    </section>
                   </div>
                 ) : null}
               </div>
-            </>
-          ) : (
-            <>
-              {!isAdmin ? (
-                <Link
-                  to="/profile"
-                  className={`header-nav-link${location.pathname === "/profile" ? " is-active" : ""}`}
-                  onClick={(event) => {
-                    if (!shouldGuardHeaderNavigation()) return;
-                    event.preventDefault();
-                    requestEditorLeave({ type: "route", to: "/profile" });
+            </nav>
+
+            <Link to={brandTarget} className="brand-link">
+              <img src="/hexagone.png" alt="hexagone" />
+              <h1>La Ruche</h1>
+              <img src="/abeille.png" alt="abeille" />
+            </Link>
+          </div>
+
+          {canUseTabletSaveButton ? (
+            <button
+              type="button"
+              className="header-save-btn"
+              disabled={Boolean(editorHeaderState?.isSaving)}
+              onClick={() => dispatchEditorAction("save")}
+            >
+              <FontAwesomeIcon icon={faFloppyDisk} />
+              {editorHeaderState?.isSaving
+                ? t("editor.saving")
+                : t("editor.saveHive")}
+            </button>
+          ) : null}
+        </>
+      ) : (
+        <>
+          <Link to={brandTarget} className="brand-link">
+            <img src="/hexagone.png" alt="hexagone" />
+            <h1>La Ruche</h1>
+            <img src="/abeille.png" alt="abeille" />
+          </Link>
+
+          <nav className="site-nav" ref={navRef}>
+            {isAuthenticated ? (
+              <>
+                {!isAdmin ? (
+                  <Link
+                    to="/profile"
+                    className={`header-nav-link${location.pathname === "/profile" ? " is-active" : ""}`}
+                    onClick={(event) => {
+                      if (!shouldGuardHeaderNavigation()) return;
+                      event.preventDefault();
+                      requestEditorLeave({ type: "route", to: "/profile" });
+                    }}
+                  >
+                    <FontAwesomeIcon icon={faUser} />
+                    {t("header.profile")}
+                  </Link>
+                ) : null}
+                {!isAdmin ? (
+                  <Link
+                    to="/inbox"
+                    className={`header-nav-link inbox-link${location.pathname === "/inbox" ? " is-active" : ""}`}
+                    onClick={(event) => {
+                      if (!shouldGuardHeaderNavigation()) return;
+                      event.preventDefault();
+                      requestEditorLeave({ type: "route", to: "/inbox" });
+                    }}
+                  >
+                    <FontAwesomeIcon icon={faEnvelope} />
+                    {t("header.inbox")}
+                    {pendingInvitesCount > 0 ? (
+                      <span className="inbox-badge">{pendingInvitesCount}</span>
+                    ) : null}
+                  </Link>
+                ) : null}
+                {isAdmin ? <Link to="/admin">{t("header.admin")}</Link> : null}
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (shouldGuardHeaderNavigation()) {
+                      requestEditorLeave({ type: "logout" });
+                      return;
+                    }
+                    logout();
+                    navigate("/");
                   }}
                 >
-                  <FontAwesomeIcon icon={faUser} />
-                  {t("header.profile")}
-                </Link>
-              ) : null}
-              {!isAdmin ? (
+                  <FontAwesomeIcon icon={faRightFromBracket} />
+                  {t("header.logout")}
+                </button>
+              </>
+            ) : (
+              <>
                 <Link
-                  to="/inbox"
-                  className={`header-nav-link inbox-link${location.pathname === "/inbox" ? " is-active" : ""}`}
-                  onClick={(event) => {
-                    if (!shouldGuardHeaderNavigation()) return;
-                    event.preventDefault();
-                    requestEditorLeave({ type: "route", to: "/inbox" });
-                  }}
+                  to="/login"
+                  className={`header-nav-link${location.pathname === "/login" ? " is-active" : ""}`}
                 >
-                  <FontAwesomeIcon icon={faEnvelope} />
-                  {t("header.inbox")}
-                  {pendingInvitesCount > 0 ? (
-                    <span className="inbox-badge">{pendingInvitesCount}</span>
-                  ) : null}
+                  {t("header.login")}
                 </Link>
-              ) : null}
-              {isAdmin ? <Link to="/admin">{t("header.admin")}</Link> : null}
-              <button
-                type="button"
-                onClick={() => {
-                  if (shouldGuardHeaderNavigation()) {
-                    requestEditorLeave({ type: "logout" });
-                    return;
-                  }
-                  logout();
-                  navigate("/");
-                }}
-              >
-                <FontAwesomeIcon icon={faRightFromBracket} />
-                {t("header.logout")}
-              </button>
-            </>
-          )
-        ) : (
-          <>
-            <Link
-              to="/login"
-              className={`header-nav-link${location.pathname === "/login" ? " is-active" : ""}`}
-            >
-              {t("header.login")}
-            </Link>
-            <Link
-              to="/register"
-              className={`header-nav-link${location.pathname === "/register" ? " is-active" : ""}`}
-            >
-              {t("header.register")}
-            </Link>
-          </>
-        )}
-      </nav>
+                <Link
+                  to="/register"
+                  className={`header-nav-link${location.pathname === "/register" ? " is-active" : ""}`}
+                >
+                  {t("header.register")}
+                </Link>
+              </>
+            )}
+          </nav>
+        </>
+      )}
     </header>
   );
 }
