@@ -1184,9 +1184,9 @@ export const messages = {
       feature1Title: "Improved real-time collaboration",
       feature1:
         "We are working to improve the management of multiple users working simultaneously on the same hive. The goal is to make updates instant and seamless, prevent version conflicts, and allow each collaborator to see others\u2019 changes in real time.",
-      feature2Title: "Working email delivery",
+      feature2Title: "Email delivery",
       feature2:
-        "The password reset by email feature is currently being configured. Automatic delivery of reset links will be fully operational soon.",
+        "Password reset emails and email notifications are fully operational.",
       feature3Title: "La Ruche Forum",
       feature3:
         "A community space is being created to allow La Ruche users to report bugs, follow updates, suggest improvements, and share pedagogical practices around the tool.",

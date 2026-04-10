@@ -22,16 +22,13 @@ export default function WipPage() {
       titleKey: "wipPage.feature1Title",
       bodyKey: "wipPage.feature1",
       icon: "🔄",
-    },
-    {
-      titleKey: "wipPage.feature2Title",
-      bodyKey: "wipPage.feature2",
-      icon: "✉️",
+      showStatus: true,
     },
     {
       titleKey: "wipPage.feature3Title",
       bodyKey: "wipPage.feature3",
       icon: "💬",
+      showStatus: true,
     },
   ];
 
@@ -55,13 +52,15 @@ export default function WipPage() {
 
       <h3 className="wip-section-heading">{t("wipPage.upcomingTitle")}</h3>
       <div className="wip-features">
-        {features.map(({ titleKey, bodyKey, icon }) => (
+        {features.map(({ titleKey, bodyKey, icon, showStatus }) => (
           <div key={titleKey} className="wip-feature-card">
             <div className="wip-feature-icon">{icon}</div>
             <div className="wip-feature-body">
               <h4>{t(titleKey)}</h4>
               <p>{t(bodyKey)}</p>
-              <span className="wip-status">{t("wipPage.status")}</span>
+              {showStatus ? (
+                <span className="wip-status">{t("wipPage.status")}</span>
+              ) : null}
             </div>
           </div>
         ))}
