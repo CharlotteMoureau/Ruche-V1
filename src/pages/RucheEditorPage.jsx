@@ -562,6 +562,7 @@ export default function RucheEditorPage() {
             sourceScale: 2,
             quality: 0.76,
             maxBytes: 170 * 1024,
+            boardData,
           });
         }
       } catch {

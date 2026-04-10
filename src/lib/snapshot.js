@@ -39,6 +39,9 @@ const DEFAULT_EXPORT_SCALE = 3;
 const MAX_EXPORT_CANVAS_DIMENSION = 12000;
 const MAX_EXPORT_CANVAS_PIXELS = 60_000_000;
 const CHAT_EXPORT_CHUNK_SIZE = 10;
+const PREVIEW_CARD_SIZE = 200;
+const PREVIEW_BOARD_WIDTH = 2200;
+const PREVIEW_BOARD_HEIGHT = 1600;
 
 function applyStyles(element, styles) {
   Object.assign(element.style, styles);
@@ -521,6 +524,182 @@ function resolveBoardCaptureNode(board) {
   return board.querySelector(".hive-board__canvas") || board;
 }
 
+function normalizePreviewCardsFromBoardData(boardData) {
+  const cards = Array.isArray(boardData?.boardCards) ? boardData.boardCards : [];
+
+  return cards
+    .filter((card) => card && typeof card === "object")
+    .map((card) => ({
+      id: String(card.id ?? "").trim(),
+      title: String(card.title || "").trim(),
+      category: String(card.category || "free").trim(),
+      x: Number(card?.position?.x ?? 0),
+      y: Number(card?.position?.y ?? 0),
+    }))
+    .filter((card) => Number.isFinite(card.x) && Number.isFinite(card.y));
+}
+
+function getPreviewCategoryFill(category) {
+  switch (category) {
+    case "visees":
+      return "#56c8cd";
+    case "conditions-enseignant":
+      return "#f2994a";
+    case "conditions-equipe":
+      return "#8b7ec8";
+    case "domaine":
+      return "#f38cae";
+    case "recommandations-enseignant":
+    case "recommandations-equipe":
+      return "#fffdf7";
+    default:
+      return "#fffdf7";
+  }
+}
+
+function getPreviewCategoryStroke(category) {
+  if (category === "recommandations-enseignant") {
+    return "#f2994a";
+  }
+
+  if (category === "recommandations-equipe") {
+    return "#8b7ec8";
+  }
+
+  return "rgba(32, 29, 24, 0.25)";
+}
+
+function getCardIconCandidates(card) {
+  if (card.category === "free") {
+    return ["/data/icons/free.png"];
+  }
+
+  const id = String(card.id || "").trim();
+  if (!id) {
+    return ["/data/icons/free.png"];
+  }
+
+  const candidates = [`/data/icons/${id}.png`, `/data/icons/${encodeURIComponent(id)}.png`];
+  if (id.endsWith(".")) {
+    candidates.push(`/data/icons/${id.slice(0, -1)}.png`);
+  }
+
+  return [...new Set(candidates)];
+}
+
+function drawHexPath(context, x, y, size) {
+  const radius = size / 2;
+  const centerX = x + radius;
+  const centerY = y + radius;
+  const points = Array.from({ length: 6 }, (_, index) => {
+    const angle = (Math.PI / 180) * (60 * index - 90);
+    return {
+      x: centerX + radius * Math.cos(angle),
+      y: centerY + radius * Math.sin(angle),
+    };
+  });
+
+  context.beginPath();
+  context.moveTo(points[0].x, points[0].y);
+  for (let index = 1; index < points.length; index += 1) {
+    context.lineTo(points[index].x, points[index].y);
+  }
+  context.closePath();
+}
+
+async function loadImageFromCandidates(candidates) {
+  for (const candidate of candidates) {
+    try {
+      const resolvedUrl = new URL(candidate, window.location.href).toString();
+      const response = await fetch(resolvedUrl, { cache: "force-cache" });
+      if (!response.ok) {
+        continue;
+      }
+
+      const dataUrl = await blobToDataUrl(await response.blob());
+      return await loadImage(dataUrl);
+    } catch {
+      // Try next source.
+    }
+  }
+
+  return null;
+}
+
+async function renderBoardPreviewFromData(boardData, { maxWidth, maxHeight }) {
+  const cards = normalizePreviewCardsFromBoardData(boardData);
+  if (!cards.length) {
+    return null;
+  }
+
+  const leftBound = Math.max(
+    0,
+    Math.min(...cards.map((card) => card.x)) - BOARD_CAPTURE_PADDING,
+  );
+  const topBound = Math.max(
+    0,
+    Math.min(...cards.map((card) => card.y)) - BOARD_CAPTURE_PADDING,
+  );
+  const rightBound = Math.min(
+    PREVIEW_BOARD_WIDTH,
+    Math.max(...cards.map((card) => card.x + PREVIEW_CARD_SIZE)) + BOARD_CAPTURE_PADDING,
+  );
+  const bottomBound = Math.min(
+    PREVIEW_BOARD_HEIGHT,
+    Math.max(...cards.map((card) => card.y + PREVIEW_CARD_SIZE)) + BOARD_CAPTURE_PADDING,
+  );
+
+  const regionWidth = Math.max(1, rightBound - leftBound);
+  const regionHeight = Math.max(1, bottomBound - topBound);
+  const fitScale = Math.min(maxWidth / regionWidth, maxHeight / regionHeight, 1);
+  const width = Math.max(1, Math.round(regionWidth * fitScale));
+  const height = Math.max(1, Math.round(regionHeight * fitScale));
+
+  const canvas = document.createElement("canvas");
+  canvas.width = width;
+  canvas.height = height;
+
+  const context = canvas.getContext("2d");
+  if (!context) {
+    throw new Error("Unable to render board preview");
+  }
+
+  context.fillStyle = "#f6efe1";
+  context.fillRect(0, 0, width, height);
+
+  const iconById = new Map();
+  await Promise.all(
+    cards.map(async (card) => {
+      const image = await loadImageFromCandidates(getCardIconCandidates(card));
+      iconById.set(card.id, image);
+    }),
+  );
+
+  cards.forEach((card) => {
+    const x = Math.round((card.x - leftBound) * fitScale);
+    const y = Math.round((card.y - topBound) * fitScale);
+    const size = Math.max(28, Math.round(PREVIEW_CARD_SIZE * fitScale));
+
+    drawHexPath(context, x, y, size);
+    context.fillStyle = getPreviewCategoryFill(card.category);
+    context.fill();
+
+    context.lineWidth = Math.max(1, Math.round(2 * fitScale));
+    context.strokeStyle = getPreviewCategoryStroke(card.category);
+    context.stroke();
+
+    const icon = iconById.get(card.id);
+    if (icon) {
+      const iconSize = Math.max(10, Math.round(size * 0.23));
+      const iconX = Math.round(x + size / 2 - iconSize / 2);
+      const iconY = Math.round(y + size * 0.58 - iconSize / 2);
+      context.drawImage(icon, iconX, iconY, iconSize, iconSize);
+    }
+  });
+
+  return canvas;
+}
+
 function getCaptureDimensions(node) {
   const rect = node.getBoundingClientRect();
   const width = Math.max(
@@ -879,6 +1058,7 @@ export async function captureBoardPreviewImage(board, options = {}) {
     ? Math.min(1, Math.max(0.1, Number(options.quality)))
     : 0.76;
   const maxBytes = Number(options.maxBytes) > 0 ? Number(options.maxBytes) : 170 * 1024;
+  const boardData = options.boardData;
 
   function getDataUrlBytes(dataUrl) {
     const payload = String(dataUrl || "").split(",")[1] || "";
@@ -927,6 +1107,21 @@ export async function captureBoardPreviewImage(board, options = {}) {
 
   if (!captureNode) {
     throw new Error("Board not found");
+  }
+
+  if (boardData) {
+    try {
+      const renderedCanvas = await renderBoardPreviewFromData(boardData, {
+        maxWidth,
+        maxHeight,
+      });
+
+      if (renderedCanvas) {
+        return encodeWithinBudget(renderedCanvas);
+      }
+    } catch {
+      // Fall back to DOM capture.
+    }
   }
 
   document.body.classList.add("capture-mode");
