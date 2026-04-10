@@ -608,6 +608,65 @@ function getCaptureRegion(node) {
   };
 }
 
+function blobToDataUrl(blob) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onloadend = () => resolve(String(reader.result || ""));
+    reader.onerror = reject;
+    reader.readAsDataURL(blob);
+  });
+}
+
+function waitForImageLoad(image, timeoutMs = 1500) {
+  if (image.complete && image.naturalWidth > 0) {
+    return Promise.resolve();
+  }
+
+  return new Promise((resolve) => {
+    const timeoutId = window.setTimeout(resolve, timeoutMs);
+
+    const handleDone = () => {
+      window.clearTimeout(timeoutId);
+      image.removeEventListener("load", handleDone);
+      image.removeEventListener("error", handleDone);
+      resolve();
+    };
+
+    image.addEventListener("load", handleDone, { once: true });
+    image.addEventListener("error", handleDone, { once: true });
+  });
+}
+
+async function inlineNodeImages(root) {
+  const images = [...root.querySelectorAll("img")];
+
+  await Promise.all(
+    images.map(async (image) => {
+      const source = image.currentSrc || image.getAttribute("src") || "";
+      if (!source || source.startsWith("data:")) {
+        await waitForImageLoad(image);
+        return;
+      }
+
+      try {
+        const resolvedUrl = new URL(source, window.location.href).toString();
+        const response = await fetch(resolvedUrl, { cache: "force-cache" });
+        if (!response.ok) {
+          await waitForImageLoad(image);
+          return;
+        }
+
+        const blob = await response.blob();
+        image.setAttribute("src", await blobToDataUrl(blob));
+      } catch {
+        // Ignore inlining failures and keep original image source.
+      }
+
+      await waitForImageLoad(image);
+    }),
+  );
+}
+
 async function captureNodeImage(node, options = {}) {
   const region = getCaptureRegion(node);
   const scale = getBoundedExportScale(region.width, region.height);
@@ -637,6 +696,7 @@ async function captureNodeImage(node, options = {}) {
   document.body.appendChild(stage);
 
   try {
+    await inlineNodeImages(clone);
     await waitForCaptureFrame();
     return await domtoimage.toPng(frame, {
       cacheBust: true,
