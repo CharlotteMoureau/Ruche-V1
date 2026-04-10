@@ -542,31 +542,84 @@ function normalizePreviewCardsFromBoardData(boardData) {
 function getPreviewCategoryFill(category) {
   switch (category) {
     case "visees":
-      return "#56c8cd";
+      return "#009F8C";
     case "conditions-enseignant":
-      return "#f2994a";
+      return "#EF7D00";
     case "conditions-equipe":
-      return "#8b7ec8";
+      return "#AD498D";
     case "domaine":
-      return "#f38cae";
+      return "#E73458";
     case "recommandations-enseignant":
     case "recommandations-equipe":
-      return "#fffdf7";
+    case "free":
+      return "#F7F3EE";
     default:
-      return "#fffdf7";
+      return "#F7F3EE";
   }
 }
 
 function getPreviewCategoryStroke(category) {
   if (category === "recommandations-enseignant") {
-    return "#f2994a";
+    return "#EF7D00";
   }
 
   if (category === "recommandations-equipe") {
-    return "#8b7ec8";
+    return "#AD498D";
   }
 
-  return "rgba(32, 29, 24, 0.25)";
+  if (category === "free") {
+    return "#8BB31D";
+  }
+
+  return "rgba(32, 29, 24, 0.14)";
+}
+
+function getPreviewCategoryTextColor(category) {
+  if (category === "recommandations-enseignant") {
+    return "#EF7D00";
+  }
+
+  if (category === "recommandations-equipe") {
+    return "#AD498D";
+  }
+
+  if (category === "free") {
+    return "#8BB31D";
+  }
+
+  return "#ffffff";
+}
+
+function drawWrappedCenteredText(context, text, centerX, startY, maxWidth, lineHeight, maxLines) {
+  const words = String(text || "").trim().split(/\s+/).filter(Boolean);
+  if (!words.length) {
+    return;
+  }
+
+  const lines = [];
+  let line = "";
+
+  words.forEach((word) => {
+    const candidate = line ? `${line} ${word}` : word;
+    if (context.measureText(candidate).width <= maxWidth || !line) {
+      line = candidate;
+      return;
+    }
+
+    lines.push(line);
+    line = word;
+  });
+
+  if (line) {
+    lines.push(line);
+  }
+
+  lines.slice(0, maxLines).forEach((entry, index) => {
+    const text = index === maxLines - 1 && lines.length > maxLines
+      ? `${entry.replace(/\s+\S+$/, "")}...`
+      : entry;
+    context.fillText(text, centerX, startY + index * lineHeight);
+  });
 }
 
 function getCardIconCandidates(card) {
@@ -664,7 +717,7 @@ async function renderBoardPreviewFromData(boardData, { maxWidth, maxHeight }) {
     throw new Error("Unable to render board preview");
   }
 
-  context.fillStyle = "#f6efe1";
+  context.fillStyle = "#fffaf0";
   context.fillRect(0, 0, width, height);
 
   const iconById = new Map();
@@ -679,6 +732,8 @@ async function renderBoardPreviewFromData(boardData, { maxWidth, maxHeight }) {
     const x = Math.round((card.x - leftBound) * fitScale);
     const y = Math.round((card.y - topBound) * fitScale);
     const size = Math.max(28, Math.round(PREVIEW_CARD_SIZE * fitScale));
+    const centerX = Math.round(x + size / 2);
+    const textColor = getPreviewCategoryTextColor(card.category);
 
     drawHexPath(context, x, y, size);
     context.fillStyle = getPreviewCategoryFill(card.category);
@@ -686,13 +741,48 @@ async function renderBoardPreviewFromData(boardData, { maxWidth, maxHeight }) {
 
     context.lineWidth = Math.max(1, Math.round(2 * fitScale));
     context.strokeStyle = getPreviewCategoryStroke(card.category);
+
+    if (
+      card.category === "recommandations-enseignant" ||
+      card.category === "recommandations-equipe" ||
+      card.category === "free"
+    ) {
+      context.setLineDash([
+        Math.max(3, Math.round(size * 0.08)),
+        Math.max(2, Math.round(size * 0.05)),
+      ]);
+    } else {
+      context.setLineDash([]);
+    }
+
     context.stroke();
+    context.setLineDash([]);
+
+    context.fillStyle = textColor;
+    context.textAlign = "center";
+    context.textBaseline = "middle";
+
+    const idFontSize = Math.max(8, Math.round(size * 0.085));
+    context.font = `700 ${idFontSize}px "Poppins", "Segoe UI", sans-serif`;
+    context.fillText(card.id, centerX, y + Math.round(size * 0.22));
+
+    const titleFontSize = Math.max(7, Math.round(size * 0.063));
+    context.font = `600 ${titleFontSize}px "Poppins", "Segoe UI", sans-serif`;
+    drawWrappedCenteredText(
+      context,
+      card.title,
+      centerX,
+      y + Math.round(size * 0.34),
+      Math.round(size * 0.72),
+      Math.max(9, Math.round(size * 0.08)),
+      2,
+    );
 
     const icon = iconById.get(card.id);
     if (icon) {
       const iconSize = Math.max(10, Math.round(size * 0.23));
       const iconX = Math.round(x + size / 2 - iconSize / 2);
-      const iconY = Math.round(y + size * 0.58 - iconSize / 2);
+      const iconY = Math.round(y + size * 0.74 - iconSize / 2);
       context.drawImage(icon, iconX, iconY, iconSize, iconSize);
     }
   });
