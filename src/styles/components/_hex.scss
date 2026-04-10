@@ -99,12 +99,16 @@
           line-height: 1.25;
           text-align: center;
           padding: 15px 0;
+          overflow-wrap: anywhere;
+          word-break: break-word;
+          hyphens: auto;
         }
 
         .scrollable-back {
           position: relative;
           justify-content: flex-start;
           overflow-y: auto;
+          overflow-x: hidden;
           -webkit-overflow-scrolling: touch;
           touch-action: pan-y;
           overscroll-behavior: contain;
