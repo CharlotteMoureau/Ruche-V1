@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 
 export default function HexCard({ card, position, onlyFront }) {
   const backContentRef = useRef(null);
+  const touchScrollStateRef = useRef(null);
   const [needsScroll, setNeedsScroll] = useState(false);
 
   const style = position
@@ -51,6 +52,43 @@ export default function HexCard({ card, position, onlyFront }) {
 
   const clipId = `hc-${card.id}`;
 
+  const handleBackContentTouchStart = (event) => {
+    if (!needsScroll || event.touches.length !== 1) return;
+
+    const touch = event.touches[0];
+    const contentElement = backContentRef.current;
+    if (!contentElement) return;
+
+    touchScrollStateRef.current = {
+      startY: touch.clientY,
+      startScrollTop: contentElement.scrollTop,
+    };
+
+    event.stopPropagation();
+  };
+
+  const handleBackContentTouchMove = (event) => {
+    if (!needsScroll || event.touches.length !== 1) return;
+
+    const touch = event.touches[0];
+    const contentElement = backContentRef.current;
+    const touchScrollState = touchScrollStateRef.current;
+    if (!contentElement || !touchScrollState) return;
+
+    const deltaY = touch.clientY - touchScrollState.startY;
+    contentElement.scrollTop = touchScrollState.startScrollTop - deltaY;
+
+    event.preventDefault();
+    event.stopPropagation();
+  };
+
+  const handleBackContentTouchEnd = (event) => {
+    if (!needsScroll) return;
+
+    touchScrollStateRef.current = null;
+    event.stopPropagation();
+  };
+
   return (
     <div className={`hex-card ${card.category}`} style={style}>
       <svg
@@ -87,6 +125,10 @@ export default function HexCard({ card, position, onlyFront }) {
                 <div
                   ref={backContentRef}
                   className={`hex-back-content ${needsScroll ? "scrollable-back" : ""}`}
+                  onTouchStart={handleBackContentTouchStart}
+                  onTouchMove={handleBackContentTouchMove}
+                  onTouchEnd={handleBackContentTouchEnd}
+                  onTouchCancel={handleBackContentTouchEnd}
                 >
                   <p className={needsScroll ? "long-def" : ""}>
                     {card.definition}
