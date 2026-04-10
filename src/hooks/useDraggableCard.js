@@ -1,8 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from "react";
-import {
-  BOARD_CARD_SIZE,
-  clampBoardPosition,
-} from "../lib/board";
+import { BOARD_CARD_SIZE, clampBoardPosition } from "../lib/board";
 
 function getCardDimensions() {
   return { width: BOARD_CARD_SIZE, height: BOARD_CARD_SIZE };
@@ -41,7 +38,7 @@ function isDropInLibraryZone(clientX, clientY) {
 
   return Boolean(
     element.closest(".editor-app__library-panel") ||
-      element.closest(".card-library"),
+    element.closest(".card-library"),
   );
 }
 
@@ -85,306 +82,328 @@ export function useDraggableCard({
     // .hex-back is the scroll container on tablet when back text is long.
     const hexBack = eventTarget.closest(".hex-back");
 
-    return Boolean(
-      hexBack &&
-        hexBack.scrollHeight > hexBack.clientHeight + 1,
-    );
+    return Boolean(hexBack && hexBack.scrollHeight > hexBack.clientHeight + 1);
   }, []);
 
-  const updateDraggedCards = useCallback((clientX, clientY) => {
-    if (!dragStateRef.current) return;
+  const updateDraggedCards = useCallback(
+    (clientX, clientY) => {
+      if (!dragStateRef.current) return;
 
-    dragStateRef.current.lastPointerClient = { x: clientX, y: clientY };
-    const delta = {
-      x: (clientX - dragStateRef.current.startPointer.x) / zoom,
-      y: (clientY - dragStateRef.current.startPointer.y) / zoom,
-    };
+      dragStateRef.current.lastPointerClient = { x: clientX, y: clientY };
+      const delta = {
+        x: (clientX - dragStateRef.current.startPointer.x) / zoom,
+        y: (clientY - dragStateRef.current.startPointer.y) / zoom,
+      };
 
-    const hasMovedEnough =
-      Math.abs(delta.x) >= DRAG_ACTIVATION_THRESHOLD ||
-      Math.abs(delta.y) >= DRAG_ACTIVATION_THRESHOLD;
+      const hasMovedEnough =
+        Math.abs(delta.x) >= DRAG_ACTIVATION_THRESHOLD ||
+        Math.abs(delta.y) >= DRAG_ACTIVATION_THRESHOLD;
 
-    if (!dragStateRef.current.isActive) {
-      if (!hasMovedEnough) {
+      if (!dragStateRef.current.isActive) {
+        if (!hasMovedEnough) {
+          return;
+        }
+
+        dragStateRef.current.isActive = true;
+        setIsDragging(true);
+        onDragStart?.();
+        emitBoardDragState({
+          dragging: true,
+          overLibrary: false,
+          card,
+          pointer: { x: clientX, y: clientY },
+        });
+      }
+
+      const isOverLibrary = isDropInLibraryZone(clientX, clientY);
+      if (isOverLibrary !== dragStateRef.current.isOverLibrary) {
+        dragStateRef.current.isOverLibrary = isOverLibrary;
+        setIsDraggingOverLibrary(isOverLibrary);
+        emitBoardDragState({
+          dragging: true,
+          overLibrary: isOverLibrary,
+          card,
+          pointer: { x: clientX, y: clientY },
+        });
+      } else {
+        emitBoardDragState({
+          dragging: true,
+          overLibrary: isOverLibrary,
+          card,
+          pointer: { x: clientX, y: clientY },
+        });
+      }
+
+      dragStateRef.current.currentDelta = delta;
+
+      const nextPositions = dragStateRef.current.cards.map((entry) => ({
+        id: entry.card.id,
+        position: {
+          x: entry.startPosition.x + delta.x,
+          y: entry.startPosition.y + delta.y,
+        },
+      }));
+
+      if (nextPositions.length === 1) {
+        // Keep drag movement unconstrained so the card can visibly hover above the library.
+        onMoveCard(nextPositions[0].id, nextPositions[0].position);
         return;
       }
 
-      dragStateRef.current.isActive = true;
-      setIsDragging(true);
-      onDragStart?.();
-      emitBoardDragState({
-        dragging: true,
-        overLibrary: false,
-        card,
-        pointer: { x: clientX, y: clientY },
-      });
-    }
+      onMoveCards(nextPositions);
+    },
+    [card, onDragStart, onMoveCard, onMoveCards, zoom],
+  );
 
-    const isOverLibrary = isDropInLibraryZone(clientX, clientY);
-    if (isOverLibrary !== dragStateRef.current.isOverLibrary) {
-      dragStateRef.current.isOverLibrary = isOverLibrary;
-      setIsDraggingOverLibrary(isOverLibrary);
-      emitBoardDragState({
-        dragging: true,
-        overLibrary: isOverLibrary,
-        card,
-        pointer: { x: clientX, y: clientY },
-      });
-    } else {
-      emitBoardDragState({
-        dragging: true,
-        overLibrary: isOverLibrary,
-        card,
-        pointer: { x: clientX, y: clientY },
-      });
-    }
+  const finalizeDrag = useCallback(
+    (endPointer) => {
+      if (!dragStateRef.current) return;
 
-    dragStateRef.current.currentDelta = delta;
+      const {
+        cards,
+        currentDelta,
+        lastPointerClient,
+        isActive,
+        toggleSelectionOnRelease,
+      } = dragStateRef.current;
 
-    const nextPositions = dragStateRef.current.cards.map((entry) => ({
-      id: entry.card.id,
-      position: {
-        x: entry.startPosition.x + delta.x,
-        y: entry.startPosition.y + delta.y,
-      },
-    }));
-
-    if (nextPositions.length === 1) {
-      // Keep drag movement unconstrained so the card can visibly hover above the library.
-      onMoveCard(nextPositions[0].id, nextPositions[0].position);
-      return;
-    }
-
-    onMoveCards(nextPositions);
-  }, [card, onDragStart, onMoveCard, onMoveCards, zoom]);
-
-  const finalizeDrag = useCallback((endPointer) => {
-    if (!dragStateRef.current) return;
-
-    const {
-      cards,
-      currentDelta,
-      lastPointerClient,
-      isActive,
-      toggleSelectionOnRelease,
-    } =
-      dragStateRef.current;
-
-    if (!isActive) {
-      if (toggleSelectionOnRelease) {
-        onToggleSelection(card.id);
-      }
-      dragStateRef.current = null;
-      setIsDraggingOverLibrary(false);
-      emitBoardDragState({ dragging: false, overLibrary: false });
-      return;
-    }
-
-    const pointer = endPointer || lastPointerClient;
-    const droppedInLibrary = isDropInLibraryZone(pointer?.x, pointer?.y);
-
-    if (droppedInLibrary) {
-      const returned =
-        cards.length > 1
-          ? onReturnCardsToLibrary?.(cards.map((entry) => entry.card))
-          : onReturnToLibrary?.(cards[0]?.card);
-
-      if (returned !== false) {
+      if (!isActive) {
+        if (toggleSelectionOnRelease) {
+          onToggleSelection(card.id);
+        }
         dragStateRef.current = null;
         setIsDraggingOverLibrary(false);
         emitBoardDragState({ dragging: false, overLibrary: false });
         return;
       }
-    }
 
-    const finalCards = cards.map((entry) => {
-      const position = {
-        x: entry.startPosition.x + currentDelta.x,
-        y: entry.startPosition.y + currentDelta.y,
+      const pointer = endPointer || lastPointerClient;
+      const droppedInLibrary = isDropInLibraryZone(pointer?.x, pointer?.y);
+
+      if (droppedInLibrary) {
+        const returned =
+          cards.length > 1
+            ? onReturnCardsToLibrary?.(cards.map((entry) => entry.card))
+            : onReturnToLibrary?.(cards[0]?.card);
+
+        if (returned !== false) {
+          dragStateRef.current = null;
+          setIsDraggingOverLibrary(false);
+          emitBoardDragState({ dragging: false, overLibrary: false });
+          return;
+        }
+      }
+
+      const finalCards = cards.map((entry) => {
+        const position = {
+          x: entry.startPosition.x + currentDelta.x,
+          y: entry.startPosition.y + currentDelta.y,
+        };
+
+        return { ...entry, position };
+      });
+
+      if (finalCards.length > 1) {
+        onMoveCards(
+          finalCards.map((entry) => ({
+            id: entry.card.id,
+            position: clampBoardPosition(entry.position),
+          })),
+        );
+      } else {
+        const [entry] = finalCards;
+
+        onMoveCard(card.id, clampBoardPosition(entry.position));
+      }
+
+      dragStateRef.current = null;
+      setIsDraggingOverLibrary(false);
+      emitBoardDragState({ dragging: false, overLibrary: false });
+    },
+    [
+      card,
+      onMoveCard,
+      onMoveCards,
+      onReturnCardsToLibrary,
+      onReturnToLibrary,
+      onToggleSelection,
+    ],
+  );
+
+  const startDrag = useCallback(
+    (clientX, clientY, options = {}) => {
+      const { toggleSelectionOnRelease = false } = options;
+      const shouldDragSelection =
+        isSelected &&
+        selectedCards.length > 1 &&
+        (!isTabletEditorMode || selectionMode);
+      const dragCards = shouldDragSelection ? selectedCards : [card];
+
+      if (
+        selectedCards.length &&
+        (!isSelected || (isTabletEditorMode && !selectionMode))
+      ) {
+        onClearSelection();
+      }
+
+      dragStateRef.current = {
+        startPointer: { x: clientX, y: clientY },
+        lastPointerClient: { x: clientX, y: clientY },
+        currentDelta: { x: 0, y: 0 },
+        isActive: false,
+        isOverLibrary: false,
+        toggleSelectionOnRelease,
+        cards: dragCards.map((dragCard) => ({
+          card: dragCard,
+          startPosition: dragCard.position,
+          ...getCardDimensions(dragCard),
+        })),
       };
 
-      return { ...entry, position };
-    });
+      setIsDragging(false);
+      setIsDraggingOverLibrary(false);
+    },
+    [
+      card,
+      isSelected,
+      isTabletEditorMode,
+      onClearSelection,
+      selectedCards,
+      selectionMode,
+    ],
+  );
 
-    if (finalCards.length > 1) {
-      onMoveCards(
-        finalCards.map((entry) => ({
-          id: entry.card.id,
-          position: clampBoardPosition(entry.position),
-        })),
-      );
-    } else {
-      const [entry] = finalCards;
+  const handleMouseDown = useCallback(
+    (event) => {
+      if (dragDisabled) {
+        event.preventDefault();
+        event.stopPropagation();
+        onUnavailableInteraction?.();
+        return;
+      }
+      if (event.button !== 0) return;
+      if (Date.now() < ignoreMouseUntilRef.current) return;
 
-      onMoveCard(card.id, clampBoardPosition(entry.position));
-    }
+      event.stopPropagation();
 
-    dragStateRef.current = null;
-    setIsDraggingOverLibrary(false);
-    emitBoardDragState({ dragging: false, overLibrary: false });
-  }, [
-    card,
-    onMoveCard,
-    onMoveCards,
-    onReturnCardsToLibrary,
-    onReturnToLibrary,
-    onToggleSelection,
-  ]);
+      if (selectionMode) {
+        if (isSelected) {
+          startDrag(event.clientX, event.clientY, {
+            toggleSelectionOnRelease: true,
+          });
+        } else {
+          onToggleSelection(card.id);
+        }
+        return;
+      }
 
-  const startDrag = useCallback((clientX, clientY, options = {}) => {
-    const { toggleSelectionOnRelease = false } = options;
-    const shouldDragSelection =
-      isSelected &&
-      selectedCards.length > 1 &&
-      (!isTabletEditorMode || selectionMode);
-    const dragCards = shouldDragSelection ? selectedCards : [card];
+      if (event.ctrlKey || event.metaKey) {
+        onToggleSelection(card.id);
+        return;
+      }
 
-    if (
-      selectedCards.length &&
-      (!isSelected || (isTabletEditorMode && !selectionMode))
-    ) {
-      onClearSelection();
-    }
+      startDrag(event.clientX, event.clientY);
+    },
+    [
+      card.id,
+      dragDisabled,
+      isSelected,
+      onUnavailableInteraction,
+      onToggleSelection,
+      selectionMode,
+      startDrag,
+    ],
+  );
 
-    dragStateRef.current = {
-      startPointer: { x: clientX, y: clientY },
-      lastPointerClient: { x: clientX, y: clientY },
-      currentDelta: { x: 0, y: 0 },
-      isActive: false,
-      isOverLibrary: false,
-      toggleSelectionOnRelease,
-      cards: dragCards.map((dragCard) => ({
-        card: dragCard,
-        startPosition: dragCard.position,
-        ...getCardDimensions(dragCard),
-      })),
-    };
+  const handleMouseMove = useCallback(
+    (event) => {
+      if (!dragStateRef.current) return;
 
-    setIsDragging(false);
-    setIsDraggingOverLibrary(false);
-  }, [
-    card,
-    isSelected,
-    isTabletEditorMode,
-    onClearSelection,
-    selectedCards,
-    selectionMode,
-  ]);
+      updateDraggedCards(event.clientX, event.clientY);
+    },
+    [updateDraggedCards],
+  );
 
-  const handleMouseDown = useCallback((event) => {
-    if (dragDisabled) {
+  const handleMouseUp = useCallback(
+    (event) => {
+      if (!dragStateRef.current) return;
+
+      setIsDragging(false);
+      finalizeDrag({ x: event.clientX, y: event.clientY });
+    },
+    [finalizeDrag],
+  );
+
+  const handleTouchStart = useCallback(
+    (event) => {
+      if (dragDisabled) {
+        event.preventDefault();
+        event.stopPropagation();
+        onUnavailableInteraction?.();
+        return;
+      }
+      ignoreMouseUntilRef.current = Date.now() + 700;
+
+      if (shouldAllowNativeTextScroll(event.target)) {
+        return;
+      }
+
+      const touch = event.touches[0];
+
+      event.stopPropagation();
+
+      if (selectionMode) {
+        if (isSelected) {
+          startDrag(touch.clientX, touch.clientY, {
+            toggleSelectionOnRelease: true,
+          });
+        } else {
+          onToggleSelection(card.id);
+        }
+        return;
+      }
+
+      startDrag(touch.clientX, touch.clientY);
+    },
+    [
+      card.id,
+      dragDisabled,
+      isSelected,
+      onUnavailableInteraction,
+      onToggleSelection,
+      selectionMode,
+      shouldAllowNativeTextScroll,
+      startDrag,
+    ],
+  );
+
+  const handleTouchMove = useCallback(
+    (event) => {
+      if (event.touches.length < 1) return;
+      const touch = event.touches[0];
+
+      if (!dragStateRef.current) return;
+
       event.preventDefault();
       event.stopPropagation();
-      onUnavailableInteraction?.();
-      return;
-    }
-    if (event.button !== 0) return;
-    if (Date.now() < ignoreMouseUntilRef.current) return;
 
-    event.stopPropagation();
+      updateDraggedCards(touch.clientX, touch.clientY);
+    },
+    [updateDraggedCards],
+  );
 
-    if (selectionMode) {
-      if (isSelected) {
-        startDrag(event.clientX, event.clientY, {
-          toggleSelectionOnRelease: true,
-        });
-      } else {
-        onToggleSelection(card.id);
-      }
-      return;
-    }
-
-    if (event.ctrlKey || event.metaKey) {
-      onToggleSelection(card.id);
-      return;
-    }
-
-    startDrag(event.clientX, event.clientY);
-  }, [
-    card.id,
-    dragDisabled,
-    isSelected,
-    onUnavailableInteraction,
-    onToggleSelection,
-    selectionMode,
-    startDrag,
-  ]);
-
-  const handleMouseMove = useCallback((event) => {
-    if (!dragStateRef.current) return;
-
-    updateDraggedCards(event.clientX, event.clientY);
-  }, [updateDraggedCards]);
-
-  const handleMouseUp = useCallback((event) => {
-    if (!dragStateRef.current) return;
-
-    setIsDragging(false);
-    finalizeDrag({ x: event.clientX, y: event.clientY });
-  }, [finalizeDrag]);
-
-  const handleTouchStart = useCallback((event) => {
-    if (dragDisabled) {
-      event.preventDefault();
+  const handleTouchEnd = useCallback(
+    (event) => {
       event.stopPropagation();
-      onUnavailableInteraction?.();
-      return;
-    }
-    ignoreMouseUntilRef.current = Date.now() + 700;
+      if (!dragStateRef.current) return;
 
-    if (shouldAllowNativeTextScroll(event.target)) {
-      return;
-    }
+      const touch = event.changedTouches?.[0];
 
-    const touch = event.touches[0];
-
-    event.stopPropagation();
-
-    if (selectionMode) {
-      if (isSelected) {
-        startDrag(touch.clientX, touch.clientY, {
-          toggleSelectionOnRelease: true,
-        });
-      } else {
-        onToggleSelection(card.id);
-      }
-      return;
-    }
-
-    startDrag(touch.clientX, touch.clientY);
-  }, [
-    card.id,
-    dragDisabled,
-    isSelected,
-    onUnavailableInteraction,
-    onToggleSelection,
-    selectionMode,
-    shouldAllowNativeTextScroll,
-    startDrag,
-  ]);
-
-  const handleTouchMove = useCallback((event) => {
-    if (event.touches.length < 1) return;
-    const touch = event.touches[0];
-
-    if (!dragStateRef.current) return;
-
-    event.stopPropagation();
-
-    updateDraggedCards(touch.clientX, touch.clientY);
-  }, [updateDraggedCards]);
-
-  const handleTouchEnd = useCallback((event) => {
-    event.stopPropagation();
-    if (!dragStateRef.current) return;
-
-    const touch = event.changedTouches?.[0];
-
-    setIsDragging(false);
-    finalizeDrag(
-      touch ? { x: touch.clientX, y: touch.clientY } : undefined,
-    );
-  }, [finalizeDrag]);
+      setIsDragging(false);
+      finalizeDrag(touch ? { x: touch.clientX, y: touch.clientY } : undefined);
+    },
+    [finalizeDrag],
+  );
 
   useEffect(() => {
     const options = { passive: false };
