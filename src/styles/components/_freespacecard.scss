@@ -29,7 +29,7 @@
       flex-direction: column;
       justify-content: center;
       align-items: center;
-      font-family: sans-serif;
+      font-family: "Poppins", sans-serif;
       text-align: center;
       font-size: 0.9rem;
       padding: 10px;
@@ -72,10 +72,25 @@
 /* ----------------------- */
 /* Variantes de couleur     */
 /* ----------------------- */
-.free-space-card.free-card--pink      { stroke: $rose;       color: $rose; }
-.free-space-card.free-card--purple    { stroke: $mauve;      color: $mauve; }
-.free-space-card.free-card--turquoise { stroke: $turquoise;  color: $turquoise; }
-.free-space-card.free-card--orange    { stroke: $orange;     color: $orange; }
+.free-space-card.free-card--pink {
+  stroke: $rose;
+  color: $rose;
+}
+
+.free-space-card.free-card--purple {
+  stroke: $mauve;
+  color: $mauve;
+}
+
+.free-space-card.free-card--turquoise {
+  stroke: $turquoise;
+  color: $turquoise;
+}
+
+.free-space-card.free-card--orange {
+  stroke: $orange;
+  color: $orange;
+}
 
 @-moz-document url-prefix() {
   .free-space-card {
@@ -136,7 +151,8 @@ body.ios {
   .free-hex-front {
     -webkit-backface-visibility: hidden;
 
-    .free-img, .icon  {
+    .free-img,
+    .icon {
       height: 50px !important;
     }
   }
