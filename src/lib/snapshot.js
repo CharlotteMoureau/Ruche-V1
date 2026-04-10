@@ -617,8 +617,12 @@ function blobToDataUrl(blob) {
   });
 }
 
-function waitForImageLoad(image, timeoutMs = 1500) {
+function waitForImageLoad(image, timeoutMs = 10000) {
   if (image.complete && image.naturalWidth > 0) {
+    if (typeof image.decode === "function") {
+      return image.decode().catch(() => undefined);
+    }
+
     return Promise.resolve();
   }
 
@@ -629,6 +633,12 @@ function waitForImageLoad(image, timeoutMs = 1500) {
       window.clearTimeout(timeoutId);
       image.removeEventListener("load", handleDone);
       image.removeEventListener("error", handleDone);
+
+      if (typeof image.decode === "function") {
+        image.decode().catch(() => undefined).finally(resolve);
+        return;
+      }
+
       resolve();
     };
 

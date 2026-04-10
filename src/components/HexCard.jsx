@@ -1,20 +1,36 @@
 import { useEffect, useRef, useState } from "react";
 
+function getCardIconSources(cardId) {
+  const id = String(cardId ?? "").trim();
+  if (!id) {
+    return [];
+  }
+
+  const candidates = [`/data/icons/${id}.png`];
+  const encoded = `/data/icons/${encodeURIComponent(id)}.png`;
+  if (!candidates.includes(encoded)) {
+    candidates.push(encoded);
+  }
+
+  if (id.endsWith(".")) {
+    const withoutTrailingDot = `/data/icons/${id.slice(0, -1)}.png`;
+    if (!candidates.includes(withoutTrailingDot)) {
+      candidates.push(withoutTrailingDot);
+    }
+  }
+
+  return candidates;
+}
+
 export default function HexCard({ card, position, onlyFront }) {
   const backContentRef = useRef(null);
   const touchScrollStateRef = useRef(null);
   const [needsScroll, setNeedsScroll] = useState(false);
+  const [iconSourceIndex, setIconSourceIndex] = useState(0);
 
   const style = position
     ? { position: "absolute", left: position.x, top: position.y }
     : {};
-
-  let extraClass = "";
-  if (card.category === "recommandations-enseignant") {
-    extraClass = "reco-enseignant";
-  } else if (card.category === "recommandations-equipe") {
-    extraClass = "reco-equipe";
-  }
 
   useEffect(() => {
     if (!card || onlyFront) return;
@@ -48,9 +64,22 @@ export default function HexCard({ card, position, onlyFront }) {
     };
   }, [card, card?.definition, onlyFront]);
 
+  useEffect(() => {
+    setIconSourceIndex(0);
+  }, [card?.id]);
+
   if (!card) return null;
 
+  let extraClass = "";
+  if (card.category === "recommandations-enseignant") {
+    extraClass = "reco-enseignant";
+  } else if (card.category === "recommandations-equipe") {
+    extraClass = "reco-equipe";
+  }
+
   const clipId = `hc-${card.id}`;
+  const iconSources = getCardIconSources(card.id);
+  const iconSource = iconSources[iconSourceIndex] || iconSources[0] || "";
 
   const handleBackContentTouchStart = (event) => {
     if (!needsScroll || event.touches.length !== 1) return;
@@ -118,7 +147,16 @@ export default function HexCard({ card, position, onlyFront }) {
             <div className="hex-front">
               <span>{card.id}</span>
               <h4>{card.title}</h4>
-              <img src={`/data/icons/${card.id}.png`} alt={card.title} />
+              <img
+                src={iconSource}
+                alt={card.title}
+                onError={() => {
+                  setIconSourceIndex((current) => {
+                    const next = current + 1;
+                    return next < iconSources.length ? next : current;
+                  });
+                }}
+              />
             </div>
             {!onlyFront && (
               <div className="hex-back">
