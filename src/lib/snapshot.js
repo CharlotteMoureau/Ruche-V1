@@ -650,26 +650,78 @@ function waitForImageLoad(image, timeoutMs = 10000) {
 async function inlineNodeImages(root) {
   const images = [...root.querySelectorAll("img")];
 
+  function getImageCandidateUrls(image) {
+    const candidates = [];
+    const pushCandidate = (value) => {
+      const trimmed = String(value || "").trim();
+      if (!trimmed || candidates.includes(trimmed)) {
+        return;
+      }
+
+      candidates.push(trimmed);
+    };
+
+    pushCandidate(image.currentSrc);
+    pushCandidate(image.getAttribute("src"));
+
+    const cardId = image
+      .closest(".hex-front")
+      ?.querySelector("span")
+      ?.textContent?.trim();
+    if (cardId) {
+      pushCandidate(`/data/icons/${cardId}.png`);
+      pushCandidate(`/data/icons/${encodeURIComponent(cardId)}.png`);
+      if (cardId.endsWith(".")) {
+        pushCandidate(`/data/icons/${cardId.slice(0, -1)}.png`);
+      }
+    }
+
+    return candidates;
+  }
+
+  async function tryInlineImage(image, source) {
+    const resolvedUrl = new URL(source, window.location.href).toString();
+    const response = await fetch(resolvedUrl, { cache: "force-cache" });
+    if (!response.ok) {
+      return false;
+    }
+
+    const blob = await response.blob();
+    image.setAttribute("src", await blobToDataUrl(blob));
+    await waitForImageLoad(image);
+
+    return image.naturalWidth > 0;
+  }
+
   await Promise.all(
     images.map(async (image) => {
-      const source = image.currentSrc || image.getAttribute("src") || "";
-      if (!source || source.startsWith("data:")) {
+      const candidateUrls = getImageCandidateUrls(image);
+      if (!candidateUrls.length) {
         await waitForImageLoad(image);
         return;
       }
 
-      try {
-        const resolvedUrl = new URL(source, window.location.href).toString();
-        const response = await fetch(resolvedUrl, { cache: "force-cache" });
-        if (!response.ok) {
+      for (const source of candidateUrls) {
+        const isDataUrl = source.startsWith("data:");
+
+        if (isDataUrl) {
+          image.setAttribute("src", source);
           await waitForImageLoad(image);
-          return;
+          if (image.naturalWidth > 0) {
+            return;
+          }
+
+          continue;
         }
 
-        const blob = await response.blob();
-        image.setAttribute("src", await blobToDataUrl(blob));
-      } catch {
-        // Ignore inlining failures and keep original image source.
+        try {
+          const didInline = await tryInlineImage(image, source);
+          if (didInline) {
+            return;
+          }
+        } catch {
+          // Try next candidate source.
+        }
       }
 
       await waitForImageLoad(image);

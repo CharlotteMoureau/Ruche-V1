@@ -1,27 +1,27 @@
 export default function FreeHexCard({ card }) {
-  const text = card.title || "";
+	const text = card.title || "";
 
-  let svg = [
-    <svg
-      className="icon"
-      version="1.1"
-      id="Layer_1"
-      xmlns="http://www.w3.org/2000/svg"
-      xmlnsXlink="http://www.w3.org/1999/xlink"
-      x="0px"
-      y="0px"
-      width="100%"
-      viewBox="0 0 512 512"
-      enableBackground="new 0 0 512 512"
-      xmlSpace="preserve"
-      key="svg"
-    >
-      <path
-        id="vert"
-        fill="currentColor"
-        opacity="1.000000"
-        stroke="none"
-        d="
+	let svg = [
+		<svg
+			className="icon"
+			version="1.1"
+			id="Layer_1"
+			xmlns="http://www.w3.org/2000/svg"
+			xmlnsXlink="http://www.w3.org/1999/xlink"
+			x="0px"
+			y="0px"
+			width="100%"
+			viewBox="0 0 512 512"
+			enableBackground="new 0 0 512 512"
+			xmlSpace="preserve"
+			key="svg"
+		>
+			<path
+				id="vert"
+				fill="currentColor"
+				opacity="1.000000"
+				stroke="none"
+				d="
 M1.000001,308.468689 
 	C1.493660,307.954712 2.282320,308.091431 2.438720,307.838013 
 	C10.923591,294.088013 19.227674,280.225128 27.818722,266.542328 
@@ -149,43 +149,53 @@ M124.598824,400.922028
 	C143.018280,398.007294 135.721695,397.909576 128.433350,398.110504 
 	C127.313599,398.141327 126.231750,399.547546 124.598824,400.922028 
 z"
-      />
-    </svg>,
-  ];
+			/>
+		</svg>,
+	];
 
-  const clipId = `fsc-${card.id}`;
+	// Prefer a raster icon so capture on tablet browsers remains reliable.
+	svg = (
+		<img
+			className="free-img icon"
+			src="/data/icons/free.png"
+			alt=""
+			aria-hidden="true"
+		/>
+	);
 
-  return (
-    <svg
-      className={`free-space-card${card.color && card.color !== "lime" ? ` free-card--${card.color}` : ""}`}
-      viewBox="0 0 100 100"
-      xmlns="http://www.w3.org/2000/svg"
-      style={{ overflow: "visible" }}
-    >
-      <defs>
-        <clipPath id={clipId} clipPathUnits="objectBoundingBox">
-          <polygon points="0.5,0 0.93,0.25 0.93,0.75 0.5,1 0.07,0.75 0.07,0.25" />
-        </clipPath>
-      </defs>
+	const clipId = `fsc-${card.id}`;
 
-      <polygon
-        className="hex-shape"
-        points="50,0 93,25 93,75 50,100 7,75 7,25"
-      />
-      <foreignObject
-        x="0"
-        y="0"
-        width="100"
-        height="100"
-        clipPath={`url(#${clipId})`}
-      >
-        <div className="free-hex-inner">
-          <div className="free-hex-front">
-            <h4>{text}</h4>
-            {svg}
-          </div>
-        </div>
-      </foreignObject>
-    </svg>
-  );
+	return (
+		<svg
+			className={`free-space-card${card.color && card.color !== "lime" ? ` free-card--${card.color}` : ""}`}
+			viewBox="0 0 100 100"
+			xmlns="http://www.w3.org/2000/svg"
+			style={{ overflow: "visible" }}
+		>
+			<defs>
+				<clipPath id={clipId} clipPathUnits="objectBoundingBox">
+					<polygon points="0.5,0 0.93,0.25 0.93,0.75 0.5,1 0.07,0.75 0.07,0.25" />
+				</clipPath>
+			</defs>
+
+			<polygon
+				className="hex-shape"
+				points="50,0 93,25 93,75 50,100 7,75 7,25"
+			/>
+			<foreignObject
+				x="0"
+				y="0"
+				width="100"
+				height="100"
+				clipPath={`url(#${clipId})`}
+			>
+				<div className="free-hex-inner">
+					<div className="free-hex-front">
+						<h4>{text}</h4>
+						{svg}
+					</div>
+				</div>
+			</foreignObject>
+		</svg>
+	);
 }
