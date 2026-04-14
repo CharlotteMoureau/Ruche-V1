@@ -1422,6 +1422,8 @@ export default function RucheEditorPage() {
             <Toolbar
               onReset={handleResetRequest}
               showResetButton={canEdit}
+              showExportButton={!isHiveLoading}
+              showCommentsButton={!isHiveLoading}
               showCollaboratorsButton={isNew}
               isCollaboratorsLocked={requiresSavedHivePrompt}
               canInvite={
@@ -1499,6 +1501,8 @@ export default function RucheEditorPage() {
         <Toolbar
           onReset={handleResetRequest}
           showResetButton={canEdit}
+          showExportButton={!isHiveLoading}
+          showCommentsButton={!isHiveLoading}
           showCollaboratorsButton={isNew}
           isCollaboratorsLocked={requiresSavedHivePrompt}
           canInvite={

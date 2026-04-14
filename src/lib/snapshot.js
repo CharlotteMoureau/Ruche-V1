@@ -261,6 +261,67 @@ function createEmptyState(message) {
   });
 }
 
+function createCardNotesTitle({
+  card,
+  cardLabel,
+  iconCandidatesByCardId,
+  iconSourceByCardId,
+}) {
+  const heading = createElement("h2", {
+    styles: {
+      margin: "0 0 10px",
+      fontSize: "22px",
+      lineHeight: "1.3",
+      color: "#3b2c1d",
+      display: "flex",
+      alignItems: "center",
+      gap: "10px",
+    },
+  });
+
+  const cardId = String(card?.id ?? "").trim();
+  const resolvedIconSource = cardId
+    ? iconSourceByCardId?.get(cardId) || ""
+    : "";
+  const boardIconCandidates = cardId
+    ? iconCandidatesByCardId?.get(cardId) || []
+    : [];
+  const fallbackIconCandidates = boardIconCandidates.length
+    ? []
+    : getCardIconCandidates(card);
+  const iconCandidates = [
+    ...new Set([
+      ...(resolvedIconSource ? [resolvedIconSource] : []),
+      ...boardIconCandidates,
+      ...fallbackIconCandidates,
+    ]),
+  ];
+  if (iconCandidates.length) {
+    const icon = createElement("img", {
+      styles: {
+        width: "26px",
+        height: "26px",
+        objectFit: "contain",
+        flex: "0 0 auto",
+      },
+    });
+
+    icon.alt = card.title || card.id || "";
+    icon.dataset.iconCandidates = JSON.stringify(iconCandidates);
+    icon.src = iconCandidates[0];
+
+    heading.appendChild(icon);
+  }
+
+  heading.appendChild(
+    createElement("span", {
+      text: `${cardLabel}: ${card.title || "-"}`,
+    }),
+  );
+
+  return heading;
+}
+
 function createCommentItem({
   author,
   dateText,
@@ -379,6 +440,8 @@ function createCardNotesExportNode({
   cardNotesTitle,
   noCardNotesMessage,
   cardLabel,
+  iconCandidatesByCardId,
+  iconSourceByCardId,
   unknownUserLabel,
   formatCreatedByText,
   formatUpdatedByText,
@@ -402,18 +465,16 @@ function createCardNotesExportNode({
         ...EXPORT_COMMENT_STYLE,
         marginTop: index ? "18px" : "0",
         background: "#fffdf8",
+        border: getCardNotesBorderStyle(card),
       },
     });
 
     wrapper.appendChild(
-      createElement("h2", {
-        text: `${cardLabel}: ${card.title || "-"}`,
-        styles: {
-          margin: "0 0 10px",
-          fontSize: "22px",
-          lineHeight: "1.3",
-          color: "#3b2c1d",
-        },
+      createCardNotesTitle({
+        card,
+        cardLabel,
+        iconCandidatesByCardId,
+        iconSourceByCardId,
       }),
     );
 
@@ -479,6 +540,9 @@ async function captureDetachedNode(node) {
   document.body.appendChild(stage);
 
   try {
+    await inlineNodeImages(node);
+    await waitForAllNodeImages(node);
+    await waitForNextPaint();
     await waitForCaptureFrame();
     const { width, height } = getCaptureDimensions(node);
     return await domtoimage.toPng(node, {
@@ -535,6 +599,49 @@ function resolveBoardCaptureNode(board) {
   }
 
   return board.querySelector(".hive-board__canvas") || board;
+}
+
+function getBoardIconCandidatesByCardId(board) {
+  const captureNode = resolveBoardCaptureNode(board);
+  const candidatesByCardId = new Map();
+
+  if (!captureNode) {
+    return candidatesByCardId;
+  }
+
+  const cards = [...captureNode.querySelectorAll(".draggable-card")];
+  cards.forEach((cardNode) => {
+    const cardId = cardNode
+      .querySelector(".hex-front span")
+      ?.textContent?.trim();
+    if (!cardId) {
+      return;
+    }
+
+    const icon = cardNode.querySelector(".hex-front img");
+    if (!icon) {
+      return;
+    }
+
+    const iconCandidates = [];
+    const pushCandidate = (value) => {
+      const trimmed = String(value || "").trim();
+      if (!trimmed || iconCandidates.includes(trimmed)) {
+        return;
+      }
+
+      iconCandidates.push(trimmed);
+    };
+
+    pushCandidate(icon.currentSrc);
+    pushCandidate(icon.getAttribute("src"));
+
+    if (iconCandidates.length) {
+      candidatesByCardId.set(cardId, iconCandidates);
+    }
+  });
+
+  return candidatesByCardId;
 }
 
 function normalizePreviewCardsFromBoardData(boardData) {
@@ -613,6 +720,28 @@ function getPreviewCategoryTextColor(cardOrCategory) {
   return "#ffffff";
 }
 
+function hasDashedCardBorder(cardOrCategory) {
+  const category = typeof cardOrCategory === "string"
+    ? cardOrCategory
+    : cardOrCategory?.category;
+
+  return (
+    category === "recommandations-enseignant" ||
+    category === "recommandations-equipe" ||
+    category === "free"
+  );
+}
+
+function getCardNotesBorderStyle(card) {
+  const isDashed = hasDashedCardBorder(card);
+  const borderStyle = isDashed ? "dashed" : "solid";
+  const borderColor = isDashed
+    ? getPreviewCategoryStroke(card)
+    : getPreviewCategoryFill(card?.category);
+
+  return `${borderStyle} 3px ${borderColor}`;
+}
+
 function drawWrappedCenteredText(context, text, centerX, startY, maxWidth, lineHeight, maxLines) {
   const words = String(text || "").trim().split(/\s+/).filter(Boolean);
   if (!words.length) {
@@ -661,6 +790,82 @@ function getCardIconCandidates(card) {
   }
 
   return [...new Set(candidates)];
+}
+
+async function resolveIconSourceFromCandidates(candidates = []) {
+  for (const candidate of candidates) {
+    const raw = String(candidate || "").trim();
+    if (!raw) {
+      continue;
+    }
+
+    const resolvedUrl = raw.startsWith("data:")
+      ? raw
+      : new URL(raw, window.location.href).toString();
+
+    if (resolvedUrl.startsWith("data:")) {
+      try {
+        await loadImage(resolvedUrl);
+        return resolvedUrl;
+      } catch {
+        continue;
+      }
+    }
+
+    try {
+      const response = await fetch(resolvedUrl, { cache: "force-cache" });
+      if (response.ok) {
+        const dataUrl = await blobToDataUrl(await response.blob());
+        await loadImage(dataUrl);
+        return dataUrl;
+      }
+    } catch {
+      // Fall through to direct URL loading below.
+    }
+
+    try {
+      const loadedImage = await loadImage(resolvedUrl);
+      const dataUrl = imageToDataUrl(loadedImage);
+      if (dataUrl) {
+        await loadImage(dataUrl);
+        return dataUrl;
+      }
+
+      return resolvedUrl;
+    } catch {
+      // Try next source.
+    }
+  }
+
+  return null;
+}
+
+async function resolveCardIconSourcesByCardId(cards = [], iconCandidatesByCardId) {
+  const iconSourceByCardId = new Map();
+
+  await Promise.all(
+    cards.map(async (card) => {
+      const cardId = String(card?.id ?? "").trim();
+      if (!cardId) {
+        return;
+      }
+
+      const boardIconCandidates = iconCandidatesByCardId?.get(cardId) || [];
+      const fallbackCandidates = boardIconCandidates.length
+        ? []
+        : getCardIconCandidates(card);
+      const candidates = [
+        ...new Set([...boardIconCandidates, ...fallbackCandidates]),
+      ];
+
+      const resolvedSource = await resolveIconSourceFromCandidates(candidates);
+      if (resolvedSource) {
+        iconSourceByCardId.set(cardId, resolvedSource);
+      }
+    }),
+  );
+
+  return iconSourceByCardId;
 }
 
 function drawHexPath(context, x, y, size) {
@@ -927,6 +1132,26 @@ function blobToDataUrl(blob) {
   });
 }
 
+function imageToDataUrl(image) {
+  const width = Math.max(1, image.naturalWidth || image.width || 0);
+  const height = Math.max(1, image.naturalHeight || image.height || 0);
+  const canvas = document.createElement("canvas");
+  canvas.width = width;
+  canvas.height = height;
+
+  const context = canvas.getContext("2d");
+  if (!context) {
+    return null;
+  }
+
+  try {
+    context.drawImage(image, 0, 0, width, height);
+    return canvas.toDataURL("image/png");
+  } catch {
+    return null;
+  }
+}
+
 function waitForImageLoad(image, timeoutMs = 10000) {
   if (image.complete && image.naturalWidth > 0) {
     if (typeof image.decode === "function") {
@@ -957,6 +1182,19 @@ function waitForImageLoad(image, timeoutMs = 10000) {
   });
 }
 
+async function waitForAllNodeImages(root) {
+  const images = [...root.querySelectorAll("img")];
+  await Promise.all(images.map((image) => waitForImageLoad(image, 12000)));
+}
+
+function waitForNextPaint() {
+  return new Promise((resolve) => {
+    window.requestAnimationFrame(() => {
+      window.requestAnimationFrame(resolve);
+    });
+  });
+}
+
 async function inlineNodeImages(root) {
   const images = [...root.querySelectorAll("img")];
 
@@ -970,6 +1208,20 @@ async function inlineNodeImages(root) {
 
       candidates.push(trimmed);
     };
+
+    const imageDatasetCandidates = image.dataset?.iconCandidates;
+    if (imageDatasetCandidates) {
+      try {
+        const parsedCandidates = JSON.parse(imageDatasetCandidates);
+        if (Array.isArray(parsedCandidates)) {
+          parsedCandidates.forEach((candidate) => {
+            pushCandidate(candidate);
+          });
+        }
+      } catch {
+        // Ignore malformed candidate lists.
+      }
+    }
 
     pushCandidate(image.currentSrc);
     pushCandidate(image.getAttribute("src"));
@@ -1007,6 +1259,15 @@ async function inlineNodeImages(root) {
     const resolvedUrl = new URL(source, window.location.href).toString();
     image.setAttribute("src", resolvedUrl);
     await waitForImageLoad(image);
+
+    if (image.naturalWidth > 0) {
+      const dataUrl = imageToDataUrl(image);
+      if (dataUrl) {
+        image.setAttribute("src", dataUrl);
+        await waitForImageLoad(image);
+      }
+    }
+
     return image.naturalWidth > 0;
   }
 
@@ -1085,6 +1346,8 @@ async function captureNodeImage(node, options = {}) {
 
   try {
     await inlineNodeImages(clone);
+    await waitForAllNodeImages(clone);
+    await waitForNextPaint();
     await waitForCaptureFrame();
     return await domtoimage.toPng(frame, {
       cacheBust: true,
@@ -1325,6 +1588,12 @@ export async function captureHiveExportBundle({
   formatCreatedByText,
   formatUpdatedByText,
 }) {
+  const iconCandidatesByCardId = getBoardIconCandidatesByCardId(board);
+  const cardsWithNotes = getCardsWithNotes(boardCards);
+  const iconSourceByCardId = await resolveCardIconSourcesByCardId(
+    cardsWithNotes,
+    iconCandidatesByCardId,
+  );
   const { frontDataUrl, backDataUrl } = await captureBoardImages(board);
   const chatCommentChunks = splitCommentsForExport(comments, CHAT_EXPORT_CHUNK_SIZE);
   const chatDataUrls = await Promise.all(
@@ -1340,7 +1609,7 @@ export async function captureHiveExportBundle({
       ),
     ),
   );
-  const cardNotesChunks = chunkItems(getCardsWithNotes(boardCards), CHAT_EXPORT_CHUNK_SIZE);
+  const cardNotesChunks = chunkItems(cardsWithNotes, CHAT_EXPORT_CHUNK_SIZE);
   const cardCommentsDataUrls = await Promise.all(
     cardNotesChunks.map((cardsChunk) =>
       captureDetachedNode(
@@ -1349,6 +1618,8 @@ export async function captureHiveExportBundle({
           cardNotesTitle,
           noCardNotesMessage,
           cardLabel,
+          iconCandidatesByCardId,
+          iconSourceByCardId,
           unknownUserLabel,
           formatCreatedByText,
           formatUpdatedByText,

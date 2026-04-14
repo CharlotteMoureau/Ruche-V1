@@ -17,6 +17,8 @@ import {
 export default function Toolbar({
   onReset,
   showResetButton = true,
+  showExportButton = true,
+  showCommentsButton = true,
   showCollaboratorsButton = false,
   isCollaboratorsLocked = false,
   canInvite = false,
@@ -268,10 +270,12 @@ export default function Toolbar({
             <FontAwesomeIcon icon={faArrowsRotate} /> {t("toolbar.reset")}
           </button>
         ) : null}
-        <button onClick={handleExport} disabled={exportLoading}>
-          <FontAwesomeIcon icon={faDownload} />
-          {exportLoading ? t("toolbar.exporting") : t("toolbar.export")}
-        </button>
+        {showExportButton ? (
+          <button onClick={handleExport} disabled={exportLoading}>
+            <FontAwesomeIcon icon={faDownload} />
+            {exportLoading ? t("toolbar.exporting") : t("toolbar.export")}
+          </button>
+        ) : null}
         {shouldShowCollaboratorsButton ? (
           <button
             type="button"
@@ -286,7 +290,7 @@ export default function Toolbar({
             <FontAwesomeIcon icon={faUserPlus} /> {t("toolbar.collaborators")}
           </button>
         ) : null}
-        {onOpenComments && (
+        {showCommentsButton && onOpenComments && (
           <button
             type="button"
             onClick={onOpenComments}
