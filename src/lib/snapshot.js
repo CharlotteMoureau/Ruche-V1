@@ -685,21 +685,28 @@ function drawHexPath(context, x, y, size) {
 
 async function loadImageFromCandidates(candidates) {
   for (const candidate of candidates) {
+    const resolvedUrl = candidate.startsWith("data:")
+      ? candidate
+      : new URL(candidate, window.location.href).toString();
+
     try {
-      if (candidate.startsWith("data:")) {
-        return await loadImage(candidate);
+      if (resolvedUrl.startsWith("data:")) {
+        return await loadImage(resolvedUrl);
       }
 
-      const resolvedUrl = new URL(candidate, window.location.href).toString();
       const response = await fetch(resolvedUrl, { cache: "force-cache" });
       if (!response.ok) {
-        continue;
+        throw new Error("Icon fetch failed");
       }
 
       const dataUrl = await blobToDataUrl(await response.blob());
       return await loadImage(dataUrl);
     } catch {
-      // Try next source.
+      try {
+        return await loadImage(resolvedUrl);
+      } catch {
+        // Try next source.
+      }
     }
   }
 
@@ -996,6 +1003,13 @@ async function inlineNodeImages(root) {
     return image.naturalWidth > 0;
   }
 
+  async function tryLoadImageDirectly(image, source) {
+    const resolvedUrl = new URL(source, window.location.href).toString();
+    image.setAttribute("src", resolvedUrl);
+    await waitForImageLoad(image);
+    return image.naturalWidth > 0;
+  }
+
   await Promise.all(
     images.map(async (image) => {
       const candidateUrls = getImageCandidateUrls(image);
@@ -1020,6 +1034,15 @@ async function inlineNodeImages(root) {
         try {
           const didInline = await tryInlineImage(image, source);
           if (didInline) {
+            return;
+          }
+        } catch {
+          // Fall through to direct URL loading below.
+        }
+
+        try {
+          const didLoadDirectly = await tryLoadImageDirectly(image, source);
+          if (didLoadDirectly) {
             return;
           }
         } catch {
