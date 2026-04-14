@@ -63,6 +63,7 @@ export function useDraggableCard({
   onReturnCardsToLibrary,
   onDragStart,
   onToggleSelection,
+  onToggleSingleSelection,
   onClearSelection,
   selectionMode = false,
   isTabletEditorMode = false,
@@ -165,11 +166,15 @@ export function useDraggableCard({
         lastPointerClient,
         isActive,
         toggleSelectionOnRelease,
+        toggleSingleSelectionOnRelease,
       } = dragStateRef.current;
 
       if (!isActive) {
         if (toggleSelectionOnRelease) {
           onToggleSelection(card.id);
+        }
+        if (toggleSingleSelectionOnRelease) {
+          onToggleSingleSelection?.(card.id);
         }
         dragStateRef.current = null;
         setIsDraggingOverLibrary(false);
@@ -227,12 +232,16 @@ export function useDraggableCard({
       onReturnCardsToLibrary,
       onReturnToLibrary,
       onToggleSelection,
+      onToggleSingleSelection,
     ],
   );
 
   const startDrag = useCallback(
     (clientX, clientY, options = {}) => {
-      const { toggleSelectionOnRelease = false } = options;
+      const {
+        toggleSelectionOnRelease = false,
+        toggleSingleSelectionOnRelease = false,
+      } = options;
       const shouldDragSelection =
         isSelected &&
         selectedCards.length > 1 &&
@@ -253,6 +262,7 @@ export function useDraggableCard({
         isActive: false,
         isOverLibrary: false,
         toggleSelectionOnRelease,
+        toggleSingleSelectionOnRelease,
         cards: dragCards.map((dragCard) => ({
           card: dragCard,
           startPosition: dragCard.position,
@@ -302,12 +312,15 @@ export function useDraggableCard({
         return;
       }
 
-      startDrag(event.clientX, event.clientY);
+      startDrag(event.clientX, event.clientY, {
+        toggleSingleSelectionOnRelease: isTabletEditorMode,
+      });
     },
     [
       card.id,
       dragDisabled,
       isSelected,
+      isTabletEditorMode,
       onUnavailableInteraction,
       onToggleSelection,
       selectionMode,
@@ -363,12 +376,15 @@ export function useDraggableCard({
         return;
       }
 
-      startDrag(touch.clientX, touch.clientY);
+      startDrag(touch.clientX, touch.clientY, {
+        toggleSingleSelectionOnRelease: isTabletEditorMode,
+      });
     },
     [
       card.id,
       dragDisabled,
       isSelected,
+      isTabletEditorMode,
       onUnavailableInteraction,
       onToggleSelection,
       selectionMode,

@@ -13,6 +13,7 @@ export default function DraggableCard({
   onReturnCardsToLibrary,
   onDragStart,
   onToggleSelection,
+  onToggleSingleSelection,
   onClearSelection,
   selectionMode = false,
   isTabletEditorMode = false,
@@ -34,6 +35,7 @@ export default function DraggableCard({
       onReturnCardsToLibrary={onReturnCardsToLibrary}
       onDragStart={onDragStart}
       onToggleSelection={onToggleSelection}
+      onToggleSingleSelection={onToggleSingleSelection}
       onClearSelection={onClearSelection}
       selectionMode={selectionMode}
       isTabletEditorMode={isTabletEditorMode}

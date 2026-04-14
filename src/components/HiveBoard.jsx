@@ -33,12 +33,15 @@ export default function HiveBoard({
   canUndo = false,
   canRedo = false,
   selectedCardIds,
+  singleSelectedCardId = null,
   boardSelectionMode = false,
   onToggleCardSelection,
+  onToggleSingleCardSelection,
   onClearSelection,
   onToggleBoardSelectionMode,
   onExitBoardSelectionMode,
   onReturnSelectedCards,
+  onReturnSingleSelectedCard,
   onOpenCardNote,
   noteLocked = false,
   canEdit = true,
@@ -76,6 +79,7 @@ export default function HiveBoard({
   const [warningMessage, setWarningMessage] = useState("");
   const selectedCards = cards.filter((card) => selectedCardIds.has(card.id));
   const selectedCount = selectedCardIds.size;
+  const hasSingleSelectedCard = Boolean(singleSelectedCardId);
   const defaultZoom = isCompactLayout
     ? BOARD_COMPACT_DEFAULT_ZOOM
     : BOARD_DEFAULT_ZOOM;
@@ -791,6 +795,15 @@ export default function HiveBoard({
               {t("workspace.returnSelectedToLibrary", { count: selectedCount })}
             </button>
           ) : null}
+          {isTabletEditorMode && !boardSelectionMode && hasSingleSelectedCard ? (
+            <button
+              type="button"
+              onClick={onReturnSingleSelectedCard}
+              disabled={tabletUsageBlocked || !canEdit}
+            >
+              {t("workspace.returnSingleSelectedToLibrary")}
+            </button>
+          ) : null}
         </div>
         <div className="hive-board__controls-group hive-board__controls-group--zoom">
           <button
@@ -874,11 +887,14 @@ export default function HiveBoard({
                 onTouchStart={handleBoardMouseDown}
               >
                 {cards.map((card) => {
+                  const isSingleSelected =
+                    !boardSelectionMode && singleSelectedCardId === card.id;
+
                   return (
                     <DraggableCard
                       key={card.id}
                       card={card}
-                      isSelected={selectedCardIds.has(card.id)}
+                      isSelected={selectedCardIds.has(card.id) || isSingleSelected}
                       selectedCards={selectedCards}
                       zoom={zoom}
                       onMoveCard={onMoveCard}
@@ -887,6 +903,7 @@ export default function HiveBoard({
                       onReturnCardsToLibrary={onReturnCardsToLibrary}
                       onDragStart={onCardDragStart}
                       onToggleSelection={onToggleCardSelection}
+                      onToggleSingleSelection={onToggleSingleCardSelection}
                       onClearSelection={onClearSelection}
                       selectionMode={isTabletEditorMode && boardSelectionMode}
                       isTabletEditorMode={isTabletEditorMode}

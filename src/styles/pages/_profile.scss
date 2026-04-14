@@ -12,11 +12,11 @@
     letter-spacing: 0.02em;
   }
 
-  > p {
+  >p {
     margin: 0 0 10px;
   }
 
-  > p > strong {
+  >p>strong {
     font-weight: 800;
     color: #1f1f1f;
   }
@@ -99,8 +99,8 @@
     width: 100%;
   }
 
-  .hive-details > strong,
-  .hive-title-row > strong {
+  .hive-details>strong,
+  .hive-title-row>strong {
     display: inline-block;
     min-width: 0;
     padding: 4px 10px;
@@ -159,7 +159,7 @@
 
   .hive-list-controls {
     display: grid;
-    grid-template-columns: minmax(0, 1.5fr) minmax(220px, 0.8fr);
+    grid-template-columns: minmax(0, 1.5fr) minmax(220px, 0.9fr);
     gap: 14px;
     align-items: stretch;
     margin: 8px 0 16px;
@@ -173,11 +173,9 @@
       padding: 14px 16px;
       border: 1px solid rgba(49, 39, 131, 0.14);
       border-radius: 14px;
-      background: linear-gradient(
-        180deg,
-        rgba(49, 39, 131, 0.07) 0%,
-        rgba(255, 255, 255, 0.98) 100%
-      );
+      background: linear-gradient(180deg,
+          rgba(49, 39, 131, 0.07) 0%,
+          rgba(255, 255, 255, 0.98) 100%);
       box-shadow: 0 8px 18px rgba(49, 39, 131, 0.06);
     }
 
@@ -198,10 +196,83 @@
     }
 
     .hive-list-controls__search-row {
+      display: block;
+    }
+
+    .hive-list-controls__search-input-wrap {
+      position: relative;
+      min-width: 0;
+    }
+
+    .hive-list-controls__search-tools {
+      position: absolute;
+      top: 50%;
+      right: 8px;
+      transform: translateY(-50%);
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      z-index: 2;
+    }
+
+    .hive-search-icon-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 34px;
+      height: 34px;
+      padding: 0;
+      border: 1px solid rgba(49, 39, 131, 0.2);
+      border-radius: 999px;
+      background: #fff;
+      color: $bleu-fonce;
+      cursor: pointer;
+      transition: background-color 120ms ease, border-color 120ms ease;
+    }
+
+    .hive-search-icon-btn:hover {
+      background: rgba(49, 39, 131, 0.08);
+      border-color: rgba(49, 39, 131, 0.42);
+    }
+
+    .hive-search-icon-btn.is-active {
+      background: rgba(49, 39, 131, 0.14);
+      border-color: rgba(49, 39, 131, 0.48);
+    }
+
+    .hive-filter-popover {
+      position: absolute;
+      top: calc(100% + 8px);
+      right: 0;
+      min-width: 190px;
       display: grid;
-      grid-template-columns: minmax(0, 1fr) auto;
-      gap: 10px;
-      align-items: stretch;
+      gap: 8px;
+      padding: 10px;
+      border: 1px solid rgba(49, 39, 131, 0.22);
+      border-radius: 12px;
+      background: #fff;
+      box-shadow: 0 14px 30px rgba(24, 19, 66, 0.18);
+      z-index: 15;
+    }
+
+    .hive-filter-popover__option {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 8px;
+      border-radius: 10px;
+      background: rgba(49, 39, 131, 0.04);
+      color: #2d2d2d;
+      font-size: 0.93rem;
+      font-weight: 600;
+      cursor: pointer;
+
+      input {
+        margin: 0;
+        width: 16px;
+        height: 16px;
+        accent-color: #312783;
+      }
     }
 
     .hive-list-controls__input,
@@ -218,10 +289,22 @@
       box-sizing: border-box;
     }
 
+    .hive-list-controls__input {
+      padding-right: 92px;
+    }
+
     .hive-list-controls__input::placeholder {
       color: #5f5f5f;
       font-size: 1rem;
       opacity: 1;
+    }
+
+    .hive-list-controls__input[type="search"]::-webkit-search-cancel-button,
+    .hive-list-controls__input[type="search"]::-webkit-search-decoration,
+    .hive-list-controls__input[type="search"]::-webkit-search-results-button,
+    .hive-list-controls__input[type="search"]::-webkit-search-results-decoration {
+      -webkit-appearance: none;
+      appearance: none;
     }
 
     .hive-list-controls__input:focus,
@@ -229,19 +312,6 @@
       border-color: rgba(49, 39, 131, 0.5);
       outline: 3px solid rgba(49, 39, 131, 0.14);
       outline-offset: 0;
-    }
-
-    .hive-search-clear {
-      align-self: stretch;
-      min-width: 132px;
-      min-height: 52px;
-      margin: 0;
-      padding: 12px 16px;
-      border: 0;
-      cursor: pointer;
-      color: #222;
-      font-size: 0.98rem;
-      font-weight: 700;
     }
   }
 
@@ -272,12 +342,10 @@
     h3 {
       margin-top: 0;
       border-left-color: $bleu-fonce;
-      background: linear-gradient(
-        90deg,
-        rgba(49, 39, 131, 0.18) 0%,
-        rgba(49, 39, 131, 0.05) 60%,
-        #fff 100%
-      );
+      background: linear-gradient(90deg,
+          rgba(49, 39, 131, 0.18) 0%,
+          rgba(49, 39, 131, 0.05) 60%,
+          #fff 100%);
       color: $bleu-fonce;
     }
 
@@ -317,11 +385,9 @@
       padding: 14px 16px;
       border: 1px solid rgba(49, 39, 131, 0.14);
       border-radius: 14px;
-      background: linear-gradient(
-        180deg,
-        rgba(49, 39, 131, 0.07) 0%,
-        rgba(255, 255, 255, 0.98) 100%
-      );
+      background: linear-gradient(180deg,
+          rgba(49, 39, 131, 0.07) 0%,
+          rgba(255, 255, 255, 0.98) 100%);
       box-shadow: 0 8px 18px rgba(49, 39, 131, 0.06);
     }
 
@@ -371,12 +437,10 @@
       padding: 6px 12px;
       border-left: 4px solid $rose;
       border-radius: 8px;
-      background: linear-gradient(
-        90deg,
-        rgba(231, 52, 88, 0.2) 0%,
-        rgba(231, 52, 88, 0.06) 60%,
-        #fff 100%
-      );
+      background: linear-gradient(90deg,
+          rgba(231, 52, 88, 0.2) 0%,
+          rgba(231, 52, 88, 0.06) 60%,
+          #fff 100%);
       color: #7a1129;
     }
 
@@ -416,12 +480,12 @@
       }
 
       .hive-list-controls__search-row {
-        grid-template-columns: minmax(0, 1fr) auto;
+        display: block;
       }
 
-      .hive-search-clear {
-        min-width: 144px;
-        padding-inline: 16px;
+      .hive-filter-popover {
+        right: auto;
+        left: 0;
       }
     }
 
@@ -470,11 +534,11 @@
       }
 
       .hive-list-controls__search-row {
-        grid-template-columns: 1fr;
+        display: block;
       }
 
-      .hive-search-clear {
-        width: 100%;
+      .hive-filter-popover {
+        min-width: min(240px, calc(100vw - 72px));
       }
     }
 

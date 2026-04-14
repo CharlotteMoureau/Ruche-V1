@@ -166,7 +166,9 @@ export default function AppHeader() {
                 {isTabletMenuOpen ? (
                   <div className="header-dropdown-menu header-dropdown-menu--tablet">
                     <section className="header-tablet-menu-section">
-                      <p className="header-tablet-menu-title">{t("header.hiveMenu")}</p>
+                      <p className="header-tablet-menu-title">
+                        {t("header.hiveMenu")}
+                      </p>
                       <button
                         type="button"
                         onClick={() => {
@@ -219,21 +221,6 @@ export default function AppHeader() {
                         <FontAwesomeIcon icon={faUserPlus} />
                         {t("toolbar.collaborators")}
                       </button>
-                      <button
-                        type="button"
-                        onClick={() => {
-                          dispatchEditorAction("comments");
-                          setIsTabletMenuOpen(false);
-                        }}
-                      >
-                        <FontAwesomeIcon icon={faComments} />
-                        {t("toolbar.comments")}
-                        {Number(editorHeaderState?.commentCount || 0) > 0 ? (
-                          <span className="inbox-badge">
-                            {editorHeaderState.commentCount}
-                          </span>
-                        ) : null}
-                      </button>
                     </section>
 
                     <section className="header-tablet-menu-section">
@@ -271,7 +258,9 @@ export default function AppHeader() {
                         <FontAwesomeIcon icon={faEnvelope} />
                         {t("header.inbox")}
                         {pendingInvitesCount > 0 ? (
-                          <span className="inbox-badge">{pendingInvitesCount}</span>
+                          <span className="inbox-badge">
+                            {pendingInvitesCount}
+                          </span>
                         ) : null}
                       </button>
                       <button
@@ -303,17 +292,32 @@ export default function AppHeader() {
           </div>
 
           {canUseTabletSaveButton ? (
-            <button
-              type="button"
-              className="header-save-btn"
-              disabled={Boolean(editorHeaderState?.isSaving)}
-              onClick={() => dispatchEditorAction("save")}
-            >
-              <FontAwesomeIcon icon={faFloppyDisk} />
-              {editorHeaderState?.isSaving
-                ? t("editor.saving")
-                : t("editor.saveHive")}
-            </button>
+            <>
+              <button
+                type="button"
+                className="header-save-btn"
+                disabled={Boolean(editorHeaderState?.isSaving)}
+                onClick={() => dispatchEditorAction("save")}
+              >
+                <FontAwesomeIcon icon={faFloppyDisk} />
+                {editorHeaderState?.isSaving
+                  ? t("editor.saving")
+                  : t("editor.saveHive")}
+              </button>
+              <button
+                type="button"
+                className="header-comments-btn"
+                onClick={() => dispatchEditorAction("comments")}
+                aria-label={t("toolbar.comments")}
+              >
+                <FontAwesomeIcon icon={faComments} />
+                {Number(editorHeaderState?.commentCount || 0) > 0 ? (
+                  <span className="inbox-badge">
+                    {editorHeaderState.commentCount}
+                  </span>
+                ) : null}
+              </button>
+            </>
           ) : null}
         </>
       ) : (

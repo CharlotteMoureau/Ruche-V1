@@ -230,12 +230,21 @@
 
 a.button-link-open,
 button.button-link-open {
+  background: $bleu-fonce;
+  color: #fff;
+}
+
+a.button-link-create,
+button.button-link-create {
   background: $jaune;
+  color: black;
 }
 
 a.button-link-duplicate,
 button.button-link-duplicate {
-  background: $jaune;
+  background: #fff;
+  color: $bleu-fonce;
+  border: 1px solid rgba($bleu-fonce, 0.55);
 }
 
 a.button-link-delete,
@@ -259,5 +268,7 @@ a.danger-btn {
 
 a.button-link-download,
 button.button-link-download {
-  background: $jaune;
+  background: #fff;
+  color: $bleu-fonce;
+  border: 1px solid rgba($bleu-fonce, 0.55);
 }

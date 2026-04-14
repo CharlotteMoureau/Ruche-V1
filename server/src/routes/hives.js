@@ -583,6 +583,34 @@ hivesRouter.post("/", async (req, res) => {
   return res.status(201).json(hive);
 });
 
+hivesRouter.get("/:id/meta", async (req, res) => {
+  const hive = await getHiveOr404(req.params.id);
+  if (!hive) {
+    return res.status(404).json({ error: "Hive not found", code: "HIVE_NOT_FOUND" });
+  }
+
+  if (!canReadHive(hive, req.user)) {
+    return res.status(403).json({ error: "Access denied", code: "HIVE_ACCESS_DENIED" });
+  }
+
+  return res.json({
+    id: hive.id,
+    title: hive.title,
+    kind: hive.kind,
+    owner: hive.owner,
+    createdAt: hive.createdAt,
+    updatedAt: hive.updatedAt,
+    canEdit: canEditHive(hive, req.user),
+    canComment: canCommentOnHive(hive, req.user),
+    collaborators: hive.collaborators.map((c) => ({
+      id: c.user.id,
+      username: c.user.username,
+      email: c.user.email,
+      role: c.role,
+    })),
+  });
+});
+
 hivesRouter.get("/:id", async (req, res) => {
   const hive = await getHiveOr404(req.params.id);
   if (!hive) {

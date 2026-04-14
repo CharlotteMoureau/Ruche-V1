@@ -15,6 +15,8 @@ import {
   faFloppyDisk,
   faGear,
   faHouse,
+  faUsers,
+  faFilter,
 } from "@fortawesome/free-solid-svg-icons";
 import { useAuth } from "../context/AuthContext";
 import { apiFetch, getApiErrorMessage } from "../lib/api";
@@ -36,7 +38,7 @@ import {
 } from "../lib/snapshot";
 import { HIVE_KINDS, resolveDefaultHiveKind } from "../lib/hives";
 
-const HIVES_PER_PAGE = 3;
+const HIVES_PER_PAGE = 5;
 const HIVE_TITLE_MAX_LENGTH = 100;
 const CARD_SIZE = 200;
 const BOARD_PADDING = 60;
@@ -306,8 +308,7 @@ export default function ProfilePage() {
   const [deletePasswordConfirm, setDeletePasswordConfirm] = useState("");
   const [deleteError, setDeleteError] = useState("");
   const [isDeleting, setIsDeleting] = useState(false);
-  const [ownedPage, setOwnedPage] = useState(1);
-  const [sharedPage, setSharedPage] = useState(1);
+  const [hivesPage, setHivesPage] = useState(1);
   const [selectingHiveType, setSelectingHiveType] = useState(false);
   const [selectedHiveKind, setSelectedHiveKind] = useState(null);
   const [creatingHive, setCreatingHive] = useState(false);
@@ -340,15 +341,17 @@ export default function ProfilePage() {
   });
   const [isUpdatingRole, setIsUpdatingRole] = useState(false);
   const [isUpdatingPassword, setIsUpdatingPassword] = useState(false);
-  const [ownedSearchQuery, setOwnedSearchQuery] = useState("");
-  const [sharedSearchQuery, setSharedSearchQuery] = useState("");
-  const [ownedSortMode, setOwnedSortMode] = useState("date-desc");
-  const [sharedSortMode, setSharedSortMode] = useState("date-desc");
+  const [hiveSearchQuery, setHiveSearchQuery] = useState("");
+  const [hivesSortMode, setHivesSortMode] = useState("date-desc");
+  const [showOwnedHives, setShowOwnedHives] = useState(true);
+  const [showSharedHives, setShowSharedHives] = useState(true);
+  const [isHiveFilterMenuOpen, setIsHiveFilterMenuOpen] = useState(false);
   const [activeProfileTab, setActiveProfileTab] = useState(PROFILE_TAB_HIVES);
   const [isLoadingProfile, setIsLoadingProfile] = useState(() =>
     Boolean(token),
   );
   const hydratedRoleFormUserIdRef = useRef(null);
+  const hiveFilterMenuRef = useRef(null);
   const defaultHiveKind = resolveDefaultHiveKind(profile?.user?.roleLabel);
   const isDcoProfile = defaultHiveKind === HIVE_KINDS.DCO;
   const localizedOtherRoleLabel = translateRole("Autre");
@@ -394,7 +397,7 @@ export default function ProfilePage() {
       }
       setIsLoadingProfile(true);
       try {
-        const data = await refreshMe();
+        const data = await refreshMe({ includePreviews: true });
         if (mounted) setProfile(data);
       } catch (err) {
         if (mounted) {
@@ -415,8 +418,12 @@ export default function ProfilePage() {
   useEffect(() => {
     if (!profile) return;
 
-    setOwnedPage((current) => clampPage(current, profile.ownedHives.length));
-    setSharedPage((current) => clampPage(current, profile.sharedHives.length));
+    setHivesPage((current) =>
+      clampPage(
+        current,
+        profile.ownedHives.length + profile.sharedHives.length,
+      ),
+    );
 
     const canonicalRole = resolveRoleFormValue(
       profile.user.roleLabel,
@@ -480,7 +487,7 @@ export default function ProfilePage() {
         },
       });
 
-      const data = await refreshMe();
+      const data = await refreshMe({ includePreviews: true });
       setProfile(data);
       setRoleForm({
         role: resolveRoleFormValue(data?.user?.roleLabel, roleOptions),
@@ -558,7 +565,7 @@ export default function ProfilePage() {
         method: "DELETE",
         token,
       });
-      const data = await refreshMe();
+      const data = await refreshMe({ includePreviews: true });
       setProfile(data);
       setConfirmDeleteHiveId(null);
     } catch (err) {
@@ -638,7 +645,7 @@ export default function ProfilePage() {
         },
       });
 
-      const data = await refreshMe();
+      const data = await refreshMe({ includePreviews: true });
       setProfile(data);
       setRenameOrDuplicateDraft({
         hiveId: null,
@@ -722,7 +729,7 @@ export default function ProfilePage() {
           boardPreviewImage,
         },
       });
-      const data = await refreshMe();
+      const data = await refreshMe({ includePreviews: true });
       setProfile(data);
       setRenameOrDuplicateDraft({
         hiveId: null,
@@ -802,7 +809,7 @@ export default function ProfilePage() {
           boardPreviewImage,
         },
       });
-      const data = await refreshMe();
+      const data = await refreshMe({ includePreviews: true });
       setProfile(data);
       setDuplicateDraft({ hiveId: null, sourceTitle: "", nextTitle: "" });
     } catch (err) {
@@ -981,62 +988,86 @@ export default function ProfilePage() {
     [profile],
   );
 
-  const { sortedOwnedHives, sortedSharedHives } = useMemo(() => {
-    const ownedNormalizedSearch = ownedSearchQuery.trim().toLowerCase();
-    const sharedNormalizedSearch = sharedSearchQuery.trim().toLowerCase();
+  const sortedHives = useMemo(() => {
+    const normalizedSearch = hiveSearchQuery.trim().toLowerCase();
 
-    const filtered = {
-      owned: ownedBaseHives.filter((hive) =>
-        (hive?.title || "").toLowerCase().includes(ownedNormalizedSearch),
-      ),
-      shared: sharedBaseHives.filter((hive) =>
-        (hive?.title || "").toLowerCase().includes(sharedNormalizedSearch),
-      ),
-    };
+    const ownedWithMeta = ownedBaseHives.map((hive) => ({
+      ...hive,
+      isSharedHive: false,
+    }));
 
-    return {
-      sortedOwnedHives: sortHives(filtered.owned, ownedSortMode, dateLocale),
-      sortedSharedHives: sortHives(filtered.shared, sharedSortMode, dateLocale),
-    };
+    const sharedWithMeta = sharedBaseHives.map((hive) => ({
+      ...hive,
+      isSharedHive: true,
+    }));
+
+    const filteredByOwnership = [...ownedWithMeta, ...sharedWithMeta].filter(
+      (hive) => {
+        if (hive.isSharedHive) return showSharedHives;
+        return showOwnedHives;
+      },
+    );
+
+    const filtered = filteredByOwnership.filter((hive) =>
+      (hive?.title || "").toLowerCase().includes(normalizedSearch),
+    );
+
+    return sortHives(filtered, hivesSortMode, dateLocale);
   }, [
     ownedBaseHives,
     sharedBaseHives,
-    ownedSearchQuery,
-    sharedSearchQuery,
-    ownedSortMode,
-    sharedSortMode,
+    hiveSearchQuery,
+    showOwnedHives,
+    showSharedHives,
+    hivesSortMode,
     dateLocale,
   ]);
 
   useEffect(() => {
-    setOwnedPage((current) => clampPage(current, sortedOwnedHives.length));
-  }, [sortedOwnedHives.length]);
+    setHivesPage((current) => clampPage(current, sortedHives.length));
+  }, [sortedHives.length]);
 
   useEffect(() => {
-    setSharedPage((current) => clampPage(current, sortedSharedHives.length));
-  }, [sortedSharedHives.length]);
+    if (!isHiveFilterMenuOpen) return undefined;
 
-  const ownedTotalPages = profile ? getTotalPages(sortedOwnedHives.length) : 1;
-  const sharedTotalPages = profile
-    ? getTotalPages(sortedSharedHives.length)
-    : 1;
-  const ownedCount = ownedBaseHives.length;
-  const sharedCount = sharedBaseHives.length;
-  const ownedVisibleCount = sortedOwnedHives.length;
-  const sharedVisibleCount = sortedSharedHives.length;
-
-  const { pagedOwnedHives, pagedSharedHives } = useMemo(() => {
-    return {
-      pagedOwnedHives: sortedOwnedHives.slice(
-        (ownedPage - 1) * HIVES_PER_PAGE,
-        ownedPage * HIVES_PER_PAGE,
-      ),
-      pagedSharedHives: sortedSharedHives.slice(
-        (sharedPage - 1) * HIVES_PER_PAGE,
-        sharedPage * HIVES_PER_PAGE,
-      ),
+    const handlePointerDown = (event) => {
+      if (
+        hiveFilterMenuRef.current &&
+        !hiveFilterMenuRef.current.contains(event.target)
+      ) {
+        setIsHiveFilterMenuOpen(false);
+      }
     };
-  }, [sortedOwnedHives, sortedSharedHives, ownedPage, sharedPage]);
+
+    const handleKeyDown = (event) => {
+      if (event.key === "Escape") {
+        setIsHiveFilterMenuOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handlePointerDown);
+    document.addEventListener("touchstart", handlePointerDown);
+    document.addEventListener("keydown", handleKeyDown);
+
+    return () => {
+      document.removeEventListener("mousedown", handlePointerDown);
+      document.removeEventListener("touchstart", handlePointerDown);
+      document.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [isHiveFilterMenuOpen]);
+
+  const hivesTotalPages = profile ? getTotalPages(sortedHives.length) : 1;
+  const allHivesCount = ownedBaseHives.length + sharedBaseHives.length;
+  const visibleHivesCount = sortedHives.length;
+
+  const pagedHives = useMemo(
+    () =>
+      sortedHives.slice(
+        (hivesPage - 1) * HIVES_PER_PAGE,
+        hivesPage * HIVES_PER_PAGE,
+      ),
+    [sortedHives, hivesPage],
+  );
 
   return (
     <section className="page-shell profile-page">
@@ -1070,8 +1101,9 @@ export default function ProfilePage() {
               id="profile-tab-hives"
               type="button"
               role="tab"
-              className={`profile-tab ${activeProfileTab === PROFILE_TAB_HIVES ? "is-active" : ""
-                }`}
+              className={`profile-tab ${
+                activeProfileTab === PROFILE_TAB_HIVES ? "is-active" : ""
+              }`}
               aria-selected={activeProfileTab === PROFILE_TAB_HIVES}
               aria-controls="profile-panel-hives"
               onClick={() => setActiveProfileTab(PROFILE_TAB_HIVES)}
@@ -1083,8 +1115,9 @@ export default function ProfilePage() {
               id="profile-tab-settings"
               type="button"
               role="tab"
-              className={`profile-tab ${activeProfileTab === PROFILE_TAB_SETTINGS ? "is-active" : ""
-                }`}
+              className={`profile-tab ${
+                activeProfileTab === PROFILE_TAB_SETTINGS ? "is-active" : ""
+              }`}
               aria-selected={activeProfileTab === PROFILE_TAB_SETTINGS}
               aria-controls="profile-panel-settings"
               onClick={() => setActiveProfileTab(PROFILE_TAB_SETTINGS)}
@@ -1104,7 +1137,7 @@ export default function ProfilePage() {
               <div className="inline-actions">
                 <button
                   type="button"
-                  className="button-link"
+                  className="button-link button-link-create"
                   onClick={handleCreateHiveClick}
                 >
                   <FontAwesomeIcon icon={faPlus} />
@@ -1112,246 +1145,112 @@ export default function ProfilePage() {
                 </button>
               </div>
 
-              {ownedCount > 0 ? (
+              {allHivesCount > 0 ? (
                 <>
                   <h3>{t("profile.myHives")}</h3>
                   <div className="hive-list-controls">
                     <div className="hive-list-controls__group hive-list-controls__search">
                       <label
                         className="hive-list-controls__label"
-                        htmlFor="owned-hive-search"
+                        htmlFor="hive-search"
                       >
                         {t("profile.searchLabel")}
                       </label>
                       <div className="hive-list-controls__search-row">
-                        <input
-                          id="owned-hive-search"
-                          className="hive-list-controls__input"
-                          type="search"
-                          value={ownedSearchQuery}
-                          onChange={(event) => {
-                            setOwnedSearchQuery(event.target.value);
-                            setOwnedPage(1);
-                          }}
-                          placeholder={t("profile.searchPlaceholder")}
-                        />
-                        {ownedSearchQuery.trim() ? (
-                          <button
-                            type="button"
-                            className="button-link hive-search-clear"
-                            onClick={() => {
-                              setOwnedSearchQuery("");
-                              setOwnedPage(1);
+                        <div className="hive-list-controls__search-input-wrap">
+                          <input
+                            id="hive-search"
+                            className="hive-list-controls__input"
+                            type="search"
+                            value={hiveSearchQuery}
+                            onChange={(event) => {
+                              setHiveSearchQuery(event.target.value);
+                              setHivesPage(1);
                             }}
+                            placeholder={t("profile.searchPlaceholder")}
+                          />
+                          <div
+                            className="hive-list-controls__search-tools"
+                            ref={hiveFilterMenuRef}
                           >
-                            <FontAwesomeIcon icon={faXmark} />
-                            {t("profile.clearSearch")}
-                          </button>
-                        ) : null}
-                      </div>
-                    </div>
-                    <div className="hive-list-controls__group hive-list-controls__sort">
-                      <label
-                        className="hive-list-controls__label"
-                        htmlFor="owned-hive-sort"
-                      >
-                        {t("profile.sortLabel")}
-                      </label>
-                      <select
-                        id="owned-hive-sort"
-                        className="hive-list-controls__select"
-                        value={ownedSortMode}
-                        onChange={(event) => {
-                          setOwnedSortMode(event.target.value);
-                          setOwnedPage(1);
-                        }}
-                      >
-                        <option value="date-desc">
-                          {t("profile.sortDateDesc")}
-                        </option>
-                        <option value="date-asc">
-                          {t("profile.sortDateAsc")}
-                        </option>
-                        <option value="name-asc">
-                          {t("profile.sortNameAsc")}
-                        </option>
-                        <option value="name-desc">
-                          {t("profile.sortNameDesc")}
-                        </option>
-                      </select>
-                    </div>
-                  </div>
-                  {ownedVisibleCount > 0 ? (
-                    <ul className="list-grid">
-                      {pagedOwnedHives.map((hive) => (
-                        <li key={hive.id}>
-                          <div className="hive-details">
-                            <div className="hive-title-row">
-                              <strong>{hive.title}</strong>
+                            {hiveSearchQuery.trim() ? (
                               <button
                                 type="button"
-                                className="hive-rename-trigger"
-                                onClick={() => openRenameHiveModal(hive)}
-                                aria-label={t("profile.renameHive")}
-                                title={t("profile.renameHive")}
-                                disabled={
-                                  Boolean(renamingHiveId) ||
-                                  Boolean(duplicatingHiveId)
-                                }
+                                className="hive-search-icon-btn"
+                                onClick={() => {
+                                  setHiveSearchQuery("");
+                                  setHivesPage(1);
+                                }}
+                                aria-label={t("profile.clearSearch")}
+                                title={t("profile.clearSearch")}
                               >
-                                <FontAwesomeIcon icon={faPen} />
+                                <FontAwesomeIcon icon={faXmark} />
                               </button>
-                            </div>
-                            <br />
-                            {t("profile.createdAt")} :{" "}
-                            {formatDateTime(hive.createdAt, dateLocale)}
-                            <br />
-                            {t("profile.updatedAt")} :{" "}
-                            {formatDateTime(hive.updatedAt, dateLocale)}
-                            <div className="hive-preview" aria-hidden="true">
-                              <HivePreview
-                                previewImage={hive.boardPreviewImage}
-                                snapshot={hive.boardSnapshot}
-                                emptyLabel={t("profile.emptyHive")}
-                              />
-                            </div>
-                          </div>
-                          <div className="inline-actions">
-                            <Link
-                              className="button-link button-link-open"
-                              to={`/hives/${hive.id}`}
-                            >
-                              <FontAwesomeIcon
-                                icon={faArrowUpRightFromSquare}
-                              />
-                              {t("profile.open")}
-                            </Link>
+                            ) : null}
                             <button
                               type="button"
-                              className="button-link button-link-duplicate"
-                              onClick={() => openDuplicateHiveModal(hive.id)}
-                              disabled={duplicatingHiveId === hive.id}
-                            >
-                              <FontAwesomeIcon icon={faCopy} />
-                              {duplicatingHiveId === hive.id
-                                ? t("profile.duplicating")
-                                : t("profile.duplicate")}
-                            </button>
-                            <button
-                              type="button"
-                              className="button-link button-link-download"
+                              className={`hive-search-icon-btn ${isHiveFilterMenuOpen ? "is-active" : ""}`}
                               onClick={() =>
-                                downloadHiveSnapshot(hive.id, hive.title)
+                                setIsHiveFilterMenuOpen((current) => !current)
                               }
-                              disabled={downloadingHiveId === hive.id}
+                              aria-label={t("profile.filterLabel")}
+                              title={t("profile.filterLabel")}
+                              aria-haspopup="menu"
+                              aria-expanded={isHiveFilterMenuOpen}
+                              aria-controls="hive-filter-popover"
                             >
-                              <FontAwesomeIcon icon={faDownload} />
-                              {downloadingHiveId === hive.id
-                                ? t("profile.downloading")
-                                : t("profile.download")}
+                              <FontAwesomeIcon icon={faFilter} />
                             </button>
-                            <button
-                              type="button"
-                              className="button-link button-link-delete"
-                              onClick={() => setConfirmDeleteHiveId(hive.id)}
-                              disabled={Boolean(deletingHiveId)}
-                            >
-                              <FontAwesomeIcon icon={faTrash} />
-                              {deletingHiveId === hive.id
-                                ? t("profile.deleting")
-                                : t("common.delete")}
-                            </button>
-                          </div>
-                        </li>
-                      ))}
-                    </ul>
-                  ) : (
-                    <p>{t("profile.noSearchResults")}</p>
-                  )}
-                  {ownedVisibleCount > HIVES_PER_PAGE ? (
-                    <div className="inline-actions">
-                      <button
-                        type="button"
-                        onClick={() =>
-                          setOwnedPage((current) => Math.max(1, current - 1))
-                        }
-                        disabled={ownedPage === 1}
-                      >
-                        <FontAwesomeIcon icon={faChevronLeft} />
-                        {t("common.previous")}
-                      </button>
-                      <span>
-                        {t("common.page")} {ownedPage}/{ownedTotalPages}
-                      </span>
-                      <button
-                        type="button"
-                        onClick={() =>
-                          setOwnedPage((current) =>
-                            Math.min(ownedTotalPages, current + 1),
-                          )
-                        }
-                        disabled={ownedPage === ownedTotalPages}
-                      >
-                        {t("common.next")}
-                        <FontAwesomeIcon icon={faChevronRight} />
-                      </button>
-                    </div>
-                  ) : null}
-                </>
-              ) : null}
 
-              {sharedCount > 0 ? (
-                <>
-                  <h3>{t("profile.sharedHives")}</h3>
-                  <div className="hive-list-controls">
-                    <div className="hive-list-controls__group hive-list-controls__search">
-                      <label
-                        className="hive-list-controls__label"
-                        htmlFor="shared-hive-search"
-                      >
-                        {t("profile.searchLabel")}
-                      </label>
-                      <div className="hive-list-controls__search-row">
-                        <input
-                          id="shared-hive-search"
-                          className="hive-list-controls__input"
-                          type="search"
-                          value={sharedSearchQuery}
-                          onChange={(event) => {
-                            setSharedSearchQuery(event.target.value);
-                            setSharedPage(1);
-                          }}
-                          placeholder={t("profile.searchPlaceholder")}
-                        />
-                        {sharedSearchQuery.trim() ? (
-                          <button
-                            type="button"
-                            className="button-link hive-search-clear"
-                            onClick={() => {
-                              setSharedSearchQuery("");
-                              setSharedPage(1);
-                            }}
-                          >
-                            <FontAwesomeIcon icon={faXmark} />
-                            {t("profile.clearSearch")}
-                          </button>
-                        ) : null}
+                            {isHiveFilterMenuOpen ? (
+                              <div
+                                id="hive-filter-popover"
+                                className="hive-filter-popover"
+                                role="menu"
+                                aria-label={t("profile.filterLabel")}
+                              >
+                                <label className="hive-filter-popover__option">
+                                  <input
+                                    type="checkbox"
+                                    checked={showOwnedHives}
+                                    onChange={(event) => {
+                                      setShowOwnedHives(event.target.checked);
+                                      setHivesPage(1);
+                                    }}
+                                  />
+                                  <span>{t("profile.myHives")}</span>
+                                </label>
+                                <label className="hive-filter-popover__option">
+                                  <input
+                                    type="checkbox"
+                                    checked={showSharedHives}
+                                    onChange={(event) => {
+                                      setShowSharedHives(event.target.checked);
+                                      setHivesPage(1);
+                                    }}
+                                  />
+                                  <span>{t("profile.sharedHives")}</span>
+                                </label>
+                              </div>
+                            ) : null}
+                          </div>
+                        </div>
                       </div>
                     </div>
                     <div className="hive-list-controls__group hive-list-controls__sort">
                       <label
                         className="hive-list-controls__label"
-                        htmlFor="shared-hive-sort"
+                        htmlFor="hives-sort"
                       >
                         {t("profile.sortLabel")}
                       </label>
                       <select
-                        id="shared-hive-sort"
+                        id="hives-sort"
                         className="hive-list-controls__select"
-                        value={sharedSortMode}
+                        value={hivesSortMode}
                         onChange={(event) => {
-                          setSharedSortMode(event.target.value);
-                          setSharedPage(1);
+                          setHivesSortMode(event.target.value);
+                          setHivesPage(1);
                         }}
                       >
                         <option value="date-desc">
@@ -1369,21 +1268,25 @@ export default function ProfilePage() {
                       </select>
                     </div>
                   </div>
-                  {sharedVisibleCount > 0 ? (
+                  {visibleHivesCount > 0 ? (
                     <ul className="list-grid">
-                      {pagedSharedHives.map((hive) => (
+                      {pagedHives.map((hive) => (
                         <li key={hive.id}>
                           <div className="hive-details">
                             <div className="hive-title-row">
                               <strong>
-                                {hive.title} (
-                                {getCollaboratorRoleLabel(
-                                  hive.collaboratorRole,
-                                  t,
-                                )}
-                                )
+                                {hive.isSharedHive ? (
+                                  <>
+                                    <FontAwesomeIcon icon={faUsers} />{" "}
+                                  </>
+                                ) : null}
+                                {hive.title}
+                                {hive.isSharedHive
+                                  ? ` (${getCollaboratorRoleLabel(hive.collaboratorRole, t)})`
+                                  : ""}
                               </strong>
-                              {hive.collaboratorRole === "ADMIN" ? (
+                              {!hive.isSharedHive ||
+                              hive.collaboratorRole === "ADMIN" ? (
                                 <button
                                   type="button"
                                   className="hive-rename-trigger"
@@ -1423,6 +1326,19 @@ export default function ProfilePage() {
                               />
                               {t("profile.open")}
                             </Link>
+                            {!hive.isSharedHive ? (
+                              <button
+                                type="button"
+                                className="button-link button-link-duplicate"
+                                onClick={() => openDuplicateHiveModal(hive.id)}
+                                disabled={duplicatingHiveId === hive.id}
+                              >
+                                <FontAwesomeIcon icon={faCopy} />
+                                {duplicatingHiveId === hive.id
+                                  ? t("profile.duplicating")
+                                  : t("profile.duplicate")}
+                              </button>
+                            ) : null}
                             <button
                               type="button"
                               className="button-link button-link-download"
@@ -1436,7 +1352,8 @@ export default function ProfilePage() {
                                 ? t("profile.downloading")
                                 : t("profile.download")}
                             </button>
-                            {hive.collaboratorRole === "ADMIN" ? (
+                            {!hive.isSharedHive ||
+                            hive.collaboratorRole === "ADMIN" ? (
                               <button
                                 type="button"
                                 className="button-link button-link-delete"
@@ -1456,29 +1373,29 @@ export default function ProfilePage() {
                   ) : (
                     <p>{t("profile.noSearchResults")}</p>
                   )}
-                  {sharedVisibleCount > HIVES_PER_PAGE ? (
+                  {visibleHivesCount > HIVES_PER_PAGE ? (
                     <div className="inline-actions">
                       <button
                         type="button"
                         onClick={() =>
-                          setSharedPage((current) => Math.max(1, current - 1))
+                          setHivesPage((current) => Math.max(1, current - 1))
                         }
-                        disabled={sharedPage === 1}
+                        disabled={hivesPage === 1}
                       >
                         <FontAwesomeIcon icon={faChevronLeft} />
                         {t("common.previous")}
                       </button>
                       <span>
-                        {t("common.page")} {sharedPage}/{sharedTotalPages}
+                        {t("common.page")} {hivesPage}/{hivesTotalPages}
                       </span>
                       <button
                         type="button"
                         onClick={() =>
-                          setSharedPage((current) =>
-                            Math.min(sharedTotalPages, current + 1),
+                          setHivesPage((current) =>
+                            Math.min(hivesTotalPages, current + 1),
                           )
                         }
-                        disabled={sharedPage === sharedTotalPages}
+                        disabled={hivesPage === hivesTotalPages}
                       >
                         {t("common.next")}
                         <FontAwesomeIcon icon={faChevronRight} />

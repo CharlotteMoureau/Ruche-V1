@@ -97,13 +97,25 @@ export function AuthProvider({ children }) {
   );
 
   const refreshMe = useMemo(
-    () => async () => {
-      if (!token) return null;
-      const data = await apiFetch("/auth/me?includeCollections=1", { token });
-      setUser(data.user);
-      setIsAdmin(Boolean(data.isAdmin));
-      return data;
-    },
+    () =>
+      async ({ includeCollections = true, includePreviews = false } = {}) => {
+        if (!token) return null;
+        const searchParams = new URLSearchParams();
+        if (includeCollections) {
+          searchParams.set("includeCollections", "1");
+        }
+        if (includePreviews) {
+          searchParams.set("includePreviews", "1");
+        }
+
+        const query = searchParams.toString();
+        const data = await apiFetch(`/auth/me${query ? `?${query}` : ""}`, {
+          token,
+        });
+        setUser(data.user);
+        setIsAdmin(Boolean(data.isAdmin));
+        return data;
+      },
     [token],
   );
 

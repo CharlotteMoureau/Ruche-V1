@@ -207,6 +207,9 @@ export default function RucheWorkspace({
   const [undoStack, setUndoStack] = useState([]);
   const [redoStack, setRedoStack] = useState([]);
   const [isBoardSelectionMode, setIsBoardSelectionMode] = useState(false);
+  const [singleSelectedBoardCardId, setSingleSelectedBoardCardId] = useState(
+    null,
+  );
   const [selectedLibraryCardIds, setSelectedLibraryCardIds] = useState(
     () => new Set(),
   );
@@ -292,6 +295,7 @@ export default function RucheWorkspace({
     setBoardCards(initial.boardCards);
     setUserCards(initial.userCards);
     setSelectedCardIds(new Set());
+    setSingleSelectedBoardCardId(null);
     setIsBoardSelectionMode(false);
     setSelectedLibraryCardIds(new Set());
     setUndoStack([]);
@@ -328,6 +332,7 @@ export default function RucheWorkspace({
       if (key === "a" && hasModifier) {
         event.preventDefault();
         if (boardCards.length > 0) {
+          setSingleSelectedBoardCardId(null);
           setSelectedCardIds(new Set(boardCards.map((card) => card.id)));
         }
         return;
@@ -627,6 +632,7 @@ export default function RucheWorkspace({
         return [...prev, ...placements];
       });
       setSelectedCardIds(new Set());
+      setSingleSelectedBoardCardId(null);
       setSelectedLibraryCardIds(new Set());
       setIsFreeCardSelected(false);
     },
@@ -659,6 +665,7 @@ export default function RucheWorkspace({
   const handleToggleCardSelection = (cardId) => {
     if (!canEdit) return;
 
+    setSingleSelectedBoardCardId(null);
     setSelectedCardIds((prev) => {
       const newSet = new Set(prev);
 
@@ -673,13 +680,27 @@ export default function RucheWorkspace({
 
   const handleClearSelection = () => {
     setSelectedCardIds((prev) => (prev.size ? new Set() : prev));
+    setSingleSelectedBoardCardId((prev) => (prev !== null ? null : prev));
   };
+
+  const handleToggleSingleSelectedBoardCard = useCallback(
+    (cardId) => {
+      if (!canEdit || !isTabletEditorMode || isBoardSelectionMode) return;
+
+      setSelectedCardIds((prev) => (prev.size ? new Set() : prev));
+      setSingleSelectedBoardCardId((prev) =>
+        prev === cardId ? null : cardId,
+      );
+    },
+    [canEdit, isBoardSelectionMode, isTabletEditorMode],
+  );
 
   const toggleBoardSelectionMode = useCallback(() => {
     if (!canEdit || !isTabletEditorMode) return;
 
     setIsBoardSelectionMode((current) => {
       const next = !current;
+      setSingleSelectedBoardCardId(null);
       if (!next) {
         setSelectedCardIds(new Set());
       }
@@ -720,6 +741,9 @@ export default function RucheWorkspace({
         cards.forEach((card) => nextSet.delete(card.id));
         return nextSet;
       });
+      setSingleSelectedBoardCardId((prev) =>
+        prev !== null && cardIds.has(prev) ? null : prev,
+      );
 
       return true;
     },
@@ -745,9 +769,12 @@ export default function RucheWorkspace({
     [applyReturnCardsToLibrary, canEdit],
   );
 
-  const handleReturnToLibrary = (card) => {
-    return handleReturnCardsToLibrary([card]);
-  };
+  const handleReturnToLibrary = useCallback(
+    (card) => {
+      return handleReturnCardsToLibrary([card]);
+    },
+    [handleReturnCardsToLibrary],
+  );
 
   const returnSelectedBoardCards = useCallback(() => {
     if (!canEdit || selectedCardIds.size === 0) return;
@@ -765,6 +792,24 @@ export default function RucheWorkspace({
     handleReturnCardsToLibrary,
     pushUndoSnapshot,
     selectedCardIds,
+    snapshotState,
+  ]);
+
+  const returnSingleSelectedBoardCard = useCallback(() => {
+    if (!canEdit || !singleSelectedBoardCardId) return;
+
+    const selectedCard =
+      boardCards.find((card) => card.id === singleSelectedBoardCardId) || null;
+    if (!selectedCard) return;
+
+    pushUndoSnapshot(snapshotState);
+    handleReturnToLibrary(selectedCard);
+  }, [
+    boardCards,
+    canEdit,
+    handleReturnToLibrary,
+    pushUndoSnapshot,
+    singleSelectedBoardCardId,
     snapshotState,
   ]);
 
@@ -954,6 +999,7 @@ export default function RucheWorkspace({
       setAvailableCards(cardsData);
       setUserCards([]);
       setSelectedCardIds(new Set());
+      setSingleSelectedBoardCardId(null);
       setIsBoardSelectionMode(false);
       setSelectedLibraryCardIds(new Set());
       setIsFreeCardSelected(false);
@@ -964,6 +1010,24 @@ export default function RucheWorkspace({
     }
     setActiveResetSignal(resetSignal);
   }, [activeResetSignal, resetSignal, canEdit, cardsData]);
+
+  useEffect(() => {
+    if (!singleSelectedBoardCardId) return;
+
+    const hasSelectedCard = boardCards.some(
+      (card) => card.id === singleSelectedBoardCardId,
+    );
+
+    if (!hasSelectedCard) {
+      setSingleSelectedBoardCardId(null);
+    }
+  }, [boardCards, singleSelectedBoardCardId]);
+
+  useEffect(() => {
+    if (!isTabletEditorMode || isBoardSelectionMode) {
+      setSingleSelectedBoardCardId(null);
+    }
+  }, [isBoardSelectionMode, isTabletEditorMode]);
 
   const activeNoteCard = noteModalCardId
     ? boardCards.find((card) => card.id === noteModalCardId) || null
@@ -1019,12 +1083,15 @@ export default function RucheWorkspace({
             canUndo={undoStack.length > 0}
             canRedo={redoStack.length > 0}
             selectedCardIds={selectedCardIds}
+            singleSelectedCardId={singleSelectedBoardCardId}
             boardSelectionMode={isBoardSelectionMode}
             onToggleCardSelection={handleToggleCardSelection}
+            onToggleSingleCardSelection={handleToggleSingleSelectedBoardCard}
             onClearSelection={handleClearSelection}
             onToggleBoardSelectionMode={toggleBoardSelectionMode}
             onExitBoardSelectionMode={exitBoardSelectionMode}
             onReturnSelectedCards={returnSelectedBoardCards}
+            onReturnSingleSelectedCard={returnSingleSelectedBoardCard}
             onOpenCardNote={handleOpenCardNote}
             noteLocked={requireSaveBeforeNote}
             canEdit={canEdit}

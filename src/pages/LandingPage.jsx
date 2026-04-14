@@ -5,6 +5,8 @@ import { useLanguage } from "../context/LanguageContext";
 import { HIVE_KINDS, isDcoRole } from "../lib/hives";
 import UnifiedPromptModal from "../components/UnifiedPromptModal";
 
+const HIVE_TITLE_MAX_LENGTH = 100;
+
 export default function LandingPage() {
   const { isAuthenticated, isLoading, user } = useAuth();
   const { t } = useLanguage();
@@ -168,6 +170,7 @@ export default function LandingPage() {
         inputLabel={t("profile.modalCreateInput")}
         inputPlaceholder={t("profile.modalCreatePlaceholder")}
         value={newHiveTitle}
+        inputMaxLength={HIVE_TITLE_MAX_LENGTH}
         onValueChange={setNewHiveTitle}
         confirmLabel={t("common.confirm")}
         confirmDisabled={!newHiveTitle.trim()}
