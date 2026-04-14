@@ -38,6 +38,7 @@ export default function HiveBoard({
   onToggleCardSelection,
   onClearSelection,
   onReturnSelectedCards,
+  onSelectAll,
   onOpenCardNote,
   noteLocked = false,
   canEdit = true,
@@ -756,6 +757,15 @@ export default function HiveBoard({
               {isLibraryOpen
                 ? t("workspace.hideLibrary")
                 : t("workspace.showLibrary")}
+            </button>
+          ) : null}
+          {isTabletEditorMode && canEdit && cards.length > 0 && selectedCount < cards.length ? (
+            <button
+              type="button"
+              onClick={onSelectAll}
+              disabled={tabletUsageBlocked}
+            >
+              {t("workspace.selectAll")}
             </button>
           ) : null}
           {isTabletEditorMode && selectedCount > 0 ? (

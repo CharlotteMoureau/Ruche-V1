@@ -679,6 +679,11 @@ export default function RucheWorkspace({
     setSelectedCardIds((prev) => (prev.size ? new Set() : prev));
   };
 
+  const handleSelectAll = useCallback(() => {
+    if (!canEdit) return;
+    setSelectedCardIds(new Set(boardCards.map((card) => card.id)));
+  }, [boardCards, canEdit]);
+
   const applyReturnCardsToLibrary = useCallback(
     (cards) => {
       if (!canEdit || !cards.length) return false;
@@ -1010,6 +1015,7 @@ export default function RucheWorkspace({
             onToggleCardSelection={handleToggleCardSelection}
             onClearSelection={handleClearSelection}
             onReturnSelectedCards={returnSelectedBoardCards}
+            onSelectAll={handleSelectAll}
             onOpenCardNote={handleOpenCardNote}
             noteLocked={requireSaveBeforeNote}
             canEdit={canEdit}
