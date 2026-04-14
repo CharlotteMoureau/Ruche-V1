@@ -174,7 +174,12 @@ export function useDraggableCard({
           onToggleSelection(card.id);
         }
         if (toggleSingleSelectionOnRelease) {
-          onToggleSingleSelection?.(card.id);
+          const pointer = endPointer || lastPointerClient;
+          const tapEl =
+            pointer && document.elementFromPoint(pointer.x, pointer.y);
+          if (!tapEl?.closest?.(".card-note-indicator")) {
+            onToggleSingleSelection?.(card.id);
+          }
         }
         dragStateRef.current = null;
         setIsDraggingOverLibrary(false);

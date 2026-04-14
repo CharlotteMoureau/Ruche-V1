@@ -1,5 +1,6 @@
 import domtoimage from "dom-to-image-more";
 import JSZip from "jszip";
+import { createFreeCardIconDataUrl, getFreeCardColor } from "./freeCardIcon";
 
 const EXPORT_STAGE_STYLE = {
   position: "fixed",
@@ -545,6 +546,7 @@ function normalizePreviewCardsFromBoardData(boardData) {
       id: String(card.id ?? "").trim(),
       title: String(card.title || "").trim(),
       category: String(card.category || "free").trim(),
+      color: String(card.color || "lime").trim(),
       x: Number(card?.position?.x ?? 0),
       y: Number(card?.position?.y ?? 0),
     }))
@@ -571,7 +573,11 @@ function getPreviewCategoryFill(category) {
   }
 }
 
-function getPreviewCategoryStroke(category) {
+function getPreviewCategoryStroke(cardOrCategory) {
+  const category = typeof cardOrCategory === "string"
+    ? cardOrCategory
+    : cardOrCategory?.category;
+
   if (category === "recommandations-enseignant") {
     return "#EF7D00";
   }
@@ -581,13 +587,17 @@ function getPreviewCategoryStroke(category) {
   }
 
   if (category === "free") {
-    return "#8BB31D";
+    return getFreeCardColor(cardOrCategory?.color);
   }
 
   return "rgba(32, 29, 24, 0.14)";
 }
 
-function getPreviewCategoryTextColor(category) {
+function getPreviewCategoryTextColor(cardOrCategory) {
+  const category = typeof cardOrCategory === "string"
+    ? cardOrCategory
+    : cardOrCategory?.category;
+
   if (category === "recommandations-enseignant") {
     return "#EF7D00";
   }
@@ -597,7 +607,7 @@ function getPreviewCategoryTextColor(category) {
   }
 
   if (category === "free") {
-    return "#8BB31D";
+    return getFreeCardColor(cardOrCategory?.color);
   }
 
   return "#ffffff";
@@ -637,12 +647,12 @@ function drawWrappedCenteredText(context, text, centerX, startY, maxWidth, lineH
 
 function getCardIconCandidates(card) {
   if (card.category === "free") {
-    return ["/data/icons/free.png"];
+    return [createFreeCardIconDataUrl(getFreeCardColor(card.color))];
   }
 
   const id = String(card.id || "").trim();
   if (!id) {
-    return ["/data/icons/free.png"];
+    return [];
   }
 
   const candidates = [`/data/icons/${id}.png`, `/data/icons/${encodeURIComponent(id)}.png`];
@@ -676,6 +686,10 @@ function drawHexPath(context, x, y, size) {
 async function loadImageFromCandidates(candidates) {
   for (const candidate of candidates) {
     try {
+      if (candidate.startsWith("data:")) {
+        return await loadImage(candidate);
+      }
+
       const resolvedUrl = new URL(candidate, window.location.href).toString();
       const response = await fetch(resolvedUrl, { cache: "force-cache" });
       if (!response.ok) {
@@ -746,14 +760,14 @@ export async function renderBoardPreviewFromData(boardData, { maxWidth, maxHeigh
     const y = Math.round((card.y - topBound) * fitScale);
     const size = Math.max(28, Math.round(PREVIEW_CARD_SIZE * fitScale));
     const centerX = Math.round(x + size / 2);
-    const textColor = getPreviewCategoryTextColor(card.category);
+    const textColor = getPreviewCategoryTextColor(card);
 
     drawHexPath(context, x, y, size);
     context.fillStyle = getPreviewCategoryFill(card.category);
     context.fill();
 
     context.lineWidth = Math.max(1, Math.round(2 * fitScale));
-    context.strokeStyle = getPreviewCategoryStroke(card.category);
+    context.strokeStyle = getPreviewCategoryStroke(card);
 
     if (
       card.category === "recommandations-enseignant" ||

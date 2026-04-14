@@ -1,7 +1,15 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faArrowLeft, faFloppyDisk } from "@fortawesome/free-solid-svg-icons";
+import {
+  faArrowLeft,
+  faFloppyDisk,
+  faPaperPlane,
+  faPen,
+  faReply,
+  faTrash,
+  faXmark,
+} from "@fortawesome/free-solid-svg-icons";
 import { ApiError, apiFetch, getApiErrorMessage } from "../lib/api";
 import { useAuth } from "../context/AuthContext";
 import RucheWorkspace from "../components/RucheWorkspace";
@@ -1585,6 +1593,7 @@ export default function RucheEditorPage() {
                           className="comment-action-btn"
                           onClick={() => startReply(comment)}
                         >
+                          <FontAwesomeIcon icon={faReply} />
                           {t("editor.reply")}
                         </button>
                       )}
@@ -1595,6 +1604,7 @@ export default function RucheEditorPage() {
                             className="comment-action-btn"
                             onClick={() => openEditCommentModal(comment)}
                           >
+                            <FontAwesomeIcon icon={faPen} />
                             {t("editor.edit")}
                           </button>
                           <button
@@ -1602,6 +1612,7 @@ export default function RucheEditorPage() {
                             className="comment-action-btn comment-action-btn--danger"
                             onClick={() => openDeleteCommentModal(comment)}
                           >
+                            <FontAwesomeIcon icon={faTrash} />
                             {t("editor.delete")}
                           </button>
                         </>
@@ -1628,6 +1639,7 @@ export default function RucheEditorPage() {
                             className="comment-action-btn"
                             onClick={() => startReply(reply)}
                           >
+                            <FontAwesomeIcon icon={faReply} />
                             {t("editor.reply")}
                           </button>
                         )}
@@ -1640,6 +1652,7 @@ export default function RucheEditorPage() {
                                 openEditCommentModal(reply, comment.id)
                               }
                             >
+                              <FontAwesomeIcon icon={faPen} />
                               {t("editor.edit")}
                             </button>
                             <button
@@ -1649,6 +1662,7 @@ export default function RucheEditorPage() {
                                 openDeleteCommentModal(reply, comment.id)
                               }
                             >
+                              <FontAwesomeIcon icon={faTrash} />
                               {t("editor.delete")}
                             </button>
                           </>
@@ -1692,6 +1706,7 @@ export default function RucheEditorPage() {
                           onClick={() => submitReply(comment.id)}
                           disabled={isSendingReply}
                         >
+                          <FontAwesomeIcon icon={faPaperPlane} />
                           {isSendingReply
                             ? t("editor.sending")
                             : t("editor.send")}
@@ -1704,6 +1719,7 @@ export default function RucheEditorPage() {
                             setReplyText("");
                           }}
                         >
+                          <FontAwesomeIcon icon={faXmark} />
                           {t("common.cancel")}
                         </button>
                       </div>
@@ -1766,6 +1782,7 @@ export default function RucheEditorPage() {
                     totalCommentCount >= MAX_COMMENTS_PER_HIVE
                   }
                 >
+                  <FontAwesomeIcon icon={faPaperPlane} />
                   {isSendingComment ? t("editor.sending") : t("editor.send")}
                 </button>
               </div>

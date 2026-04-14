@@ -271,18 +271,37 @@
 }
 
 .comment-action-btn {
-  background: none;
-  border: 0;
-  padding: 0;
-  font-size: 0.78rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
+  min-height: 2.1rem;
+  padding: 0.45rem 0.8rem;
+  border: 1px solid rgba($bleu-fonce, 0.16);
+  border-radius: 999px;
+  background: #fff8e3;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+  font-family: "Poppins", sans-serif;
+  font-size: 0.8rem;
   font-weight: 600;
   line-height: 1.2;
-  color: $bleu-clair;
+  color: $bleu-fonce;
   cursor: pointer;
-  text-decoration: underline;
+  transition:
+    background-color 180ms ease,
+    transform 180ms ease,
+    box-shadow 180ms ease,
+    filter 180ms ease;
 
   &:hover {
-    color: $bleu-fonce;
+    transform: translateY(-1px);
+    filter: brightness(0.98);
+    box-shadow: 0 8px 14px rgba(0, 0, 0, 0.14);
+  }
+
+  &:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
   }
 
   &:focus-visible {
@@ -291,10 +310,24 @@
   }
 
   &--danger {
-    color: $rose;
+    border-color: rgba($rose, 0.35);
+    background: rgba($rose, 0.9);
+    color: #fff;
 
     &:hover {
-      color: color.adjust($rose, $lightness: -10%);
+      background: color.adjust($rose, $lightness: -4%);
+      filter: none;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    transition: none;
+
+    &:hover,
+    &:active {
+      transform: none;
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+      filter: none;
     }
   }
 }
@@ -341,6 +374,10 @@
   flex-wrap: wrap;
 
   button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.45rem;
     padding: 0.4rem 0.8rem;
     border: none;
     border-radius: 8px;
@@ -429,6 +466,10 @@
   }
 
   button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.45rem;
     padding: 0.5rem 1rem;
     border: none;
     border-radius: 8px;
@@ -644,7 +685,9 @@
     margin-top: 0.75rem;
 
     .card-note-save-btn {
-      color: $bleu-fonce;
+      background: $jaune;
+      border-color: rgba(#222, 0.12);
+      color: #222;
       font-weight: 700;
     }
   }

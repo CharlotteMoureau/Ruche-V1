@@ -2,6 +2,8 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useDrop } from "react-dnd";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
+  faCropSimple,
+  faExpand,
   faExclamationTriangle,
   faRotateLeft,
   faRotateRight,
@@ -390,13 +392,13 @@ export default function HiveBoard({
 
         const fallbackOffset = viewportRect
           ? {
-            x: viewportRect.left + viewportRect.width / 2,
-            y: viewportRect.top + viewportRect.height / 2,
-          }
+              x: viewportRect.left + viewportRect.width / 2,
+              y: viewportRect.top + viewportRect.height / 2,
+            }
           : {
-            x: boardRect.left + boardRect.width / 2,
-            y: boardRect.top + boardRect.height / 2,
-          };
+              x: boardRect.left + boardRect.width / 2,
+              y: boardRect.top + boardRect.height / 2,
+            };
         const effectiveOffset =
           isInsideBoard && isInsideViewport ? offset : fallbackOffset;
 
@@ -795,7 +797,9 @@ export default function HiveBoard({
               {t("workspace.returnSelectedToLibrary", { count: selectedCount })}
             </button>
           ) : null}
-          {isTabletEditorMode && !boardSelectionMode && hasSingleSelectedCard ? (
+          {isTabletEditorMode &&
+          !boardSelectionMode &&
+          hasSingleSelectedCard ? (
             <button
               type="button"
               onClick={onReturnSingleSelectedCard}
@@ -803,6 +807,14 @@ export default function HiveBoard({
             >
               {t("workspace.returnSingleSelectedToLibrary")}
             </button>
+          ) : null}
+          {isTabletEditorMode &&
+          !boardSelectionMode &&
+          !hasSingleSelectedCard &&
+          canEdit ? (
+            <span className="hive-board__tablet-select-hint">
+              {t("workspace.tabletSelectHint")}
+            </span>
           ) : null}
         </div>
         <div className="hive-board__controls-group hive-board__controls-group--zoom">
@@ -835,14 +847,14 @@ export default function HiveBoard({
             onClick={handleFitContent}
             disabled={tabletUsageBlocked}
           >
-            {t("workspace.fitContent")}
+            <FontAwesomeIcon icon={faCropSimple} /> {t("workspace.fitContent")}
           </button>
           <button
             type="button"
             onClick={handleFitBoard}
             disabled={tabletUsageBlocked}
           >
-            {t("workspace.fitBoard")}
+            <FontAwesomeIcon icon={faExpand} /> {t("workspace.fitBoard")}
           </button>
         </div>
       </header>
@@ -894,7 +906,9 @@ export default function HiveBoard({
                     <DraggableCard
                       key={card.id}
                       card={card}
-                      isSelected={selectedCardIds.has(card.id) || isSingleSelected}
+                      isSelected={
+                        selectedCardIds.has(card.id) || isSingleSelected
+                      }
                       selectedCards={selectedCards}
                       zoom={zoom}
                       onMoveCard={onMoveCard}

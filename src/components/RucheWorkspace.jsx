@@ -1,6 +1,13 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import {
+  faFloppyDisk,
+  faPen,
+  faTrash,
+  faXmark,
+} from "@fortawesome/free-solid-svg-icons";
 import CardLibrary from "./CardLibrary";
 import HiveBoard from "./HiveBoard";
 import HexCard from "./HexCard";
@@ -207,9 +214,8 @@ export default function RucheWorkspace({
   const [undoStack, setUndoStack] = useState([]);
   const [redoStack, setRedoStack] = useState([]);
   const [isBoardSelectionMode, setIsBoardSelectionMode] = useState(false);
-  const [singleSelectedBoardCardId, setSingleSelectedBoardCardId] = useState(
-    null,
-  );
+  const [singleSelectedBoardCardId, setSingleSelectedBoardCardId] =
+    useState(null);
   const [selectedLibraryCardIds, setSelectedLibraryCardIds] = useState(
     () => new Set(),
   );
@@ -688,9 +694,7 @@ export default function RucheWorkspace({
       if (!canEdit || !isTabletEditorMode || isBoardSelectionMode) return;
 
       setSelectedCardIds((prev) => (prev.size ? new Set() : prev));
-      setSingleSelectedBoardCardId((prev) =>
-        prev === cardId ? null : cardId,
-      );
+      setSingleSelectedBoardCardId((prev) => (prev === cardId ? null : cardId));
     },
     [canEdit, isBoardSelectionMode, isTabletEditorMode],
   );
@@ -814,6 +818,7 @@ export default function RucheWorkspace({
   ]);
 
   const handleOpenCardNote = (card) => {
+    setSingleSelectedBoardCardId(null);
     const existingComment = getCardComment(card);
     setNoteModalCardId(card.id);
     setNoteDraft(existingComment?.message || "");
@@ -1289,6 +1294,7 @@ export default function RucheWorkspace({
                         className="comment-action-btn"
                         onClick={handleStartEditingCardNote}
                       >
+                        <FontAwesomeIcon icon={faPen} />
                         {t("common.edit")}
                       </button>
                       <button
@@ -1296,6 +1302,7 @@ export default function RucheWorkspace({
                         className="comment-action-btn comment-action-btn--danger"
                         onClick={() => setShowDeleteCardNoteModal(true)}
                       >
+                        <FontAwesomeIcon icon={faTrash} />
                         {t("common.delete")}
                       </button>
                     </>
@@ -1309,6 +1316,7 @@ export default function RucheWorkspace({
                           className="comment-action-btn comment-action-btn--danger"
                           onClick={() => setShowDeleteCardNoteModal(true)}
                         >
+                          <FontAwesomeIcon icon={faTrash} />
                           {t("common.delete")}
                         </button>
                       ) : null}
@@ -1317,6 +1325,7 @@ export default function RucheWorkspace({
                         className="comment-action-btn"
                         onClick={handleCancelCardNoteEdit}
                       >
+                        <FontAwesomeIcon icon={faXmark} />
                         {t("common.cancel")}
                       </button>
                       <button
@@ -1324,6 +1333,7 @@ export default function RucheWorkspace({
                         className="comment-action-btn card-note-save-btn"
                         onClick={handleSaveCardNote}
                       >
+                        <FontAwesomeIcon icon={faFloppyDisk} />
                         {hasActiveNote ? t("common.save") : t("workspace.add")}
                       </button>
                     </>
