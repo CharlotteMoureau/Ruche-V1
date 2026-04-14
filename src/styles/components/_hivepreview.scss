@@ -1,8 +1,3 @@
-.hive-details {
-  flex: 1;
-  min-width: 0;
-}
-
 .hive-preview {
   margin-top: 10px;
   width: 100%;
@@ -10,7 +5,7 @@
   aspect-ratio: 16 / 9;
   border: 1px solid #ded6cb;
   border-radius: 10px;
-  background: linear-gradient(180deg, #fff9f0 0%, #f8f3ea 100%);
+  background: #ffffff;
   overflow: hidden;
 }
 
@@ -20,78 +15,6 @@
   height: 100%;
   object-fit: cover;
   object-position: center;
-}
-
-.hive-preview-board {
-  position: relative;
-  width: 100%;
-  height: 100%;
-}
-
-.hive-preview-card {
-  position: absolute;
-  transform: translate(-50%, -50%);
-  width: 72px;
-  min-height: 64px;
-  padding: 10px 8px;
-  clip-path: polygon(50% 0%, 93% 25%, 93% 75%, 50% 100%, 7% 75%, 7% 25%);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
-  border: 2px solid rgba(255, 255, 255, 0.45);
-  box-shadow: 0 6px 10px rgba(34, 28, 20, 0.18);
-
-  span {
-    display: block;
-    max-width: 100%;
-    font-size: 0.56rem;
-    line-height: 1.15;
-    font-weight: 700;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    display: -webkit-box;
-    line-clamp: 3;
-    -webkit-line-clamp: 3;
-    -webkit-box-orient: vertical;
-  }
-}
-
-.hive-preview-card.category-visees {
-  background: #1fa8ab;
-  color: #fff;
-}
-
-.hive-preview-card.category-conditions-enseignant {
-  background: #f5a450;
-  color: #fff;
-}
-
-.hive-preview-card.category-recommandations-enseignant {
-  background: #fff4e5;
-  color: #995a1c;
-  border: 2px dashed #f5a450;
-}
-
-.hive-preview-card.category-conditions-equipe {
-  background: #8c6ccf;
-  color: #fff;
-}
-
-.hive-preview-card.category-recommandations-equipe {
-  background: #f2ecff;
-  color: #5f4397;
-  border: 2px dashed #8c6ccf;
-}
-
-.hive-preview-card.category-domaine {
-  background: #d15d79;
-  color: #fff;
-}
-
-.hive-preview-card.category-free {
-  background: #61584c;
-  color: #fff;
 }
 
 .hive-preview-empty {

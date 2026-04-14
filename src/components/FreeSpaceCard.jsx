@@ -1,7 +1,7 @@
 export default function FreeHexCard({ card }) {
 	const text = card.title || "";
 
-	let svg = [
+	const svg = (
 		<svg
 			className="icon"
 			version="1.1"
@@ -150,17 +150,7 @@ M124.598824,400.922028
 	C127.313599,398.141327 126.231750,399.547546 124.598824,400.922028 
 z"
 			/>
-		</svg>,
-	];
-
-	// Prefer a raster icon so capture on tablet browsers remains reliable.
-	svg = (
-		<img
-			className="free-img icon"
-			src="/data/icons/free.png"
-			alt=""
-			aria-hidden="true"
-		/>
+		</svg>
 	);
 
 	const clipId = `fsc-${card.id}`;
@@ -188,6 +178,7 @@ z"
 				width="100"
 				height="100"
 				clipPath={`url(#${clipId})`}
+				style={{ pointerEvents: "none" }}
 			>
 				<div className="free-hex-inner">
 					<div className="free-hex-front">

@@ -419,7 +419,10 @@ export default function ProfilePage() {
     if (!profile) return;
 
     setHivesPage((current) =>
-      clampPage(current, profile.ownedHives.length + profile.sharedHives.length),
+      clampPage(
+        current,
+        profile.ownedHives.length + profile.sharedHives.length,
+      ),
     );
 
     const canonicalRole = resolveRoleFormValue(
@@ -976,8 +979,14 @@ export default function ProfilePage() {
     closeCreateHiveModal();
   };
 
-  const ownedBaseHives = useMemo(() => (profile ? profile.ownedHives : []), [profile]);
-  const sharedBaseHives = useMemo(() => (profile ? profile.sharedHives : []), [profile]);
+  const ownedBaseHives = useMemo(
+    () => (profile ? profile.ownedHives : []),
+    [profile],
+  );
+  const sharedBaseHives = useMemo(
+    () => (profile ? profile.sharedHives : []),
+    [profile],
+  );
 
   const sortedHives = useMemo(() => {
     const normalizedSearch = hiveSearchQuery.trim().toLowerCase();
@@ -1092,8 +1101,9 @@ export default function ProfilePage() {
               id="profile-tab-hives"
               type="button"
               role="tab"
-              className={`profile-tab ${activeProfileTab === PROFILE_TAB_HIVES ? "is-active" : ""
-                }`}
+              className={`profile-tab ${
+                activeProfileTab === PROFILE_TAB_HIVES ? "is-active" : ""
+              }`}
               aria-selected={activeProfileTab === PROFILE_TAB_HIVES}
               aria-controls="profile-panel-hives"
               onClick={() => setActiveProfileTab(PROFILE_TAB_HIVES)}
@@ -1105,8 +1115,9 @@ export default function ProfilePage() {
               id="profile-tab-settings"
               type="button"
               role="tab"
-              className={`profile-tab ${activeProfileTab === PROFILE_TAB_SETTINGS ? "is-active" : ""
-                }`}
+              className={`profile-tab ${
+                activeProfileTab === PROFILE_TAB_SETTINGS ? "is-active" : ""
+              }`}
               aria-selected={activeProfileTab === PROFILE_TAB_SETTINGS}
               aria-controls="profile-panel-settings"
               onClick={() => setActiveProfileTab(PROFILE_TAB_SETTINGS)}
@@ -1275,7 +1286,7 @@ export default function ProfilePage() {
                                   : ""}
                               </strong>
                               {!hive.isSharedHive ||
-                                hive.collaboratorRole === "ADMIN" ? (
+                              hive.collaboratorRole === "ADMIN" ? (
                                 <button
                                   type="button"
                                   className="hive-rename-trigger"
@@ -1342,7 +1353,7 @@ export default function ProfilePage() {
                                 : t("profile.download")}
                             </button>
                             {!hive.isSharedHive ||
-                              hive.collaboratorRole === "ADMIN" ? (
+                            hive.collaboratorRole === "ADMIN" ? (
                               <button
                                 type="button"
                                 className="button-link button-link-delete"

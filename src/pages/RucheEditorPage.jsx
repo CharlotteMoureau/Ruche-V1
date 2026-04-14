@@ -87,8 +87,8 @@ export default function RucheEditorPage() {
   const duplicateSource = location.state?.duplicateSource || null;
   const requestedHiveKind = normalizeHiveKind(
     location.state?.hiveKind ||
-    duplicateSource?.kind ||
-    resolveDefaultHiveKind(user?.roleLabel),
+      duplicateSource?.kind ||
+      resolveDefaultHiveKind(user?.roleLabel),
   );
   const initialHiveKind = isNew ? requestedHiveKind : HIVE_KINDS.STANDARD;
   const initialNewTitle =
@@ -163,24 +163,24 @@ export default function RucheEditorPage() {
     : isNew
       ? true
       : Boolean(
-        hive?.canEdit ||
-        isOwner ||
-        isAdmin ||
-        collaboratorRole === "ADMIN" ||
-        hasEditorRole,
-      );
+          hive?.canEdit ||
+          isOwner ||
+          isAdmin ||
+          collaboratorRole === "ADMIN" ||
+          hasEditorRole,
+        );
   const canComment = adminReadOnly
     ? false
     : isNew
       ? false
       : Boolean(
-        hive?.canComment ||
-        isOwner ||
-        isAdmin ||
-        collaboratorRole === "ADMIN" ||
-        hasEditorRole ||
-        collaboratorRole === "COMMENT",
-      );
+          hive?.canComment ||
+          isOwner ||
+          isAdmin ||
+          collaboratorRole === "ADMIN" ||
+          hasEditorRole ||
+          collaboratorRole === "COMMENT",
+        );
   const workspaceLoadKey = isNew
     ? "new-hive"
     : `${id}:${hive ? "loaded" : "init"}`;
@@ -682,12 +682,12 @@ export default function RucheEditorPage() {
         setHive((prev) =>
           prev
             ? {
-              ...prev,
-              title: titleToSave,
-              kind: hiveKind,
-              boardData,
-              updatedAt: updated?.updatedAt || prev.updatedAt,
-            }
+                ...prev,
+                title: titleToSave,
+                kind: hiveKind,
+                boardData,
+                updatedAt: updated?.updatedAt || prev.updatedAt,
+              }
             : prev,
         );
         showTabletSaveFeedback("success", 2200);
@@ -911,10 +911,10 @@ export default function RucheEditorPage() {
         setHive((prev) =>
           prev
             ? {
-              ...prev,
-              boardData: resolvedBoardData,
-              updatedAt: updated?.updatedAt || prev.updatedAt,
-            }
+                ...prev,
+                boardData: resolvedBoardData,
+                updatedAt: updated?.updatedAt || prev.updatedAt,
+              }
             : prev,
         );
         setError("");
@@ -1143,11 +1143,11 @@ export default function RucheEditorPage() {
         return prev.map((c) =>
           c.id === editingTarget.parentId
             ? {
-              ...c,
-              replies: (c.replies || []).map((r) =>
-                r.id === updated.id ? updated : r,
-              ),
-            }
+                ...c,
+                replies: (c.replies || []).map((r) =>
+                  r.id === updated.id ? updated : r,
+                ),
+              }
             : c,
         );
       });
@@ -1176,11 +1176,11 @@ export default function RucheEditorPage() {
         return prev.map((c) =>
           c.id === deleteTarget.parentId
             ? {
-              ...c,
-              replies: (c.replies || []).filter(
-                (r) => r.id !== deleteTarget.comment.id,
-              ),
-            }
+                ...c,
+                replies: (c.replies || []).filter(
+                  (r) => r.id !== deleteTarget.comment.id,
+                ),
+              }
             : c,
         );
       });

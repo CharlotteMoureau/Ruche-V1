@@ -43,6 +43,18 @@ const PREVIEW_CARD_SIZE = 200;
 const PREVIEW_BOARD_WIDTH = 2200;
 const PREVIEW_BOARD_HEIGHT = 1600;
 
+const PREVIEW_FRONT_LAYOUT = {
+  idFontSize: 0.085,
+  idY: 0.22,
+  titleFontSize: 0.063,
+  titleStartY: 0.34,
+  titleMaxWidth: 0.72,
+  titleLineHeight: 0.08,
+  titleMaxLines: 2,
+  iconSize: 0.23,
+  iconCenterY: 0.74,
+};
+
 function applyStyles(element, styles) {
   Object.assign(element.style, styles);
   return element;
@@ -551,8 +563,9 @@ function getPreviewCategoryFill(category) {
       return "#E73458";
     case "recommandations-enseignant":
     case "recommandations-equipe":
-    case "free":
       return "#F7F3EE";
+    case "free":
+      return "#FFFFFF";
     default:
       return "#F7F3EE";
   }
@@ -679,7 +692,7 @@ async function loadImageFromCandidates(candidates) {
   return null;
 }
 
-async function renderBoardPreviewFromData(boardData, { maxWidth, maxHeight }) {
+export async function renderBoardPreviewFromData(boardData, { maxWidth, maxHeight }) {
   const cards = normalizePreviewCardsFromBoardData(boardData);
   if (!cards.length) {
     return null;
@@ -717,7 +730,7 @@ async function renderBoardPreviewFromData(boardData, { maxWidth, maxHeight }) {
     throw new Error("Unable to render board preview");
   }
 
-  context.fillStyle = "#fffaf0";
+  context.fillStyle = "#ffffff";
   context.fillRect(0, 0, width, height);
 
   const iconById = new Map();
@@ -762,27 +775,34 @@ async function renderBoardPreviewFromData(boardData, { maxWidth, maxHeight }) {
     context.textAlign = "center";
     context.textBaseline = "middle";
 
-    const idFontSize = Math.max(8, Math.round(size * 0.085));
-    context.font = `700 ${idFontSize}px "Poppins", "Segoe UI", sans-serif`;
-    context.fillText(card.id, centerX, y + Math.round(size * 0.22));
+    if (card.category !== "free") {
+      const idFontSize = Math.max(8, Math.round(size * PREVIEW_FRONT_LAYOUT.idFontSize));
+      context.font = `700 ${idFontSize}px "Poppins", "Segoe UI", sans-serif`;
+      context.fillText(card.id, centerX, y + Math.round(size * PREVIEW_FRONT_LAYOUT.idY));
+    }
 
-    const titleFontSize = Math.max(7, Math.round(size * 0.063));
+    const titleFontSize = Math.max(7, Math.round(size * PREVIEW_FRONT_LAYOUT.titleFontSize));
     context.font = `600 ${titleFontSize}px "Poppins", "Segoe UI", sans-serif`;
+    const titleY = card.category === "free" 
+      ? y + Math.round(size * 0.30)
+      : y + Math.round(size * PREVIEW_FRONT_LAYOUT.titleStartY);
     drawWrappedCenteredText(
       context,
       card.title,
       centerX,
-      y + Math.round(size * 0.34),
-      Math.round(size * 0.72),
-      Math.max(9, Math.round(size * 0.08)),
-      2,
+      titleY,
+      Math.round(size * PREVIEW_FRONT_LAYOUT.titleMaxWidth),
+      Math.max(9, Math.round(size * PREVIEW_FRONT_LAYOUT.titleLineHeight)),
+      PREVIEW_FRONT_LAYOUT.titleMaxLines,
     );
 
     const icon = iconById.get(card.id);
     if (icon) {
-      const iconSize = Math.max(10, Math.round(size * 0.23));
+      const iconSize = Math.max(10, Math.round(size * PREVIEW_FRONT_LAYOUT.iconSize));
       const iconX = Math.round(x + size / 2 - iconSize / 2);
-      const iconY = Math.round(y + size * 0.74 - iconSize / 2);
+      const iconY = card.category === "free"
+        ? Math.round(y + size * 0.58 - iconSize / 2)
+        : Math.round(y + size * PREVIEW_FRONT_LAYOUT.iconCenterY - iconSize / 2);
       context.drawImage(icon, iconX, iconY, iconSize, iconSize);
     }
   });
@@ -1199,21 +1219,6 @@ export async function captureBoardPreviewImage(board, options = {}) {
     throw new Error("Board not found");
   }
 
-  if (boardData) {
-    try {
-      const renderedCanvas = await renderBoardPreviewFromData(boardData, {
-        maxWidth,
-        maxHeight,
-      });
-
-      if (renderedCanvas) {
-        return encodeWithinBudget(renderedCanvas);
-      }
-    } catch {
-      // Fall back to DOM capture.
-    }
-  }
-
   document.body.classList.add("capture-mode");
 
   try {
@@ -1242,6 +1247,23 @@ export async function captureBoardPreviewImage(board, options = {}) {
     context.drawImage(image, 0, 0, width, height);
 
     return encodeWithinBudget(canvas);
+  } catch (error) {
+    if (boardData) {
+      try {
+        const renderedCanvas = await renderBoardPreviewFromData(boardData, {
+          maxWidth,
+          maxHeight,
+        });
+
+        if (renderedCanvas) {
+          return encodeWithinBudget(renderedCanvas);
+        }
+      } catch {
+        // Re-throw the original DOM capture failure below.
+      }
+    }
+
+    throw error;
   } finally {
     document.body.classList.remove("capture-mode");
   }
