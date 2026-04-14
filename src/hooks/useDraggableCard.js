@@ -63,9 +63,7 @@ export function useDraggableCard({
   onReturnCardsToLibrary,
   onDragStart,
   onToggleSelection,
-  onToggleSingleSelection,
   onClearSelection,
-  selectionMode = false,
   isTabletEditorMode = false,
   dragDisabled = false,
   onUnavailableInteraction,
@@ -79,11 +77,10 @@ export function useDraggableCard({
   const shouldAllowNativeTextScroll = useCallback((eventTarget) => {
     if (!(eventTarget instanceof Element)) return false;
 
-    // Traverse up to the .hex-back element (works across the SVG foreignObject boundary).
-    // .hex-back is the scroll container on tablet when back text is long.
-    const hexBack = eventTarget.closest(".hex-back");
-
-    return Boolean(hexBack && hexBack.scrollHeight > hexBack.clientHeight + 1);
+    // .scrollable-back is only present when needsScroll===true (overflow confirmed).
+    // .hex-back itself never overflows (its sole child is height:100%), so checking
+    // .hex-back.scrollHeight would always return false — use .scrollable-back instead.
+    return Boolean(eventTarget.closest(".scrollable-back"));
   }, []);
 
   const updateDraggedCards = useCallback(
@@ -166,19 +163,15 @@ export function useDraggableCard({
         lastPointerClient,
         isActive,
         toggleSelectionOnRelease,
-        toggleSingleSelectionOnRelease,
       } = dragStateRef.current;
 
       if (!isActive) {
         if (toggleSelectionOnRelease) {
-          onToggleSelection(card.id);
-        }
-        if (toggleSingleSelectionOnRelease) {
           const pointer = endPointer || lastPointerClient;
           const tapEl =
             pointer && document.elementFromPoint(pointer.x, pointer.y);
           if (!tapEl?.closest?.(".card-note-indicator")) {
-            onToggleSingleSelection?.(card.id);
+            onToggleSelection(card.id);
           }
         }
         dragStateRef.current = null;
@@ -237,7 +230,6 @@ export function useDraggableCard({
       onReturnCardsToLibrary,
       onReturnToLibrary,
       onToggleSelection,
-      onToggleSingleSelection,
     ],
   );
 
@@ -245,18 +237,13 @@ export function useDraggableCard({
     (clientX, clientY, options = {}) => {
       const {
         toggleSelectionOnRelease = false,
-        toggleSingleSelectionOnRelease = false,
       } = options;
       const shouldDragSelection =
         isSelected &&
-        selectedCards.length > 1 &&
-        (!isTabletEditorMode || selectionMode);
+        selectedCards.length > 1;
       const dragCards = shouldDragSelection ? selectedCards : [card];
 
-      if (
-        selectedCards.length &&
-        (!isSelected || (isTabletEditorMode && !selectionMode))
-      ) {
+      if (selectedCards.length && !isSelected) {
         onClearSelection();
       }
 
@@ -267,7 +254,6 @@ export function useDraggableCard({
         isActive: false,
         isOverLibrary: false,
         toggleSelectionOnRelease,
-        toggleSingleSelectionOnRelease,
         cards: dragCards.map((dragCard) => ({
           card: dragCard,
           startPosition: dragCard.position,
@@ -281,10 +267,8 @@ export function useDraggableCard({
     [
       card,
       isSelected,
-      isTabletEditorMode,
       onClearSelection,
       selectedCards,
-      selectionMode,
     ],
   );
 
@@ -301,34 +285,21 @@ export function useDraggableCard({
 
       event.stopPropagation();
 
-      if (selectionMode) {
-        if (isSelected) {
-          startDrag(event.clientX, event.clientY, {
-            toggleSelectionOnRelease: true,
-          });
-        } else {
-          onToggleSelection(card.id);
-        }
-        return;
-      }
-
       if (event.ctrlKey || event.metaKey) {
         onToggleSelection(card.id);
         return;
       }
 
       startDrag(event.clientX, event.clientY, {
-        toggleSingleSelectionOnRelease: isTabletEditorMode,
+        toggleSelectionOnRelease: isTabletEditorMode,
       });
     },
     [
       card.id,
       dragDisabled,
-      isSelected,
       isTabletEditorMode,
       onUnavailableInteraction,
       onToggleSelection,
-      selectionMode,
       startDrag,
     ],
   );
@@ -370,29 +341,14 @@ export function useDraggableCard({
 
       event.stopPropagation();
 
-      if (selectionMode) {
-        if (isSelected) {
-          startDrag(touch.clientX, touch.clientY, {
-            toggleSelectionOnRelease: true,
-          });
-        } else {
-          onToggleSelection(card.id);
-        }
-        return;
-      }
-
       startDrag(touch.clientX, touch.clientY, {
-        toggleSingleSelectionOnRelease: isTabletEditorMode,
+        toggleSelectionOnRelease: isTabletEditorMode,
       });
     },
     [
-      card.id,
       dragDisabled,
-      isSelected,
       isTabletEditorMode,
       onUnavailableInteraction,
-      onToggleSelection,
-      selectionMode,
       shouldAllowNativeTextScroll,
       startDrag,
     ],
