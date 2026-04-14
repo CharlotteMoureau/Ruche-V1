@@ -313,44 +313,78 @@ export default function RucheEditorPage() {
 
     const intervalId = setInterval(async () => {
       try {
-        const data = await apiFetch(
-          `/hives/${id}?commentsLimit=${COMMENTS_PAGE_SIZE}`,
-          { token },
-        );
+        const [meta, commentsPage] = await Promise.all([
+          apiFetch(`/hives/${id}/meta`, { token }),
+          apiFetch(`/hives/${id}/comments?limit=${COMMENTS_PAGE_SIZE}`, {
+            token,
+          }),
+        ]);
 
-        setHive(data);
+        setHive((current) => {
+          if (!current) return current;
+          return {
+            ...current,
+            ...meta,
+          };
+        });
         setComments((prev) =>
           mergeCommentPages(
-            Array.isArray(data.comments) ? data.comments : [],
+            Array.isArray(commentsPage.comments) ? commentsPage.comments : [],
             prev,
           ),
         );
-        setHasMoreComments(Boolean(data.commentsPagination?.hasMore));
-        setCommentsNextCursor(data.commentsPagination?.nextCursor || null);
+        setHasMoreComments(Boolean(commentsPage.pagination?.hasMore));
+        setCommentsNextCursor(commentsPage.pagination?.nextCursor || null);
         setTotalCommentCount(
-          Number(data.commentsPagination?.totalCommentCount) || 0,
+          Number(commentsPage.pagination?.totalCommentCount) || 0,
         );
-        const nextSnapshot = JSON.stringify({
-          title: data.title,
-          hiveKind: normalizeHiveKind(data.kind),
-          boardData: data.boardData,
-        });
 
         if (!isDirty) {
-          setTitle(data.title);
-          setHiveKind(normalizeHiveKind(data.kind));
-          setBoardData(data.boardData);
-          setBaseUpdatedAt(data.updatedAt || null);
-          setSavedSnapshot(nextSnapshot);
-          shouldSyncWorkspaceNormalizationRef.current = true;
+          const hasRemoteChanges =
+            Boolean(baseUpdatedAt) &&
+            Boolean(meta.updatedAt) &&
+            baseUpdatedAt !== meta.updatedAt;
+
+          if (hasRemoteChanges) {
+            const fullHive = await apiFetch(
+              `/hives/${id}?commentsLimit=${COMMENTS_PAGE_SIZE}`,
+              { token },
+            );
+
+            setHive(fullHive);
+            setTitle(fullHive.title);
+            setHiveKind(normalizeHiveKind(fullHive.kind));
+            setBoardData(fullHive.boardData);
+            setBaseUpdatedAt(fullHive.updatedAt || null);
+            setSavedSnapshot(
+              JSON.stringify({
+                title: fullHive.title,
+                hiveKind: normalizeHiveKind(fullHive.kind),
+                boardData: fullHive.boardData,
+              }),
+            );
+            shouldSyncWorkspaceNormalizationRef.current = true;
+          } else {
+            setTitle(meta.title);
+            setHiveKind(normalizeHiveKind(meta.kind));
+            setBaseUpdatedAt(meta.updatedAt || null);
+            setSavedSnapshot((prev) =>
+              replaceSavedSnapshotBoardData(
+                prev,
+                boardData,
+                meta.title,
+                normalizeHiveKind(meta.kind),
+              ),
+            );
+          }
         }
       } catch {
         // Ignore transient refresh errors and keep local editing state.
       }
-    }, 4500);
+    }, 10_000);
 
     return () => clearInterval(intervalId);
-  }, [canEdit, id, isDirty, isNew, token]);
+  }, [baseUpdatedAt, boardData, id, isDirty, isNew, token]);
 
   useEffect(() => {
     if (isNew || !id || !token || !user?.id) {

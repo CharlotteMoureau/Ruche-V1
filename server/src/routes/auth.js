@@ -170,6 +170,7 @@ authRouter.post("/login", async (req, res) => {
 
 authRouter.get("/me", requireAuth, async (req, res) => {
   const includeCollections = req.query.includeCollections === "1";
+  const includePreviews = req.query.includePreviews === "1";
   if (!includeCollections) {
     return res.json({
       user: sanitizeUser(req.user),
@@ -187,8 +188,8 @@ authRouter.get("/me", requireAuth, async (req, res) => {
           id: true,
           title: true,
           kind: true,
-          boardSnapshot: true,
-          boardPreviewImage: true,
+          boardSnapshot: includePreviews,
+          boardPreviewImage: includePreviews,
           updatedAt: true,
           createdAt: true,
         },
@@ -202,8 +203,8 @@ authRouter.get("/me", requireAuth, async (req, res) => {
               id: true,
               title: true,
               kind: true,
-              boardSnapshot: true,
-              boardPreviewImage: true,
+              boardSnapshot: includePreviews,
+              boardPreviewImage: includePreviews,
               createdAt: true,
               updatedAt: true,
               owner: { select: { username: true, email: true } },

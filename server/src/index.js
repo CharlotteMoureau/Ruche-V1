@@ -1,6 +1,7 @@
 import "dotenv/config";
 import express from "express";
 import cors from "cors";
+import compression from "compression";
 import { startDatabaseCleanupScheduler } from "./lib/dbCleanup.js";
 import { authRouter } from "./routes/auth.js";
 import { usersRouter } from "./routes/users.js";
@@ -45,6 +46,7 @@ app.use(
     credentials: false,
   }),
 );
+app.use(compression());
 app.use(express.json({ limit: "5mb" }));
 
 app.get("/api/health", (_req, res) => {
