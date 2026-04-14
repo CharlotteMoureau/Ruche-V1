@@ -261,12 +261,7 @@ function createEmptyState(message) {
   });
 }
 
-function createCardNotesTitle({
-  card,
-  cardLabel,
-  iconCandidatesByCardId,
-  iconSourceByCardId,
-}) {
+function createCardNotesTitle({ card, cardLabel }) {
   const heading = createElement("h2", {
     styles: {
       margin: "0 0 10px",
@@ -278,40 +273,6 @@ function createCardNotesTitle({
       gap: "10px",
     },
   });
-
-  const cardId = String(card?.id ?? "").trim();
-  const resolvedIconSource = cardId
-    ? iconSourceByCardId?.get(cardId) || ""
-    : "";
-  const boardIconCandidates = cardId
-    ? iconCandidatesByCardId?.get(cardId) || []
-    : [];
-  const fallbackIconCandidates = boardIconCandidates.length
-    ? []
-    : getCardIconCandidates(card);
-  const iconCandidates = [
-    ...new Set([
-      ...(resolvedIconSource ? [resolvedIconSource] : []),
-      ...boardIconCandidates,
-      ...fallbackIconCandidates,
-    ]),
-  ];
-  if (iconCandidates.length) {
-    const icon = createElement("img", {
-      styles: {
-        width: "26px",
-        height: "26px",
-        objectFit: "contain",
-        flex: "0 0 auto",
-      },
-    });
-
-    icon.alt = card.title || card.id || "";
-    icon.dataset.iconCandidates = JSON.stringify(iconCandidates);
-    icon.src = iconCandidates[0];
-
-    heading.appendChild(icon);
-  }
 
   heading.appendChild(
     createElement("span", {
@@ -440,8 +401,6 @@ function createCardNotesExportNode({
   cardNotesTitle,
   noCardNotesMessage,
   cardLabel,
-  iconCandidatesByCardId,
-  iconSourceByCardId,
   unknownUserLabel,
   formatCreatedByText,
   formatUpdatedByText,
@@ -469,14 +428,7 @@ function createCardNotesExportNode({
       },
     });
 
-    wrapper.appendChild(
-      createCardNotesTitle({
-        card,
-        cardLabel,
-        iconCandidatesByCardId,
-        iconSourceByCardId,
-      }),
-    );
+    wrapper.appendChild(createCardNotesTitle({ card, cardLabel }));
 
     wrapper.appendChild(
       createElement("p", {
@@ -599,49 +551,6 @@ function resolveBoardCaptureNode(board) {
   }
 
   return board.querySelector(".hive-board__canvas") || board;
-}
-
-function getBoardIconCandidatesByCardId(board) {
-  const captureNode = resolveBoardCaptureNode(board);
-  const candidatesByCardId = new Map();
-
-  if (!captureNode) {
-    return candidatesByCardId;
-  }
-
-  const cards = [...captureNode.querySelectorAll(".draggable-card")];
-  cards.forEach((cardNode) => {
-    const cardId = cardNode
-      .querySelector(".hex-front span")
-      ?.textContent?.trim();
-    if (!cardId) {
-      return;
-    }
-
-    const icon = cardNode.querySelector(".hex-front img");
-    if (!icon) {
-      return;
-    }
-
-    const iconCandidates = [];
-    const pushCandidate = (value) => {
-      const trimmed = String(value || "").trim();
-      if (!trimmed || iconCandidates.includes(trimmed)) {
-        return;
-      }
-
-      iconCandidates.push(trimmed);
-    };
-
-    pushCandidate(icon.currentSrc);
-    pushCandidate(icon.getAttribute("src"));
-
-    if (iconCandidates.length) {
-      candidatesByCardId.set(cardId, iconCandidates);
-    }
-  });
-
-  return candidatesByCardId;
 }
 
 function normalizePreviewCardsFromBoardData(boardData) {
@@ -792,81 +701,6 @@ function getCardIconCandidates(card) {
   return [...new Set(candidates)];
 }
 
-async function resolveIconSourceFromCandidates(candidates = []) {
-  for (const candidate of candidates) {
-    const raw = String(candidate || "").trim();
-    if (!raw) {
-      continue;
-    }
-
-    const resolvedUrl = raw.startsWith("data:")
-      ? raw
-      : new URL(raw, window.location.href).toString();
-
-    if (resolvedUrl.startsWith("data:")) {
-      try {
-        await loadImage(resolvedUrl);
-        return resolvedUrl;
-      } catch {
-        continue;
-      }
-    }
-
-    try {
-      const response = await fetch(resolvedUrl, { cache: "force-cache" });
-      if (response.ok) {
-        const dataUrl = await blobToDataUrl(await response.blob());
-        await loadImage(dataUrl);
-        return dataUrl;
-      }
-    } catch {
-      // Fall through to direct URL loading below.
-    }
-
-    try {
-      const loadedImage = await loadImage(resolvedUrl);
-      const dataUrl = imageToDataUrl(loadedImage);
-      if (dataUrl) {
-        await loadImage(dataUrl);
-        return dataUrl;
-      }
-
-      return resolvedUrl;
-    } catch {
-      // Try next source.
-    }
-  }
-
-  return null;
-}
-
-async function resolveCardIconSourcesByCardId(cards = [], iconCandidatesByCardId) {
-  const iconSourceByCardId = new Map();
-
-  await Promise.all(
-    cards.map(async (card) => {
-      const cardId = String(card?.id ?? "").trim();
-      if (!cardId) {
-        return;
-      }
-
-      const boardIconCandidates = iconCandidatesByCardId?.get(cardId) || [];
-      const fallbackCandidates = boardIconCandidates.length
-        ? []
-        : getCardIconCandidates(card);
-      const candidates = [
-        ...new Set([...boardIconCandidates, ...fallbackCandidates]),
-      ];
-
-      const resolvedSource = await resolveIconSourceFromCandidates(candidates);
-      if (resolvedSource) {
-        iconSourceByCardId.set(cardId, resolvedSource);
-      }
-    }),
-  );
-
-  return iconSourceByCardId;
-}
 
 function drawHexPath(context, x, y, size) {
   const radius = size / 2;
@@ -1588,12 +1422,16 @@ export async function captureHiveExportBundle({
   formatCreatedByText,
   formatUpdatedByText,
 }) {
-  const iconCandidatesByCardId = getBoardIconCandidatesByCardId(board);
+  const captureNode = resolveBoardCaptureNode(board);
+  if (!captureNode) {
+    throw new Error("Board not found");
+  }
+
+  await waitForCaptureFrame();
+  await waitForAllNodeImages(captureNode);
+  await waitForNextPaint();
+
   const cardsWithNotes = getCardsWithNotes(boardCards);
-  const iconSourceByCardId = await resolveCardIconSourcesByCardId(
-    cardsWithNotes,
-    iconCandidatesByCardId,
-  );
   const { frontDataUrl, backDataUrl } = await captureBoardImages(board);
   const chatCommentChunks = splitCommentsForExport(comments, CHAT_EXPORT_CHUNK_SIZE);
   const chatDataUrls = await Promise.all(
@@ -1618,8 +1456,6 @@ export async function captureHiveExportBundle({
           cardNotesTitle,
           noCardNotesMessage,
           cardLabel,
-          iconCandidatesByCardId,
-          iconSourceByCardId,
           unknownUserLabel,
           formatCreatedByText,
           formatUpdatedByText,
