@@ -243,7 +243,7 @@ export function useDraggableCard({
         selectedCards.length > 1;
       const dragCards = shouldDragSelection ? selectedCards : [card];
 
-      if (selectedCards.length && !isSelected) {
+      if (selectedCards.length && !isSelected && !toggleSelectionOnRelease) {
         onClearSelection();
       }
 
