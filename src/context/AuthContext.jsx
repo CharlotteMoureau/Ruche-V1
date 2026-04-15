@@ -98,7 +98,11 @@ export function AuthProvider({ children }) {
 
   const refreshMe = useMemo(
     () =>
-      async ({ includeCollections = true, includePreviews = false } = {}) => {
+      async ({
+        includeCollections = true,
+        includePreviews = false,
+        includePreviewImages = false,
+      } = {}) => {
         if (!token) return null;
         const searchParams = new URLSearchParams();
         if (includeCollections) {
@@ -106,6 +110,9 @@ export function AuthProvider({ children }) {
         }
         if (includePreviews) {
           searchParams.set("includePreviews", "1");
+        }
+        if (includePreviewImages) {
+          searchParams.set("includePreviewImages", "1");
         }
 
         const query = searchParams.toString();

@@ -19,6 +19,8 @@ import { useLanguage } from "../context/LanguageContext";
 import { apiFetch } from "../lib/api";
 import { useTabletViewport } from "../hooks/useTabletViewport";
 
+const INVITES_REFRESH_INTERVAL_MS = 60_000;
+
 export default function AppHeader() {
   const { isAuthenticated, logout, isAdmin, token } = useAuth();
   const { t } = useLanguage();
@@ -94,7 +96,10 @@ export default function AppHeader() {
     };
 
     refreshPendingInvitesCount();
-    const intervalId = window.setInterval(refreshPendingInvitesCount, 5000);
+    const intervalId = window.setInterval(() => {
+      if (document.visibilityState === "hidden") return;
+      refreshPendingInvitesCount();
+    }, INVITES_REFRESH_INTERVAL_MS);
     window.addEventListener("focus", handleVisibilityOrFocus);
     document.addEventListener("visibilitychange", handleVisibilityOrFocus);
     window.addEventListener("ruche:invitations-updated", handleManualRefresh);

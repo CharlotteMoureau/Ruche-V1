@@ -287,10 +287,21 @@ function isCommentRateLimited(hiveId, userId) {
   return false;
 }
 
-async function getHiveOr404(id) {
+async function getHiveOr404(
+  id,
+  { includeBoardData = false, includePreviewImage = false } = {},
+) {
   return prisma.hive.findUnique({
     where: { id },
-    include: {
+    select: {
+      id: true,
+      title: true,
+      kind: true,
+      ownerId: true,
+      createdAt: true,
+      updatedAt: true,
+      boardData: includeBoardData,
+      boardPreviewImage: includePreviewImage,
       owner: { select: { id: true, username: true, email: true } },
       collaborators: {
         include: {
@@ -619,7 +630,11 @@ hivesRouter.get("/:id/meta", async (req, res) => {
 });
 
 hivesRouter.get("/:id", async (req, res) => {
-  const hive = await getHiveOr404(req.params.id);
+  const includePreviewImage = req.query.includePreviewImage === "1";
+  const hive = await getHiveOr404(req.params.id, {
+    includeBoardData: true,
+    includePreviewImage,
+  });
   if (!hive) {
     return res
       .status(404)
@@ -642,7 +657,7 @@ hivesRouter.get("/:id", async (req, res) => {
     title: hive.title,
     kind: hive.kind,
     boardData: hive.boardData,
-    boardPreviewImage: hive.boardPreviewImage,
+    boardPreviewImage: includePreviewImage ? hive.boardPreviewImage : null,
     owner: hive.owner,
     createdAt: hive.createdAt,
     updatedAt: hive.updatedAt,
@@ -783,7 +798,9 @@ hivesRouter.put("/:id", async (req, res) => {
     return res.status(validation.status).json(validation.body);
   }
 
-  const hive = await getHiveOr404(req.params.id);
+  const hive = await getHiveOr404(req.params.id, {
+    includePreviewImage: true,
+  });
   if (!hive) {
     return res
       .status(404)
@@ -1048,7 +1065,9 @@ hivesRouter.put("/:id/cards/:cardId/note", async (req, res) => {
     });
   }
 
-  const hive = await getHiveOr404(req.params.id);
+  const hive = await getHiveOr404(req.params.id, {
+    includeBoardData: true,
+  });
   if (!hive) {
     return res
       .status(404)
@@ -1107,7 +1126,9 @@ hivesRouter.put("/:id/cards/:cardId/note", async (req, res) => {
 });
 
 hivesRouter.delete("/:id/cards/:cardId/note", async (req, res) => {
-  const hive = await getHiveOr404(req.params.id);
+  const hive = await getHiveOr404(req.params.id, {
+    includeBoardData: true,
+  });
   if (!hive) {
     return res
       .status(404)

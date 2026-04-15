@@ -29,6 +29,9 @@ const HIVE_TITLE_MAX_LENGTH = 100;
 const HIVE_COMMENT_MAX_LENGTH = 500;
 const COMMENTS_PAGE_SIZE = 10;
 const MAX_COMMENTS_PER_HIVE = 100;
+const EDITOR_REFRESH_INTERVAL_MS = 30_000;
+const PRESENCE_REFRESH_INTERVAL_MS = 30_000;
+const PREVIEW_MAX_BYTES = 45 * 1024;
 
 function formatDateTime(value, locale) {
   if (!value) return "-";
@@ -320,6 +323,8 @@ export default function RucheEditorPage() {
     if (isNew) return;
 
     const intervalId = setInterval(async () => {
+      if (document.visibilityState === "hidden") return;
+
       try {
         const [meta, commentsPage] = await Promise.all([
           apiFetch(`/hives/${id}/meta`, { token }),
@@ -389,7 +394,7 @@ export default function RucheEditorPage() {
       } catch {
         // Ignore transient refresh errors and keep local editing state.
       }
-    }, 10_000);
+    }, EDITOR_REFRESH_INTERVAL_MS);
 
     return () => clearInterval(intervalId);
   }, [baseUpdatedAt, boardData, id, isDirty, isNew, token]);
@@ -418,7 +423,10 @@ export default function RucheEditorPage() {
     };
 
     syncPresence();
-    const intervalId = setInterval(syncPresence, 10_000);
+    const intervalId = setInterval(() => {
+      if (document.visibilityState === "hidden") return;
+      syncPresence();
+    }, PRESENCE_REFRESH_INTERVAL_MS);
 
     return () => {
       isMounted = false;
@@ -603,7 +611,7 @@ export default function RucheEditorPage() {
             maxHeight: 450,
             sourceScale: 2,
             quality: 0.76,
-            maxBytes: 170 * 1024,
+            maxBytes: PREVIEW_MAX_BYTES,
             boardData,
           });
         }

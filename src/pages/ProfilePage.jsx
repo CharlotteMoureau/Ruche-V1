@@ -42,6 +42,7 @@ const HIVES_PER_PAGE = 5;
 const HIVE_TITLE_MAX_LENGTH = 100;
 const CARD_SIZE = 200;
 const BOARD_PADDING = 60;
+const PREVIEW_MAX_BYTES = 45 * 1024;
 const PROFILE_TAB_HIVES = "hives";
 const PROFILE_TAB_SETTINGS = "settings";
 
@@ -162,6 +163,10 @@ function isRasterPreviewDataUrl(value) {
     typeof value === "string" &&
     /^data:image\/(webp|jpeg|jpg|png);base64,/i.test(value.trim())
   );
+}
+
+function toOptionalPreviewImage(value) {
+  return isRasterPreviewDataUrl(value) ? value : undefined;
 }
 
 function getHiveDateValue(hive) {
@@ -640,7 +645,7 @@ export default function ProfilePage() {
           title: trimmedTitle,
           kind: sourceHive?.kind,
           boardData: sourceHive?.boardData,
-          boardPreviewImage: sourceHive?.boardPreviewImage,
+          boardPreviewImage: toOptionalPreviewImage(sourceHive?.boardPreviewImage),
           expectedUpdatedAt: sourceHive?.updatedAt,
         },
       });
@@ -710,7 +715,7 @@ export default function ProfilePage() {
               maxHeight: 450,
               sourceScale: 2,
               quality: 0.76,
-              maxBytes: 170 * 1024,
+              maxBytes: PREVIEW_MAX_BYTES,
             });
           }
         } finally {
@@ -726,7 +731,7 @@ export default function ProfilePage() {
           title: trimmedTitle,
           kind: sourceHive.kind,
           boardData: sourceHive.boardData,
-          boardPreviewImage,
+          boardPreviewImage: toOptionalPreviewImage(boardPreviewImage),
         },
       });
       const data = await refreshMe({ includePreviews: true });
@@ -790,7 +795,7 @@ export default function ProfilePage() {
               maxHeight: 450,
               sourceScale: 2,
               quality: 0.76,
-              maxBytes: 170 * 1024,
+              maxBytes: PREVIEW_MAX_BYTES,
             });
           }
         } finally {
@@ -806,7 +811,7 @@ export default function ProfilePage() {
           title: trimmedTitle,
           kind: sourceHive.kind,
           boardData: sourceHive.boardData,
-          boardPreviewImage,
+          boardPreviewImage: toOptionalPreviewImage(boardPreviewImage),
         },
       });
       const data = await refreshMe({ includePreviews: true });

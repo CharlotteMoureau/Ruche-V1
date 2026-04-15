@@ -70,8 +70,8 @@ authRouter.post("/register", async (req, res) => {
   });
 
   if (
-    existing?.username
-    && existing.username.toLowerCase() === parsed.data.username.toLowerCase()
+    existing?.username &&
+    existing.username.toLowerCase() === parsed.data.username.toLowerCase()
   ) {
     return res
       .status(409)
@@ -171,6 +171,7 @@ authRouter.post("/login", async (req, res) => {
 authRouter.get("/me", requireAuth, async (req, res) => {
   const includeCollections = req.query.includeCollections === "1";
   const includePreviews = req.query.includePreviews === "1";
+  const includePreviewImages = req.query.includePreviewImages === "1";
   if (!includeCollections) {
     return res.json({
       user: sanitizeUser(req.user),
@@ -189,7 +190,7 @@ authRouter.get("/me", requireAuth, async (req, res) => {
           title: true,
           kind: true,
           boardSnapshot: includePreviews,
-          boardPreviewImage: includePreviews,
+          boardPreviewImage: includePreviews && includePreviewImages,
           updatedAt: true,
           createdAt: true,
         },
@@ -204,7 +205,7 @@ authRouter.get("/me", requireAuth, async (req, res) => {
               title: true,
               kind: true,
               boardSnapshot: includePreviews,
-              boardPreviewImage: includePreviews,
+              boardPreviewImage: includePreviews && includePreviewImages,
               createdAt: true,
               updatedAt: true,
               owner: { select: { username: true, email: true } },
