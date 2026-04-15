@@ -894,6 +894,24 @@ export default function RucheEditorPage() {
     async ({ cardId, message, nextBoardData }) => {
       if (isNew || !id) return null;
 
+      const savedBoardCards = Array.isArray(hive?.boardData?.boardCards)
+        ? hive.boardData.boardCards
+        : [];
+      const hasSavedCard = savedBoardCards.some(
+        (card) => String(card?.id) === String(cardId),
+      );
+
+      // New cards added locally do not exist in the persisted hive yet.
+      // Keep note changes locally and persist them with the next hive save.
+      if (!hasSavedCard) {
+        setBoardData(nextBoardData);
+        setError("");
+        return {
+          boardData: nextBoardData,
+          updatedAt: baseUpdatedAt,
+        };
+      }
+
       try {
         const encodedCardId = encodeURIComponent(String(cardId));
         const updated = await apiFetch(
@@ -933,7 +951,18 @@ export default function RucheEditorPage() {
         throw err;
       }
     },
-    [hive?.kind, hive?.title, hiveKind, id, isNew, showApiError, title, token],
+    [
+      baseUpdatedAt,
+      hive?.boardData?.boardCards,
+      hive?.kind,
+      hive?.title,
+      hiveKind,
+      id,
+      isNew,
+      showApiError,
+      title,
+      token,
+    ],
   );
 
   const runSavedHiveAction = (action) => {
