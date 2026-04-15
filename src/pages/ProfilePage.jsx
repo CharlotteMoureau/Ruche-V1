@@ -402,7 +402,10 @@ export default function ProfilePage() {
       }
       setIsLoadingProfile(true);
       try {
-        const data = await refreshMe({ includePreviews: true });
+        const data = await refreshMe({
+          includePreviews: true,
+          includePreviewImages: true,
+        });
         if (mounted) setProfile(data);
       } catch (err) {
         if (mounted) {
@@ -492,7 +495,10 @@ export default function ProfilePage() {
         },
       });
 
-      const data = await refreshMe({ includePreviews: true });
+      const data = await refreshMe({
+        includePreviews: true,
+        includePreviewImages: true,
+      });
       setProfile(data);
       setRoleForm({
         role: resolveRoleFormValue(data?.user?.roleLabel, roleOptions),
@@ -570,7 +576,10 @@ export default function ProfilePage() {
         method: "DELETE",
         token,
       });
-      const data = await refreshMe({ includePreviews: true });
+      const data = await refreshMe({
+        includePreviews: true,
+        includePreviewImages: true,
+      });
       setProfile(data);
       setConfirmDeleteHiveId(null);
     } catch (err) {
@@ -650,7 +659,10 @@ export default function ProfilePage() {
         },
       });
 
-      const data = await refreshMe({ includePreviews: true });
+      const data = await refreshMe({
+        includePreviews: true,
+        includePreviewImages: true,
+      });
       setProfile(data);
       setRenameOrDuplicateDraft({
         hiveId: null,
@@ -734,7 +746,10 @@ export default function ProfilePage() {
           boardPreviewImage: toOptionalPreviewImage(boardPreviewImage),
         },
       });
-      const data = await refreshMe({ includePreviews: true });
+      const data = await refreshMe({
+        includePreviews: true,
+        includePreviewImages: true,
+      });
       setProfile(data);
       setRenameOrDuplicateDraft({
         hiveId: null,
@@ -814,7 +829,10 @@ export default function ProfilePage() {
           boardPreviewImage: toOptionalPreviewImage(boardPreviewImage),
         },
       });
-      const data = await refreshMe({ includePreviews: true });
+      const data = await refreshMe({
+        includePreviews: true,
+        includePreviewImages: true,
+      });
       setProfile(data);
       setDuplicateDraft({ hiveId: null, sourceTitle: "", nextTitle: "" });
     } catch (err) {
