@@ -222,6 +222,17 @@
     padding-left: 14px;
   }
 
+  .bug-report-context {
+    margin: 0 0 24px 0;
+    padding: 16px 18px;
+    border-radius: 8px;
+    background: rgba($orange, 0.08);
+    border: 1px solid rgba($orange, 0.24);
+    color: $gris;
+    line-height: 1.65;
+    font-size: 0.95rem;
+  }
+
   .bug-report-sections {
     display: grid;
     gap: 16px;

@@ -680,6 +680,8 @@ export const messages = {
       title: "Signaler un bug",
       intro:
         "Si quelque chose ne fonctionne pas comme prévu, cette page vous aide à nous envoyer un message clair et utile, même sans vocabulaire technique.",
+      context:
+        "La Ruche est encore un site récent, développé avec beaucoup de soin mais sans prétention de niveau professionnel. Il peut donc rester quelques bugs, et vos signalements nous aident vraiment à améliorer l’outil.",
       section1Title: "1. Où le problème apparaît-il ?",
       section1:
         "Indiquez la page ou la fonctionnalité concernée. Par exemple : connexion, profil, commentaires, export PNG ou une ruche précise.",
@@ -698,7 +700,7 @@ export const messages = {
       tip3: "Indiquez l’appareil utilisé, le navigateur, et le nom de la ruche concernée si vous le connaissez.",
       sendButton: "Ouvrir un e-mail de signalement",
       emailNote:
-        "Le bouton ouvre votre application e-mail avec un sujet et un modèle déjà préparés à envoyer à test@test.com.",
+        "Le bouton ouvre votre application e-mail avec un sujet et un modèle déjà préparés à envoyer à charlotte.moureau@cfwb.be.",
       emailSubject: "La Ruche - Signalement de bug",
       emailTemplate:
         "Bonjour,\n\nJe souhaite signaler un bug dans La Ruche.\n\n1. Où le problème apparaît-il ?\n(Page ou fonctionnalité concernée)\n\n2. Que faisiez-vous juste avant ?\n(étapes simples, une par ligne)\n\n3. Qu’est-ce qui s’est passé ?\n(message d’erreur, blocage, résultat inattendu)\n\n4. Quel résultat attendiez-vous ?\n(résultat attendu)\n\n5. Le problème est-il reproductible ?\n(toujours / parfois / une seule fois)\n\n6. Informations utiles\n- Appareil :\n- Navigateur :\n- Nom de la ruche :\n- Capture d’écran ou fichier joint :\n\nMerci.",
@@ -1236,6 +1238,8 @@ export const messages = {
       title: "Report a bug",
       intro:
         "If something does not work as expected, this page helps you send us a clear and useful report, even if you are not used to technical terms.",
+      context:
+        "La Ruche is still a new website, built with care but not by a professional developer. Some bugs may still remain, and your reports genuinely help improve the tool.",
       section1Title: "1. Where does the problem happen?",
       section1:
         "Tell us which page or feature is concerned. For example: login, profile, comments, PNG export, or a specific hive.",
@@ -1254,7 +1258,7 @@ export const messages = {
       tip3: "Include the device, browser, and hive name if you know them.",
       sendButton: "Open a bug report email",
       emailNote:
-        "The button opens your email app with a prepared subject and message template addressed to test@test.com.",
+        "The button opens your email app with a prepared subject and message template addressed to charlotte.moureau@cfwb.be.",
       emailSubject: "La Ruche - Bug report",
       emailTemplate:
         "Hello,\n\nI would like to report a bug in La Ruche.\n\n1. Where does the problem happen?\n(page or feature concerned)\n\n2. What were you doing just before?\n(simple steps, one per line)\n\n3. What happened?\n(error message, block, unexpected result)\n\n4. What should have happened instead?\n(expected result)\n\n5. Can you reproduce the problem?\n(always / sometimes / only once)\n\n6. Useful information\n- Device:\n- Browser:\n- Hive name:\n- Screenshot or attached file:\n\nThank you.",
@@ -1802,6 +1806,8 @@ export const messages = {
       title: "Bug melden",
       intro:
         "Als iets niet werkt zoals verwacht, helpt deze pagina u om een duidelijke en bruikbare melding te sturen, ook zonder technische termen.",
+      context:
+        "La Ruche is nog een recente website, met veel zorg ontwikkeld maar niet door een professionele ontwikkelaar. Daarom kunnen er nog enkele bugs aanwezig zijn, en uw meldingen helpen echt om het hulpmiddel te verbeteren.",
       section1Title: "1. Waar verschijnt het probleem?",
       section1:
         "Geef aan om welke pagina of functie het gaat. Bijvoorbeeld: aanmelden, profiel, reacties, PNG-export of een specifieke bijenkorf.",
@@ -1820,7 +1826,7 @@ export const messages = {
       tip3: "Vermeld het apparaat, de browser en de naam van de bijenkorf als u die kent.",
       sendButton: "E-mail voor bugmelding openen",
       emailNote:
-        "De knop opent uw e-mailprogramma met een voorbereid onderwerp en sjabloon gericht aan test@test.com.",
+        "De knop opent uw e-mailprogramma met een voorbereid onderwerp en sjabloon gericht aan charlotte.moureau@cfwb.be.",
       emailSubject: "La Ruche - Bugmelding",
       emailTemplate:
         "Hallo,\n\nIk wil een bug in La Ruche melden.\n\n1. Waar verschijnt het probleem?\n(betreffende pagina of functie)\n\n2. Wat deed u net ervoor?\n(eenvoudige stappen, één per regel)\n\n3. Wat is er gebeurd?\n(foutmelding, blokkering, onverwacht resultaat)\n\n4. Wat had er moeten gebeuren?\n(verwacht resultaat)\n\n5. Kunt u het probleem opnieuw veroorzaken?\n(altijd / soms / slechts één keer)\n\n6. Nuttige informatie\n- Apparaat:\n- Browser:\n- Naam van de bijenkorf:\n- Schermafbeelding of bijlage:\n\nBedankt.",

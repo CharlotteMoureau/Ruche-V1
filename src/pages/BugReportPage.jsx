@@ -39,6 +39,7 @@ export default function BugReportPage() {
     <section className="page-shell bug-report-page">
       <h2>{t("bugReportPage.title")}</h2>
       <p className="bug-report-intro">{t("bugReportPage.intro")}</p>
+      <p className="bug-report-context">{t("bugReportPage.context")}</p>
 
       <div className="bug-report-sections">
         {sections.map(({ titleKey, bodyKey }) => (
