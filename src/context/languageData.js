@@ -237,6 +237,7 @@ export const messages = {
       tutorialPlaceholder: "Guide complet et vidéo d'explication",
       gdpr: "RGPD / Confidentialité",
       gdprPlaceholder: "Données, cookies, droits RGPD — lisez notre politique.",
+      reportBug: "Signaler un bug",
       wip: "En cours de développement",
       wipPlaceholder:
         "V1, V2, fonctionnalités à venir — découvrez la feuille de route.",
@@ -675,6 +676,35 @@ export const messages = {
       status: "En cours de développement",
       back: "Retour à l’accueil",
     },
+    bugReportPage: {
+      title: "Signaler un bug",
+      intro:
+        "Si quelque chose ne fonctionne pas comme prévu, cette page vous aide à nous envoyer un message clair et utile, même sans vocabulaire technique.",
+      section1Title: "1. Où le problème apparaît-il ?",
+      section1:
+        "Indiquez la page ou la fonctionnalité concernée. Par exemple : connexion, profil, commentaires, export PNG ou une ruche précise.",
+      section2Title: "2. Que faisiez-vous juste avant ?",
+      section2:
+        "Décrivez les étapes dans l’ordre, avec des mots simples. Exemple : j’ai ouvert une ruche, déplacé une carte, puis cliqué sur enregistrer.",
+      section3Title: "3. Qu’est-ce qui s’est passé ?",
+      section3:
+        "Expliquez le résultat observé : message d’erreur, écran vide, bouton bloqué, contenu disparu ou comportement inattendu.",
+      section4Title: "4. Quel résultat attendiez-vous ?",
+      section4:
+        "Dites-nous ce qui aurait dû se passer normalement. Cela nous aide à comprendre plus vite l’écart entre attendu et réel.",
+      tipsTitle: "Informations très utiles à ajouter",
+      tip1: "Précisez si le problème arrive toujours, parfois, ou seulement une seule fois.",
+      tip2: "Ajoutez une capture d’écran si vous pouvez, surtout s’il y a un message affiché.",
+      tip3: "Indiquez l’appareil utilisé, le navigateur, et le nom de la ruche concernée si vous le connaissez.",
+      sendButton: "Ouvrir un e-mail de signalement",
+      emailNote:
+        "Le bouton ouvre votre application e-mail avec un sujet et un modèle déjà préparés à envoyer à l'adresse configurée pour l'administration.",
+      emailUnavailable:
+        "Aucune adresse d'administration n'est configurée pour le moment.",
+      emailSubject: "La Ruche - Signalement de bug",
+      emailTemplate:
+        "Bonjour,\n\nJe souhaite signaler un bug dans La Ruche.\n\n1. Où le problème apparaît-il ?\n(Page ou fonctionnalité concernée)\n\n2. Que faisiez-vous juste avant ?\n(étapes simples, une par ligne)\n\n3. Qu’est-ce qui s’est passé ?\n(message d’erreur, blocage, résultat inattendu)\n\n4. Quel résultat attendiez-vous ?\n(résultat attendu)\n\n5. Le problème est-il reproductible ?\n(toujours / parfois / une seule fois)\n\n6. Informations utiles\n- Appareil :\n- Navigateur :\n- Nom de la ruche :\n- Capture d’écran ou fichier joint :\n\nMerci.",
+    },
     tutorial: {
       title: "Tutoriel",
     },
@@ -784,6 +814,7 @@ export const messages = {
       tutorialPlaceholder: "Complete guide and video tutorial",
       gdpr: "GDPR / Privacy",
       gdprPlaceholder: "Data, cookies, GDPR rights — read our privacy policy.",
+      reportBug: "Report a bug",
       wip: "Work in Progress",
       wipPlaceholder: "V1, V2, upcoming features — discover the roadmap.",
       contact: "Contact",
@@ -1203,6 +1234,34 @@ export const messages = {
       status: "Status: In development",
       back: "Back to home",
     },
+    bugReportPage: {
+      title: "Report a bug",
+      intro:
+        "If something does not work as expected, this page helps you send us a clear and useful report, even if you are not used to technical terms.",
+      section1Title: "1. Where does the problem happen?",
+      section1:
+        "Tell us which page or feature is concerned. For example: login, profile, comments, PNG export, or a specific hive.",
+      section2Title: "2. What were you doing just before?",
+      section2:
+        "Describe the steps in order, using simple words. Example: I opened a hive, moved a card, then clicked save.",
+      section3Title: "3. What happened?",
+      section3:
+        "Explain what you saw: an error message, a blank screen, a blocked button, missing content, or any unexpected behaviour.",
+      section4Title: "4. What should have happened instead?",
+      section4:
+        "Tell us what you expected to happen. This helps us understand the difference between the expected result and the actual one.",
+      tipsTitle: "Very helpful details to include",
+      tip1: "Tell us whether the issue happens every time, sometimes, or only once.",
+      tip2: "Add a screenshot if you can, especially if a message is displayed.",
+      tip3: "Include the device, browser, and hive name if you know them.",
+      sendButton: "Open a bug report email",
+      emailNote:
+        "The button opens your email app with a prepared subject and message template addressed to the configured admin email.",
+      emailUnavailable: "No admin email is configured at the moment.",
+      emailSubject: "La Ruche - Bug report",
+      emailTemplate:
+        "Hello,\n\nI would like to report a bug in La Ruche.\n\n1. Where does the problem happen?\n(page or feature concerned)\n\n2. What were you doing just before?\n(simple steps, one per line)\n\n3. What happened?\n(error message, block, unexpected result)\n\n4. What should have happened instead?\n(expected result)\n\n5. Can you reproduce the problem?\n(always / sometimes / only once)\n\n6. Useful information\n- Device:\n- Browser:\n- Hive name:\n- Screenshot or attached file:\n\nThank you.",
+    },
     tutorial: {
       title: "Tutorial",
     },
@@ -1315,6 +1374,7 @@ export const messages = {
       gdpr: "GDPR / Privacy",
       gdprPlaceholder:
         "Gegevens, cookies, AVG-rechten — lees ons privacybeleid.",
+      reportBug: "Bug melden",
       wip: "In Ontwikkeling",
       wipPlaceholder: "V1, V2, komende functies — ontdek de routekaart.",
       contact: "Contact",
@@ -1740,6 +1800,34 @@ export const messages = {
         "Een communityruimte om bugs te melden, updates te volgen en pedagogische praktijken uit te wisselen.",
       status: "In ontwikkeling",
       back: "Terug naar home",
+    },
+    bugReportPage: {
+      title: "Bug melden",
+      intro:
+        "Als iets niet werkt zoals verwacht, helpt deze pagina u om een duidelijke en bruikbare melding te sturen, ook zonder technische termen.",
+      section1Title: "1. Waar verschijnt het probleem?",
+      section1:
+        "Geef aan om welke pagina of functie het gaat. Bijvoorbeeld: aanmelden, profiel, reacties, PNG-export of een specifieke bijenkorf.",
+      section2Title: "2. Wat deed u net ervoor?",
+      section2:
+        "Beschrijf de stappen in volgorde en in eenvoudige woorden. Bijvoorbeeld: ik opende een bijenkorf, versleepte een kaart en klikte daarna op opslaan.",
+      section3Title: "3. Wat is er gebeurd?",
+      section3:
+        "Leg uit wat u zag: een foutmelding, een leeg scherm, een knop die niet werkt, verdwenen inhoud of ander onverwacht gedrag.",
+      section4Title: "4. Wat had er moeten gebeuren?",
+      section4:
+        "Vertel ons wat u normaal verwachtte. Zo begrijpen we sneller het verschil tussen verwacht en werkelijk resultaat.",
+      tipsTitle: "Heel nuttige extra informatie",
+      tip1: "Geef aan of het probleem altijd, soms of slechts één keer voorkomt.",
+      tip2: "Voeg indien mogelijk een schermafbeelding toe, vooral als er een bericht zichtbaar is.",
+      tip3: "Vermeld het apparaat, de browser en de naam van de bijenkorf als u die kent.",
+      sendButton: "E-mail voor bugmelding openen",
+      emailNote:
+        "De knop opent uw e-mailprogramma met een voorbereid onderwerp en sjabloon gericht aan het geconfigureerde beheeradres.",
+      emailUnavailable: "Er is momenteel geen beheeradres geconfigureerd.",
+      emailSubject: "La Ruche - Bugmelding",
+      emailTemplate:
+        "Hallo,\n\nIk wil een bug in La Ruche melden.\n\n1. Waar verschijnt het probleem?\n(betreffende pagina of functie)\n\n2. Wat deed u net ervoor?\n(eenvoudige stappen, één per regel)\n\n3. Wat is er gebeurd?\n(foutmelding, blokkering, onverwacht resultaat)\n\n4. Wat had er moeten gebeuren?\n(verwacht resultaat)\n\n5. Kunt u het probleem opnieuw veroorzaken?\n(altijd / soms / slechts één keer)\n\n6. Nuttige informatie\n- Apparaat:\n- Browser:\n- Naam van de bijenkorf:\n- Schermafbeelding of bijlage:\n\nBedankt.",
     },
     tutorial: {
       title: "Handleiding",

@@ -202,6 +202,137 @@
   }
 }
 
+// ── Bug Report Page ───────────────────────────────────────────────────────
+
+.bug-report-page {
+  max-width: 780px;
+  margin: 0 auto;
+
+  h2 {
+    color: $bleu-fonce;
+    margin-bottom: 12px;
+  }
+
+  .bug-report-intro {
+    font-size: 1rem;
+    color: $gris;
+    line-height: 1.7;
+    margin-bottom: 32px;
+    border-left: 4px solid $bleu-clair;
+    padding-left: 14px;
+  }
+
+  .bug-report-sections {
+    display: grid;
+    gap: 16px;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  }
+
+  .bug-report-section {
+    background: #fafaf8;
+    border: 1px solid #e8e4de;
+    border-radius: 8px;
+    padding: 20px 24px;
+
+    h3 {
+      font-size: 1rem;
+      color: $bleu-fonce;
+      margin: 0 0 8px 0;
+    }
+
+    p {
+      font-size: 0.92rem;
+      color: $gris;
+      line-height: 1.65;
+      margin: 0;
+    }
+  }
+
+  .bug-report-tips {
+    margin-top: 24px;
+    background: rgba($turquoise, 0.08);
+    border: 1px solid rgba($turquoise, 0.22);
+    border-radius: 8px;
+    padding: 20px 24px;
+
+    h3 {
+      font-size: 1rem;
+      color: $bleu-fonce;
+      margin: 0 0 12px 0;
+    }
+
+    ul {
+      margin: 0;
+      padding-left: 18px;
+      color: $gris;
+    }
+
+    li + li {
+      margin-top: 8px;
+    }
+  }
+
+  .bug-report-actions {
+    margin-top: 28px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .bug-report-mail-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 12px 18px;
+    border-radius: 999px;
+    background: $bleu-fonce;
+    color: $blanc;
+    text-decoration: none;
+    font-weight: 600;
+
+    &:hover {
+      background: $bleu-clair;
+    }
+  }
+
+  .bug-report-note {
+    margin: 0;
+    font-size: 0.9rem;
+    color: $gris;
+  }
+
+  .bug-report-back-link {
+    display: inline-block;
+    margin-top: 28px;
+    color: $bleu-clair;
+    text-decoration: none;
+    font-size: 0.9rem;
+
+    &:hover {
+      color: $bleu-fonce;
+      text-decoration: underline;
+    }
+  }
+}
+
+@media (max-width: 767px) {
+  .bug-report-page {
+    .bug-report-sections {
+      grid-template-columns: 1fr;
+    }
+
+    .bug-report-section,
+    .bug-report-tips {
+      padding: 18px;
+    }
+
+    .bug-report-mail-button {
+      width: 100%;
+    }
+  }
+}
+
 // ── Tutorial Page ──────────────────────────────────────────────────────────
 
 .tutorial-page {

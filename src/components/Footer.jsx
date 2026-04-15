@@ -7,15 +7,20 @@ export default function Footer() {
   return (
     <footer>
       <div className="administration">
-        <a href="https://www.peca.be/" target="_blank">
+        <a href="https://www.peca.be/" target="_blank" rel="noopener noreferrer">
           <img src="/data/logos/peca.svg" alt="PECA logo" />
         </a>
-        <a href="https://www.federation-wallonie-bruxelles.be/" target="_blank">
+        <a
+          href="https://www.federation-wallonie-bruxelles.be/"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
           <img src="/data/logos/fwb.png" alt="logo FW-B" />
         </a>
         <a
           href="https://pactepourunenseignementdexcellence.cfwb.be/"
           target="_blank"
+          rel="noopener noreferrer"
         >
           <img
             src="/data/logos/pacte.png"
@@ -30,6 +35,8 @@ export default function Footer() {
           <Link to="https://www.peca.be/contact" target="_blank">
             {t("landing.contact")}
           </Link>
+          <span aria-hidden="true">·</span>
+          <Link to="/report-bug">{t("landing.reportBug")}</Link>
           <span aria-hidden="true">·</span>
           <Link to="/wip">{t("landing.wip")}</Link>
         </div>
@@ -50,13 +57,13 @@ export default function Footer() {
         </label>
       </div>
       <div className="unif">
-        <a href="https://web.umons.ac.be/" target="_blank">
+        <a href="https://web.umons.ac.be/" target="_blank" rel="noopener noreferrer">
           <img src="/data/logos/umons.png" alt="logo UMons" />
         </a>
-        <a href="https://www.unamur.be/" target="_blank">
+        <a href="https://www.unamur.be/" target="_blank" rel="noopener noreferrer">
           <img src="/data/logos/unamur.svg" alt="logo UNamur" />
         </a>
-        <a href="https://www.uliege.be/" target="_blank">
+        <a href="https://www.uliege.be/" target="_blank" rel="noopener noreferrer">
           <img src="/data/logos/uliège.png" alt="logo ULiège" />
         </a>
       </div>

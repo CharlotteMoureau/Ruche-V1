@@ -90,6 +90,8 @@ body.ios footer {
 .footer-legal {
     display: flex;
     align-items: center;
+    flex-wrap: wrap;
+    justify-content: center;
     gap: 10px;
     font-size: 12px;
 
@@ -133,6 +135,7 @@ body.ios footer {
         .footer-legal {
             gap: 8px;
             font-size: 11px;
+            row-gap: 4px;
         }
 
         .language-select-wrap {

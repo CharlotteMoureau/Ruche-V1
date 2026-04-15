@@ -17,9 +17,10 @@ async function parseResponse(response) {
     : await response.text();
 
   if (!response.ok) {
-    const message = typeof payload === "object" && payload?.error
-      ? payload.error
-      : `Request failed (${response.status})`;
+    const message =
+      typeof payload === "object" && payload?.error
+        ? payload.error
+        : `Request failed (${response.status})`;
     throw new ApiError(message, {
       status: response.status,
       payload,
@@ -43,7 +44,15 @@ export async function apiFetch(path, { method = "GET", body, token } = {}) {
   return parseResponse(response);
 }
 
-export function getApiErrorMessage(error, t, fallbackPath = "common.unexpectedError") {
+export async function fetchPublicAppConfig() {
+  return apiFetch("/public/app-config");
+}
+
+export function getApiErrorMessage(
+  error,
+  t,
+  fallbackPath = "common.unexpectedError",
+) {
   if (error?.code) {
     const localizedByCode = t(`apiErrors.${error.code}`);
     if (localizedByCode !== `apiErrors.${error.code}`) {
