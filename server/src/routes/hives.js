@@ -54,7 +54,9 @@ const collaboratorRoleSchema = z.enum(COLLABORATOR_ROLES);
 const PRESENCE_TTL_MS = 30_000;
 const COMMENT_PAGE_LIMIT_DEFAULT = 30;
 const COMMENT_PAGE_LIMIT_MAX = 100;
-const COMMENT_RATE_WINDOW_MS = Number(process.env.HIVE_COMMENT_RATE_WINDOW_MS || 60_000);
+const COMMENT_RATE_WINDOW_MS = Number(
+  process.env.HIVE_COMMENT_RATE_WINDOW_MS || 60_000,
+);
 const COMMENT_RATE_MAX = Number(process.env.HIVE_COMMENT_RATE_MAX || 20);
 const MAX_COMMENTS_PER_HIVE = Number(process.env.HIVE_MAX_COMMENTS || 100);
 
@@ -223,10 +225,7 @@ function mapComment(comment) {
 function parseCommentPageLimit(value) {
   const parsed = Number(value);
   if (!Number.isFinite(parsed)) return COMMENT_PAGE_LIMIT_DEFAULT;
-  return Math.min(
-    COMMENT_PAGE_LIMIT_MAX,
-    Math.max(1, Math.trunc(parsed)),
-  );
+  return Math.min(COMMENT_PAGE_LIMIT_MAX, Math.max(1, Math.trunc(parsed)));
 }
 
 async function fetchHiveCommentsPage(hiveId, { limit, cursor }) {
@@ -294,7 +293,9 @@ async function getHiveOr404(id) {
     include: {
       owner: { select: { id: true, username: true, email: true } },
       collaborators: {
-        include: { user: { select: { id: true, username: true, email: true } } },
+        include: {
+          user: { select: { id: true, username: true, email: true } },
+        },
       },
     },
   });
@@ -305,7 +306,11 @@ function getMembershipRole(hive, userId) {
 }
 
 function canReadHive(hive, user) {
-  return user.isAdmin || hive.ownerId === user.id || Boolean(getMembershipRole(hive, user.id));
+  return (
+    user.isAdmin ||
+    hive.ownerId === user.id ||
+    Boolean(getMembershipRole(hive, user.id))
+  );
 }
 
 function canEditHive(hive, user) {
@@ -565,9 +570,7 @@ hivesRouter.post("/", async (req, res) => {
     });
   }
 
-  const finalKind = isTryingToDcoHive
-    ? HIVE_KINDS.DCO
-    : HIVE_KINDS.STANDARD;
+  const finalKind = isTryingToDcoHive ? HIVE_KINDS.DCO : HIVE_KINDS.STANDARD;
 
   const hive = await prisma.hive.create({
     data: {
@@ -586,11 +589,15 @@ hivesRouter.post("/", async (req, res) => {
 hivesRouter.get("/:id/meta", async (req, res) => {
   const hive = await getHiveOr404(req.params.id);
   if (!hive) {
-    return res.status(404).json({ error: "Hive not found", code: "HIVE_NOT_FOUND" });
+    return res
+      .status(404)
+      .json({ error: "Hive not found", code: "HIVE_NOT_FOUND" });
   }
 
   if (!canReadHive(hive, req.user)) {
-    return res.status(403).json({ error: "Access denied", code: "HIVE_ACCESS_DENIED" });
+    return res
+      .status(403)
+      .json({ error: "Access denied", code: "HIVE_ACCESS_DENIED" });
   }
 
   return res.json({
@@ -614,11 +621,15 @@ hivesRouter.get("/:id/meta", async (req, res) => {
 hivesRouter.get("/:id", async (req, res) => {
   const hive = await getHiveOr404(req.params.id);
   if (!hive) {
-    return res.status(404).json({ error: "Hive not found", code: "HIVE_NOT_FOUND" });
+    return res
+      .status(404)
+      .json({ error: "Hive not found", code: "HIVE_NOT_FOUND" });
   }
 
   if (!canReadHive(hive, req.user)) {
-    return res.status(403).json({ error: "Access denied", code: "HIVE_ACCESS_DENIED" });
+    return res
+      .status(403)
+      .json({ error: "Access denied", code: "HIVE_ACCESS_DENIED" });
   }
 
   const commentsPage = await fetchHiveCommentsPage(hive.id, {
@@ -651,11 +662,15 @@ hivesRouter.get("/:id", async (req, res) => {
 hivesRouter.get("/:id/comments", async (req, res) => {
   const hive = await getHiveOr404(req.params.id);
   if (!hive) {
-    return res.status(404).json({ error: "Hive not found", code: "HIVE_NOT_FOUND" });
+    return res
+      .status(404)
+      .json({ error: "Hive not found", code: "HIVE_NOT_FOUND" });
   }
 
   if (!canReadHive(hive, req.user)) {
-    return res.status(403).json({ error: "Access denied", code: "HIVE_ACCESS_DENIED" });
+    return res
+      .status(403)
+      .json({ error: "Access denied", code: "HIVE_ACCESS_DENIED" });
   }
 
   const page = await fetchHiveCommentsPage(hive.id, {
@@ -675,7 +690,9 @@ hivesRouter.get("/:id/invitations", async (req, res) => {
   }
 
   if (!canManageHive(hive, req.user)) {
-    return res.status(403).json({ error: "You are not allowed to view invitations" });
+    return res
+      .status(403)
+      .json({ error: "You are not allowed to view invitations" });
   }
 
   const rows = await prisma.$queryRaw`
@@ -768,7 +785,9 @@ hivesRouter.put("/:id", async (req, res) => {
 
   const hive = await getHiveOr404(req.params.id);
   if (!hive) {
-    return res.status(404).json({ error: "Hive not found", code: "HIVE_NOT_FOUND" });
+    return res
+      .status(404)
+      .json({ error: "Hive not found", code: "HIVE_NOT_FOUND" });
   }
 
   if (!canEditHive(hive, req.user)) {
@@ -797,12 +816,15 @@ hivesRouter.put("/:id", async (req, res) => {
 
   const expectedTimestamp = Date.parse(expectedUpdatedAt);
   if (Number.isNaN(expectedTimestamp)) {
-    return res.status(400).json({ error: "Invalid hive version", code: "HIVE_VERSION_INVALID" });
+    return res
+      .status(400)
+      .json({ error: "Invalid hive version", code: "HIVE_VERSION_INVALID" });
   }
 
   if (expectedTimestamp !== hive.updatedAt.getTime()) {
     return res.status(409).json({
-      error: "This hive was modified by another collaborator. Reload it before saving.",
+      error:
+        "This hive was modified by another collaborator. Reload it before saving.",
       code: "HIVE_VERSION_CONFLICT",
       currentUpdatedAt: hive.updatedAt.toISOString(),
     });
@@ -831,7 +853,9 @@ hivesRouter.delete("/:id", async (req, res) => {
   }
 
   if (!canManageHive(hive, req.user)) {
-    return res.status(403).json({ error: "You are not allowed to delete this hive" });
+    return res
+      .status(403)
+      .json({ error: "You are not allowed to delete this hive" });
   }
 
   await prisma.hive.delete({ where: { id: hive.id } });
@@ -857,10 +881,14 @@ hivesRouter.post("/:id/collaborators", async (req, res) => {
   }
 
   if (!canManageHive(hive, req.user)) {
-    return res.status(403).json({ error: "You are not allowed to invite collaborators" });
+    return res
+      .status(403)
+      .json({ error: "You are not allowed to invite collaborators" });
   }
 
-  const invitee = await prisma.user.findUnique({ where: { email: parsed.data.email.toLowerCase() } });
+  const invitee = await prisma.user.findUnique({
+    where: { email: parsed.data.email.toLowerCase() },
+  });
   if (!invitee) {
     return res.status(404).json({ error: "No account matches this email" });
   }
@@ -879,7 +907,9 @@ hivesRouter.post("/:id/collaborators", async (req, res) => {
   });
 
   if (existingCollaborator) {
-    return res.status(400).json({ error: "This user is already a collaborator" });
+    return res
+      .status(400)
+      .json({ error: "This user is already a collaborator" });
   }
 
   const pendingRows = await prisma.$queryRaw`
@@ -951,7 +981,9 @@ hivesRouter.patch("/:id/collaborators/:userId", async (req, res) => {
   }
 
   if (!canManageHive(hive, req.user)) {
-    return res.status(403).json({ error: "You are not allowed to change permissions" });
+    return res
+      .status(403)
+      .json({ error: "You are not allowed to change permissions" });
   }
 
   const updated = await prisma.hiveCollaborator.update({
@@ -1018,7 +1050,9 @@ hivesRouter.put("/:id/cards/:cardId/note", async (req, res) => {
 
   const hive = await getHiveOr404(req.params.id);
   if (!hive) {
-    return res.status(404).json({ error: "Hive not found", code: "HIVE_NOT_FOUND" });
+    return res
+      .status(404)
+      .json({ error: "Hive not found", code: "HIVE_NOT_FOUND" });
   }
 
   if (!canCommentOnHive(hive, req.user)) {
@@ -1030,22 +1064,26 @@ hivesRouter.put("/:id/cards/:cardId/note", async (req, res) => {
 
   const actor = buildUserActor(req.user);
   const now = new Date().toISOString();
-  const nextBoardData = updateBoardCard(hive.boardData, req.params.cardId, (card) => {
-    const existingComment =
-      card.comment && typeof card.comment === "object" ? card.comment : null;
-    const isNewComment = !existingComment?.message;
+  const nextBoardData = updateBoardCard(
+    hive.boardData,
+    req.params.cardId,
+    (card) => {
+      const existingComment =
+        card.comment && typeof card.comment === "object" ? card.comment : null;
+      const isNewComment = !existingComment?.message;
 
-    return {
-      ...card,
-      comment: {
-        message: parsed.data.message,
-        createdAt: existingComment?.createdAt || now,
-        createdBy: existingComment?.createdBy || actor,
-        updatedAt: now,
-        updatedBy: isNewComment ? existingComment?.createdBy || actor : actor,
-      },
-    };
-  });
+      return {
+        ...card,
+        comment: {
+          message: parsed.data.message,
+          createdAt: existingComment?.createdAt || now,
+          createdBy: existingComment?.createdBy || actor,
+          updatedAt: now,
+          updatedBy: isNewComment ? existingComment?.createdBy || actor : actor,
+        },
+      };
+    },
+  );
 
   if (!nextBoardData) {
     return res.status(404).json({
@@ -1071,7 +1109,9 @@ hivesRouter.put("/:id/cards/:cardId/note", async (req, res) => {
 hivesRouter.delete("/:id/cards/:cardId/note", async (req, res) => {
   const hive = await getHiveOr404(req.params.id);
   if (!hive) {
-    return res.status(404).json({ error: "Hive not found", code: "HIVE_NOT_FOUND" });
+    return res
+      .status(404)
+      .json({ error: "Hive not found", code: "HIVE_NOT_FOUND" });
   }
 
   if (!canCommentOnHive(hive, req.user)) {
@@ -1081,15 +1121,19 @@ hivesRouter.delete("/:id/cards/:cardId/note", async (req, res) => {
     });
   }
 
-  const nextBoardData = updateBoardCard(hive.boardData, req.params.cardId, (card) => {
-    if (!card.comment || typeof card.comment !== "object") {
-      return card;
-    }
+  const nextBoardData = updateBoardCard(
+    hive.boardData,
+    req.params.cardId,
+    (card) => {
+      if (!card.comment || typeof card.comment !== "object") {
+        return card;
+      }
 
-    const nextCard = { ...card };
-    delete nextCard.comment;
-    return nextCard;
-  });
+      const nextCard = { ...card };
+      delete nextCard.comment;
+      return nextCard;
+    },
+  );
 
   if (!nextBoardData) {
     return res.status(404).json({
@@ -1115,12 +1159,16 @@ hivesRouter.delete("/:id/cards/:cardId/note", async (req, res) => {
 hivesRouter.post("/:id/comments", async (req, res) => {
   const parsed = commentSchema.safeParse(req.body);
   if (!parsed.success) {
-    return res.status(400).json({ error: "Invalid comment", code: "HIVE_COMMENT_INVALID" });
+    return res
+      .status(400)
+      .json({ error: "Invalid comment", code: "HIVE_COMMENT_INVALID" });
   }
 
   const hive = await getHiveOr404(req.params.id);
   if (!hive) {
-    return res.status(404).json({ error: "Hive not found", code: "HIVE_NOT_FOUND" });
+    return res
+      .status(404)
+      .json({ error: "Hive not found", code: "HIVE_NOT_FOUND" });
   }
 
   if (!canCommentOnHive(hive, req.user)) {
@@ -1137,7 +1185,9 @@ hivesRouter.post("/:id/comments", async (req, res) => {
     });
   }
 
-  const commentCount = await prisma.hiveComment.count({ where: { hiveId: hive.id } });
+  const commentCount = await prisma.hiveComment.count({
+    where: { hiveId: hive.id },
+  });
   if (commentCount >= MAX_COMMENTS_PER_HIVE) {
     return res.status(400).json({
       error: "Maximum number of comments reached for this hive",
@@ -1147,7 +1197,9 @@ hivesRouter.post("/:id/comments", async (req, res) => {
 
   let resolvedParentId = null;
   if (parsed.data.parentId) {
-    const parent = await prisma.hiveComment.findUnique({ where: { id: parsed.data.parentId } });
+    const parent = await prisma.hiveComment.findUnique({
+      where: { id: parsed.data.parentId },
+    });
     if (!parent || parent.hiveId !== hive.id) {
       return res.status(400).json({
         error: "Parent comment not found",
@@ -1176,17 +1228,25 @@ hivesRouter.post("/:id/comments", async (req, res) => {
 hivesRouter.patch("/:id/comments/:commentId", async (req, res) => {
   const parsed = commentSchema.safeParse(req.body);
   if (!parsed.success) {
-    return res.status(400).json({ error: "Invalid comment", code: "HIVE_COMMENT_INVALID" });
+    return res
+      .status(400)
+      .json({ error: "Invalid comment", code: "HIVE_COMMENT_INVALID" });
   }
 
   const hive = await getHiveOr404(req.params.id);
   if (!hive || !canReadHive(hive, req.user)) {
-    return res.status(404).json({ error: "Hive not found", code: "HIVE_NOT_FOUND" });
+    return res
+      .status(404)
+      .json({ error: "Hive not found", code: "HIVE_NOT_FOUND" });
   }
 
-  const comment = await prisma.hiveComment.findUnique({ where: { id: req.params.commentId } });
+  const comment = await prisma.hiveComment.findUnique({
+    where: { id: req.params.commentId },
+  });
   if (!comment || comment.hiveId !== hive.id) {
-    return res.status(404).json({ error: "Comment not found", code: "HIVE_COMMENT_NOT_FOUND" });
+    return res
+      .status(404)
+      .json({ error: "Comment not found", code: "HIVE_COMMENT_NOT_FOUND" });
   }
 
   if (!(req.user.isAdmin || comment.authorId === req.user.id)) {
@@ -1210,12 +1270,18 @@ hivesRouter.patch("/:id/comments/:commentId", async (req, res) => {
 hivesRouter.delete("/:id/comments/:commentId", async (req, res) => {
   const hive = await getHiveOr404(req.params.id);
   if (!hive || !canReadHive(hive, req.user)) {
-    return res.status(404).json({ error: "Hive not found", code: "HIVE_NOT_FOUND" });
+    return res
+      .status(404)
+      .json({ error: "Hive not found", code: "HIVE_NOT_FOUND" });
   }
 
-  const comment = await prisma.hiveComment.findUnique({ where: { id: req.params.commentId } });
+  const comment = await prisma.hiveComment.findUnique({
+    where: { id: req.params.commentId },
+  });
   if (!comment || comment.hiveId !== hive.id) {
-    return res.status(404).json({ error: "Comment not found", code: "HIVE_COMMENT_NOT_FOUND" });
+    return res
+      .status(404)
+      .json({ error: "Comment not found", code: "HIVE_COMMENT_NOT_FOUND" });
   }
 
   if (!(req.user.isAdmin || comment.authorId === req.user.id)) {

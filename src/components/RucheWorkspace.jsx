@@ -26,7 +26,7 @@ import { BOARD_CARD_SIZE, clampBoardPosition } from "../lib/board";
 
 const COMPACT_EDITOR_MEDIA_QUERY = "(max-width: 1200px)";
 const HISTORY_LIMIT = 30;
-const CARD_NOTE_MAX_LENGTH = 500;
+const CARD_NOTE_MAX_LENGTH = 1200;
 const FREE_LIBRARY_SELECTION_CARD = {
   id: "__free-library-selection__",
   category: "free",
