@@ -1,39 +1,10 @@
-import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { useLanguage } from "../context/LanguageContext";
-import { fetchPublicAppConfig } from "../lib/api";
+
+const REPORT_EMAIL = "charlotte.moureau@cfwb.be";
 
 export default function BugReportPage() {
   const { t } = useLanguage();
-  const [reportEmail, setReportEmail] = useState("");
-  const [isLoadingEmail, setIsLoadingEmail] = useState(true);
-  const [emailLoadFailed, setEmailLoadFailed] = useState(false);
-
-  useEffect(() => {
-    let isMounted = true;
-
-    fetchPublicAppConfig()
-      .then((config) => {
-        if (!isMounted) {
-          return;
-        }
-        setReportEmail(String(config?.supportEmail || "").trim());
-        setEmailLoadFailed(false);
-        setIsLoadingEmail(false);
-      })
-      .catch(() => {
-        if (!isMounted) {
-          return;
-        }
-        setReportEmail("");
-        setEmailLoadFailed(true);
-        setIsLoadingEmail(false);
-      });
-
-    return () => {
-      isMounted = false;
-    };
-  }, []);
 
   const sections = [
     {
@@ -60,11 +31,9 @@ export default function BugReportPage() {
     t("bugReportPage.tip3"),
   ];
 
-  const mailtoHref = reportEmail
-    ? `mailto:${reportEmail}?subject=${encodeURIComponent(
-        t("bugReportPage.emailSubject"),
-      )}&body=${encodeURIComponent(t("bugReportPage.emailTemplate"))}`
-    : null;
+  const mailtoHref = `mailto:${REPORT_EMAIL}?subject=${encodeURIComponent(
+    t("bugReportPage.emailSubject"),
+  )}&body=${encodeURIComponent(t("bugReportPage.emailTemplate"))}`;
 
   return (
     <section className="page-shell bug-report-page">
@@ -90,20 +59,10 @@ export default function BugReportPage() {
       </div>
 
       <div className="bug-report-actions">
-        {isLoadingEmail ? (
-          <p className="bug-report-note">{t("bugReportPage.emailLoading")}</p>
-        ) : mailtoHref ? (
-          <a href={mailtoHref} className="bug-report-mail-button">
-            {t("bugReportPage.sendButton")}
-          </a>
-        ) : emailLoadFailed ? (
-          <p className="bug-report-note">{t("bugReportPage.emailLoadFailed")}</p>
-        ) : (
-          <p className="bug-report-note">{t("bugReportPage.emailUnavailable")}</p>
-        )}
-        {!isLoadingEmail && mailtoHref ? (
-          <p className="bug-report-note">{t("bugReportPage.emailNote")}</p>
-        ) : null}
+        <a href={mailtoHref} className="bug-report-mail-button">
+          {t("bugReportPage.sendButton")}
+        </a>
+        <p className="bug-report-note">{t("bugReportPage.emailNote")}</p>
       </div>
 
       <Link to="/" className="bug-report-back-link">

@@ -53,11 +53,6 @@ app.get("/api/health", (_req, res) => {
   res.json({ ok: true });
 });
 
-app.get("/api/public/app-config", (_req, res) => {
-  const supportEmail = (env.ADMIN_EMAIL || "").trim();
-  res.json({ supportEmail });
-});
-
 app.use("/api/auth", authRouter);
 app.use("/api/users", usersRouter);
 app.use("/api/hives", hivesRouter);

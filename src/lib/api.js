@@ -44,10 +44,6 @@ export async function apiFetch(path, { method = "GET", body, token } = {}) {
   return parseResponse(response);
 }
 
-export async function fetchPublicAppConfig() {
-  return apiFetch("/public/app-config");
-}
-
 export function getApiErrorMessage(
   error,
   t,

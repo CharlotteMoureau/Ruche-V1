@@ -697,13 +697,8 @@ export const messages = {
       tip2: "Ajoutez une capture d’écran si vous pouvez, surtout s’il y a un message affiché.",
       tip3: "Indiquez l’appareil utilisé, le navigateur, et le nom de la ruche concernée si vous le connaissez.",
       sendButton: "Ouvrir un e-mail de signalement",
-      emailLoading: "Chargement de l'adresse d'administration...",
       emailNote:
-        "Le bouton ouvre votre application e-mail avec un sujet et un modèle déjà préparés à envoyer à l'adresse configurée pour l'administration.",
-      emailLoadFailed:
-        "Impossible de charger l'adresse d'administration pour le moment.",
-      emailUnavailable:
-        "Aucune adresse d'administration n'est configurée pour le moment.",
+        "Le bouton ouvre votre application e-mail avec un sujet et un modèle déjà préparés à envoyer à test@test.com.",
       emailSubject: "La Ruche - Signalement de bug",
       emailTemplate:
         "Bonjour,\n\nJe souhaite signaler un bug dans La Ruche.\n\n1. Où le problème apparaît-il ?\n(Page ou fonctionnalité concernée)\n\n2. Que faisiez-vous juste avant ?\n(étapes simples, une par ligne)\n\n3. Qu’est-ce qui s’est passé ?\n(message d’erreur, blocage, résultat inattendu)\n\n4. Quel résultat attendiez-vous ?\n(résultat attendu)\n\n5. Le problème est-il reproductible ?\n(toujours / parfois / une seule fois)\n\n6. Informations utiles\n- Appareil :\n- Navigateur :\n- Nom de la ruche :\n- Capture d’écran ou fichier joint :\n\nMerci.",
@@ -1258,11 +1253,8 @@ export const messages = {
       tip2: "Add a screenshot if you can, especially if a message is displayed.",
       tip3: "Include the device, browser, and hive name if you know them.",
       sendButton: "Open a bug report email",
-      emailLoading: "Loading the admin email address...",
       emailNote:
-        "The button opens your email app with a prepared subject and message template addressed to the configured admin email.",
-      emailLoadFailed: "Unable to load the admin email address right now.",
-      emailUnavailable: "No admin email is configured at the moment.",
+        "The button opens your email app with a prepared subject and message template addressed to test@test.com.",
       emailSubject: "La Ruche - Bug report",
       emailTemplate:
         "Hello,\n\nI would like to report a bug in La Ruche.\n\n1. Where does the problem happen?\n(page or feature concerned)\n\n2. What were you doing just before?\n(simple steps, one per line)\n\n3. What happened?\n(error message, block, unexpected result)\n\n4. What should have happened instead?\n(expected result)\n\n5. Can you reproduce the problem?\n(always / sometimes / only once)\n\n6. Useful information\n- Device:\n- Browser:\n- Hive name:\n- Screenshot or attached file:\n\nThank you.",
@@ -1827,11 +1819,8 @@ export const messages = {
       tip2: "Voeg indien mogelijk een schermafbeelding toe, vooral als er een bericht zichtbaar is.",
       tip3: "Vermeld het apparaat, de browser en de naam van de bijenkorf als u die kent.",
       sendButton: "E-mail voor bugmelding openen",
-      emailLoading: "Beheeradres wordt geladen...",
       emailNote:
-        "De knop opent uw e-mailprogramma met een voorbereid onderwerp en sjabloon gericht aan het geconfigureerde beheeradres.",
-      emailLoadFailed: "Het beheeradres kan momenteel niet worden geladen.",
-      emailUnavailable: "Er is momenteel geen beheeradres geconfigureerd.",
+        "De knop opent uw e-mailprogramma met een voorbereid onderwerp en sjabloon gericht aan test@test.com.",
       emailSubject: "La Ruche - Bugmelding",
       emailTemplate:
         "Hallo,\n\nIk wil een bug in La Ruche melden.\n\n1. Waar verschijnt het probleem?\n(betreffende pagina of functie)\n\n2. Wat deed u net ervoor?\n(eenvoudige stappen, één per regel)\n\n3. Wat is er gebeurd?\n(foutmelding, blokkering, onverwacht resultaat)\n\n4. Wat had er moeten gebeuren?\n(verwacht resultaat)\n\n5. Kunt u het probleem opnieuw veroorzaken?\n(altijd / soms / slechts één keer)\n\n6. Nuttige informatie\n- Apparaat:\n- Browser:\n- Naam van de bijenkorf:\n- Schermafbeelding of bijlage:\n\nBedankt.",
