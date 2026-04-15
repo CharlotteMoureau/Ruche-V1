@@ -697,8 +697,11 @@ export const messages = {
       tip2: "Ajoutez une capture d’écran si vous pouvez, surtout s’il y a un message affiché.",
       tip3: "Indiquez l’appareil utilisé, le navigateur, et le nom de la ruche concernée si vous le connaissez.",
       sendButton: "Ouvrir un e-mail de signalement",
+      emailLoading: "Chargement de l'adresse d'administration...",
       emailNote:
         "Le bouton ouvre votre application e-mail avec un sujet et un modèle déjà préparés à envoyer à l'adresse configurée pour l'administration.",
+      emailLoadFailed:
+        "Impossible de charger l'adresse d'administration pour le moment.",
       emailUnavailable:
         "Aucune adresse d'administration n'est configurée pour le moment.",
       emailSubject: "La Ruche - Signalement de bug",
@@ -1255,8 +1258,10 @@ export const messages = {
       tip2: "Add a screenshot if you can, especially if a message is displayed.",
       tip3: "Include the device, browser, and hive name if you know them.",
       sendButton: "Open a bug report email",
+      emailLoading: "Loading the admin email address...",
       emailNote:
         "The button opens your email app with a prepared subject and message template addressed to the configured admin email.",
+      emailLoadFailed: "Unable to load the admin email address right now.",
       emailUnavailable: "No admin email is configured at the moment.",
       emailSubject: "La Ruche - Bug report",
       emailTemplate:
@@ -1822,8 +1827,10 @@ export const messages = {
       tip2: "Voeg indien mogelijk een schermafbeelding toe, vooral als er een bericht zichtbaar is.",
       tip3: "Vermeld het apparaat, de browser en de naam van de bijenkorf als u die kent.",
       sendButton: "E-mail voor bugmelding openen",
+      emailLoading: "Beheeradres wordt geladen...",
       emailNote:
         "De knop opent uw e-mailprogramma met een voorbereid onderwerp en sjabloon gericht aan het geconfigureerde beheeradres.",
+      emailLoadFailed: "Het beheeradres kan momenteel niet worden geladen.",
       emailUnavailable: "Er is momenteel geen beheeradres geconfigureerd.",
       emailSubject: "La Ruche - Bugmelding",
       emailTemplate:

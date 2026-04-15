@@ -6,6 +6,8 @@ import { fetchPublicAppConfig } from "../lib/api";
 export default function BugReportPage() {
   const { t } = useLanguage();
   const [reportEmail, setReportEmail] = useState("");
+  const [isLoadingEmail, setIsLoadingEmail] = useState(true);
+  const [emailLoadFailed, setEmailLoadFailed] = useState(false);
 
   useEffect(() => {
     let isMounted = true;
@@ -16,12 +18,16 @@ export default function BugReportPage() {
           return;
         }
         setReportEmail(String(config?.supportEmail || "").trim());
+        setEmailLoadFailed(false);
+        setIsLoadingEmail(false);
       })
       .catch(() => {
         if (!isMounted) {
           return;
         }
         setReportEmail("");
+        setEmailLoadFailed(true);
+        setIsLoadingEmail(false);
       });
 
     return () => {
@@ -84,14 +90,18 @@ export default function BugReportPage() {
       </div>
 
       <div className="bug-report-actions">
-        {mailtoHref ? (
+        {isLoadingEmail ? (
+          <p className="bug-report-note">{t("bugReportPage.emailLoading")}</p>
+        ) : mailtoHref ? (
           <a href={mailtoHref} className="bug-report-mail-button">
             {t("bugReportPage.sendButton")}
           </a>
+        ) : emailLoadFailed ? (
+          <p className="bug-report-note">{t("bugReportPage.emailLoadFailed")}</p>
         ) : (
           <p className="bug-report-note">{t("bugReportPage.emailUnavailable")}</p>
         )}
-        {mailtoHref ? (
+        {!isLoadingEmail && mailtoHref ? (
           <p className="bug-report-note">{t("bugReportPage.emailNote")}</p>
         ) : null}
       </div>
