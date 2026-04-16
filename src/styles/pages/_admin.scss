@@ -43,6 +43,19 @@
   border-radius: 10px;
 }
 
+.admin-password-section {
+  margin-top: 32px;
+  padding-top: 24px;
+  border-top: 1px solid #e2ded8;
+
+  .form-grid {
+    max-width: 480px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+}
+
 .admin-table {
   width: 100%;
   border-collapse: collapse;
