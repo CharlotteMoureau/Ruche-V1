@@ -37,23 +37,10 @@
 }
 
 .admin-table-wrap {
-  overflow-x: hidden;
+  overflow-x: auto;
   margin-bottom: 10px;
   border: 1px solid #e2ded8;
   border-radius: 10px;
-}
-
-.admin-password-section {
-  margin-top: 32px;
-  padding-top: 24px;
-  border-top: 1px solid #e2ded8;
-
-  .form-grid {
-    max-width: 480px;
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
-  }
 }
 
 .admin-table {
@@ -70,8 +57,6 @@
     text-align: left;
     font-weight: 700;
     white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
     border-bottom: 2px solid #e2ded8;
     color: #444;
   }
@@ -97,9 +82,6 @@
     padding: 9px 12px;
     vertical-align: middle;
     border-bottom: 1px solid #eeebe6;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    max-width: 200px;
   }
 
   tbody tr:last-child td {

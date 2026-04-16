@@ -3,7 +3,6 @@ import { useNavigate } from "react-router-dom";
 import { apiFetch } from "../lib/api";
 import { useAuth } from "../context/AuthContext";
 import UnifiedPromptModal from "../components/UnifiedPromptModal";
-import PasswordField from "../components/PasswordField";
 import { useLanguage } from "../context/LanguageContext";
 
 const ITEMS_PER_PAGE = 10;
@@ -53,15 +52,6 @@ export default function AdminPage() {
   const [isDeletingTarget, setIsDeletingTarget] = useState(false);
   const [isRemovingCollaborator, setIsRemovingCollaborator] = useState(false);
   const [isDeletingComment, setIsDeletingComment] = useState(false);
-
-  const [passwordForm, setPasswordForm] = useState({
-    currentPassword: "",
-    newPassword: "",
-    newPasswordConfirm: "",
-  });
-  const [isUpdatingPassword, setIsUpdatingPassword] = useState(false);
-  const [passwordError, setPasswordError] = useState("");
-  const [passwordSuccess, setPasswordSuccess] = useState("");
 
   const userSortField = userSort.split("_")[0];
   const userSortDir = userSort.split("_")[1];
@@ -313,43 +303,6 @@ export default function AdminPage() {
       setError(err.message);
     } finally {
       setIsRemovingCollaborator(false);
-    }
-  };
-
-  const updatePassword = async (event) => {
-    event.preventDefault();
-    const currentPassword = passwordForm.currentPassword.trim();
-    const newPassword = passwordForm.newPassword.trim();
-    const newPasswordConfirm = passwordForm.newPasswordConfirm.trim();
-
-    if (!currentPassword || !newPassword || !newPasswordConfirm) {
-      setPasswordError(t("profile.passwordUpdateRequiredFields"));
-      return;
-    }
-    if (newPassword !== newPasswordConfirm) {
-      setPasswordError(t("profile.passwordMismatch"));
-      return;
-    }
-    if (newPassword.length < 8) {
-      setPasswordError(t("profile.passwordTooShort"));
-      return;
-    }
-
-    try {
-      setPasswordError("");
-      setPasswordSuccess("");
-      setIsUpdatingPassword(true);
-      await apiFetch("/users/me", {
-        method: "PATCH",
-        token,
-        body: { currentPassword, newPassword, newPasswordConfirm },
-      });
-      setPasswordForm({ currentPassword: "", newPassword: "", newPasswordConfirm: "" });
-      setPasswordSuccess(t("profile.passwordUpdateSuccess"));
-    } catch (err) {
-      setPasswordError(err.message);
-    } finally {
-      setIsUpdatingPassword(false);
     }
   };
 
@@ -1089,57 +1042,6 @@ export default function AdminPage() {
           </button>
         </div>
       ) : null}
-
-      <div className="admin-password-section">
-        <h3>{t("admin.changePassword")}</h3>
-        {passwordError ? <p className="form-error">{passwordError}</p> : null}
-        {passwordSuccess ? <p className="form-success">{passwordSuccess}</p> : null}
-        <form onSubmit={updatePassword} className="form-grid">
-          <PasswordField
-            label={t("profile.currentPassword")}
-            id="admin-current-password"
-            name="currentPassword"
-            value={passwordForm.currentPassword}
-            onChange={(event) =>
-              setPasswordForm((prev) => ({
-                ...prev,
-                currentPassword: event.target.value,
-              }))
-            }
-          />
-          <PasswordField
-            label={t("profile.newPassword")}
-            id="admin-new-password"
-            name="newPassword"
-            value={passwordForm.newPassword}
-            onChange={(event) =>
-              setPasswordForm((prev) => ({
-                ...prev,
-                newPassword: event.target.value,
-              }))
-            }
-          />
-          <PasswordField
-            label={t("profile.newPasswordConfirm")}
-            id="admin-new-password-confirm"
-            name="newPasswordConfirm"
-            value={passwordForm.newPasswordConfirm}
-            onChange={(event) =>
-              setPasswordForm((prev) => ({
-                ...prev,
-                newPasswordConfirm: event.target.value,
-              }))
-            }
-          />
-          <div>
-            <button type="submit" className="button-primary" disabled={isUpdatingPassword}>
-              {isUpdatingPassword
-                ? t("common.loading")
-                : t("profile.updatePassword")}
-            </button>
-          </div>
-        </form>
-      </div>
 
       <UnifiedPromptModal
         isOpen={Boolean(deleteTarget.type && deleteTarget.id)}
