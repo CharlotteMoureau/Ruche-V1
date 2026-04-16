@@ -137,14 +137,16 @@ export default function HiveBoard({
       if (!board || !viewport) return;
 
       const boardRect = board.getBoundingClientRect();
+      const boardOriginLeft = boardRect.left + board.clientLeft;
+      const boardOriginTop = boardRect.top + board.clientTop;
       const viewportRect = viewport.getBoundingClientRect();
       const centerX = viewportRect.left + viewportRect.width / 2;
       const centerY = viewportRect.top + viewportRect.height / 2;
 
       onPlaceLibraryCards?.({
         anchor: clampBoardPosition({
-          x: (centerX - boardRect.left) / zoom - BOARD_CARD_SIZE / 2,
-          y: (centerY - boardRect.top) / zoom - BOARD_CARD_SIZE / 2,
+          x: (centerX - boardOriginLeft) / zoom - BOARD_CARD_SIZE / 2,
+          y: (centerY - boardOriginTop) / zoom - BOARD_CARD_SIZE / 2,
         }),
         cards: pendingLibraryCards,
       });
@@ -255,10 +257,12 @@ export default function HiveBoard({
       if (!board) return null;
 
       const boardRect = board.getBoundingClientRect();
+      const boardOriginLeft = boardRect.left + board.clientLeft;
+      const boardOriginTop = boardRect.top + board.clientTop;
 
       return {
-        x: (clientX - boardRect.left) / zoom,
-        y: (clientY - boardRect.top) / zoom,
+        x: (clientX - boardOriginLeft) / zoom,
+        y: (clientY - boardOriginTop) / zoom,
       };
     },
     [zoom],
@@ -365,9 +369,12 @@ export default function HiveBoard({
         if (!item?.card) return;
 
         const offset = monitor.getClientOffset();
-        if (!boardRef.current) return;
+        const board = boardRef.current;
+        if (!board) return;
 
-        const boardRect = boardRef.current.getBoundingClientRect();
+        const boardRect = board.getBoundingClientRect();
+        const boardOriginLeft = boardRect.left + board.clientLeft;
+        const boardOriginTop = boardRect.top + board.clientTop;
         const viewport = viewportRef.current;
         const viewportRect = viewport?.getBoundingClientRect();
         const isInsideBoard =
@@ -397,8 +404,8 @@ export default function HiveBoard({
           isInsideBoard && isInsideViewport ? offset : fallbackOffset;
 
         const position = clampBoardPosition({
-          x: (effectiveOffset.x - boardRect.left) / zoom - BOARD_CARD_SIZE / 2,
-          y: (effectiveOffset.y - boardRect.top) / zoom - BOARD_CARD_SIZE / 2,
+          x: (effectiveOffset.x - boardOriginLeft) / zoom - BOARD_CARD_SIZE / 2,
+          y: (effectiveOffset.y - boardOriginTop) / zoom - BOARD_CARD_SIZE / 2,
         });
 
         onDropCard(item.card, position, true);
