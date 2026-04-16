@@ -11,13 +11,14 @@
     "db:down": "docker compose -f docker-compose.dev.yml down",
     "db:logs": "docker compose -f docker-compose.dev.yml logs -f postgres",
     "start:server": "node server/src/index.js",
-    "start:server:prod": "npm run start:server",
+    "start:server:prod": "npx prisma migrate deploy && npm run start:server",
     "db:push:prod": "npx prisma db push",
     "build": "vite build",
     "lint": "eslint .",
     "preview": "vite preview",
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev",
+    "prisma:migrate:deploy": "prisma migrate deploy",
     "prisma:studio": "prisma studio"
   },
   "dependencies": {

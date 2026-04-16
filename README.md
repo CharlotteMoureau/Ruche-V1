@@ -66,6 +66,15 @@ Backend :
 - Zod
 - Nodemailer pour les emails de réinitialisation
 
+### Deploiement base de donnees (production)
+
+Important : a chaque changement Prisma (schema/migrations), il faut appliquer les migrations sur la base de production avant de lancer l'API.
+
+- Commande recommandee : `npm run prisma:migrate:deploy`
+- Le script de demarrage production `npm run start:server:prod` lance maintenant automatiquement `prisma migrate deploy` puis demarre le serveur.
+
+Si cette etape est ignoree, Prisma peut lever une erreur `P2022` (colonne absente), par exemple sur `User.lastActivityAt`.
+
 ### 🎯 Fonctions principales
 
 - Création de compte et connexion avec choix d'un rôle
