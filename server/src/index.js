@@ -1,8 +1,10 @@
 import "dotenv/config";
+import process from "node:process";
 import express from "express";
 import cors from "cors";
 import compression from "compression";
 import { startDatabaseCleanupScheduler } from "./lib/dbCleanup.js";
+import { prisma } from "./lib/prisma.js";
 import { authRouter } from "./routes/auth.js";
 import { usersRouter } from "./routes/users.js";
 import { hivesRouter } from "./routes/hives.js";
@@ -66,8 +68,28 @@ app.use((err, _req, res, next) => {
   res.status(500).json({ error: "Server error" });
 });
 
-startDatabaseCleanupScheduler();
+async function ensureUserLastActivityColumn() {
+  await prisma.$executeRawUnsafe(`
+    ALTER TABLE "User"
+    ADD COLUMN IF NOT EXISTS "lastActivityAt" TIMESTAMPTZ(3) NOT NULL DEFAULT CURRENT_TIMESTAMP
+  `);
 
-app.listen(port, host, () => {
-  console.log(`API running on http://${host}:${port}`);
+  await prisma.$executeRawUnsafe(`
+    CREATE INDEX IF NOT EXISTS "User_lastActivityAt_idx"
+    ON "User"("lastActivityAt")
+  `);
+}
+
+async function startServer() {
+  await ensureUserLastActivityColumn();
+  startDatabaseCleanupScheduler();
+
+  app.listen(port, host, () => {
+    console.log(`API running on http://${host}:${port}`);
+  });
+}
+
+startServer().catch((error) => {
+  console.error("Server startup failed", error);
+  process.exit(1);
 });
