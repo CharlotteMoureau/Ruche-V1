@@ -151,6 +151,9 @@ export default function AdminPage() {
       } else if (field === "collabsCount") {
         av = a._count.collaborations;
         bv = b._count.collaborations;
+      } else if (field === "lastActivityAt") {
+        av = a.lastActivityAt ? new Date(a.lastActivityAt).getTime() : 0;
+        bv = b.lastActivityAt ? new Date(b.lastActivityAt).getTime() : 0;
       } else {
         av = new Date(a.createdAt).getTime();
         bv = new Date(b.createdAt).getTime();
@@ -449,6 +452,18 @@ export default function AdminPage() {
                   {sortIndicator("createdAt", userSortField, userSortDir)}
                 </button>
               </th>
+              <th>
+                <button
+                  type="button"
+                  className="admin-sort-btn"
+                  onClick={() =>
+                    toggleSort("lastActivityAt", userSort, setUserSort)
+                  }
+                >
+                  {t("admin.lastActivityAt")}
+                  {sortIndicator("lastActivityAt", userSortField, userSortDir)}
+                </button>
+              </th>
               <th>{t("admin.actions")}</th>
             </tr>
           </thead>
@@ -472,6 +487,9 @@ export default function AdminPage() {
                   <td className="admin-num">{u._count.collaborations}</td>
                   <td className="admin-date">
                     {formatDate(u.createdAt, dateLocale)}
+                  </td>
+                  <td className="admin-date">
+                    {formatDate(u.lastActivityAt, dateLocale)}
                   </td>
                   <td>
                     <div className="inline-actions">
@@ -513,7 +531,7 @@ export default function AdminPage() {
                 </tr>
                 {editingUser?.id === u.id ? (
                   <tr className="admin-edit-row">
-                    <td colSpan={9}>
+                    <td colSpan={10}>
                       <form
                         className="form-grid admin-inline-form"
                         onSubmit={(event) => {

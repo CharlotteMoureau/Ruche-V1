@@ -26,6 +26,7 @@ model User {
   roleOtherText  String?
   createdAt      DateTime             @default(now()) @db.Timestamptz(3)
   updatedAt      DateTime             @updatedAt @db.Timestamptz(3)
+  lastActivityAt DateTime             @default(now()) @db.Timestamptz(3)
   hives          Hive[]               @relation("HiveOwner")
   collaborations HiveCollaborator[]
   comments       HiveComment[]

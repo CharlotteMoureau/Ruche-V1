@@ -31,6 +31,7 @@ export function sanitizeUser(user) {
     roleOtherText: user.roleOtherText,
     createdAt: user.createdAt,
     updatedAt: user.updatedAt,
+    lastActivityAt: user.lastActivityAt,
   };
 }
 

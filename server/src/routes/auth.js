@@ -160,11 +160,16 @@ authRouter.post("/login", async (req, res) => {
       .json({ error: "Invalid credentials", code: "AUTH_INVALID_CREDENTIALS" });
   }
 
-  const token = signAccessToken(user);
+  const activeUser = await prisma.user.update({
+    where: { id: user.id },
+    data: { lastActivityAt: new Date() },
+  });
+
+  const token = signAccessToken(activeUser);
   return res.json({
     token,
-    user: sanitizeUser(user),
-    isAdmin: isAdminEmail(user.email),
+    user: sanitizeUser(activeUser),
+    isAdmin: isAdminEmail(activeUser.email),
   });
 });
 

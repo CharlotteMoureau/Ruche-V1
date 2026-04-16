@@ -1,0 +1,5 @@
+ALTER TABLE "User"
+ADD COLUMN "lastActivityAt" TIMESTAMPTZ(3) NOT NULL DEFAULT CURRENT_TIMESTAMP;
+
+CREATE INDEX IF NOT EXISTS "User_lastActivityAt_idx"
+ON "User"("lastActivityAt");

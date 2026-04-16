@@ -23,6 +23,7 @@ adminRouter.get("/users", async (_req, res) => {
       roleOtherText: true,
       createdAt: true,
       updatedAt: true,
+      lastActivityAt: true,
       _count: {
         select: {
           hives: true,
@@ -99,6 +100,7 @@ adminRouter.patch("/users/:id", async (req, res) => {
     lastName: updated.lastName,
     roleLabel: updated.roleLabel,
     roleOtherText: updated.roleOtherText,
+    lastActivityAt: updated.lastActivityAt,
   });
 });
 
@@ -125,8 +127,12 @@ adminRouter.delete("/users/:id", async (req, res) => {
       const ownedHiveIds = ownedHives.map((h) => h.id);
 
       if (ownedHiveIds.length > 0) {
-        await tx.hiveComment.deleteMany({ where: { hiveId: { in: ownedHiveIds } } });
-        await tx.hiveCollaborator.deleteMany({ where: { hiveId: { in: ownedHiveIds } } });
+        await tx.hiveComment.deleteMany({
+          where: { hiveId: { in: ownedHiveIds } },
+        });
+        await tx.hiveCollaborator.deleteMany({
+          where: { hiveId: { in: ownedHiveIds } },
+        });
         await tx.hive.deleteMany({ where: { id: { in: ownedHiveIds } } });
       }
 
@@ -138,8 +144,13 @@ adminRouter.delete("/users/:id", async (req, res) => {
 
     return res.json({ message: "User deleted" });
   } catch (err) {
-    if (err instanceof Prisma.PrismaClientKnownRequestError && err.code === "P2003") {
-      return res.status(409).json({ error: "Deletion blocked: linked data exists" });
+    if (
+      err instanceof Prisma.PrismaClientKnownRequestError &&
+      err.code === "P2003"
+    ) {
+      return res
+        .status(409)
+        .json({ error: "Deletion blocked: linked data exists" });
     }
     throw err;
   }

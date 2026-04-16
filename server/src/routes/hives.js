@@ -408,6 +408,13 @@ function removePresence(hiveId, userId) {
   }
 }
 
+async function touchUserLastActivity(userId) {
+  await prisma.user.update({
+    where: { id: userId },
+    data: { lastActivityAt: new Date() },
+  });
+}
+
 hivesRouter.get("/", async (req, res) => {
   const hives = await prisma.hive.findMany({
     where: {
@@ -593,6 +600,8 @@ hivesRouter.post("/", async (req, res) => {
       ownerId: req.user.id,
     },
   });
+
+  await touchUserLastActivity(req.user.id);
 
   return res.status(201).json(hive);
 });
@@ -860,6 +869,8 @@ hivesRouter.put("/:id", async (req, res) => {
     },
   });
 
+  await touchUserLastActivity(req.user.id);
+
   return res.json(updated);
 });
 
@@ -1119,6 +1130,8 @@ hivesRouter.put("/:id/cards/:cardId/note", async (req, res) => {
     },
   });
 
+  await touchUserLastActivity(req.user.id);
+
   return res.json({
     boardData: updated.boardData,
     updatedAt: updated.updatedAt,
@@ -1170,6 +1183,8 @@ hivesRouter.delete("/:id/cards/:cardId/note", async (req, res) => {
       boardSnapshot: buildBoardSnapshot(nextBoardData),
     },
   });
+
+  await touchUserLastActivity(req.user.id);
 
   return res.json({
     boardData: updated.boardData,
@@ -1243,6 +1258,8 @@ hivesRouter.post("/:id/comments", async (req, res) => {
     },
   });
 
+  await touchUserLastActivity(req.user.id);
+
   return res.status(201).json(comment);
 });
 
@@ -1285,6 +1302,8 @@ hivesRouter.patch("/:id/comments/:commentId", async (req, res) => {
     },
   });
 
+  await touchUserLastActivity(req.user.id);
+
   return res.json(updated);
 });
 
@@ -1313,5 +1332,6 @@ hivesRouter.delete("/:id/comments/:commentId", async (req, res) => {
   }
 
   await prisma.hiveComment.delete({ where: { id: comment.id } });
+  await touchUserLastActivity(req.user.id);
   return res.json({ message: "Comment deleted" });
 });
