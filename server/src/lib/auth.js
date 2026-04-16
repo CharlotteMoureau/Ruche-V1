@@ -36,6 +36,11 @@ export function sanitizeUser(user) {
 }
 
 export function isAdminEmail(email) {
-  const adminEmail = (env.ADMIN_EMAIL || "").toLowerCase().trim();
-  return Boolean(adminEmail) && email.toLowerCase().trim() === adminEmail;
+  const adminEmails = (env.ADMIN_EMAIL || "")
+    .toLowerCase()
+    .split(",")
+    .map((e) => e.trim())
+    .filter(Boolean);
+
+  return adminEmails.includes(email.toLowerCase().trim());
 }
