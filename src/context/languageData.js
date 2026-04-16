@@ -418,7 +418,7 @@ export const messages = {
       doubleConfirmMessage:
         "Êtes-vous vraiment sûr(e) de vouloir supprimer cet élément ?",
       viewHive: "Voir",
-      hiveDetails: "Détails de la ruche",
+      hiveDetails: "Détails",
       hiveCollaborators: "Collaborateurs",
       hiveComments: "Commentaires",
       noCollaborators: "Aucun collaborateur.",
@@ -990,7 +990,7 @@ export const messages = {
       doubleConfirmMessage:
         "Are you absolutely sure you want to delete this item?",
       viewHive: "View",
-      hiveDetails: "Hive details",
+      hiveDetails: "Details",
       hiveCollaborators: "Collaborators",
       hiveComments: "Comments",
       noCollaborators: "No collaborators.",
@@ -1551,7 +1551,7 @@ export const messages = {
       confirmDeleteFinal: "Definitieve bevestiging",
       doubleConfirmMessage: "Weet je zeker dat je dit item wilt verwijderen?",
       viewHive: "Bekijken",
-      hiveDetails: "Details bijenkorf",
+      hiveDetails: "Details",
       hiveCollaborators: "Medewerkers",
       hiveComments: "Reacties",
       noCollaborators: "Geen medewerkers.",
