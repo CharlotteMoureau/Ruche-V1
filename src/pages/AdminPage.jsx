@@ -1131,7 +1131,7 @@ export default function AdminPage() {
               }))
             }
           />
-          <div>
+          <div className="inline-actions">
             <button type="submit" className="button-link" disabled={isUpdatingPassword}>
               {isUpdatingPassword
                 ? t("common.loading")
