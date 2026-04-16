@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
 import { useLanguage } from "../context/LanguageContext";
 
-const REPORT_EMAIL = "charlotte.moureau@cfwb.be";
+const REPORT_EMAIL = "laruche.support@cfwb.be";
 
 export default function BugReportPage() {
   const { t } = useLanguage();
