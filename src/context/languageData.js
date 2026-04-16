@@ -675,6 +675,7 @@ export const messages = {
       feature3Title: "Forum La Ruche",
       feature3:
         "Un espace communautaire pour signaler des bugs, suivre les mises à jour et échanger autour des usages pédagogiques.",
+      cta: "Accéder au prototype de la Ruche",
       status: "En cours de développement",
       back: "Retour à l’accueil",
     },
@@ -1235,6 +1236,7 @@ export const messages = {
       feature3Title: "La Ruche Forum",
       feature3:
         "A community space is being created to allow La Ruche users to report bugs, follow updates, suggest improvements, and share pedagogical practices around the tool.",
+      cta: "Open prototype of La Ruche",
       status: "Status: In development",
       back: "Back to home",
     },
@@ -1805,6 +1807,7 @@ export const messages = {
       feature3Title: "La Ruche Forum",
       feature3:
         "Een communityruimte om bugs te melden, updates te volgen en pedagogische praktijken uit te wisselen.",
+      cta: "Open prototype van La Ruche",
       status: "In ontwikkeling",
       back: "Terug naar home",
     },

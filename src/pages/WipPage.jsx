@@ -1,6 +1,8 @@
 import { Link } from "react-router-dom";
 import { useLanguage } from "../context/LanguageContext";
 
+const WIP_CTA_URL = "https://la-ruche.netlify.app/";
+
 export default function WipPage() {
   const { t } = useLanguage();
 
@@ -9,6 +11,8 @@ export default function WipPage() {
       titleKey: "wipPage.v1Title",
       bodyKey: "wipPage.v1Body",
       badge: "V1",
+      ctaKey: "wipPage.cta",
+      href: WIP_CTA_URL,
     },
     {
       titleKey: "wipPage.v2Title",
@@ -39,12 +43,22 @@ export default function WipPage() {
 
       <h3 className="wip-section-heading">{t("wipPage.historyTitle")}</h3>
       <div className="wip-history">
-        {versions.map(({ titleKey, bodyKey, badge }) => (
+        {versions.map(({ titleKey, bodyKey, badge, ctaKey, href }) => (
           <div key={titleKey} className="wip-version-card">
             <div className="wip-version-badge">{badge}</div>
             <div className="wip-feature-body">
               <h4>{t(titleKey)}</h4>
               <p>{t(bodyKey)}</p>
+              {ctaKey && href ? (
+                <a
+                  href={href}
+                  className="button-link button-link-open wip-version-link"
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  {t(ctaKey)}
+                </a>
+              ) : null}
             </div>
           </div>
         ))}
