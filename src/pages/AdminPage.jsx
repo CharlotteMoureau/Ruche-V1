@@ -1132,7 +1132,7 @@ export default function AdminPage() {
             }
           />
           <div>
-            <button type="submit" className="button-primary" disabled={isUpdatingPassword}>
+            <button type="submit" className="button-link" disabled={isUpdatingPassword}>
               {isUpdatingPassword
                 ? t("common.loading")
                 : t("profile.updatePassword")}
