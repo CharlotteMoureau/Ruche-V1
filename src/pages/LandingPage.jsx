@@ -1,5 +1,11 @@
 import { Link, useNavigate } from "react-router-dom";
 import { useState } from "react";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import {
+  faArrowRightToBracket,
+  faUserPlus,
+} from "@fortawesome/free-solid-svg-icons";
+import { faCircleQuestion } from "@fortawesome/free-regular-svg-icons";
 import { useAuth } from "../context/AuthContext";
 import { useLanguage } from "../context/LanguageContext";
 import { HIVE_KINDS, isDcoRole } from "../lib/hives";
@@ -63,15 +69,32 @@ export default function LandingPage() {
 
   return (
     <>
-      <section className="page-shell">
-        <h2>{t("landing.title")}</h2>
-        <p>{isAuthenticated ? t("landing.connected") : t("landing.guest")}</p>
+      <section className="page-shell landing-shell">
+        <div
+          className={`landing-hero${
+            isAuthenticated ? "" : " landing-hero--with-image"
+          }`}
+        >
+          <div className="landing-hero-copy">
+            <h2>{t("landing.title")}</h2>
+            <p>
+              {isAuthenticated ? t("landing.connected") : t("landing.guest")}
+            </p>
+          </div>
+          {isAuthenticated ? null : (
+            <img
+              className="landing-image"
+              src="/landing/banner.jpg"
+              alt="landing"
+            />
+          )}
+        </div>
         <div className="cta-grid landing-cta-grid">
           {isAuthenticated ? (
             <>
               <Link to="/profile" className="cta-card">
                 <div className="cta-card-image">
-                  <img src="/Profile.jpg" alt="Profile" />
+                  <img src="/landing/Profile.jpg" alt="Profile" />
                 </div>
                 <div className="cta-card-content">{t("landing.goProfile")}</div>
               </Link>
@@ -87,7 +110,7 @@ export default function LandingPage() {
                 }}
               >
                 <div className="cta-card-image">
-                  <img src="/Hive.jpg" alt="Create Hive" />
+                  <img src="/landing/Hive.jpg" alt="Create Hive" />
                 </div>
                 <div className="cta-card-content">
                   {t("landing.createHive")}
@@ -100,7 +123,7 @@ export default function LandingPage() {
                 className="cta-card"
               >
                 <div className="cta-card-image">
-                  <img src="/Learn%20more.jpg" alt="Learn More" />
+                  <img src="/landing/Learn%20more.jpg" alt="Learn More" />
                 </div>
                 <div className="cta-card-content">{t("landing.learnMore")}</div>
               </a>
@@ -112,7 +135,10 @@ export default function LandingPage() {
                 className="cta-card cta-card-auth cta-card-auth-signin"
               >
                 <div className="cta-card-content cta-card-auth-content">
-                  <h3>{t("landing.signIn")}</h3>
+                  <div className="card-title-icon">
+                    <FontAwesomeIcon icon={faArrowRightToBracket} />
+                    <h3>{t("landing.signIn")}</h3>
+                  </div>
                   <p>{t("landing.connected")}</p>
                 </div>
               </Link>
@@ -121,8 +147,25 @@ export default function LandingPage() {
                 className="cta-card cta-card-auth cta-card-auth-register"
               >
                 <div className="cta-card-content cta-card-auth-content">
-                  <h3>{t("landing.createAccount")}</h3>
+                  <div className="card-title-icon">
+                    <FontAwesomeIcon icon={faUserPlus} />
+                    <h3>{t("landing.createAccount")}</h3>
+                  </div>
                   <p>{t("landing.guest")}</p>
+                </div>
+              </Link>
+              <Link
+                to="https://www.peca.be/ressources/boite-a-outils/la-ruche"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="cta-card cta-card-auth cta-card-auth-signin"
+              >
+                <div className="cta-card-content cta-card-auth-content">
+                  <div className="card-title-icon">
+                    <FontAwesomeIcon icon={faCircleQuestion} />
+                    <h3>{t("landing.learnMore")}</h3>
+                  </div>
+                  <p>{t("landing.learnMoreText")}</p>
                 </div>
               </Link>
             </>

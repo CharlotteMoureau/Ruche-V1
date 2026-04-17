@@ -1,19 +1,121 @@
 @use "../base/variables" as *;
 
+.landing-hero {
+  display: grid;
+  gap: 18px;
+  margin-bottom: 20px;
+}
+
+.landing-hero-copy {
+  max-width: 42rem;
+
+  h2 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: $bleu-fonce;
+    margin: 0 0 12px;
+    letter-spacing: -0.5px;
+  }
+
+  p {
+    font-size: 1.1rem;
+    color: #666;
+    margin: 0;
+    line-height: 1.6;
+  }
+}
+
+.landing-hero--with-image {
+  position: relative;
+  display: block;
+  margin-bottom: 24px;
+
+  .landing-hero-copy {
+    position: absolute;
+    bottom: clamp(18px, 4vw, 28px);
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 1;
+    width: min(38rem, calc(100% - 36px));
+    padding: 16px 20px;
+    border: 1px solid rgba(#fff, 0.35);
+    border-radius: 16px;
+    background: rgba(255, 255, 255, 0.85);
+    box-shadow: 0 14px 30px rgba($bleu-fonce, 0.12);
+    backdrop-filter: blur(5px);
+    text-align: center;
+
+    p {
+      color: rgba(#273043, 0.92);
+    }
+  }
+}
+
+.landing-image {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 1280 / 360;
+  object-fit: cover;
+  margin: 0;
+  border-radius: 16px;
+}
+
+.card-title-icon {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+
+  .svg-inline--fa {
+    font-size: 1.5rem;
+    color: $bleu-fonce;
+  }
+  
+  h3 {
+    margin: 0;
+    font-size: 1.15rem;
+    color: $bleu-fonce;
+    line-height: 1.3;
+  }
+}
+
 .landing-cta-grid .cta-card {
   border: 1px solid rgba($gris, 0.25);
-  border-left: 5px solid rgba($turquoise, 0.65);
-  background: linear-gradient(165deg, rgba($jaune, 0.12) 0%, $blanc 100%);
+  border-left: 5px solid rgba($orange, 0.65);
+  background: linear-gradient(165deg, rgba($orange, 0.1) 0%, rgba($orange, 0.03) 100%);
 
   &:hover {
     border-color: rgba($bleu-fonce, 0.28);
-    background: linear-gradient(165deg, rgba($jaune, 0.2) 0%, $blanc 100%);
+    background: linear-gradient(165deg, rgba($turquoise, 0.94) 0%, rgba($turquoise, 0.78) 100%);
+    color: #fff;
+
+    .cta-card-content,
+    .card-title-icon .svg-inline--fa,
+    .card-title-icon h3,
+    .cta-card-auth-content p {
+      color: #fff;
+    }
   }
 }
 
 .landing-tutorial.cta-card:hover {
-  border-color: rgba($bleu-fonce, 0.28);
-  background: linear-gradient(165deg, rgba($jaune, 0.2) 0%, $blanc 100%);
+  border-color: rgba($turquoise, 0.28);
+  background: linear-gradient(165deg, rgba($turquoise, 0.94) 0%, rgba($turquoise, 0.78) 100%);
+  color: #fff;
+
+  .landing-tutorial-content,
+  .landing-tutorial-content h3,
+  .landing-tutorial-content p {
+    color: #fff;
+  }
+}
+
+.landing-tutorial.cta-card {
+  background: linear-gradient(165deg, rgba($rose, 0.1) 0%, rgba($rose, 0.03) 100%);
+  
+  p {
+    font-weight: 400;
+  }
 }
 
 .cta-card-auth {
@@ -45,6 +147,27 @@
 }
 
 @media (max-width: 768px) {
+  .landing-hero-copy {
+    h2 {
+      font-size: 2rem;
+    }
+
+    p {
+      font-size: 1rem;
+    }
+  }
+
+  .landing-hero--with-image {
+    .landing-hero-copy {
+      bottom: 16px;
+      left: 16px;
+      right: 16px;
+      transform: none;
+      width: auto;
+      padding: 14px 16px;
+    }
+  }
+
   .cta-card-auth {
     .cta-card-auth-content {
       min-height: 96px;

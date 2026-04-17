@@ -6,14 +6,14 @@ function getCardIconSources(cardId) {
     return [];
   }
 
-  const candidates = [`/data/icons/${id}.png`];
-  const encoded = `/data/icons/${encodeURIComponent(id)}.png`;
+  const candidates = [`/icons/${id}.png`];
+  const encoded = `/icons/${encodeURIComponent(id)}.png`;
   if (!candidates.includes(encoded)) {
     candidates.push(encoded);
   }
 
   if (id.endsWith(".")) {
-    const withoutTrailingDot = `/data/icons/${id.slice(0, -1)}.png`;
+    const withoutTrailingDot = `/icons/${id.slice(0, -1)}.png`;
     if (!candidates.includes(withoutTrailingDot)) {
       candidates.push(withoutTrailingDot);
     }

@@ -312,7 +312,7 @@
 }
 
 .landing-tutorial {
-  margin-top: 48px;
+  margin-top: 15px;
   border-left: 5px solid rgba($turquoise, 0.65);
 
   .landing-tutorial-content {
@@ -374,7 +374,7 @@
   transition: border-color 0.18s, background 0.18s, box-shadow 0.18s;
 
   &:hover {
-    background: linear-gradient(165deg, rgba($jaune, 0.12) 0%, $blanc 100%);
+    background: rgba($turquoise, 0.075);
     border-color: rgba($bleu-fonce, 0.3);
     box-shadow: 0 2px 10px rgba($bleu-fonce, 0.08);
 

@@ -693,9 +693,9 @@ function getCardIconCandidates(card) {
     return [];
   }
 
-  const candidates = [`/data/icons/${id}.png`, `/data/icons/${encodeURIComponent(id)}.png`];
+  const candidates = [`/icons/${id}.png`, `/icons/${encodeURIComponent(id)}.png`];
   if (id.endsWith(".")) {
-    candidates.push(`/data/icons/${id.slice(0, -1)}.png`);
+    candidates.push(`/icons/${id.slice(0, -1)}.png`);
   }
 
   return [...new Set(candidates)];
@@ -1065,10 +1065,10 @@ async function inlineNodeImages(root) {
       ?.querySelector("span")
       ?.textContent?.trim();
     if (cardId) {
-      pushCandidate(`/data/icons/${cardId}.png`);
-      pushCandidate(`/data/icons/${encodeURIComponent(cardId)}.png`);
+      pushCandidate(`/icons/${cardId}.png`);
+      pushCandidate(`/icons/${encodeURIComponent(cardId)}.png`);
       if (cardId.endsWith(".")) {
-        pushCandidate(`/data/icons/${cardId.slice(0, -1)}.png`);
+        pushCandidate(`/icons/${cardId.slice(0, -1)}.png`);
       }
     }
 
