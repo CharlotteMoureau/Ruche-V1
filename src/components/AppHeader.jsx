@@ -290,9 +290,8 @@ export default function AppHeader() {
             </nav>
 
             <Link to={brandTarget} className="brand-link">
-              <img src="/hexagone.png" alt="hexagone" />
+              <img src="/Logo ruche alvéoles-01.png" alt="logo ruche" />
               <h1>La Ruche</h1>
-              <img src="/abeille.png" alt="abeille" />
             </Link>
           </div>
 
@@ -328,9 +327,8 @@ export default function AppHeader() {
       ) : (
         <>
           <Link to={brandTarget} className="brand-link">
-            <img src="/hexagone.png" alt="hexagone" />
+            <img src="/Logo ruche alvéoles-01.png" alt="logo ruche" />
             <h1>La Ruche</h1>
-            <img src="/abeille.png" alt="abeille" />
           </Link>
 
           <nav className="site-nav" ref={navRef}>
